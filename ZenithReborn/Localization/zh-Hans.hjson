@@ -1,0 +1,136 @@
+Mods: {
+	ZenithReborn: {
+		Items: {
+			GuardianGel: {
+				DisplayName: 凝胶信物
+				Tooltip: 凝胶里藏着大陆最弱小者守护的承诺
+			}
+
+			DynastyWoodSword: {
+				DisplayName: 王朝木剑
+				Tooltip: 旅人的旧木，守住心中的秩序
+			}
+
+			SpookyWoodSword: {
+				DisplayName: 阴森木剑
+				Tooltip: 哀木未寂，凋零亦能成为力量
+			}
+
+			FeyWoodSword: {
+				DisplayName: 仙灵木剑
+				Tooltip: 蘑菇与生命木交织出的温柔菌光
+			}
+
+			SoulItem: {
+				DisplayName: 诅咒的天顶残魂
+				Tooltip: 大陆之巅的残响，等待一把愿意承载它的剑
+			}
+
+			CrimsonSigil: {
+				DisplayName: 猩红之脊
+				Tooltip: 腐化世界的世界吞噬怪遗留的猩红脊骨
+			}
+
+			CorruptionLure: {
+				DisplayName: 腐化之饵
+				Tooltip: 猩红世界的克苏鲁之脑留下的腐化诱饵
+			}
+
+			DawnCore: {
+				DisplayName: 初光魂芯
+				Tooltip: 克苏鲁之眼的封印碎片，恢复肉前的承载能力
+			}
+
+			FleshCore: {
+				DisplayName: 血肉魂芯
+				Tooltip: 血肉墙的封印碎片，恢复第五槽位的承载能力
+			}
+
+			MachineCore: {
+				DisplayName: 机魂魂芯
+				Tooltip: 三位机械镇压者败亡后凝结，恢复第六槽位的承载能力
+			}
+
+			LifeCore: {
+				DisplayName: 生息魂芯
+				Tooltip: 世纪之花的封印碎片，恢复第七槽位的承载能力
+			}
+
+			TempleCore: {
+				DisplayName: 神庙魂芯
+				Tooltip: 石巨人的封印碎片，恢复第八与第九槽位的承载能力
+			}
+
+			CelestialCore: {
+				DisplayName: 天界魂芯
+				Tooltip: 月亮领主的封印碎片，恢复最后槽位的承载能力
+			}
+		}
+
+		Buffs: {
+			ForestBreath: {
+				DisplayName: 森息
+				Description: 木质族命中增益：额外自然回复0.25×S生命/秒
+			}
+
+			BloodFragrance: {
+				DisplayName: 血馥
+				Description: 剑魂直接治疗效果提高4%×S，不扩大治疗额度
+			}
+
+			DynastyOrder: {
+				DisplayName: 御令
+				Description: 新受白名单减益持续时间缩短4%×S
+			}
+
+			ForestPower: {
+				DisplayName: 森林之力
+				Description: 全木共鸣：额外两个真实剑位，属性随有效战斗成长
+			}
+
+			FrostStill: {
+				DisplayName: 霜寂
+				Description: 普通敌人减速4%×S，所属剑魂主攻伤害提高1%×S
+			}
+
+			SaltCorrosion: {
+				DisplayName: 盐蚀
+				Description: 所属剑魂主攻穿甲＋2×S
+			}
+
+			JungleToxin: {
+				DisplayName: 瘴毒
+				Description: 受到有来源记录的丛林毒伤
+			}
+
+			CactusBleed: {
+				DisplayName: 裂伤
+				Description: 仙人掌造成的敌人流血，最多三层
+			}
+
+			WoodWither: {
+				DisplayName: 蚀枯
+				Description: 所属剑魂持续伤害增幅2%×S
+			}
+
+			EmberBurn: {
+				DisplayName: 烬燃
+				Description: 受到有来源记录的木质火伤
+			}
+
+			HallowRadiance: {
+				DisplayName: 净辉
+				Description: 所属剑魂主攻伤害提高1.5%×S
+			}
+
+			MourningMark: {
+				DisplayName: 悼魂
+				Description: 所属剑魂持续伤害增幅10%×S，死亡时传播部分剩余预算
+			}
+		}
+
+		NPCs.GuardianSlimeKing.DisplayName: 史莱姆王·守望者
+		Projectiles.SoulBlade.DisplayName: 天顶剑影
+		Keybinds.OpenSoul.DisplayName: 打开剑魂寄宿界面
+	}
+}

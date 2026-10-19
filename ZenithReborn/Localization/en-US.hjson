@@ -1,0 +1,136 @@
+Mods: {
+	ZenithReborn: {
+		Items: {
+			GuardianGel: {
+				DisplayName: Guardian Gel Token
+				Tooltip: A promise kept by the smallest creatures of the land
+			}
+
+			DynastyWoodSword: {
+				DisplayName: Dynasty Wood Sword
+				Tooltip: Order carried by a traveler
+			}
+
+			SpookyWoodSword: {
+				DisplayName: Spooky Wood Sword
+				Tooltip: The mourning forest still remembers
+			}
+
+			FeyWoodSword: {
+				DisplayName: Fey Wood Sword
+				Tooltip: A soft glow woven from living wood and mushrooms
+			}
+
+			SoulItem: {
+				DisplayName: Cursed Zenith Remnant
+				Tooltip: The echo of a fallen summit, waiting for a blade to host it.
+			}
+
+			CrimsonSigil: {
+				DisplayName: Crimson Spine
+				Tooltip: A crimson vertebra left by the Eater of Worlds.
+			}
+
+			CorruptionLure: {
+				DisplayName: Corrupted Lure
+				Tooltip: A corrupted lure left by the Brain of Cthulhu.
+			}
+
+			DawnCore: {
+				DisplayName: Dawn Soul Core
+				Tooltip: Restores pre-Hardmode hosting capacity.
+			}
+
+			FleshCore: {
+				DisplayName: Flesh Soul Core
+				Tooltip: Restores hosting capacity up to five slots.
+			}
+
+			MachineCore: {
+				DisplayName: Machine Soul Core
+				Tooltip: Restores hosting capacity up to six slots.
+			}
+
+			LifeCore: {
+				DisplayName: Life Soul Core
+				Tooltip: Restores hosting capacity up to seven slots.
+			}
+
+			TempleCore: {
+				DisplayName: Temple Soul Core
+				Tooltip: Restores hosting capacity up to nine slots.
+			}
+
+			CelestialCore: {
+				DisplayName: Celestial Soul Core
+				Tooltip: Restores hosting capacity up to ten slots.
+			}
+		}
+
+		Buffs: {
+			ForestBreath: {
+				DisplayName: ForestBreath
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			BloodFragrance: {
+				DisplayName: BloodFragrance
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			DynastyOrder: {
+				DisplayName: DynastyOrder
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			ForestPower: {
+				DisplayName: ForestPower
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			FrostStill: {
+				DisplayName: FrostStill
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			SaltCorrosion: {
+				DisplayName: SaltCorrosion
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			JungleToxin: {
+				DisplayName: JungleToxin
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			CactusBleed: {
+				DisplayName: CactusBleed
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			WoodWither: {
+				DisplayName: WoodWither
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			EmberBurn: {
+				DisplayName: EmberBurn
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			HallowRadiance: {
+				DisplayName: HallowRadiance
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+
+			MourningMark: {
+				DisplayName: MourningMark
+				Description: Woodland soul effect. See the soul hosting panel for details.
+			}
+		}
+
+		NPCs.GuardianSlimeKing.DisplayName: King Slime, the Keeper
+		Projectiles.SoulBlade.DisplayName: Zenith Soul Blade
+		Keybinds.OpenSoul.DisplayName: Open soul hosting interface
+	}
+}

@@ -1,0 +1,4 @@
+displayName = Zenith Prototype Check (isolated)
+version = 0.1
+modReferences = ZenithReborn
+buildIgnore = bin/*, obj/*, *.csproj

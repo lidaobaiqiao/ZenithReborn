@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net8.0</TargetFramework><BuildMod>false</BuildMod><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
+  <Import Project="E:/SteamLibrary/steamapps/common/tModLoader/tMLMod.targets" />
+  <ItemGroup><Reference Include="ZenithReborn"><HintPath>../../ZenithReborn/bin/Release/net8.0/ZenithReborn.dll</HintPath><Private>false</Private></Reference></ItemGroup>
+</Project>
