@@ -78,12 +78,18 @@ if previous_addon_hash:
     assert hashlib.sha256(previous_addon.read_bytes()).hexdigest() == previous_addon_hash
 assert [n for n in json.loads(enabled_path.read_text(encoding='utf-8-sig')) if n != name] == [n for n in json.loads(enabled_before.decode('utf-8-sig')) if n != name]
 assert 'ZenithPrototypeCheck' not in enabled
+gui_report_path = out / f'ui-validation-{version}.json'
+graphics_verified = False
+if gui_report_path.exists():
+    gui_report = json.loads(gui_report_path.read_text(encoding='utf-8'))
+    graphics_verified = gui_report.get('tested_package_sha256') == hashlib.sha256(built.read_bytes()).hexdigest()
 result = dict(name=name, version=version, installed=True, enabled=True,
     target=str(target), sha256=hashlib.sha256(target.read_bytes()).hexdigest(),
     loader=loader, focused_checks=checks, source_archive=f'ZenithReborn-{version}-source.zip',
     existing_addon_preserved=True, config_preserved=True,
     previous_enabled_entries_preserved=True, backup=str(backup),
-    graphics_ui_tested=False, live_multiplayer_tested=False,
+    graphics_ui_tested=graphics_verified, graphics_ui_report=gui_report_path.name if graphics_verified else None,
+    live_multiplayer_tested=False,
     full_existing_modpack_load_tested=False)
 (out / 'install-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
 print(json.dumps(result, ensure_ascii=False, indent=2))

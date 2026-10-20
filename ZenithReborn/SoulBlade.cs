@@ -15,6 +15,7 @@ public class SoulSource : GlobalProjectile
     public override bool InstancePerEntity => true;
     public string SoulId = "";
     public float LeashRadius;
+    public int SourceWeapon;
     public override void OnSpawn(Projectile projectile, IEntitySource source)
     {
         SoulId = source switch {
@@ -22,11 +23,13 @@ public class SoulSource : GlobalProjectile
             EntitySource_Parent parent when parent.Entity is Projectile p => p.GetGlobalProjectile<SoulSource>().SoulId,
             _ => ""
         };
+        SourceWeapon = projectile.ModProjectile is SoulBlade ? (int)projectile.ai[0] :
+            source is EntitySource_Parent ancestry && ancestry.Entity is Projectile ancestor ? ancestor.GetGlobalProjectile<SoulSource>().SourceWeapon : 0;
     }
     public override void SendExtraAI(Projectile projectile, BitWriter bitWriter, BinaryWriter writer)
-    { writer.Write(SoulId); writer.Write(LeashRadius); }
+    { writer.Write(SoulId); writer.Write(LeashRadius); writer.Write(SourceWeapon); }
     public override void ReceiveExtraAI(Projectile projectile, BitReader bitReader, BinaryReader reader)
-    { SoulId = reader.ReadString(); LeashRadius=reader.ReadSingle(); }
+    { SoulId = reader.ReadString(); LeashRadius=reader.ReadSingle(); SourceWeapon=reader.ReadInt32(); }
     public override void AI(Projectile projectile)
     {
         if(LeashRadius>0 && projectile.owner>=0 && projectile.owner<Main.maxPlayers &&
@@ -39,6 +42,14 @@ public class SoulBlade : ModProjectile
     public Vector2 TargetOffset;
     public float SwordScale = 1;
     public int SpecialDamage;
+    public bool Reborn { get; private set; }
+    public void ConfigureReborn(bool reborn)
+    {
+        Reborn = reborn;
+        // Vanilla 933: 15 updates at two updates/frame. This projectile keeps
+        // its stable one-update trajectory, so use the equivalent eight frames.
+        Projectile.localNPCHitCooldown = 8;
+    }
     // Vanilla Zenith projectile 933 uses ai[0] = Random.Next(-100, 101) as
     // the ellipse's vertical radius / lean. One sword = one ellipse.
     public float Vertical = 60f;
@@ -56,7 +67,8 @@ public class SoulBlade : ModProjectile
         Projectile.friendly = true; Projectile.DamageType = DamageClass.Melee;
         Projectile.tileCollide = false; Projectile.ignoreWater = true;
         Projectile.penetrate = -1; Projectile.timeLeft = 120;
-        Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = -1;
+        Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = 8;
+        Reborn = false;
         Vertical = 60f;
         trailPoints=new Vector2[TrailLength];trailCenters=new Vector2[TrailLength];trailRotations=new float[TrailLength];
         trailCount=0;
@@ -64,9 +76,9 @@ public class SoulBlade : ModProjectile
     public override bool ShouldUpdatePosition() => false;
     public override bool? CanDamage() => age <= Projectile.ai[2] ? false : null;
     public override void SendExtraAI(BinaryWriter writer)
-    { writer.Write(TargetOffset.X); writer.Write(TargetOffset.Y); writer.Write(SwordScale); writer.Write(Vertical); writer.Write(SpecialDamage); }
+    { writer.Write(TargetOffset.X); writer.Write(TargetOffset.Y); writer.Write(SwordScale); writer.Write(Vertical); writer.Write(SpecialDamage); writer.Write(Reborn); }
     public override void ReceiveExtraAI(BinaryReader reader)
-    { TargetOffset = new(reader.ReadSingle(), reader.ReadSingle()); SwordScale = reader.ReadSingle(); Vertical = reader.ReadSingle(); SpecialDamage = reader.ReadInt32(); }
+    { TargetOffset = new(reader.ReadSingle(), reader.ReadSingle()); SwordScale = reader.ReadSingle(); Vertical = reader.ReadSingle(); SpecialDamage = reader.ReadInt32(); ConfigureReborn(reader.ReadBoolean()); }
     public override void AI()
     {
         Player player = Main.player[Projectile.owner];
@@ -122,11 +134,13 @@ public class SoulBlade : ModProjectile
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
     {
         float point = 0;
-        Vector2 length = new Vector2(26 * Projectile.scale, 0).RotatedBy(Projectile.rotation - MathHelper.PiOver4);
+        Vector2 length = new Vector2((Reborn ? 40 : 26) * Projectile.scale, 0).RotatedBy(Projectile.rotation - MathHelper.PiOver4);
         var soul = WoodCombat.FindSoul(Main.player[Projectile.owner], Projectile.GetGlobalProjectile<SoulSource>().SoulId);
         bool solid = WeaponFamilies.Of((int)Projectile.ai[0]) == BladeFamily.Solid ||
             soul != null && soul.Supports.Any(i=>WeaponFamilies.Of(i.type)==BladeFamily.Solid);
-        return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(),
+        // The line helper can miss a short blade wholly inside a large target.
+        // The blade segment passes through its center, so containment is a hit.
+        return targetHitbox.Contains(Projectile.Center.ToPoint()) || Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(),
             Projectile.Center - length, Projectile.Center + length, 20 * Projectile.scale *
             (solid?1.15f:1), ref point);
     }
@@ -142,11 +156,14 @@ public class SoulBlade : ModProjectile
             if (soul.Supports.Any(i => WeaponFamilies.Of(i.type) == BladeFamily.Nature)) target.AddBuff(BuffID.Poisoned, 180);
         }
         WoodCombat.FinishPrimaryHit(Projectile, target, damageDone);
+        Main.player[Projectile.owner].GetModPlayer<HardOrePlayer>().Hit(Projectile, target, damageDone);
+        OreFamily.OnMainHit(Projectile, target, damageDone);
     }
     public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
     {
         WoodCombat.PreparePrimaryHit(Projectile, target);
         WoodCombat.ModifyPrimaryHit(Projectile, target, ref modifiers);
+        Main.player[Projectile.owner].GetModPlayer<HardOrePlayer>().Modify(Projectile, target, ref modifiers);
         var soul = WoodCombat.FindSoul(Main.player[Projectile.owner], Projectile.GetGlobalProjectile<SoulSource>().SoulId);
         if (((int)Projectile.ai[0] == ItemID.CopperShortsword || soul != null && soul.Supports.Any(i => i.type == ItemID.CopperShortsword)) &&
             Vector2.Distance(Main.player[Projectile.owner].Center, target.Center) < 180)
@@ -168,9 +185,8 @@ public class SoulBlade : ModProjectile
         bool arcane=WeaponFamilies.Of(type)==BladeFamily.Arcane;
         if(arcane)
         {
-            var flow=player.GetModPlayer<SoulPlayer>();
-            if(flow.ArcaneCooldown>0) return;
-            flow.ArcaneCooldown=45;
+            string soulId = Projectile.GetGlobalProjectile<SoulSource>().SoulId;
+            if(!player.GetModPlayer<SoulPlayer>().TryArcane(soulId,type)) return;
         }
         if (!SoulProgress.ZenithWeapons.Contains(type) || type == ItemID.CopperShortsword) return;
         Item template = new(type);

@@ -130,7 +130,13 @@ Mods: {
 		}
 
 		NPCs.GuardianSlimeKing.DisplayName: 史莱姆王·守望者
-		Projectiles.SoulBlade.DisplayName: 天顶剑影
+
+		Projectiles: {
+			SoulBlade.DisplayName: 天顶剑影
+			// HardOreShot.DisplayName: Hard Ore Shot
+			// OreFlyingSword.DisplayName: Ore Flying Sword
+		}
+
 		Keybinds.OpenSoul.DisplayName: 打开剑魂寄宿界面
 	}
 }

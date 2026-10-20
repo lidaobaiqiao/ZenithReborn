@@ -67,9 +67,11 @@ public static partial class SoulProgress
         if (slot < 15)
         {
             int need = new[] {1,2,4,6,8}[slot-10];
-            return $"支援第{slot-9}槽 · 需要{need}种有效木剑（当前{soul.Wood.Count}种）\n基础普通与已生效支援槽计数；不出主剑、不参与伤害分摊\n失去条件时暂停，里面的武器仍可取回";
+            return $"支援第{slot-9}槽 · 需要{need}种有效木剑（当前{soul.Wood.Count}种）\n基础普通与已生效支援槽计数；不出主剑、只贡献特性与羁绊\n失去条件时暂停，里面的武器仍可取回";
         }
-        return $"森林奖励第{slot-14}槽 · 12种木剑同时有效寄宿（当前{soul.Wood.Count}/12）\n需要至少7个基础普通槽＋5个有效支援槽\n真实攻击剑位；不能反向凑齐全套，暂停时可取回";
+        if (slot < 17)
+            return $"森林奖励第{slot-14}槽 · 12种木剑同时有效寄宿（当前{soul.Wood.Count}/12）\n需要至少7个基础普通槽＋5个有效支援槽\n真实攻击剑位；不能反向凑齐全套，暂停时可取回";
+        return "旧扩展已停用：物品不参与伤害、特性与羁绊；只可空手取回，不可放入。";
     }
     public static void RequestCoreRecovery(SoulItem soul)
     {

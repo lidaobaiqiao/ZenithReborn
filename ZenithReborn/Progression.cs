@@ -52,7 +52,17 @@ public static partial class SoulProgress
 public class SoulPlayer : ModPlayer
 {
     internal float Flow;
-    internal int ArcaneCooldown;
+    private Dictionary<(string Soul, int Weapon), int> arcaneCooldowns = [];
+    public override void Initialize() => arcaneCooldowns = [];
+    internal bool TryArcane(string soul, int weapon)
+    {
+        var key = (soul, weapon);
+        if (arcaneCooldowns.ContainsKey(key)) return false;
+        arcaneCooldowns[key] = 45;
+        return true;
+    }
+    public override void OnEnterWorld() => arcaneCooldowns.Clear();
+    public override void UpdateDead() => arcaneCooldowns.Clear();
     private int idle;
     public override IEnumerable<Item> AddStartingItems(bool mediumCoreDeath)
     {
@@ -64,7 +74,8 @@ public class SoulPlayer : ModPlayer
     }
     public override void PostUpdate()
     {
-        if(ArcaneCooldown>0) ArcaneCooldown--;
+        foreach (var key in arcaneCooldowns.Keys.ToArray())
+            if (--arcaneCooldowns[key] <= 0) arcaneCooldowns.Remove(key);
         if (Player.whoAmI == Main.myPlayer && Main.mouseItem.ModItem is SoulItem held)
             HeroPrefixCompat.Remember(held);
         if (++idle > 35 || Player.HeldItem.ModItem is not SoulItem) Flow = Math.Max(0, Flow - .015f);

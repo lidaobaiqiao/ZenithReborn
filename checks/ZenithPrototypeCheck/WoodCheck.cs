@@ -99,13 +99,17 @@ internal static class WoodCheck
         player.statLife=50;float healBudget=105;Main.myPlayer=255;
         check(woodPlayer.HealFromSoul(soul,100,ref healBudget)==105 && player.statLife==155 && healBudget==0,"Blood fragrance direct-heal entry spends original budget and actually heals");
         Main.myPlayer=0;
-        int beforeShots=Main.projectile.Count(p=>p.active && p.ModProjectile is SoulBlade);
-        soul.Shoot(player,new EntitySource_ItemUse_WithAmmo(player,soul.Item,0),player.Center,Vector2.UnitX,ModContent.ProjectileType<SoulBlade>(),1,1);
+        for(int gesture=0;gesture<2;gesture++)
+        {
+            soul.UseAnimation(player); player.itemAnimationMax=25;
+            for(int time=25;time>=1;time--) { player.itemAnimation=time;player.GetModPlayer<SoulSwingPlayer>().PostItemCheck(); }
+        }
         var shots=Main.projectile.Where(p=>p.active && p.ModProjectile is SoulBlade).ToArray();
-        check(shots.Length-beforeShots==9 && shots.Any(p=>(int)p.ai[0]==ItemID.TerraBlade) && shots.Any(p=>(int)p.ai[0]==ItemID.StarWrath),"Actual Shoot spawns both real-slot blades, support slots spawn none");
+        check(shots.Length==10 && shots.Any(p=>(int)p.ai[0]==ItemID.TerraBlade) && shots.Any(p=>(int)p.ai[0]==ItemID.StarWrath) &&
+            shots.All(p=>soul.Active.Any(h=>h.type==(int)p.ai[0])),"Sequential swings reach both real-slot blades, support slots spawn none");
         var terra=shots.First(p=>(int)p.ai[0]==ItemID.TerraBlade);
-        int expectedBase=Math.Max(1,(int)(player.GetWeaponDamage(soul.ForestHosts[0])*soul.Potency/3));
-        check(((SoulBlade)terra.ModProjectile).SpecialDamage==expectedBase && terra.damage==(int)(expectedBase*1.36f),"Main-only growth and nine-sword sharing use real source damage");
+        int expectedBase=Math.Max(1,(int)(player.GetWeaponDamage(soul.ForestHosts[0])*soul.Potency));
+        check(((SoulBlade)terra.ModProjectile).SpecialDamage==expectedBase && terra.damage==(int)(expectedBase*1.36f),"Main-only growth uses the individual real-slot source damage without sharing");
         foreach(var shot in shots) shot.Kill();
         NPC npc=new();npc.SetDefaults(NPCID.Zombie);npc.active=true;npc.whoAmI=20;Main.npc[20]=npc;
         WoodCombat.Apply(npc,player,soul,100);

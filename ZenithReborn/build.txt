@@ -1,5 +1,5 @@
-displayName = 天顶复苏 · 诅咒残魂
+displayName = 澶╅《澶嶈嫃 路 璇呭拻娈嬮瓊
 author = Zenith Reborn
-version = 0.3.2
+version = 0.3.11
 includeSource = true
 buildIgnore = bin/*, obj/*, *.csproj

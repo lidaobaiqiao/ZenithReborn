@@ -3,7 +3,7 @@ $taskRoot = Split-Path $PSScriptRoot -Parent
 $loaderRoot = 'E:/SteamLibrary/steamapps/common/tModLoader'
 $dotnet = 'C:/Program Files/dotnet/dotnet.exe'
 $testProfile = Join-Path $taskRoot 'wood-check-profile'
-New-Item -ItemType Directory -Force -Path "$testProfile/Mods" | Out-Null
+New-Item -ItemType Directory -Force -Path "$testProfile/Mods", "$taskRoot/artifacts" | Out-Null
 foreach ($name in @('ZenithReborn', 'ZenithPrototypeCheck')) {
     $source = if ($name -eq 'ZenithReborn') { "$taskRoot/ZenithReborn" } else { "$taskRoot/checks/ZenithPrototypeCheck" }
     & $dotnet build "$source/$name.csproj" -c Release --nologo *> "$taskRoot/artifacts/$name-wood-build.log"

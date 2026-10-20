@@ -130,7 +130,13 @@ Mods: {
 		}
 
 		NPCs.GuardianSlimeKing.DisplayName: King Slime, the Keeper
-		Projectiles.SoulBlade.DisplayName: Zenith Soul Blade
+
+		Projectiles: {
+			SoulBlade.DisplayName: Zenith Soul Blade
+			HardOreShot.DisplayName: Hard Ore Shot
+			OreFlyingSword.DisplayName: Ore Flying Sword
+		}
+
 		Keybinds.OpenSoul.DisplayName: Open soul hosting interface
 	}
 }

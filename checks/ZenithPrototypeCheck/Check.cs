@@ -36,14 +36,28 @@ public class Check : ModSystem
         if (string.IsNullOrEmpty(path)) return;
         try
         {
+            if(Environment.GetEnvironmentVariable("ZENITH_ORE")=="1")
+            {
+                StageOneCheck.Run(Assert);
+                RibbonCheck.Run(Assert);
+                OreCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} focused checks; ore family, fourteen-material count, generic support and ordinary expansion, save/load and network. No graphical client or live multiplayer validation.\n");
+                Console.WriteLine("ZENITH_ORE_PASS "+checks); Environment.Exit(0); return;
+            }
             if(Environment.GetEnvironmentVariable("ZENITH_WOOD")=="1")
             {
                 StageOneCheck.Run(Assert);
                 RibbonCheck.Run(Assert);
                 WoodCheck.Run(Assert);
                 ProgressionCheck.Run(Assert);
+                SwingCheck.Run(Assert);
+                DamageBalanceCheck.Run(Assert);
+                HardOreCheck.Run(Assert);
                 LunarCheck.Run(Assert);
-                File.WriteAllText(path,$"PASS: {checks} focused checks; lunar event/countdown recovery and actual vanilla Moon Lord spawn, persistence and no-repeat/world guards; complete slot progression, actual friendly king spawn/chat, core recovery, wood slots, save/network/reforge, forest stats, DoT and ribbon regressions. No graphical client or live multiplayer validation.\n");
+                UiCheck.Run(Assert);
+                UiInputCheck.Run(Assert);
+                OreCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} focused checks; 17 active slots and legacy recovery, ore real-hit/target/draw guards, UI click-through shielding against real vanilla slot handlers, held/close capture, responsive viewport, all 17 slot mappings, scaled clicks and navigation; six hardmode ore swords, real hit-driven procs, source-specific counters/cooldowns, support admission, child budgets/orbits, Mythril marks, Palladium healing/resource guards, worm grouping and packet metadata; independent damage, five-node swings, palettes, lunar recovery, progression, wood and DoT regressions. No graphical client or live multiplayer validation.\n");
                 Console.WriteLine("ZENITH_WOOD_PASS "+checks); Environment.Exit(0); return;
             }
             if(Environment.GetEnvironmentVariable("ZENITH_STAGE_ONE")=="1")

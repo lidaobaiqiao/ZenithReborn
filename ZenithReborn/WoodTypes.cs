@@ -45,7 +45,7 @@ public static class WoodTypes
     public static WoodLoadout Evaluate(SoulItem soul)
     {
         if (!soul.Attached) return default;
-        int seed = Mask(soul.Hosts.Take(soul.Capacity)), slots = 0, mask = seed;
+        int seed = Mask(soul.Hosts.Take(soul.BaseCapacity)), slots = 0, mask = seed;
         for (int attempt = 0; attempt <= 5; attempt++)
         {
             mask = seed | Mask(soul.SupportHosts.Take(slots));
@@ -57,7 +57,7 @@ public static class WoodTypes
         return new(mask, slots);
     }
     public static bool CanSupport(Item item) => SoulItem.CanHost(item) &&
-        (IsWood(item.type) || WeaponFamilies.Of(item.type) != BladeFamily.Plain || SoulProgress.ZenithWeapons.Contains(item.type));
+        (IsWood(item.type) || HardOreTypes.IsOre(item.type) || WeaponFamilies.Of(item.type) != BladeFamily.Plain || SoulProgress.ZenithWeapons.Contains(item.type));
     public static string Description(int type)
     {
         int i = Index(type);
@@ -74,7 +74,7 @@ public static class WoodTypes
             9 => "御令：6秒内新受指定减益持续时间缩短4%×S",
             10 => "悼魂：6秒自有持续伤害＋10%×S；死亡传播剩余预算25%×S，360像素内至多2敌平分",
             11 => "孢光：新施加或刷新的自有持续伤害延长0.5×S秒，上限8秒",
-            _ => WeaponFamilies.Description(type)
+            _ => HardOreTypes.IsOre(type) ? HardOreTypes.Description(type) : WeaponFamilies.Description(type)
         };
     }
 }

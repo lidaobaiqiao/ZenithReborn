@@ -10,19 +10,31 @@ namespace ZenithReborn;
 
 public partial class SoulItem : ModItem
 {
-    public Item[] Hosts = Enumerable.Range(0, 10).Select(_ => new Item()).ToArray();
-    public Item[] SupportHosts = EmptySlots(5), ForestHosts = EmptySlots(2);
+    public Item[] Hosts = Enumerable.Range(0, 12).Select(_ => new Item()).ToArray();
+    public Item[] SupportHosts = EmptySlots(11), ForestHosts = EmptySlots(2);
     public bool AwakeningMemory;
     public WoodLoadout Wood => WoodTypes.Evaluate(this);
-    public int SupportCapacity => Wood.SupportCount;
+    public int BaseCapacity => Attached ? Math.Min(10, SoulProgress.Capacity(Kills, Cores)) : 0;
+    public int Capacity => BaseCapacity;
+    public int WoodSupportCapacity => Wood.SupportCount;
+    public int SupportCapacity => WoodSupportCapacity;
+    // Extended arrays are retained solely to recover items saved by 0.3.9/10.
+    // They never grant active slots or contribute to combat/set counts.
+    public bool HasLegacyExpansion => Hosts.Skip(10).Concat(SupportHosts.Skip(5)).Any(i => !i.IsAir);
     public int BonusCapacity => Wood.Full ? 2 : 0;
     public IEnumerable<Item> Stored => Hosts.Concat(SupportHosts).Concat(ForestHosts);
     public IEnumerable<Item> Supports => SupportHosts.Take(SupportCapacity).Where(i => !i.IsAir);
+    public Item ItemAt(int slot) =>
+        slot < 10 ? Hosts[slot] :
+        slot < 15 ? SupportHosts[slot - 10] :
+        slot < 17 ? ForestHosts[slot - 15] :
+        slot < 19 ? Hosts[10 + slot - 17] :
+        slot < 25 ? SupportHosts[5 + slot - 19] : new Item();
+    public Item[] SlotItems() => Enumerable.Range(0, 25).Select(ItemAt).ToArray();
     private static Item[] EmptySlots(int count) => Enumerable.Range(0, count).Select(_ => new Item()).ToArray();
     public string SoulId = Guid.NewGuid().ToString("N");
     public int Kills, Cores;
     public bool Attached, KingMemory;
-    public int Capacity => Attached ? SoulProgress.Capacity(Kills, Cores) : 0;
     public IEnumerable<Item> Active => Hosts.Take(Capacity).Concat(ForestHosts.Take(BonusCapacity)).Where(i => !i.IsAir);
     public int Stage => SoulProgress.Milestones(Kills);
     public bool Awakened => AwakeningMemory || CanAwaken;
@@ -36,18 +48,33 @@ public partial class SoulItem : ModItem
     public bool TrySwapHost(int slot, ref Item cursor, out string error)
     {
         error = "";
-        if (slot < 0 || slot >= 17) return false;
-        Item[] slots = slot < 10 ? Hosts : slot < 15 ? SupportHosts : ForestHosts;
-        int local = slot < 10 ? slot : slot < 15 ? slot - 10 : slot - 15;
-        bool unlocked = slot < 10 ? local < Math.Max(1, Capacity) : slot < 15 ? local < SupportCapacity : local < BonusCapacity;
+        if (slot < 0 || slot >= 25) return false;
+        Item[] slots;
+        int local;
+        bool unlocked;
+        if (slot < 10)
+        { slots = Hosts; local = slot; unlocked = local < Math.Max(1, Capacity); }
+        else if (slot < 15)
+        { slots = SupportHosts; local = slot - 10; unlocked = local < SupportCapacity; }
+        else if (slot < 17)
+        { slots = ForestHosts; local = slot - 15; unlocked = local < BonusCapacity; }
+        else if (slot < 19)
+        { slots = Hosts; local = 10 + slot - 17; unlocked = false; }
+        else
+        { slots = SupportHosts; local = 5 + slot - 19; unlocked = false; }
         if (!cursor.IsAir)
         {
             int incomingType = cursor.type;
-            if (!unlocked) error = "这个槽位尚未解锁；暂停槽中的武器仍可用空鼠标取回。";
+            if (!unlocked) error = slot >= 17 ? "旧扩展已停用，只可空手取回，不能再放入。" : "这个槽位尚未解锁；暂停槽中的武器仍可用空鼠标取回。";
             else if (!CanHost(cursor)) error = "请放入不可堆叠的近战武器；工具、消耗武器和天顶剑不可寄宿。";
-            else if (slot is >= 10 and < 15 && !WoodTypes.CanSupport(cursor)) error = "这把武器尚未登记支援特性。可放木质剑、五类早期武器或天顶材料剑。";
-            else if (Stored.Where((_, i) => i != slot).Any(h => !h.IsAir && h.type == incomingType))
-                error = "同种武器最多寄宿一把。";
+            else if (((slot >= 10 && slot < 15) || (slot >= 19 && slot < 25)) && !WoodTypes.CanSupport(cursor))
+                error = "这把武器尚未登记支援特性。可放木质剑、矿石剑、五类早期武器或天顶材料剑。";
+            else
+            {
+                int same = Stored.Count(h => !h.IsAir && h.type == incomingType);
+                if (!slots[local].IsAir && slots[local].type == incomingType) same--;
+                if (same > 0) error = "同种武器最多寄宿一把。";
+            }
             if (error.Length > 0) return false;
         }
         AwakeningMemory |= CanAwaken;
@@ -60,8 +87,8 @@ public partial class SoulItem : ModItem
     public override void SetDefaults()
     {
         SoulId = Guid.NewGuid().ToString("N");
-        Hosts = Enumerable.Range(0, 10).Select(_ => new Item()).ToArray();
-        SupportHosts = EmptySlots(5); ForestHosts = EmptySlots(2); AwakeningMemory = false;
+        Hosts = Enumerable.Range(0, 12).Select(_ => new Item()).ToArray();
+        SupportHosts = EmptySlots(11); ForestHosts = EmptySlots(2); AwakeningMemory = false;
         Kills = Cores = 0;
         Attached = KingMemory = false;
         Item.width = Item.height = 40; Item.damage = 20; Item.knockBack = 3;
@@ -153,11 +180,11 @@ public partial class SoulItem : ModItem
         if (string.IsNullOrEmpty(SoulId)) SoulId = Guid.NewGuid().ToString("N");
         Kills = tag.GetInt("kills") & SoulProgress.All; Cores = tag.GetInt("cores") & 63;
         var stored = tag.GetList<TagCompound>("hosts");
-        Hosts = Enumerable.Range(0, 10).Select(i => i < stored.Count ? ItemIO.Load(stored[i]) : new Item()).ToArray();
+        Hosts = Enumerable.Range(0, 12).Select(i => i < stored.Count ? ItemIO.Load(stored[i]) : new Item()).ToArray();
         // Keep older, already-used souls playable; an empty old remnant starts the new prologue.
         Attached = tag.ContainsKey("attachment") ? tag.GetBool("attachment") : Hosts.Any(i=>!i.IsAir) || Kills!=0 || Cores!=0;
         KingMemory = tag.GetBool("kingMemory");
-        SupportHosts = LoadSlots(tag, "supports", 5);
+        SupportHosts = LoadSlots(tag, "supports", 11);
         ForestHosts = LoadSlots(tag, "forestHosts", 2);
         AwakeningMemory = tag.GetBool("awakenedMemory") || CanAwaken;
     }
@@ -178,8 +205,8 @@ public partial class SoulItem : ModItem
         SoulId = reader.ReadString(); Kills = reader.ReadInt32() & SoulProgress.All; Cores = reader.ReadInt32() & 63;
         Attached=reader.ReadBoolean();KingMemory=reader.ReadBoolean();
         AwakeningMemory = reader.ReadBoolean();
-        Hosts = Enumerable.Range(0, 10).Select(_ => ItemIO.Receive(reader, readStack: true, readFavorite: true)).ToArray();
-        SupportHosts = Enumerable.Range(0, 5).Select(_ => ItemIO.Receive(reader, readStack: true, readFavorite: true)).ToArray();
+        Hosts = Enumerable.Range(0, 12).Select(_ => ItemIO.Receive(reader, readStack: true, readFavorite: true)).ToArray();
+        SupportHosts = Enumerable.Range(0, 11).Select(_ => ItemIO.Receive(reader, readStack: true, readFavorite: true)).ToArray();
         ForestHosts = Enumerable.Range(0, 2).Select(_ => ItemIO.Receive(reader, readStack: true, readFavorite: true)).ToArray();
     }
     public override bool AltFunctionUse(Player player) => true;
@@ -240,46 +267,61 @@ public partial class SoulItem : ModItem
         return range * (remaining == 0 ? 1 + .2f * flow : 1 - .3f * remaining / 3 * flow) *
             (Supports.Any(i => WeaponFamilies.Of(i.type) == BladeFamily.Swift) ? .85f : 1);
     }
-    public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
-        Vector2 velocity, int type, int damage, float knockback)
+    public override void UseAnimation(Player player) => player.GetModPlayer<SoulSwingPlayer>().Begin(this);
+    public override void UseItemFrame(Player player)
     {
-        var active = Active.ToArray();
-        if (active.Length == 0) return false;
-        player.GetModPlayer<SoulPlayer>().Cycle(active.Length);
+        int phase = SoulSwingPlayer.Phase(player);
+        float angle = MathHelper.Lerp(-2.6f, .65f, phase / 5f);
+        player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, angle * player.direction);
+    }
+    // Actual projectiles are emitted by the five animation thresholds, never
+    // pre-created as a hidden batch by vanilla's first-frame Shoot call.
+    public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
+        Vector2 velocity, int type, int damage, float knockback) => false;
+
+    public int EmitBlade(Player player, Item host, int ordinal, int hostCount)
+    {
+        if (player.whoAmI != Main.myPlayer || Main.netMode == NetmodeID.Server) return Main.maxProjectiles;
         Vector2 delta = Main.MouseWorld - player.Center;
         float reach = Reach(player);
         if (delta.Length() > reach) delta = Vector2.Normalize(delta) * reach;
         if (delta.LengthSquared() < 2500) delta = delta.SafeNormalize(Vector2.UnitX * player.direction) * 50;
-        // All hosts contribute one blade per cycle. Normalize growth from additional slots.
-        float sharing = 1f / MathF.Sqrt(active.Length);
-        for (int i = 0; i < active.Length; i++)
-        {
-            Item host = active[i];
-            int baseHostDamage = Math.Max(1, (int)(player.GetWeaponDamage(host) * Potency * sharing));
-            int hostDamage = Math.Max(1, (int)(baseHostDamage * (1 + player.GetModPlayer<WoodPlayer>().LayersFor(this) * .03f)));
-            int duration = Math.Clamp((int)(Math.Max(host.useAnimation, host.useTime)*WeaponFamilies.Interval(host.type) / player.GetAttackSpeed(DamageClass.Melee)), 18, 55);
-            int index = Projectile.NewProjectile(source, player.Center, Vector2.Zero, type,
-                hostDamage, player.GetWeaponKnockback(host)*(WeaponFamilies.Of(host.type)==BladeFamily.Solid ||
-                    Supports.Any(h=>WeaponFamilies.Of(h.type)==BladeFamily.Solid)?1.2f:1), player.whoAmI, host.type, duration, i * 2);
-            if (index >= Main.maxProjectiles) continue;
-            var blade = (SoulBlade)Main.projectile[index].ModProjectile;
-            blade.TargetOffset = delta.RotatedBy((i - (active.Length - 1) * .5f) * .06f);
-            blade.SwordScale = host.scale;
-            blade.SpecialDamage = baseHostDamage;
-            // Vanilla Zenith 933: one ellipse, ai[0] = Random.Next(-100, 101).
-            blade.Vertical = Main.rand.Next(-100, 101);
-            Main.projectile[index].CritChance = player.GetWeaponCrit(host);
-            Main.projectile[index].GetGlobalProjectile<SoulSource>().SoulId = SoulId;
-            Main.projectile[index].netUpdate = true;
-        }
-        return false;
+        int baseHostDamage = BladeDamage(player, host);
+        int hostDamage = Math.Max(1, (int)(baseHostDamage * (1 + player.GetModPlayer<WoodPlayer>().LayersFor(this) * .03f)));
+        float baseDuration = Math.Max(host.useAnimation, host.useTime)*WeaponFamilies.Interval(host.type);
+        int duration = Math.Clamp((int)(baseDuration / player.GetAttackSpeed(DamageClass.Melee)), 18, 55);
+        float hostKnockback = player.GetWeaponKnockback(host);
+        int index = Projectile.NewProjectile(player.GetSource_ItemUse(Item), player.Center, Vector2.Zero, ModContent.ProjectileType<SoulBlade>(),
+            hostDamage, hostKnockback*(WeaponFamilies.Of(host.type)==BladeFamily.Solid ||
+                Supports.Any(h=>WeaponFamilies.Of(h.type)==BladeFamily.Solid)?1.2f:1), player.whoAmI, host.type, duration, 0);
+        if (index >= Main.maxProjectiles) return index;
+        var blade = (SoulBlade)Main.projectile[index].ModProjectile;
+        blade.ConfigureReborn(Awakened);
+        blade.TargetOffset = delta.RotatedBy((ordinal - (hostCount - 1) * .5f) * .06f);
+        blade.SwordScale = host.scale;
+        blade.SpecialDamage = baseHostDamage;
+        // Vanilla Zenith 933: one ellipse, ai[0] = Random.Next(-100, 101).
+        blade.Vertical = Main.rand.Next(-100, 101);
+        Main.projectile[index].CritChance = player.GetWeaponCrit(host);
+        Main.projectile[index].GetGlobalProjectile<SoulSource>().SoulId = SoulId;
+        Main.projectile[index].GetGlobalProjectile<SoulSource>().SourceWeapon = host.type;
+        Main.projectile[index].netUpdate = true;
+        return index;
     }
     public override void ModifyTooltips(List<TooltipLine> tooltips)
     {
         tooltips.Add(new(Mod,"SoulControl","按P或手持右键：管理寄宿武器；放入和取回都不会消耗武器"));
+        tooltips.Add(new(Mod,"SoulSwing","每次挥臂分五段，依次释放最多五把剑；下次接续轮换。不足五把时各出一次，余下节点留空。"));
+        tooltips.Add(new(Mod,"BladeCombat","逐剑计算：各剑继承自身伤害、暴击、击退与特性；无统一伤害下限，不按剑数分摊；同一剑对同一敌人每8帧可再次命中。\n伤害栏仅为平均参考，实际命中由当前出剑的寄宿武器决定。"));
         if(!Attached) tooltips.Add(new(Mod,"Unstable","残魂未稳：尚不能攻击，第一槽仅供预览。\n白天地表使用凝胶信物，右键友善史莱姆王对话，接受「附着」。\n凝胶信物：开局附带，或凝胶10＋坠落之星1在工作台制作。"));
         else tooltips.Add(new(Mod,"Attachment","祝福·附着：已经能够稳定依附武器，永久生效。"));
         tooltips.Add(new(Mod,"SoulStats",$"普通槽 {Capacity}/10＋森林奖励{BonusCapacity}/2 · 支援槽{SupportCapacity}/5 · 武器效能 {Potency:P0} · 魂芯 {System.Numerics.BitOperations.PopCount((uint)Cores)}/6"));
+        int oreCount = OreFamily.Count(this);
+        if (oreCount > 0)
+            tooltips.Add(new(Mod,"OreFamily",$"锻金族 {oreCount}/14 · 飞剑 {oreCount} 把 · 每多一把飞剑伤害 +5%\n"+
+                "矿石主剑命中后生成环绕飞剑；仍使用原17槽与木系支援解锁，不增加槽位"));
+        if (Active.Concat(Supports).Any(i => HardOreTypes.IsOre(i.type)))
+            tooltips.Add(new(Mod,"HardOre", "肉后矿石：主剑每8帧可再次命中，机制每来源、每目标主体30帧计一次，3秒未命中清空连击；支援槽按实际主剑取伤害。"));
         var wood = Wood;
         tooltips.Add(new(Mod, "WoodSet", $"木质族 {wood.Count}/12 · 环境强度{wood.Strength:0.##}倍 · 生命＋{wood.Life}"));
         if (wood.Full) tooltips.Add(new(Mod, "ForestPower", "森林之力：额外2真实剑位；60秒满层：伤害＋36%、速度＋24%、防御＋36、回复＋6/秒、持续伤害＋60%、减伤＋12个百分点"));
