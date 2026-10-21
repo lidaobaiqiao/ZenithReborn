@@ -15,8 +15,8 @@ public class WoodPlayer : ModPlayer
     private readonly Dictionary<string, ulong> cooldowns = [];
     private float regenRemainder;
     public SoulItem HeldSoul => !Player.dead && Player.HeldItem.ModItem is SoulItem soul && soul.Attached ? soul : null;
-    public WoodLoadout Loadout => HeldSoul?.Wood ?? default;
-    public int LayersFor(SoulItem soul) => currentSoul == soul.SoulId && soul.Wood.Full ? Layers : 0;
+    public WoodLoadout Loadout => HeldSoul?.CombatWood ?? default;
+    public int LayersFor(SoulItem soul) => currentSoul == soul.SoulId && soul.CombatWood.Full ? Layers : 0;
     public bool Ready(string key, int frames)
     {
         ulong tick = Main.GameUpdateCount;
@@ -26,7 +26,7 @@ public class WoodPlayer : ModPlayer
     }
     public void RecordHit(SoulItem soul)
     {
-        if (HeldSoul?.SoulId != soul.SoulId || !soul.Wood.Full) return;
+        if (HeldSoul?.SoulId != soul.SoulId || !soul.CombatWood.Full) return;
         if (currentSoul != soul.SoulId) { ResetGrowth(); currentSoul = soul.SoulId; }
         RecentCombat = 300;
     }
@@ -34,7 +34,7 @@ public class WoodPlayer : ModPlayer
     public void AdvanceGrowth()
     {
         SoulItem soul = HeldSoul;
-        if (soul == null || !soul.Wood.Full) { ResetGrowth(); return; }
+        if (soul == null || !soul.CombatWood.Full) { ResetGrowth(); return; }
         if (currentSoul != soul.SoulId) { ResetGrowth(); currentSoul = soul.SoulId; }
         if (RecentCombat > 0)
         {
@@ -65,7 +65,7 @@ public class WoodPlayer : ModPlayer
     {
         var soul = HeldSoul;
         if (soul == null) return;
-        Player.statLifeMax2 += soul.Wood.Life;
+        Player.statLifeMax2 += soul.CombatWood.Life;
         int layers = LayersFor(soul);
         Player.statDefense += layers * 3;
         Player.endurance += layers * .01f;
@@ -74,8 +74,8 @@ public class WoodPlayer : ModPlayer
     {
         var soul = HeldSoul;
         float perSecond = soul == null ? 0 : LayersFor(soul) * .5f;
-        if (soul != null && soul.Wood.Has(WoodKind.Forest) && Player.HasBuff(ModContent.BuffType<ForestBreath>()))
-            perSecond += .25f * soul.Wood.Strength;
+        if (soul != null && soul.CombatWood.Has(WoodKind.Forest) && Player.HasBuff(ModContent.BuffType<ForestBreath>()))
+            perSecond += .25f * soul.CombatWood.Strength;
         // Fractional lifeRegen units accumulate; no per-frame minimum heal and no Heal hook.
         if (perSecond <= 0) { regenRemainder = 0; return; }
         regenRemainder += perSecond * 2;
@@ -101,7 +101,7 @@ public class WoodPlayer : ModPlayer
     public void GrantHitBuffs(SoulItem soul)
     {
         if (HeldSoul?.SoulId != soul.SoulId) return;
-        var wood = soul.Wood;
+        var wood = soul.CombatWood;
         if (wood.Has(WoodKind.Forest) && Ready(soul.SoulId + ":breath", 60)) Player.AddBuff(ModContent.BuffType<ForestBreath>(), 360);
         if (wood.Has(WoodKind.Shade) && Ready(soul.SoulId + ":blood", 60)) Player.AddBuff(ModContent.BuffType<BloodFragrance>(), 360);
         if (wood.Has(WoodKind.Dynasty) && Ready(soul.SoulId + ":order", 60)) Player.AddBuff(ModContent.BuffType<DynastyOrder>(), 360);

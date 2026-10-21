@@ -25,7 +25,7 @@ internal static class UiCheck
                 SoulUI.SelectPage(0);
                 var panel=SoulUI.PanelBounds(); var body=SoulUI.ContentBounds();
                 check(new Rectangle(0,0,Main.screenWidth,Main.screenHeight).Contains(panel),"UI panel fits viewport: "+resolution+" / "+scale);
-                check(panel.Contains(body) && !body.Intersects(SoulUI.TabBounds(0)),"Scrolling body stays below fixed navigation");
+                check(panel.Contains(body) && body.Contains(SoulUI.TabBounds(0)),"Orbital navigation is inside the clipped host canvas");
                 check(panel.Contains(SoulUI.CloseBounds()),"Close button stays on screen");
                 var slots=Enumerable.Range(0,17).Select(SoulUI.SlotBounds).ToArray();
                 for(int i=0;i<slots.Length;i++)
@@ -33,7 +33,11 @@ internal static class UiCheck
                     check(slots[i].Width>=35 && slots[i].Left>=body.Left && slots[i].Right<=body.Right,"Slot horizontal bounds and usable target "+i);
                     check(!slots.Where((r,j)=>j!=i).Any(r=>r.Intersects(slots[i])),"Slots never overlap "+i);
                 }
-                check(slots[5].Y>slots[0].Bottom && slots[4].Y==slots[0].Y,"Ten main slots use two rows of five");
+                check(slots.Take(10).All(r=>Math.Abs(Vector2.Distance(r.Center.ToVector2(),SoulUI.RingCenter)-SoulUI.RingRadius)<2),"Ten main slots share one circular orbit");
+                check(slots.Skip(15).All(r=>r.Center.X<SoulUI.RingCenter.X && r.Center.Y<SoulUI.RingCenter.Y),"Forest bonus slots occupy the upper-left arc");
+                check(slots.Skip(10).Take(5).All(r=>r.Center.X>SoulUI.RingCenter.X && r.Center.Y>SoulUI.RingCenter.Y),"Support slots occupy the lower-right arc");
+                var fragments=Enumerable.Range(0,4).Select(SoulUI.TabBounds).ToArray();
+                check(fragments.All(r=>!slots.Any(r.Intersects)) && !fragments.Where((r,i)=>fragments.Skip(i+1).Any(r.Intersects)).Any(),"Fragment navigation does not overlap any weapon or fragment target");
                 var soul=(SoulItem)new Item(ModContent.ItemType<SoulItem>()).ModItem;
                 Main.player[0].inventory[0]=soul.Item;
                 Point pos=slots[0].Center; Main.mouseX=pos.X;Main.mouseY=pos.Y;
@@ -44,7 +48,7 @@ internal static class UiCheck
                 check(SoulUI.TryClickHost(soul,out _) && soul.Hosts[0].IsAir && Main.mouseItem.type==ItemID.CopperShortsword,"Real handler returns preview weapon");
                 Main.mouseItem=new Item(ItemID.WoodenBow);Main.mouseLeftRelease=true;
                 check(!SoulUI.TryClickHost(soul,out var error) && error.Length>0 && Main.mouseItem.type==ItemID.WoodenBow,"Rejected item stays on cursor");
-                foreach(int page in new[]{1,2})
+                foreach(int page in new[]{1,2,SoulUI.CatalogPage})
                 {
                     SoulUI.SelectPage(page); Main.mouseLeftRelease=true;
                     check(!SoulUI.TryClickHost(soul,out _) && Main.mouseItem.type==ItemID.WoodenBow && Main.mouseLeftRelease,"Hidden slots cannot consume clicks on other pages");

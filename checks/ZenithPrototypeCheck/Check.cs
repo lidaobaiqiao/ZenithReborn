@@ -36,6 +36,12 @@ public class Check : ModSystem
         if (string.IsNullOrEmpty(path)) return;
         try
         {
+            if(Environment.GetEnvironmentVariable("ZENITH_LEGENDARY")=="1")
+            {
+                LegendaryCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} focused checks; legendary-only slot identity, active weapon, save/network, paused retrieval and insertion rejection. No graphical client validation.\n");
+                Console.WriteLine("ZENITH_LEGENDARY_PASS "+checks); Environment.Exit(0); return;
+            }
             if(Environment.GetEnvironmentVariable("ZENITH_ORE")=="1")
             {
                 StageOneCheck.Run(Assert);
@@ -46,18 +52,35 @@ public class Check : ModSystem
             }
             if(Environment.GetEnvironmentVariable("ZENITH_WOOD")=="1")
             {
+                CurseFixture.NeutralDefaults=true;
+                SoulUI.DomainMode=false;
                 StageOneCheck.Run(Assert);
                 RibbonCheck.Run(Assert);
                 WoodCheck.Run(Assert);
                 ProgressionCheck.Run(Assert);
                 SwingCheck.Run(Assert);
                 DamageBalanceCheck.Run(Assert);
+                VanillaReturnCheck.Run(Assert);
+                SparkCheck.Run(Assert);
+                NativeParticleCheck.Run(Assert);
                 HardOreCheck.Run(Assert);
                 LunarCheck.Run(Assert);
                 UiCheck.Run(Assert);
                 UiInputCheck.Run(Assert);
+                WindowDragCheck.Run(Assert);
+                TraitCheck.Run(Assert);
                 OreCheck.Run(Assert);
-                File.WriteAllText(path,$"PASS: {checks} focused checks; 17 active slots and legacy recovery, ore real-hit/target/draw guards, UI click-through shielding against real vanilla slot handlers, held/close capture, responsive viewport, all 17 slot mappings, scaled clicks and navigation; six hardmode ore swords, real hit-driven procs, source-specific counters/cooldowns, support admission, child budgets/orbits, Mythril marks, Palladium healing/resource guards, worm grouping and packet metadata; independent damage, five-node swings, palettes, lunar recovery, progression, wood and DoT regressions. No graphical client or live multiplayer validation.\n");
+                OreRewardCheck.Run(Assert);
+                SupportIntegrationCheck.Run(Assert);
+                CurseFixture.NeutralDefaults=false;
+                CurseCheck.Run(Assert);
+                DomainCheck.Run(Assert);
+                LegendaryCheck.Run(Assert);
+                FollowupCheck.Run(Assert);
+                BlessingCheck.Run(Assert);
+                BlessingCameraCheck.Run(Assert);
+                EnvironmentAttributeCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} focused checks; fullscreen domain layout, direct inventory sword exchange/return and loss protection, native legendary toggle/restoration/world-state persistence; six curse groups and distinct personal boss stages, actual blessed ItemCheck cadence up to ten blades, direct-hit limits and terrain interception, legacy migration and HERO/reforge/save/network preservation; active-only traits/codex, ten primary slots, additive shared supports and legacy recovery, UI click-through shielding, drag/viewport/slot mappings; six hardmode ore mechanisms, independent damage, cumulative ore mastery and piercing multi-target frame damage; actual native ItemCheck cadence across prefixes/speed modifiers, native two-update flight without phase rescaling, seeded actual vanilla dust comparison, tip flare envelope; compact tooltips, palettes, lunar recovery, progression, wood and DoT regressions. Graphical checks recorded separately; no live multiplayer validation.\n");
                 Console.WriteLine("ZENITH_WOOD_PASS "+checks); Environment.Exit(0); return;
             }
             if(Environment.GetEnvironmentVariable("ZENITH_STAGE_ONE")=="1")

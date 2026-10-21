@@ -45,19 +45,10 @@ public static class WoodTypes
     public static WoodLoadout Evaluate(SoulItem soul)
     {
         if (!soul.Attached) return default;
-        int seed = Mask(soul.Hosts.Take(soul.BaseCapacity)), slots = 0, mask = seed;
-        for (int attempt = 0; attempt <= 5; attempt++)
-        {
-            mask = seed | Mask(soul.SupportHosts.Take(slots));
-            int count = System.Numerics.BitOperations.PopCount((uint)mask);
-            int next = new[] { 1, 2, 4, 6, 8 }.Count(n => count >= n);
-            if (next == slots) return new(mask, slots);
-            slots = next;
-        }
-        return new(mask, slots);
+        return new(Mask(SoulSupport.SetItems(soul)),soul.SupportCapacity);
     }
-    public static bool CanSupport(Item item) => SoulItem.CanHost(item) &&
-        (IsWood(item.type) || HardOreTypes.IsOre(item.type) || WeaponFamilies.Of(item.type) != BladeFamily.Plain || SoulProgress.ZenithWeapons.Contains(item.type));
+    // Kept as a compatibility entry point for existing callers.
+    public static bool CanSupport(Item item) => SoulSupport.CanSupport(item);
     public static string Description(int type)
     {
         int i = Index(type);

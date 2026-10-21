@@ -23,7 +23,9 @@ public abstract class CrossSummonItem : ModItem
         Item.rare = ItemRarityID.Blue;
         Item.value = 0;
     }
-    public override bool CanUseItem(Player player) => !NPC.AnyNPCs(BossType);
+    public override bool CanUseItem(Player player) => BossType==NPCID.EaterofWorldsHead
+        ? !Main.npc.Any(n=>n.active && SoulCurses.BossSeal(n.type)==SoulCurses.Eater)
+        : !NPC.AnyNPCs(BossType);
     public override bool? UseItem(Player player)
     {
         if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -56,7 +58,8 @@ public class CrossSummonDrops : GlobalNPC
     public override void OnKill(NPC npc)
     {
         if (Main.netMode == NetmodeID.MultiplayerClient) return;
-        if (!WorldGen.crimson && npc.type == NPCID.EaterofWorldsHead)
+        if (!WorldGen.crimson && SoulCurses.BossSeal(npc.type)==SoulCurses.Eater &&
+            !Main.npc.Any(n=>n.active && n.whoAmI!=npc.whoAmI && SoulCurses.BossSeal(n.type)==SoulCurses.Eater))
             Item.NewItem(npc.GetSource_Loot(), npc.Hitbox, ModContent.ItemType<CrimsonSigil>());
         else if (WorldGen.crimson && npc.type == NPCID.BrainofCthulhu)
             Item.NewItem(npc.GetSource_Loot(), npc.Hitbox, ModContent.ItemType<CorruptionLure>());

@@ -23,7 +23,7 @@ Mods: {
 
 			SoulItem: {
 				DisplayName: 诅咒的天顶残魂
-				Tooltip: 大陆之巅的残响，等待一把愿意承载它的剑
+				Tooltip: 大陆之巅的残响，随众剑一同复苏
 			}
 
 			CrimsonSigil: {
@@ -127,16 +127,26 @@ Mods: {
 				DisplayName: 悼魂
 				Description: 所属剑魂持续伤害增幅10%×S，死亡时传播部分剩余预算
 			}
+
+			SoulBreach: {
+				DisplayName: 破障
+				Description: 护甲受到15点穿透
+			}
 		}
 
 		NPCs.GuardianSlimeKing.DisplayName: 史莱姆王·守望者
 
 		Projectiles: {
+			BlessingStrike.DisplayName: 祝福斩痕
 			SoulBlade.DisplayName: 天顶剑影
-			// HardOreShot.DisplayName: Hard Ore Shot
-			// OreFlyingSword.DisplayName: Ore Flying Sword
+			HardOreShot.DisplayName: 锻金衍刃
+			OreFlyingSword.DisplayName: 百炼飞剑
+			OreSkyfall.DisplayName: 天铸巨剑
 		}
 
-		Keybinds.OpenSoul.DisplayName: 打开剑魂寄宿界面
+		Keybinds: {
+			ActivateYujian.DisplayName: 手动开启御剑祝福
+			OpenSoul.DisplayName: 打开剑魂寄宿界面
+		}
 	}
 }

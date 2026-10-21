@@ -98,17 +98,26 @@ internal static class DamageBalanceCheck
             "Actual emitted crit chances follow each host including its prefix");
         check(Math.Abs(strong.Projectile.knockBack-player.GetWeaponKnockback(soul.Hosts[1]))<.001,
             "High host keeps its own knockback rather than the shared template");
-        check(strong.Projectile.ai[1]!=blade.Projectile.ai[1],"Each blade flight duration follows its host attack speed");
+        check(strong.Projectile.ai[1]==0 && blade.Projectile.ai[1]==0 && blade.Projectile.extraUpdates==1,
+            "Native flight clock replaces host-speed duration and runs twice per game frame");
+        blade.SwordScale=1.3f;blade.AI();
+        check(Math.Abs(blade.Projectile.scale-1.3f)<.001f && Math.Abs(blade.DisplayScale-2.08f)<.001f,
+            "Main model is sixty percent larger while underlying collision scale retains source size");
+        float savedSpeed=player.GetAttackSpeed(DamageClass.Melee);
+        player.GetAttackSpeed(DamageClass.Melee)=100f;
+        int fast=soul.EmitBlade(player,soul.Hosts[0],0,2);
+        check(Main.projectile[fast].ai[1]==0 && Main.projectile[fast].extraUpdates==1,"Player attack speed does not rescale native projectile AI");
+        Main.projectile[fast].active=false;player.GetAttackSpeed(DamageClass.Melee)=savedSpeed;
         using(var data=new System.IO.MemoryStream())
         {
             blade.SendExtraAI(new System.IO.BinaryWriter(data));data.Position=0;
             var remote=new Projectile();remote.SetDefaults(ModContent.ProjectileType<SoulBlade>());
             ((SoulBlade)remote.ModProjectile).ReceiveExtraAI(new System.IO.BinaryReader(data));
-            check(data.Position==data.Length && ((SoulBlade)remote.ModProjectile).Reborn && remote.localNPCHitCooldown==8,
+            check(data.Position==data.Length && ((SoulBlade)remote.ModProjectile).Reborn && remote.localNPCHitCooldown==16,
                 "Reborn state and hit interval survive projectile network serialization");
         }
         blade.ConfigureReborn(false);
-        check(!blade.Reborn && blade.Projectile.localNPCHitCooldown==8,"Non-reborn blades also allow repeated hits");
+        check(!blade.Reborn && blade.Projectile.localNPCHitCooldown==16,"Non-reborn blades retain eight game frames between hits at two updates per frame");
         VerifyRepeatedHits(player,blade,strong,check);
         VerifySpecials(player,soul,check);
         foreach(var p in Main.projectile) p.active=false;
@@ -129,7 +138,7 @@ internal static class DamageBalanceCheck
         check(once==1 && Hits==once,"Engine enforces an interval between hits of the same blade");
         strong.Projectile.Damage();
         check(Hits==2 && Damage-weakDamage>weakDamage,"Another blade hits independently with its own higher damage");
-        for(int frame=0;frame<8;frame++) if(weak.Projectile.localNPCImmunity[20]>0) weak.Projectile.localNPCImmunity[20]--;
+        for(int frame=0;frame<16;frame++) if(weak.Projectile.localNPCImmunity[20]>0) weak.Projectile.localNPCImmunity[20]--;
         weak.Projectile.Damage();
         check(Hits==3,"Engine permits the original weak blade to hit the same target again after cooldown");
         Recording=false;target.active=false;

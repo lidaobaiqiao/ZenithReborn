@@ -3,67 +3,63 @@ using Terraria.ModLoader;
 
 namespace ZenithReborn;
 
-// One state per wielder. Only real attack slots enter this sequence; support
-// effects still ride on each blade through the existing SoulBlade logic.
+// Vanilla ItemCheck owns the clock. This class only selects the next host.
 public class SoulSwingPlayer : ModPlayer
 {
     private SoulItem swinging;
-    private Item[] hosts = [];
-    private int[] types = [];
+    private Item[] hosts=[];
+    private int[] types=[];
     private string cursorSoul;
-    private int cursor, lastPhase;
-    private bool pending;
+    private int cursor, shots, lastAnimation;
+    private int budget;
 
     public void Begin(SoulItem soul)
     {
-        swinging = soul;
-        hosts = soul.Active.ToArray();
-        types = hosts.Select(i => i.type).ToArray();
-        if (cursorSoul != soul.SoulId) { cursorSoul = soul.SoulId; cursor = 0; }
-        if (hosts.Length > 0) cursor %= hosts.Length;
-        lastPhase = 0;
-        pending = true;
+        swinging=soul;hosts=soul.Active.ToArray();types=hosts.Select(i=>i.type).ToArray();
+        if(cursorSoul!=soul.SoulId){cursorSoul=soul.SoulId;cursor=0;}
+        if(hosts.Length>0)cursor%=hosts.Length;
+        shots=0;lastAnimation=-1;
+        budget=Math.Min(hosts.Length,SoulCurses.Blades(soul));
+        if(soul.Curse(SoulCurse.Sheathing)<CurseStage.Released)
+            foreach(var p in Main.ActiveProjectiles)
+                if(p.owner==Player.whoAmI && p.ModProjectile is SoulBlade blade &&
+                    p.GetGlobalProjectile<SoulSource>().SoulId==soul.SoulId)blade.Retire();
+        Player.GetModPlayer<SoulPlayer>().Cycle(hosts.Length);
     }
 
-    // ItemCheck decrements the animation before PostItemCheck; the start frame
-    // still has the full timer. Count that frame so the fifth node occurs on
-    // the final visible frame (timer=1), before auto-reuse starts the next swing.
-    public static int Phase(Player player) => player.itemAnimationMax <= 0 ? 0 :
-        Math.Clamp((player.itemAnimationMax - player.itemAnimation + 1) * 5 / player.itemAnimationMax, 0, 5);
+    private bool Valid()=>swinging!=null && !Player.dead && Player.HeldItem.ModItem==swinging &&
+        swinging.Attached && Player.altFunctionUse!=2 && Player.itemAnimation>0 && !SoulUI.IsEditing(swinging) &&
+        hosts.Length>0 && swinging.Active.SequenceEqual(hosts) && hosts.Select(i=>i.type).SequenceEqual(types);
+
+    public void FireHost()
+    {
+        if(!Valid()){Cancel();return;}
+        if(budget>3)return; // Evenly spaced extra nodes are handled below.
+        EmitNext();
+    }
+    private void EmitNext()
+    {
+        if(lastAnimation==Player.itemAnimation)return;
+        lastAnimation=Player.itemAnimation;
+        // Sparse loadouts use each host once; spare native firing opportunities
+        // remain empty. The next gesture resumes the same persistent cursor.
+        if(shots>=budget)return;
+        shots++;
+        swinging.EmitBlade(Player,hosts[cursor],cursor,hosts.Length);
+        cursor=(cursor+1)%hosts.Length;
+    }
 
     public override void PostItemCheck()
     {
-        if (swinging == null) return;
-        if (Player.dead || Player.HeldItem.ModItem != swinging || !swinging.Attached ||
-            Player.altFunctionUse == 2 || Player.itemAnimation <= 0 || SoulUI.IsEditing(swinging))
-        { Cancel(); return; }
-        var current = swinging.Active.ToArray();
-        if (hosts.Length == 0 || current.Length != hosts.Length ||
-            current.Where((item, i) => !ReferenceEquals(item, hosts[i]) || item.type != types[i]).Any())
-        { Cancel(); return; }
-        if (pending)
-        {
-            // Five separate release frames remain possible even at extreme
-            // attack speed. Apply after vanilla calculates animation duration.
-            if (Player.itemAnimationMax < 5)
-            {
-                Player.itemAnimation = Player.itemAnimationMax = 5;
-                Player.itemTime = Math.Max(Player.itemTime, 5);
-            }
-            Player.GetModPlayer<SoulPlayer>().Cycle(hosts.Length);
-            pending = false;
-        }
-        int phase = Phase(Player);
-        if (phase <= lastPhase) return;
-        lastPhase = phase;
-        // Never catch up by spawning several swords on one frame. Normal
-        // animation ticks visit every node; a skipped node stays empty.
-        if (phase > Math.Min(5, hosts.Length)) return;
-        swinging.EmitBlade(Player, hosts[cursor], cursor, hosts.Length);
-        cursor = (cursor + 1) % hosts.Length;
+        if(swinging==null)return;
+        if(!Valid()){Cancel();return;}
+        if(budget<=3)return;
+        int nodes=Math.Min(budget,Player.itemAnimationMax);
+        int elapsed=Player.itemAnimationMax-Player.itemAnimation;
+        int due=Math.Min(nodes,1+elapsed*nodes/Math.Max(1,Player.itemAnimationMax));
+        if(shots<due)EmitNext();
     }
-
-    private void Cancel() { swinging = null; hosts = []; types = []; pending = false; }
-    public override void UpdateDead() { Cancel(); cursor = 0; cursorSoul = null; }
-    public override void OnEnterWorld() { Cancel(); cursor = 0; cursorSoul = null; }
+    private void Cancel(){swinging=null;hosts=[];types=[];}
+    public override void UpdateDead(){Cancel();cursor=0;cursorSoul=null;}
+    public override void OnEnterWorld(){Cancel();cursor=0;cursorSoul=null;}
 }

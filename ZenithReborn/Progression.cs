@@ -98,7 +98,7 @@ public class SoulEncounters : ModSystem
     {
         if (Main.netMode == NetmodeID.MultiplayerClient || Hits.Count == 0) return;
         foreach (int bit in Hits.Keys.ToArray())
-            if (!Main.npc.Any(n => n.active && SoulProgress.BossBit(n.type) == bit)) Hits.Remove(bit);
+            if (!Main.npc.Any(n => n.active && SoulCurses.BossSeal(n.type) == bit)) Hits.Remove(bit);
     }
 }
 
@@ -106,30 +106,28 @@ public class SoulBossCredit : GlobalNPC
 {
     public static void Register(NPC npc,int owner,string id)
     {
-        int bit=SoulProgress.BossBit(npc.type);
-        if(bit==0 || string.IsNullOrEmpty(id) || owner<0 || owner>=Main.maxPlayers ||
-            !Main.player[owner].active || AttachmentStory.FindSoul(Main.player[owner],id)==null) return;
-        if(!SoulEncounters.Hits.TryGetValue(bit,out var participants)) SoulEncounters.Hits[bit]=participants=[];
+        int seal=SoulCurses.BossSeal(npc.type);
+        if(seal==0 || string.IsNullOrEmpty(id) || owner<0 || owner>=Main.maxPlayers ||
+            !Main.player[owner].active || AttachmentStory.FindSoul(Main.player[owner],id)==null)return;
+        if(!SoulEncounters.Hits.TryGetValue(seal,out var participants))SoulEncounters.Hits[seal]=participants=[];
         participants.Add((owner,id));
     }
     public static void ReceiveCredit(System.IO.BinaryReader reader,int owner)
     {
         int identity=reader.ReadInt32(),index=reader.ReadInt16(),netId=reader.ReadInt32();
-        if(Main.netMode!=NetmodeID.Server || owner<0 || owner>=Main.maxPlayers || index<0 || index>=Main.maxNPCs) return;
+        if(Main.netMode!=NetmodeID.Server || owner<0 || owner>=Main.maxPlayers || index<0 || index>=Main.maxNPCs)return;
         NPC npc=Main.npc[index];
-        Projectile projectile=Main.projectile.FirstOrDefault(p=>p.active && p.owner==owner && p.identity==identity);
-        if(projectile==null || !npc.active || npc.netID!=netId || npc.friendly || npc.dontTakeDamage) return;
-        Register(npc,owner,projectile.GetGlobalProjectile<SoulSource>().SoulId);
+        Projectile p=Main.projectile.FirstOrDefault(p=>p.active && p.owner==owner && p.identity==identity);
+        if(p==null || !npc.active || npc.netID!=netId || npc.friendly || npc.dontTakeDamage)return;
+        Register(npc,owner,p.GetGlobalProjectile<SoulSource>().SoulId);
     }
-    public override void ModifyHitByProjectile(NPC npc, Projectile projectile, ref NPC.HitModifiers modifiers)
+    public override void ModifyHitByProjectile(NPC npc,Projectile projectile,ref NPC.HitModifiers modifiers)
     {
-        // Register before StrikeNPC/OnKill so a killing first hit also earns credit.
-        int bit = SoulProgress.BossBit(npc.type);
-        string id = projectile.GetGlobalProjectile<SoulSource>().SoulId;
-        if (bit == 0 || string.IsNullOrEmpty(id)) return;
+        if(SoulCurses.BossSeal(npc.type)==0)return;
+        string id=projectile.GetGlobalProjectile<SoulSource>().SoulId;if(string.IsNullOrEmpty(id))return;
         if(Main.netMode==NetmodeID.MultiplayerClient)
         {
-            if(projectile.owner!=Main.myPlayer) return;
+            if(projectile.owner!=Main.myPlayer)return;
             var packet=ModContent.GetInstance<ZenithReborn>().GetPacket();
             packet.Write((byte)8);packet.Write(projectile.identity);packet.Write((short)npc.whoAmI);packet.Write(npc.netID);packet.Send();
         }
@@ -137,31 +135,24 @@ public class SoulBossCredit : GlobalNPC
     }
     public override void OnKill(NPC npc)
     {
-        if (Main.netMode == NetmodeID.MultiplayerClient) return;
-        int bit = SoulProgress.BossBit(npc.type);
-        if (bit == 0) return;
-        if (bit == SoulProgress.Destroyer && npc.type != NPCID.TheDestroyer) return;
-        if (bit == SoulProgress.Evil && npc.type != NPCID.BrainofCthulhu && Main.npc.Any(n =>
-            n.active && n.whoAmI != npc.whoAmI && SoulProgress.BossBit(n.type) == bit)) return;
-        if (!SoulEncounters.Hits.Remove(bit, out var participants)) return;
-        foreach (var entry in participants)
+        if(Main.netMode==NetmodeID.MultiplayerClient)return;
+        int seal=SoulCurses.BossSeal(npc.type),bit=SoulProgress.BossBit(npc.type);if(seal==0)return;
+        if(seal==SoulCurses.Destroyer && npc.type!=NPCID.TheDestroyer)return;
+        if(seal==SoulCurses.Eater && Main.npc.Any(n=>n.active && n.whoAmI!=npc.whoAmI && SoulCurses.BossSeal(n.type)==seal))return;
+        if(!SoulEncounters.Hits.Remove(seal,out var participants))return;
+        foreach(var entry in participants)
         {
-            if (entry.Player < 0 || entry.Player >= Main.maxPlayers) continue;
-            Player player = Main.player[entry.Player];
-            if (!player.active) continue;
-            for (int slot = 0; slot < 58; slot++)
+            if(entry.Player<0 || entry.Player>=Main.maxPlayers)continue;
+            Player player=Main.player[entry.Player];if(!player.active)continue;
+            for(int slot=0;slot<58;slot++)
             {
-                if (player.inventory[slot].ModItem is not SoulItem soul || soul.SoulId != entry.Soul) continue;
-                soul.Kills |= bit;
-                int core = bit switch { SoulProgress.Eye => 0, SoulProgress.Flesh => 1,
-                    SoulProgress.Flower => 3, SoulProgress.Temple => 4, SoulProgress.Moon => 5, _ => -1 };
-                if (SoulProgress.Mechs(soul.Kills) == 3 &&
-                    (bit & (SoulProgress.Destroyer | SoulProgress.Retinazer | SoulProgress.Spazmatism | SoulProgress.Prime)) != 0) core = 2;
-                if (core >= 0 && (soul.Cores & (1 << core)) == 0)
-                    player.QuickSpawnItem(npc.GetSource_Loot(), SoulCore.TypeFor(core));
-                if (Main.netMode == NetmodeID.Server)
-                    NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, slot);
-                else Main.NewText("剑魂铭刻了胜利。" + SoulProgress.Next(soul), 160, 220, 255);
+                if(player.inventory[slot].ModItem is not SoulItem soul || soul.SoulId!=entry.Soul)continue;
+                soul.Kills|=bit;soul.Seals|=seal;
+                int core=bit switch{SoulProgress.Eye=>0,SoulProgress.Flesh=>1,SoulProgress.Flower=>3,SoulProgress.Temple=>4,SoulProgress.Moon=>5,_=>-1};
+                if(SoulProgress.Mechs(soul.Kills)==3 && (bit&(SoulProgress.Destroyer|SoulProgress.Retinazer|SoulProgress.Spazmatism|SoulProgress.Prime))!=0)core=2;
+                if(core>=0 && (soul.Cores&(1<<core))==0)player.QuickSpawnItem(npc.GetSource_Loot(),SoulCore.TypeFor(core));
+                if(Main.netMode==NetmodeID.Server)NetMessage.SendData(MessageID.SyncEquipment,-1,-1,null,player.whoAmI,slot);
+                else Main.NewText("剑魂铭刻了胜利。"+SoulProgress.Next(soul),160,220,255);
                 break;
             }
         }

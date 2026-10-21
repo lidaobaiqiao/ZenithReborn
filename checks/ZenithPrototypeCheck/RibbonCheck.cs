@@ -42,6 +42,17 @@ internal static class RibbonCheck
         check(SoulRibbonMesh.Build(centers,rotations,length,32,Color.White,1,Vector2.Zero,shifted)==0,
             "Invalid rotation cannot reach the GPU");
         rotations[3]=-MathHelper.PiOver4-3*.045f;
+        var flight=new SwordFlightTrail();
+        for(int i=0;i<30;i++) flight.Record(new Vector2(100+i*24,200),.5f);
+        check(flight.Count==SwordFlightTrail.Capacity && flight.Point(0)==new Vector2(796,200),"Flying trail uses bounded newest-first samples");
+        check(SwordFlightTrail.Strength(0,8)==1 && SwordFlightTrail.Strength(7,8)==0 &&
+            SwordFlightTrail.Strength(4,8)<SwordFlightTrail.Strength(2,8),"Flying streak tapers smoothly to a transparent tail");
+        flight.Record(new Vector2(2000,2000),1);
+        check(flight.Count==1,"Flying sword teleport cannot connect a screen-wide streak");
+        flight.Record(new Vector2(float.NaN,0),0);
+        check(flight.Count==0,"Invalid flying trail sample is discarded");
+        check(SwordFlightTrail.Formation(0)==0 && SwordFlightTrail.Formation(20)==1 &&
+            SwordFlightTrail.Formation(10)>SwordFlightTrail.Formation(5),"Formation scale and opacity ease in over original twenty-frame duration");
 
         string report=Environment.GetEnvironmentVariable("ZENITH_CHECK_REPORT");
         string preview=Path.Combine(Path.GetDirectoryName(report),"soul-ribbon-preview-mesh.json");

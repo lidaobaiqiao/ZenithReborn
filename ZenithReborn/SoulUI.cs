@@ -10,15 +10,20 @@ using Terraria.UI;
 
 namespace ZenithReborn;
 
-public class SoulUI : ModSystem
+public partial class SoulUI : ModSystem
 {
     private static SoulItem editing;
     private static int page, selected, scroll, contentHeight;
-    private static int TabCount => editing?.HasLegacyExpansion == true ? 4 : 3;
+    public const int CatalogPage = 3, RecoveryPage = 4;
+    private static int catalogFilter;
+    private static Vector2? windowPosition;
+    private static Vector2 dragOffset;
+    public static bool WindowDragging { get; private set; }
+    private static int TabCount => editing?.HasLegacyExpansion == true ? 5 : 4;
     private static string feedback = "";
     private static ulong feedbackUntil;
     private static RasterizerState clipState;
-    private static readonly Color Ink = new(218, 227, 239), Muted = new(148, 166, 190), Accent = new(121, 204, 234);
+    private static readonly Color Ink = new(230, 232, 235), Muted = new(158, 165, 176), Accent = new(148, 202, 208);
     public static SoulItem EditingSoul => editing;
     public static string HoveredSlotRequirement { get; private set; } = "";
     public static bool IsEditing(SoulItem soul) => ReferenceEquals(editing, soul);
@@ -30,16 +35,19 @@ public class SoulUI : ModSystem
     public static void SelectPage(int value)
     {
         page = Math.Clamp(value, 0, TabCount-1); scroll = 0; contentHeight = 0;
-        if (page == 3 && selected < 17) selected = 17;
-        if (page != 3 && selected >= 17) selected = 0;
+        pageStarted=UiTime;
+        if (page == RecoveryPage && selected is not (>=17 and <25)) selected = 17;
+        if (page != RecoveryPage && selected is >=17 and <25) selected = 0;
         HoveredSlotRequirement = "";
     }
     public static void Toggle(SoulItem soul)
     {
         HoveredSlotRequirement = "";
+        WindowDragging=false;
         if (ReferenceEquals(editing, soul)) { Sync(editing); editing = null; return; }
         if (editing != null) Sync(editing);
-        editing = soul; selected = 0; feedback = ""; SelectPage(0); Main.playerInventory = true;
+        editing = soul; selected = 0; catalogFilter = 0; feedback = ""; SelectPage(0);
+        openedAt=UiTime;libraryScroll=0; Array.Fill(lastSlotType,-1); Array.Fill(slotLit,0f); Main.playerInventory = true;
         SoundEngine.PlaySound(SoundID.MenuOpen);
     }
     public static void Sync(SoulItem soul)
@@ -52,18 +60,20 @@ public class SoulUI : ModSystem
     }
     public override void Unload()
     {
-        editing = null; HoveredSlotRequirement = ""; SoulInput.Reset();
+        editing = null; HoveredSlotRequirement = ""; SoulInput.Reset(); ResetWindowPosition();
         clipState?.Dispose(); clipState = null;
+        glowTexture?.Dispose(); glowTexture=null; shardTexture?.Dispose(); shardTexture=null;
+        veilTexture?.Dispose(); veilTexture=null;
     }
     public override void OnWorldUnload()
     {
-        editing = null; HoveredSlotRequirement = ""; SoulInput.Reset(); SelectPage(0); HeroPrefixCompat.Clear();
+        editing = null; HoveredSlotRequirement = ""; SoulInput.Reset(); ResetWindowPosition(); SelectPage(0); HeroPrefixCompat.Clear();
     }
     public override void PostUpdateInput()
     {
         HoveredSlotRequirement = "";
         if (Main.gameMenu || Main.dedServ) return;
-        if (ZenithReborn.OpenSoul.JustPressed && !Main.drawingPlayerChat)
+        if (ZenithReborn.OpenSoul?.JustPressed == true && !Main.drawingPlayerChat)
         {
             if (editing != null) Toggle(editing);
             else
@@ -75,13 +85,24 @@ public class SoulUI : ModSystem
         }
         if (editing != null && (!Main.playerInventory || Main.LocalPlayer.dead ||
             !Main.LocalPlayer.inventory.Any(i => ReferenceEquals(i.ModItem, editing))))
-        { Sync(editing); editing = null; }
-        SoulInput.Capture(editing != null && !Main.hideUI && !Main.mapFullscreen &&
-            ContainsScreenPoint(Main.mouseX, Main.mouseY, Main.screenWidth, Main.screenHeight, Main.UIScale));
+        { Sync(editing); editing = null; WindowDragging=false; }
+        bool visible=editing != null && !Main.hideUI && !Main.mapFullscreen;
+        bool inside=visible && ContainsScreenPoint(Main.mouseX,Main.mouseY,Main.screenWidth,Main.screenHeight,Main.UIScale);
+        bool dragCapture=false;
+        if(visible) dragCapture=HandleWindowDrag(Main.mouseX,Main.mouseY,Main.screenWidth,Main.screenHeight,
+            Main.UIScale,Main.mouseLeft,Main.mouseLeftRelease);
+        else WindowDragging=false;
+        SoulInput.Capture(inside || dragCapture || visible &&
+            ContainsScreenPoint(Main.mouseX,Main.mouseY,Main.screenWidth,Main.screenHeight,Main.UIScale));
     }
     public override void PostDrawInterface(SpriteBatch spriteBatch) => SoulInput.RestoreAfterInterface();
     public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
     {
+        // The domain owns a separate scene. Do not let a hidden vanilla health
+        // meter/inventory enqueue hover text or achievements over the scene.
+        if(DomainMode && editing!=null && !Main.hideUI && !Main.mapFullscreen)
+            layers.RemoveAll(l=>l.Name.StartsWith("Vanilla:") && l.Name is not
+                ("Vanilla: Mouse Text" or "Vanilla: Cursor" or "Vanilla: Mouse Item / NPC Head"));
         // Vanilla draws inventory slots before our panel. Keep input hidden from
         // every background layer, not just the mouse-text layer at the end.
         layers.Insert(0, new LegacyGameInterfaceLayer("ZenithReborn: Input Shield",
@@ -97,14 +118,14 @@ public class SoulUI : ModSystem
             () =>
             {
                 SoulInput.BeginSoulLayer();
-                try { if (editing != null) Draw(); }
+                try { if (editing != null && !Main.hideUI && !Main.mapFullscreen) Draw(); }
                 finally { SoulInput.EndSoulLayer(); }
                 return true;
             }, InterfaceScaleType.UI));
     }
     private static void Box(Rectangle r, Color color) => Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, r, color);
     private static void Text(string text, Vector2 at, Color color, float scale = .78f) =>
-        Utils.DrawBorderString(Main.spriteBatch, text, at, color, scale);
+        Utils.DrawBorderString(Main.spriteBatch, text, at, color * (.35f+.65f*PageFade), scale);
     private static void Border(Rectangle r, Color color)
     {
         Box(new(r.X,r.Y,r.Width,1),color); Box(new(r.X,r.Bottom-1,r.Width,1),color);
@@ -115,21 +136,57 @@ public class SoulUI : ModSystem
     public static Rectangle PanelBounds() => PanelBounds(Main.screenWidth, Main.screenHeight);
     private static Rectangle PanelBounds(int width, int height)
     {
+        if(DomainMode)return new(0,0,width,height);
         int w = Math.Min(760, Math.Max(1,width-24));
         int h = Math.Min(650, Math.Max(1,height-24));
-        return new((width-w)/2, Math.Min(110, (height-h)/2), w, h);
+        Vector2 position=windowPosition??new Vector2((width-w)/2,Math.Min(110,(height-h)/2));
+        return new((int)Math.Clamp(position.X,0,Math.Max(0,width-w)),
+            (int)Math.Clamp(position.Y,0,Math.Max(0,height-h)),w,h);
+    }
+    public static void ResetWindowPosition() { windowPosition=null; WindowDragging=false; }
+    private static Rectangle HeaderDragBounds(Rectangle panel) => DomainMode?Rectangle.Empty:new(panel.X+8,panel.Y+5,Math.Max(1,panel.Width-64),52);
+    public static Rectangle HeaderDragBounds() => HeaderDragBounds(PanelBounds());
+    // Called in PostUpdateInput, before masking world/UI buttons. Drag ownership
+    // survives leaving the old panel; drawing never handles physical movement.
+    public static bool HandleWindowDrag(int x,int y,int width,int height,float scale,bool down,bool pressEdge)
+    {
+        if(editing==null || DomainMode) { WindowDragging=false; return false; }
+        int uiWidth=(int)(width/scale),uiHeight=(int)(height/scale);
+        Vector2 mouse=new(x/scale,y/scale);
+        Rectangle panel=PanelBounds(uiWidth,uiHeight);
+        bool owned=WindowDragging;
+        if(!down) { WindowDragging=false; return owned; }
+        if(!WindowDragging && pressEdge && Main.mouseItem.IsAir && HeaderDragBounds(panel).Contains(mouse.ToPoint()))
+        { WindowDragging=true; dragOffset=mouse-panel.Location.ToVector2(); }
+        if(WindowDragging)
+            windowPosition=new Vector2(Math.Clamp(mouse.X-dragOffset.X,0,Math.Max(0,uiWidth-panel.Width)),
+                Math.Clamp(mouse.Y-dragOffset.Y,0,Math.Max(0,uiHeight-panel.Height)));
+        return owned || WindowDragging;
     }
     // PostUpdateInput is still in physical screen units; drawing uses UI units.
     public static bool ContainsScreenPoint(int x,int y,int width,int height,float scale) =>
         PanelBounds((int)(width/scale),(int)(height/scale)).Contains((int)(x/scale),(int)(y/scale));
     public static Rectangle ContentBounds()
     {
-        var p = PanelBounds(); return new(p.X+14,p.Y+106,p.Width-36,Math.Max(1,p.Height-170));
+        if(DomainMode)return DomainWorkBounds();
+        var p=PanelBounds(); int top=page==0?72:112;
+        return new(p.X+14,p.Y+top,p.Width-36,Math.Max(1,p.Height-top-48));
     }
     public static Rectangle TabBounds(int tab)
     {
-        var p = PanelBounds(); int w = (p.Width-28)/TabCount;
-        return new(p.X+14+tab*w,p.Y+66,w-4,30);
+        if(DomainMode)
+        {
+            var work=DomainWorkBounds();int domainStep=work.Width/TabCount;
+            return new(work.X+tab*domainStep,62,domainStep-5,36);
+        }
+        if(page==0)
+        {
+            float[] angles=[-90,-24,142,180,-164];
+            Vector2 c=OrbitPoint(angles[tab],RingRadius+62);
+            return new((int)c.X-24,(int)c.Y-24,48,48);
+        }
+        var p=PanelBounds(); int step=(p.Width-28)/TabCount;
+        return new(p.X+14+tab*step,p.Y+64,step-4,42);
     }
     public static Rectangle CloseBounds()
     {
@@ -137,13 +194,45 @@ public class SoulUI : ModSystem
     }
     private static int GridWidth => Math.Min(330,ContentBounds().Width);
     private static int SlotStep => (GridWidth-8)/5;
+    // All animated decoration is anchored to these fixed hit targets. Opening,
+    // hover and insertion effects never move a clickable slot away from its item.
     public static Rectangle SlotBounds(int index)
     {
-        var b=ContentBounds(); int step=SlotStep, size=Math.Min(54,step-6);
-        int row=index<10?index/5:index<15?2:3;
-        int col=index<10?index%5:index<15?index-10:index-15;
-        int top=row<2?38+row*(size+10):row==2?38+2*(size+10)+46:38+3*(size+10)+92;
-        return new(b.X+4+col*step,b.Y+top-scroll,size,size);
+        if(index==SoulItem.LegendarySlotId)
+        {
+            Vector2 legendaryCenter=OrbitPoint(-45,RingRadius+86);
+            return new((int)legendaryCenter.X-29,(int)legendaryCenter.Y-29,58,58);
+        }
+        int supportOrdinal=SoulItem.SupportOrdinal(index);
+        if(supportOrdinal>=0)
+        {
+            if(supportOrdinal>=11)
+            {
+                var b=DomainMode?RingViewport:ContentBounds();int extra=supportOrdinal-11;
+                int columns=Math.Max(1,Math.Min(5,(b.Width-12)/58));
+                return new(b.Right-54-extra%columns*58,ContentBounds().Y+BaseRingCanvasHeight+14+extra/columns*58-scroll,44,44);
+            }
+            // Include saved paused slots in spacing. Never collapse their hit
+            // targets when capacity shrinks. Large sets wrap around the lower arc.
+            int count=editing?.VisibleSupportCount??5;
+            float start=count<=6?8:-6;
+            float angle=start+supportOrdinal*20;
+            Vector2 supportCenter=OrbitPoint(angle,RingRadius+62);
+            int supportSize=RingViewport.Width<420?35:RingRadius<116?38:44;
+            return new((int)supportCenter.X-supportSize/2,(int)supportCenter.Y-supportSize/2,supportSize,supportSize);
+        }
+        if(index>=25)
+        {
+            var body=DomainMode?RingViewport:ContentBounds();int ordinal=index-25;
+            int columns=Math.Max(1,Math.Min(5,(body.Width-12)/58)),col=ordinal%columns,row=ordinal/columns;
+            float bend=MathF.Sin((col+.5f)/columns*MathHelper.Pi)*9;
+            return new(body.Right-54-col*58,ContentBounds().Y+BaseRingCanvasHeight+14+row*58+(int)bend-scroll,44,44);
+        }
+        Vector2 c=index<10?OrbitPoint(-90+index*36,RingRadius):
+            index<15?OrbitPoint(8+(index-10)*20,RingRadius+62):
+            OrbitPoint(-142+(index-15)*22,RingRadius+62);
+        int size=RingViewport.Width<420?index<10?40:35:index<10?48:44;
+        return new((int)c.X-size/2,(int)c.Y-size/2,size,size);
     }
     public static Rectangle ExtendedSlotBounds(int local)
     {
@@ -155,15 +244,16 @@ public class SoulUI : ModSystem
     public static bool TryClickHost(SoulItem soul, out string error)
     {
         error="";
-        if((page!=0 && page!=3) || !Main.mouseLeft || !Main.mouseLeftRelease) return false;
+        if((page!=0 && page!=RecoveryPage) || !Main.mouseLeft || !Main.mouseLeftRelease) return false;
         Point mouse=new(Main.mouseX,Main.mouseY);
         if(!ContentBounds().Contains(mouse)) return false;
         if(page==0)
         {
-            for(int i=0;i<17;i++)
+            foreach(int i in soul.VisibleSlotIds)
             {
                 if(!SlotBounds(i).Contains(mouse)) continue;
                 selected=i; Main.mouseLeftRelease=false;
+                if(DomainMode && Main.mouseItem.IsAir)return false;
                 return soul.TrySwapHost(i,ref Main.mouseItem,out error);
             }
         }
@@ -173,6 +263,7 @@ public class SoulUI : ModSystem
             {
                 if(!ExtendedSlotBounds(i).Contains(mouse)) continue;
                 selected=17+i; Main.mouseLeftRelease=false;
+                if(DomainMode && Main.mouseItem.IsAir)return false;
                 return soul.TrySwapHost(selected,ref Main.mouseItem,out error);
             }
         }
@@ -184,7 +275,7 @@ public class SoulUI : ModSystem
         Point mouse=new(Main.mouseX,Main.mouseY);
         if(CloseBounds().Contains(mouse))
         { Main.mouseLeftRelease=false; Toggle(editing); return true; }
-        for(int i=0;i<TabCount;i++) if(TabBounds(i).Contains(mouse))
+        for(int i=0;i<TabCount;i++) if(TabBounds(i).Contains(mouse) && (DomainMode || page!=0 || ContentBounds().Contains(mouse)))
         { Main.mouseLeftRelease=false; SelectPage(i); return true; }
         return false;
     }
@@ -192,8 +283,8 @@ public class SoulUI : ModSystem
     {
         Point mouse=new(Main.mouseX,Main.mouseY);
         bool hover=r.Contains(mouse) && ContentBounds().Contains(mouse);
-        Box(r, enabled ? hover?new(54,100,128):new(37,66,90) : new(36,42,55));
-        Border(r,enabled?new(74,126,153):new(57,65,80));
+        RoundedBox(r, enabled ? hover?new Color(62,69,72)*.9f:new Color(36,41,47)*.9f : new Color(26,28,33)*.8f,8);
+        Line(new(r.X+10,r.Bottom-1),new(r.Right-10,r.Bottom-1),enabled?Accent*(hover?.55f:.22f):Color.White*.07f);
         // Buttons remain one line; fit measured text instead of overflowing.
         float scale=Math.Min(.76f,(r.Width-16)/Math.Max(1,FontAssets.MouseText.Value.MeasureString(label).X));
         Text(label,new(r.X+8,r.Y+(r.Height-20*scale)/2-2),enabled?Ink:Muted,scale);
@@ -215,14 +306,15 @@ public class SoulUI : ModSystem
     }
     private static int Section(string title,string body,int x,int y,int width,Color color)
     {
-        Box(new(x,y+3,3,16),color); Text(title,new(x+10,y),color,.82f);
+        Box(new(x,y+3,3,16),color); Text(Fit(title,width-14,.82f),new(x+10,y),color,.82f);
         return Paragraph(body,x+10,y+28,width-14,Ink)+18;
     }
-    private static bool Available(SoulItem soul,int i) => i<10 ? i<Math.Max(1,soul.Capacity) :
+    private static bool Available(SoulItem soul,int i) => i==SoulItem.LegendarySlotId ? soul.LegendaryOn :
+        i<10 ? i<Math.Max(1,soul.Capacity) :
         i<15 ? i-10<soul.SupportCapacity : i<17 ? i-15<soul.BonusCapacity :
-        false;
-    private static string SlotName(int i) => i<10?$"普通剑位 {i+1:00}":i<15?$"支援剑位 S{i-9:00}":
-        i<17?$"森林剑位 F{i-14:00}":i<19?$"旧普通扩展 {i-16:00} · 仅可取回":$"旧支援扩展 {i-18:00} · 仅可取回";
+        i>=25 && SoulItem.SupportOrdinal(i)<soul.SupportCapacity;
+    private static string SlotName(int i) => i==SoulItem.LegendarySlotId?"传奇剑位":i<10?$"普通剑位 {i+1:00}":i<15?$"支援剑位 S{i-9:00}":
+        i<17?$"奖励剑位 R{i-14:00}":i<19?$"旧普通扩展 {i-16:00} · 仅可取回":i<25?$"旧支援扩展 {i-18:00} · 仅可取回":$"支援剑位 S{SoulItem.SupportOrdinal(i)+1:00}";
     private static void Draw()
     {
         var soul=editing; if(page>=TabCount) SelectPage(0);
@@ -234,23 +326,21 @@ public class SoulUI : ModSystem
             Main.LocalPlayer.mouseInterface=true; PlayerInput.LockVanillaMouseScroll("ZenithReborn: Soul");
             Main.HoverItem=new Item(); Main.hoverItemName="";
         }
-        Box(new(panel.X+4,panel.Y+5,panel.Width,panel.Height),Color.Black*.35f);
-        Box(panel,new(15,23,38,248)); Border(panel,new(66,92,118));
-        Box(new(panel.X+1,panel.Y+1,panel.Width-2,3),Accent*.7f);
-        Text(soul.Awakened?"天顶复生 · 众剑归位":"天顶残魂",new(panel.X+18,panel.Y+14),Ink,panel.Width<430?.86f:1f);
-        Text(soul.Attached?$"主攻 {soul.Active.Count()}/{soul.Capacity+soul.BonusCapacity}   支援 {soul.Supports.Count()}/{soul.SupportCapacity}   效能 {soul.Potency:P0}":
-            "尚未附着 · 第一剑位仅供预览",new(panel.X+18,panel.Y+43),Accent,panel.Width<430?.61f:.73f);
-        var close=CloseBounds(); Box(close,close.Contains(mouse)?new(108,57,68):new(44,50,66));
-        Text("×",new(close.X+10,close.Y+4),Ink,.88f);
-        string[] tabs=["武器寄宿","羁绊特性","成长与记忆","旧物取回"];
-        for(int i=0;i<TabCount;i++)
+        if(DomainMode){DrawDomainBackdrop(panel);DrawDomainHeader(mouse);DrawLibrary(soul);}
+        else
         {
-            var tab=TabBounds(i); bool active=page==i;
-            Box(tab,active?new(38,69,92):tab.Contains(mouse)?new(37,47,65):new(27,36,52));
-            if(active) Box(new(tab.X,tab.Bottom-2,tab.Width,2),Accent);
-            Text(tabs[i],new(tab.X+10,tab.Y+6),active?Ink:Muted,panel.Width<430?.66f:.78f);
+            DrawChrome(panel,mouse);
+            Text(soul.Awakened?"天顶复生 · 众剑归位":"天顶残魂",new(panel.X+18,panel.Y+14),Ink,panel.Width<430?.86f:1f);
+            if(panel.Width>=430) Text("拖动标题栏",new(panel.Right-145,panel.Y+18),WindowDragging?Accent:Muted,.6f);
+            Text(soul.Attached?$"主攻 {soul.Active.Count()}/{soul.Capacity+soul.BonusCapacity+(soul.LegendaryOn?1:0)}   支援 {soul.Supports.Count()}/{soul.SupportCapacity}   效能 {soul.Potency:P0}":
+                "尚未附着 · 第一剑位仅供预览",new(panel.X+18,panel.Y+43),Accent,panel.Width<430?.61f:.73f);
         }
+        var close=CloseBounds();
+        if(close.Contains(mouse)) RoundedBox(close,new Color(112,62,65)*.62f,8);
+        Text("×",new(close.X+10,close.Y+4),Ink,.88f);
         HandleNavigation(); if(editing==null) return;
+        body=ContentBounds();
+        if(page!=0 && !DomainMode) DrawNavigation(false);
         if(body.Contains(mouse) && PlayerInput.ScrollWheelDelta!=0)
             scroll=Math.Clamp(scroll-PlayerInput.ScrollWheelDelta/120*48,0,Math.Max(0,contentHeight-body.Height));
         // Clip only the scrolling body. Headers/footer and vanilla item tooltips
@@ -265,8 +355,9 @@ public class SoulUI : ModSystem
         Main.spriteBatch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,Main.DefaultSamplerState,DepthStencilState.None,clipState,null,Main.UIScaleMatrix);
         try
         {
+            DrawPageSurface(body);
             int top=body.Y-scroll;
-            int bottom=page==0?DrawHosts(soul,body,top):page==1?DrawTraits(soul,body,top):page==2?DrawProgress(soul,body,top):DrawExtended(soul,body,top);
+            int bottom=page==0?DrawHosts(soul,body,top):page==1?DrawTraits(soul,body,top):page==2?DrawProgress(soul,body,top):page==CatalogPage?DrawCatalog(soul,body,top):DrawExtended(soul,body,top);
             contentHeight=bottom-top;
         }
         finally
@@ -277,79 +368,42 @@ public class SoulUI : ModSystem
         scroll=Math.Clamp(scroll,0,Math.Max(0,contentHeight-body.Height));
         if(contentHeight>body.Height)
         {
-            var track=new Rectangle(panel.Right-14,body.Y,4,body.Height); Box(track,new(32,46,64));
-            int h=Math.Max(20,body.Height*body.Height/contentHeight);
-            Box(new(track.X,track.Y+(body.Height-h)*scroll/Math.Max(1,contentHeight-body.Height),4,h),Accent*.7f);
+            var track=new Rectangle(panel.Right-12,body.Y+8,2,Math.Max(1,body.Height-16)); Box(track,Color.White*.055f);
+            int h=Math.Max(20,track.Height*body.Height/contentHeight);
+            Box(new(track.X,track.Y+(track.Height-h)*scroll/Math.Max(1,contentHeight-body.Height),2,h),Accent*.5f);
         }
-        int fy=panel.Bottom-57;
-        Box(new(panel.X+14,fy-3,panel.Width-28,1),new(48,65,85));
-        string message=Main.GameUpdateCount<feedbackUntil?feedback:"左键交换武器 · 悬停查看详情 · P 关闭";
+        int fy=panel.Bottom-47;
+
+        string message=Main.GameUpdateCount<feedbackUntil?feedback:DomainMode && HoveredSlotRequirement.Length>0?HoveredSlotRequirement.Split('\n')[0]:
+            DomainMode?"选择剑位 → 点击左侧剑库寄宿 · P / Esc 关闭":"左键交换 · 拖动标题栏移动窗口 · P 关闭";
         Paragraph(message,panel.X+16,fy+4,panel.Width-32,Main.GameUpdateCount<feedbackUntil?Color.LightSalmon:Muted,panel.Width<430?.60f:.68f);
         if(contentHeight>body.Height) Text("滚轮浏览",new(panel.Right-84,panel.Bottom-20),Muted,.60f);
     }
     private static int DrawHosts(SoulItem soul,Rectangle b,int y)
     {
-        int size=SlotBounds(0).Width;
-        Text("主攻剑位",new(b.X+4,y+3),Accent,.84f);
-        Text("参与出剑 · 各自计算伤害",new(b.X+4,y+24),Muted,.63f);
-        int supportY=y+38+2*(size+10)+18, forestY=y+38+3*(size+10)+64;
-        Text("支援剑位 · 只提供特性与羁绊",new(b.X+4,supportY),new(185,171,234),.70f);
-        Text("森林剑位 · 完整属性与出剑",new(b.X+4,forestY),Color.LightGreen,.70f);
-        var stored=soul.SlotItems(); Point mouse=new(Main.mouseX,Main.mouseY);
-        for(int i=0;i<17;i++)
-        {
-            Rectangle r=SlotBounds(i); Item item=stored[i]; bool unlocked=Available(soul,i);
-            Color tint=unlocked?(i<10?Accent:i<15?new(185,171,234):Color.LightGreen):new(75,85,102);
-            bool hovered=b.Contains(mouse) && r.Contains(mouse);
-            Box(r,hovered?new(53,70,95):new(29,41,60));
-            Border(r,selected==i?Color.Gold:hovered?tint:tint*.55f);
-            Text(i<10?$"{i+1}":i<15?$"S{i-9}":$"F{i-14}",new(r.X+3,r.Y+1),tint,.48f);
-            if(!item.IsAir)
-            {
-                Main.instance.LoadItem(item.type);
-                var texture=TextureAssets.Item[item.type].Value;
-                var frame=Main.itemAnimations[item.type]?.GetFrame(texture)??texture.Frame();
-                float scale=Math.Min(1,(size-14f)/Math.Max(frame.Width,frame.Height));
-                Main.spriteBatch.Draw(texture,r.Center.ToVector2()+new Vector2(0,3),frame,unlocked?(item.color==default?Color.White:item.color):Color.Gray,
-                    0,frame.Size()*.5f,scale,SpriteEffects.None,0);
-                Box(new(r.X+4,r.Bottom-4,r.Width-8,2),unlocked?SoulVisuals.Tint(item.type):Color.Gray);
-                if(SoulProgress.ZenithWeapons.Contains(item.type)) Text("*",new(r.Right-11,r.Y),Color.Gold,.65f);
-            }
-            else Text(unlocked?"+":"锁",new(r.Center.X-8,r.Center.Y-8),tint,.72f);
-            if(!hovered) continue;
-            selected=i; HoveredSlotRequirement=SoulProgress.SlotHint(soul,i);
-            if(!item.IsAir) { Main.HoverItem=item.Clone();Main.hoverItemName=item.Name; }
-            else Main.hoverItemName=HoveredSlotRequirement;
-        }
+        DrawSoulRing(soul,DomainMode?RingViewport:b);
         if(TryClickHost(soul,out string error))
         {
             Sync(soul); SoundEngine.PlaySound(SoundID.Grab);
             feedback="已交换 · "+SlotName(selected); feedbackUntil=Main.GameUpdateCount+180;
         }
         else if(error.Length>0) { feedback=error;feedbackUntil=Main.GameUpdateCount+240; }
-        int gridBottom=SlotBounds(16).Bottom+20;
-        bool side=b.Width>=650; int dx=side?b.X+GridWidth+20:b.X+4,dy=side?y+4:gridBottom;
-        int width=side?b.Width-GridWidth-24:b.Width-8;
+        int bottom=y+RingCanvasHeight+12;
+        int ringBottom=bottom;
+        if(SideInspector){b=new(b.Right-284,b.Y,280,b.Height);bottom=y+14;}
         var chosen=soul.ItemAt(selected);
-        string state=Available(soul,selected)?!soul.Attached?"预览 · 附着后启用":selected<10||selected>=15?"主攻 · 独立出剑":"支援 · 不出剑":"未解锁 / 已暂停 · 可空手取回";
-        dy=Section(SlotName(selected),state,dx,dy,width,Color.Gold);
-        if(!chosen.IsAir)
-        {
-            dy=Section(chosen.Name,$"{WeaponFamilies.Name(chosen.type)}\n面板伤害 {chosen.damage} · 使用间隔 {chosen.useAnimation}帧\n"+
-                WoodTypes.Description(chosen.type),dx,dy,width,Ink);
-            if(WoodTypes.IsWood(chosen.type)) dy=Paragraph($"当前环境倍率 S = {soul.Wood.Strength:0.##}；P 为实际主剑影伤害。",dx+10,dy,width-14,Muted,.68f)+12;
-        }
-        else dy=Section("等待寄宿","拿起一把近战武器，左键点击剑位放入。再次空手点击即可取回。金色星号 * 表示天顶材料剑。",dx,dy,width,Muted);
-        dy=Section("解锁条件",SoulProgress.SlotHint(soul,selected),dx,dy,width,Accent);
-        int bottom=Math.Max(gridBottom,dy)+8;
-        bottom=Section("下一步",SoulProgress.Next(soul),b.X+4,bottom,b.Width-8,Accent);
-        if(Button(new(b.X+14,bottom,b.Width-28,34),"查看成长路线 / 史莱姆王记忆 →")) SelectPage(2);
-        return bottom+48;
+        string state=Available(soul,selected)?!soul.Attached?"预览 · 附着后启用":SoulItem.SupportOrdinal(selected)>=0?"支援 · 不出剑":"主攻 · 独立出剑":"未解锁 / 已暂停 · 可空手取回";
+        bottom=Section(SlotName(selected)+(chosen.IsAir?"":" · "+chosen.Name),state,b.X+8,bottom,b.Width-16,Color.Gold);
+        bottom=Section("解锁条件",SoulProgress.SlotHint(soul,selected),b.X+8,bottom,b.Width-16,Accent);
+        bottom=Section("下一步",SoulProgress.Next(soul),b.X+8,bottom,b.Width-16,Accent);
+        if(DomainMode)bottom=DrawDomainReturn(b,bottom);
+        if(Button(new(b.X+18,bottom,b.Width-36,34),"查看成长路线 / 史莱姆王记忆 →")) SelectPage(2);
+        return Math.Max(bottom+48,SideInspector?ringBottom:0);
     }
     private static int DrawExtended(SoulItem soul,Rectangle b,int y)
     {
         Text("旧扩展物品 · 仅可空手取回",new(b.X+4,y+3),Color.Gold,.84f);
-        Text("当前只有17个有效寄宿槽；旧版扩展物品不生效，也不能再放入",new(b.X+4,y+24),Muted,.63f);
+        Text("支援按当前激活奖励扩展；此页旧物仍不生效，只可取回",new(b.X+4,y+24),Muted,.63f);
         var stored=soul.SlotItems(); Point mouse=new(Main.mouseX,Main.mouseY);
         int size=SlotBounds(0).Width;
         for(int local=0;local<8;local++)
@@ -372,7 +426,8 @@ public class SoulUI : ModSystem
             }
             else Text(unlocked?"+":"锁",new(r.Center.X-8,r.Center.Y-8),tint,.72f);
             if(!hovered) continue;
-            selected=i; HoveredSlotRequirement=SoulProgress.SlotHint(soul,i);
+            if(!DomainMode)selected=i;
+            HoveredSlotRequirement=SoulProgress.SlotHint(soul,i);
             if(!item.IsAir){Main.HoverItem=item.Clone();Main.hoverItemName=item.Name;}
             else Main.hoverItemName=HoveredSlotRequirement;
         }
@@ -382,29 +437,55 @@ public class SoulUI : ModSystem
         int dx=b.X+4,dy=y+2*(size+10)+40;
         dy=Section(SlotName(selected),Available(soul,selected)?"可用":"未解锁 / 暂停 · 可空手取回",dx,dy,b.Width-8,Color.Gold);
         dy=Section("解锁条件",SoulProgress.SlotHint(soul,selected),dx,dy,b.Width-8,Accent);
+        if(DomainMode)dy=DrawDomainReturn(b,dy);
         int oreCount=OreFamily.Count(soul);
-        dy=Section("矿石族",$"材质 {oreCount}/14 · 飞剑 {Math.Min(14,oreCount)} 把 · 支援上限 {soul.SupportCapacity}/5\n"+
-            "维持原17槽：旧扩展内容不参与战斗或羁绊；此页仅用于取回旧物。",dx,dy,b.Width-8,Color.LightBlue);
+        dy=Section("矿石族",$"材质 {oreCount}/14 · 飞剑 {Math.Min(14,oreCount)} 把 · 共用支援 {soul.SupportCapacity} 格\n"+
+            "旧扩展内容不参与战斗或羁绊；新增支援独立保存，此页仅用于取回旧物。",dx,dy,b.Width-8,Color.LightBlue);
         return dy+20;
     }
+    private static Color TraitColor(TraitCategory category) => category switch {
+        TraitCategory.Wood=>Color.LightGreen,TraitCategory.Ore=>Accent,
+        TraitCategory.Growth=>Color.Gold,_=>new Color(197,183,242) };
     private static int DrawTraits(SoulItem soul,Rectangle b,int y)
     {
-        var wood=soul.Wood; int x=b.X+4,w=b.Width-8;
-        y=Section("木质族 · 自然之力",$"已寄宿 {wood.Count}/12 种 · 特殊效果 {wood.Strength:0.##}倍 · 生命 +{wood.Life}\n"+
-            "1 / 2 / 4 / 6 / 8 种分别开放第 1～5 支援槽；支援剑不贡献武器属性。",x,y,w,Color.LightGreen);
-        var bar=new Rectangle(x+10,y,w-20,7);Box(bar,new(36,53,59));Box(new(bar.X,bar.Y,bar.Width*wood.Count/12,bar.Height),new(102,192,133));y+=22;
-        y=Section(wood.Full?"森林之力 · 已激活":"森林之力 · 等待全套",wood.Full?
-            $"12种同时寄宿：环境效果达到基础3倍，生命+100，解锁2个真实剑位。战斗成长 {Main.LocalPlayer.GetModPlayer<WoodPlayer>().LayersFor(soul)}/12层。":
-            "需12种木剑同时寄宿在普通与有效支援槽，至少7普通＋5支援。全套获得基础3倍环境效果、100生命、2个真实剑位和战斗成长；取下则暂停。",x,y,w,Color.LightGreen);
-        for(int i=0;i<12;i++)
+        int x=b.X+4,w=b.Width-8;
+        var traits=SoulTraits.Active(soul).ToArray();
+        y=Section("当前生效特性",$"共 {traits.Length} 项；仅统计有效寄宿和已获得的祝福。命中触发效果会注明触发条件，并不代表当前正在施加。",x,y,w,Accent);
+        if(Button(new(x+10,y,w-20,34),"打开特性图鉴 · 查看全部效果与激活条件 →")) SelectPage(CatalogPage);
+        y+=48;
+        if(traits.Length==0) return Section("暂无生效特性","获得附着并寄宿武器后，这里会自动列出当前生效的效果。",x,y,w,Muted);
+        foreach(var category in Enum.GetValues<TraitCategory>())
         {
-            bool has=(wood.Mask&(1<<i))!=0;
-            y=Section((has?"已激活 · ":"未寄宿 · ")+WoodTypes.Names[i]+" / "+WoodTypes.Effects[i],WoodTypes.Description(WoodTypes.Types[i]),x,y,w,has?Color.LightGreen:Muted);
+            var group=traits.Where(t=>t.Category==category).ToArray();
+            if(group.Length==0)continue;
+            y=Section(SoulTraits.CategoryName(category),$"{group.Length} 项生效",x,y,w,TraitColor(category));
+            foreach(var trait in group)y=Section(trait.Title,trait.Description,x+8,y,w-8,Ink);
         }
-        y=Section("肉后三矿 · 当前有效特性","主攻剑携带自身特性；有效支援槽为主攻剑附加特性。计数、冷却和伤害按实际来源武器独立结算。",x,y,w,Accent);
-        var ore=soul.Active.Concat(soul.Supports).Select(i=>i.type).Where(HardOreTypes.IsOre).Distinct().ToArray();
-        if(ore.Length==0) y=Paragraph("尚未寄宿肉后三矿剑。",x+10,y,w-14,Muted)+16;
-        foreach(int type in ore) y=Section(HardOreTypes.Names[HardOreTypes.Index(type)],HardOreTypes.Description(type),x,y,w,SoulVisuals.Tint(type));
+        return y;
+    }
+    public static int CatalogFilter => catalogFilter;
+    public static void SelectCatalogFilter(int value)
+    { catalogFilter=Math.Clamp(value,0,4);scroll=0;contentHeight=0; }
+    public static IEnumerable<SoulTrait> CatalogEntries(SoulItem soul) => SoulTraits.All(soul)
+        .Where(t=>catalogFilter==0 || (int)t.Category==catalogFilter-1);
+    private static int DrawCatalog(SoulItem soul,Rectangle b,int y)
+    {
+        int x=b.X+4,w=b.Width-8;
+        y=Section("特性图鉴","查看已实装的特性与激活条件；未激活项只在这里展示。浏览图鉴不会解锁特性。S为木族倍率，P或D为实际来源主剑伤害。",x,y,w,Accent);
+        string[] filters=["全部","木质族","矿石族","剑术","成长"];
+        int cols=Math.Clamp(w/110,2,5),step=w/cols;
+        for(int i=0;i<filters.Length;i++)
+        {
+            var r=new Rectangle(x+i%cols*step,y+i/cols*38,step-6,32);
+            if(Button(r,(catalogFilter==i?"● ":"")+filters[i])) SelectCatalogFilter(i);
+        }
+        y+=((filters.Length+cols-1)/cols)*38+12;
+        foreach(var trait in CatalogEntries(soul))
+        {
+            Color color=trait.Active?TraitColor(trait.Category):Muted;
+            y=Section((trait.Active?"已激活 · ":"未激活 · ")+trait.Title,
+                trait.Description+"\n激活条件："+trait.Requirement,x,y,w,color);
+        }
         return y;
     }
     private static int DrawProgress(SoulItem soul,Rectangle b,int y)
@@ -443,8 +524,11 @@ public class SoulUI : ModSystem
             y+=48;
         }
         else y=Paragraph("记录了对应胜利后，遗失的魂芯可在此补办；不会跳过主线条件。",x+10,y,w-14,Muted)+18;
-        int mechs=SoulProgress.Mechs(soul.Kills);
-        y=Section(mechs==3?"祝福 · 机魂协律":$"诅咒 · 迟滞械缓 {mechs}/3",mechs==3?"连续轮换时，攻速与距离最多提升20%。":"每击败一位机械Boss，诅咒便减弱一分；单剑不累积迟滞。",x,y,w,Color.LightPink);
+        y=Section("六封印 · 此剑魂独立铭刻","两Boss组：解除→祝福；三Boss组：削弱→解除→祝福。解除即恢复正常机制，祝福额外强化另计。",x,y,w,Accent);
+        foreach(SoulCurse curse in Enum.GetValues<SoulCurse>())
+            y=Section(SoulCurses.Names[(int)curse]+" · "+SoulCurses.StageName(soul.Curse(curse))+" · "+SoulCurses.Count(soul,curse)+"/"+SoulCurses.Groups[(int)curse].Length,
+                SoulCurses.Description(soul,curse)+"\n"+SoulCurses.Requirement(soul,curse),x,y,w,soul.Curse(curse)>=CurseStage.Released?Color.LightGreen:Color.LightPink);
+        y=Section("外域 · 独立祝福记录",$"猪龙鱼公爵：{((soul.Seals&SoulCurses.Duke)!=0?"已铭刻":"未铭刻")}；鹿角怪：{((soul.Seals&SoulCurses.Deer)!=0?"已铭刻":"未铭刻")}。二者不施咒；特殊祝福效果尚未设计，本版只记录胜利。",x,y,w,Muted);
         return Section("凝胶信物","新角色自带信物。旧角色：凝胶10＋坠落之星1，在工作台制作。",x,y,w,Muted);
     }
 }

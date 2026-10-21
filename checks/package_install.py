@@ -83,12 +83,18 @@ graphics_verified = False
 if gui_report_path.exists():
     gui_report = json.loads(gui_report_path.read_text(encoding='utf-8'))
     graphics_verified = gui_report.get('tested_package_sha256') == hashlib.sha256(built.read_bytes()).hexdigest()
+combat_report_path = out / f'ore-tier-combat-validation-{version}.json'
+combat_verified = False
+if combat_report_path.exists():
+    combat_report = json.loads(combat_report_path.read_text(encoding='utf-8-sig'))
+    combat_verified = combat_report.get('tested_package_sha256') == hashlib.sha256(built.read_bytes()).hexdigest()
 result = dict(name=name, version=version, installed=True, enabled=True,
     target=str(target), sha256=hashlib.sha256(target.read_bytes()).hexdigest(),
     loader=loader, focused_checks=checks, source_archive=f'ZenithReborn-{version}-source.zip',
     existing_addon_preserved=True, config_preserved=True,
     previous_enabled_entries_preserved=True, backup=str(backup),
     graphics_ui_tested=graphics_verified, graphics_ui_report=gui_report_path.name if graphics_verified else None,
+    graphics_combat_tested=combat_verified, graphics_combat_report=combat_report_path.name if combat_verified else None,
     live_multiplayer_tested=False,
     full_existing_modpack_load_tested=False)
 (out / 'install-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')

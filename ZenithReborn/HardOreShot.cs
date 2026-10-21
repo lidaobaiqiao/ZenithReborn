@@ -7,10 +7,17 @@ namespace ZenithReborn;
 
 public class HardOreShot : ModProjectile
 {
+    public bool FromOreFlight;
+    public float FlightDamageShare=1;
+    public override void SendExtraAI(System.IO.BinaryWriter writer){writer.Write(FromOreFlight);writer.Write(FlightDamageShare);}
+    public override void ReceiveExtraAI(System.IO.BinaryReader reader){FromOreFlight=reader.ReadBoolean();FlightDamageShare=reader.ReadSingle();}
+    public override void ModifyHitNPC(NPC target,ref NPC.HitModifiers modifiers)
+    {if(FromOreFlight)modifiers.DefenseEffectiveness*=Math.Clamp(FlightDamageShare,0,1);}
     private long targetGeneration;
     public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.CrystalShard;
     public override void SetDefaults()
     {
+        FromOreFlight=false;FlightDamageShare=1;
         Projectile.width = Projectile.height = 12;
         Projectile.friendly = true; Projectile.DamageType = DamageClass.Melee;
         Projectile.tileCollide = false; Projectile.ignoreWater = true;
@@ -44,7 +51,8 @@ public class HardOreShot : ModProjectile
         var kind = (HardOreKind)(int)Projectile.ai[1];
         int index = (int)Projectile.ai[0];
         if (!player.active || player.dead || soul == null || !soul.Attached || soul.SoulId != source.SoulId ||
-            !HardOreTypes.Enabled(soul, source.SourceWeapon, kind) || index < 0 || index >= Main.maxNPCs ||
+            !(FromOreFlight?OreFamily.CanFlightTrait(soul,source.SourceWeapon) && HardOreTypes.Index(source.SourceWeapon)==(int)kind:
+                HardOreTypes.Enabled(soul, source.SourceWeapon, kind)) || index < 0 || index >= Main.maxNPCs ||
             !HardOrePlayer.ValidTarget(Main.npc[index]) || Vector2.DistanceSquared(Projectile.Center, player.Center) > 600 * 600)
         { Projectile.Kill(); return; }
         long generation = WoodCombat.Root(Main.npc[index]).GetGlobalNPC<HardOreTarget>().Id;
@@ -54,7 +62,7 @@ public class HardOreShot : ModProjectile
         if (kind == HardOreKind.Titanium)
         {
             var parent = Main.projectile.FirstOrDefault(p => p.active && p.owner == Projectile.owner &&
-                p.identity == (int)Projectile.ai[2] && p.ModProjectile is SoulBlade &&
+                p.identity == (int)Projectile.ai[2] && (p.ModProjectile is SoulBlade || FromOreFlight && p.ModProjectile is OreFlyingSword) &&
                 p.GetGlobalProjectile<SoulSource>().SoulId == source.SoulId);
             if (parent == null) { Projectile.Kill(); return; }
             Projectile.Center = parent.Center + (age * .35f).ToRotationVector2() * 18;

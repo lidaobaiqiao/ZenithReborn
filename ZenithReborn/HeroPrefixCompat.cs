@@ -12,21 +12,29 @@ internal static class HeroPrefixCompat
 {
     private static Item[] hosts;
     private static Item[] supports, forest;
+    private static List<Item> additional;
+    private static Item legendary;
     private static bool awakened;
     private static string soulId;
-    private static int kills, cores;
+    private static int kills, cores, oreCollection;
+    private static int seals,legacy,yujian;
     private static bool has;
     private static bool attached, memory;
 
     internal static void Remember(SoulItem soul)
     {
+        soul.RegisterOreCollection();
         hosts = soul.Hosts.Select(i => i.Clone()).ToArray();
         supports = soul.SupportHosts.Select(i => i.Clone()).ToArray();
         forest = soul.ForestHosts.Select(i => i.Clone()).ToArray();
+        additional=soul.AdditionalSupports.Select(i=>i.Clone()).ToList();
+        legendary=soul.LegendaryHost.Clone();
         awakened = soul.Awakened;
         soulId = soul.SoulId;
         kills = soul.Kills;
         cores = soul.Cores;
+        oreCollection=soul.OreCollectionMask;
+        seals=soul.Seals;legacy=soul.LegacyReleased;yujian=soul.YujianCharge;
         attached = soul.Attached; memory = soul.KingMemory;
         has = true;
     }
@@ -35,7 +43,7 @@ internal static class HeroPrefixCompat
     {
         if (!has) return false;
         // Only fill a freshly rebuilt, empty soul. Never overwrite real data.
-        if (soul.Stored.Any(h => !h.IsAir) || soul.Kills != 0 || soul.Cores != 0) return false;
+        if (soul.Stored.Any(h => !h.IsAir) || soul.Kills != 0 || soul.Cores != 0 || soul.OreCollectionMask!=0 || soul.Seals!=0) return false;
         for (int i = 0; i < soul.Hosts.Length && i < hosts.Length; i++)
             if (soul.Hosts[i].IsAir && !hosts[i].IsAir)
                 soul.Hosts[i] = hosts[i].Clone();
@@ -45,7 +53,11 @@ internal static class HeroPrefixCompat
         soul.Attached = attached; soul.KingMemory = memory;
         soul.SupportHosts = supports.Select(i => i.Clone()).ToArray();
         soul.ForestHosts = forest.Select(i => i.Clone()).ToArray();
+        soul.AdditionalSupports=additional.Select(i=>i.Clone()).ToList();
+        soul.LegendaryHost=legendary.Clone();
         soul.AwakeningMemory = awakened;
+        soul.OreCollectionMask=oreCollection & OreFamily.AllMaterials;
+        soul.Seals=seals;soul.LegacyReleased=legacy;soul.YujianCharge=yujian;
         return true;
     }
 
@@ -53,6 +65,8 @@ internal static class HeroPrefixCompat
     {
         hosts = null;
         supports = forest = null;
+        additional=null;
+        legendary=null;
         soulId = null;
         has = false;
     }

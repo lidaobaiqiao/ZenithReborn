@@ -99,13 +99,13 @@ internal static class WoodCheck
         player.statLife=50;float healBudget=105;Main.myPlayer=255;
         check(woodPlayer.HealFromSoul(soul,100,ref healBudget)==105 && player.statLife==155 && healBudget==0,"Blood fragrance direct-heal entry spends original budget and actually heals");
         Main.myPlayer=0;
-        for(int gesture=0;gesture<2;gesture++)
+        for(int gesture=0;gesture<4;gesture++)
         {
-            soul.UseAnimation(player); player.itemAnimationMax=25;
-            for(int time=25;time>=1;time--) { player.itemAnimation=time;player.GetModPlayer<SoulSwingPlayer>().PostItemCheck(); }
+            soul.UseAnimation(player); player.itemAnimationMax=30;
+            foreach(int time in new[]{30,20,10}){player.itemAnimation=time;player.GetModPlayer<SoulSwingPlayer>().FireHost();}
         }
         var shots=Main.projectile.Where(p=>p.active && p.ModProjectile is SoulBlade).ToArray();
-        check(shots.Length==10 && shots.Any(p=>(int)p.ai[0]==ItemID.TerraBlade) && shots.Any(p=>(int)p.ai[0]==ItemID.StarWrath) &&
+        check(shots.Length==12 && shots.Any(p=>(int)p.ai[0]==ItemID.TerraBlade) && shots.Any(p=>(int)p.ai[0]==ItemID.StarWrath) &&
             shots.All(p=>soul.Active.Any(h=>h.type==(int)p.ai[0])),"Sequential swings reach both real-slot blades, support slots spawn none");
         var terra=shots.First(p=>(int)p.ai[0]==ItemID.TerraBlade);
         int expectedBase=Math.Max(1,(int)(player.GetWeaponDamage(soul.ForestHosts[0])*soul.Potency));

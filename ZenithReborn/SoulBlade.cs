@@ -2,6 +2,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -16,6 +17,14 @@ public class SoulSource : GlobalProjectile
     public string SoulId = "";
     public float LeashRadius;
     public int SourceWeapon;
+    public int PrimaryOrdinal=-1;
+    public int HostSlot=-1;
+    public override void ModifyHitNPC(Projectile projectile,NPC target,ref NPC.HitModifiers modifiers)
+    {
+        if(string.IsNullOrEmpty(SoulId) || projectile.owner<0 || projectile.owner>=Main.maxPlayers)return;
+        var state=Main.player[projectile.owner].GetModPlayer<BlessingPlayer>();
+        if(state.Held?.SoulId==SoulId)modifiers.FinalDamage*=state.DistanceMultiplier(state.Held,target);
+    }
     public override void OnSpawn(Projectile projectile, IEntitySource source)
     {
         SoulId = source switch {
@@ -25,11 +34,15 @@ public class SoulSource : GlobalProjectile
         };
         SourceWeapon = projectile.ModProjectile is SoulBlade ? (int)projectile.ai[0] :
             source is EntitySource_Parent ancestry && ancestry.Entity is Projectile ancestor ? ancestor.GetGlobalProjectile<SoulSource>().SourceWeapon : 0;
+        PrimaryOrdinal=source is EntitySource_Parent parentSource && parentSource.Entity is Projectile parentProjectile?
+            parentProjectile.GetGlobalProjectile<SoulSource>().PrimaryOrdinal:-1;
+        HostSlot=source is EntitySource_Parent hostSource && hostSource.Entity is Projectile hostParent?
+            hostParent.GetGlobalProjectile<SoulSource>().HostSlot:-1;
     }
     public override void SendExtraAI(Projectile projectile, BitWriter bitWriter, BinaryWriter writer)
-    { writer.Write(SoulId); writer.Write(LeashRadius); writer.Write(SourceWeapon); }
+    { writer.Write(SoulId); writer.Write(LeashRadius); writer.Write(SourceWeapon); writer.Write(PrimaryOrdinal); writer.Write(HostSlot); }
     public override void ReceiveExtraAI(Projectile projectile, BitReader bitReader, BinaryReader reader)
-    { SoulId = reader.ReadString(); LeashRadius=reader.ReadSingle(); SourceWeapon=reader.ReadInt32(); }
+    { SoulId = reader.ReadString(); LeashRadius=reader.ReadSingle(); SourceWeapon=reader.ReadInt32(); PrimaryOrdinal=reader.ReadInt32(); HostSlot=reader.ReadInt32(); }
     public override void AI(Projectile projectile)
     {
         if(LeashRadius>0 && projectile.owner>=0 && projectile.owner<Main.maxPlayers &&
@@ -41,24 +54,55 @@ public class SoulBlade : ModProjectile
 {
     public Vector2 TargetOffset;
     public float SwordScale = 1;
+    // Enlarge the model, ghosts, ribbon and particles together. Keep the
+    // original Projectile.scale for damage collision and source-size rules.
+    public float DisplayScale => Projectile.scale * 1.6f;
+    // Same phase increment and two updates/frame as native projectile 933.
+    public float MotionPhase => Projectile.localAI[0];
+    public static float SpriteVisibility(float phase) => Utils.GetLerpValue(0,20,phase,true)*Utils.GetLerpValue(68,60,phase,true);
+    public float BladeOpacity => SpriteVisibility(MotionPhase)*Projectile.Opacity*(retired?1-retireAge/8f:1);
+    // Native rotation is axis + Pi/2; item art adds -Pi/4*spriteDirection.
+    // Our collision/ribbon rotation remains axis + Pi/4.
+    public float DrawRotation => Projectile.rotation+MathHelper.PiOver4*(1-Projectile.spriteDirection);
+    public SpriteEffects DrawEffects => Projectile.spriteDirection==1?SpriteEffects.None:SpriteEffects.FlipHorizontally;
     public int SpecialDamage;
+    public BladeBlessings Blessings=new();
     public bool Reborn { get; private set; }
     public void ConfigureReborn(bool reborn)
     {
         Reborn = reborn;
-        // Vanilla 933: 15 updates at two updates/frame. This projectile keeps
-        // its stable one-update trajectory, so use the equivalent eight frames.
-        Projectile.localNPCHitCooldown = 8;
+        // Retain eight game frames of hit immunity at two updates/frame.
+        Projectile.localNPCHitCooldown = 16;
     }
     // Vanilla Zenith projectile 933 uses ai[0] = Random.Next(-100, 101) as
     // the ellipse's vertical radius / lean. One sword = one ellipse.
     public float Vertical = 60f;
     private int age;
     private bool released;
+    private bool oreHitConsumed;
+    private bool retired,terrainArmed;
+    private int retireAge;
+    private float terrainDepth;
+    private Vector2 previousCenter;
+    private Dictionary<long,int> targetHits=[];
+    private SoulItem SourceSoul=>Projectile.owner>=0 && Projectile.owner<Main.maxPlayers?
+        WoodCombat.FindSoul(Main.player[Projectile.owner],Projectile.GetGlobalProjectile<SoulSource>().SoulId):null;
+    public bool Retired=>retired;
+    public void Retire(){if(retired)return;retired=true;retireAge=0;Projectile.netUpdate=true;}
+    // This is per emitted primary blade, not per target or damage tick.
+    // Consume before cooldown checks so a blocked first hit cannot retry later.
+    public bool TryConsumeOreHit()
+    {
+        if (oreHitConsumed) return false;
+        oreHitConsumed = true;
+        return true;
+    }
     private Vector2[] trailPoints;
     private Vector2[] trailCenters;
     private float[] trailRotations;
+    private float[] trailPhases;
     private const int TrailLength = SoulRibbonMesh.HistoryLength;
+    private const int HistoryLength = 96;
     private int trailCount;
     public override string Texture => "Terraria/Images/Item_" + ItemID.Zenith;
     public override void SetDefaults()
@@ -67,18 +111,28 @@ public class SoulBlade : ModProjectile
         Projectile.friendly = true; Projectile.DamageType = DamageClass.Melee;
         Projectile.tileCollide = false; Projectile.ignoreWater = true;
         Projectile.penetrate = -1; Projectile.timeLeft = 120;
-        Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = 8;
-        Reborn = false;
+        Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = 16;
+        Projectile.extraUpdates=1;
+        Reborn = false;age=0;released=false;retired=terrainArmed=false;retireAge=0;terrainDepth=0;targetHits=[];
+        oreHitConsumed = false;
+        Blessings=new();
         Vertical = 60f;
-        trailPoints=new Vector2[TrailLength];trailCenters=new Vector2[TrailLength];trailRotations=new float[TrailLength];
+        trailPoints=new Vector2[HistoryLength];trailCenters=new Vector2[HistoryLength];trailRotations=new float[HistoryLength];trailPhases=new float[HistoryLength];
         trailCount=0;
     }
     public override bool ShouldUpdatePosition() => false;
-    public override bool? CanDamage() => age <= Projectile.ai[2] ? false : null;
+    public override bool? CanDamage() => retired || MotionPhase>=60 || age <= Projectile.ai[2] ? false : null;
+    public override bool? CanHitNPC(NPC target)
+    {
+        var soul=SourceSoul;
+        if(soul==null)return null;
+        long key=WoodCombat.Root(target).GetGlobalNPC<HardOreTarget>().Id;
+        return targetHits.GetValueOrDefault(key)>=SoulCurses.HitLimit(soul)?false:null;
+    }
     public override void SendExtraAI(BinaryWriter writer)
-    { writer.Write(TargetOffset.X); writer.Write(TargetOffset.Y); writer.Write(SwordScale); writer.Write(Vertical); writer.Write(SpecialDamage); writer.Write(Reborn); }
+    { writer.Write(TargetOffset.X); writer.Write(TargetOffset.Y); writer.Write(SwordScale); writer.Write(Vertical); writer.Write(SpecialDamage); writer.Write(Reborn);writer.Write(retired);writer.Write(retireAge); }
     public override void ReceiveExtraAI(BinaryReader reader)
-    { TargetOffset = new(reader.ReadSingle(), reader.ReadSingle()); SwordScale = reader.ReadSingle(); Vertical = reader.ReadSingle(); SpecialDamage = reader.ReadInt32(); ConfigureReborn(reader.ReadBoolean()); }
+    { TargetOffset = new(reader.ReadSingle(), reader.ReadSingle()); SwordScale = reader.ReadSingle(); Vertical = reader.ReadSingle(); SpecialDamage = reader.ReadInt32(); ConfigureReborn(reader.ReadBoolean());retired=reader.ReadBoolean();retireAge=Math.Clamp(reader.ReadInt32(),0,8); }
     public override void AI()
     {
         Player player = Main.player[Projectile.owner];
@@ -86,12 +140,19 @@ public class SoulBlade : ModProjectile
         float elapsed = ++age - Projectile.ai[2];
         if (elapsed < 0) { Projectile.Center = player.Center; Projectile.hide = true; return; }
         Projectile.hide = false;
-        float t = elapsed / Math.Max(1, Projectile.ai[1]);
-        if (t >= 1) { Projectile.Kill(); return; }
-        // Exact vanilla Zenith 933 / UpgradableZenith motion: one ellipse per
-        // sword, ai[0] (Vertical) as its lean, orbit around the midpoint.
+        previousCenter=Projectile.Center;
+        if(retired)retireAge=Math.Min(8,retireAge+1);
         Vector2 velocity = TargetOffset * .5f;
-        float lerp = t;
+        float distanceFactor=Utils.GetLerpValue(900,0,velocity.Length()*2,true);
+        float step=MathHelper.Lerp(.7f,2f,distanceFactor);
+        Projectile.localAI[0]+=step;
+        float phase=MotionPhase;
+        if(phase>=60 && !retired)Blessings.CompleteReturn(Projectile);
+        if(phase>=120){Projectile.Kill();return;}
+        // Reserve the native trail lifetime even for slow hosts. No appended
+        // player-core movement, model shrinking or separate player draw layer.
+        Projectile.timeLeft=Math.Max(Projectile.timeLeft,2+(int)Math.Ceiling((120-phase)/step));
+        float lerp = Utils.GetLerpValue(0,1,phase/60f,true);
         float num3 = Vertical;
         float aim = velocity.ToRotation();
         float dir = velocity.X > 0f ? 1f : -1f;
@@ -99,33 +160,40 @@ public class SoulBlade : ModProjectile
         float radius = Math.Max(60f, velocity.Length() +
             MathHelper.Lerp(0f, 40f, Utils.GetLerpValue(.5f, 1f, lerp, true)));
         Vector2 target = player.MountedCenter + velocity;
-        Vector2 spinning = orbit.ToRotationVector2() * new Vector2(radius, num3 * MathHelper.Lerp(2f, 1f, lerp));
+        Vector2 spinning = orbit.ToRotationVector2() * new Vector2(radius, num3 * MathHelper.Lerp(2f, 1f, distanceFactor));
         Vector2 small = (1f - Utils.GetLerpValue(0f, .5f, lerp, true)) *
             new Vector2(dir * -radius * .1f, -num3 * .3f);
         Projectile.Center = target + spinning.RotatedBy(aim) + small;
+        var sourceSoul=SourceSoul;
+        if(sourceSoul!=null && !retired && phase<60)
+        {
+            if(terrainArmed)Blessings.CrossedSolid(Projectile,previousCenter,Projectile.Center);
+            if(terrainArmed && SoulTerrain.Sweep(previousCenter,Projectile.Center,SoulCurses.TerrainAllowance(sourceSoul),ref terrainDepth))Retire();
+            if(!SoulTerrain.SolidAt(Projectile.Center) && phase>=6)terrainArmed=true;
+        }
         Projectile.rotation = orbit + aim + MathHelper.PiOver4;
-        if (num3 < 0f)
-            Projectile.rotation = MathHelper.Pi + dir * lerp * -MathHelper.TwoPi + aim + MathHelper.PiOver4;
         Projectile.direction = Projectile.spriteDirection = (int)dir;
+        if (num3 < 0f)
+        {
+            Projectile.rotation = MathHelper.Pi + dir * lerp * -MathHelper.TwoPi + aim + MathHelper.PiOver4;
+            Projectile.direction = Projectile.spriteDirection = -(int)dir;
+        }
+        Projectile.Opacity=Utils.GetLerpValue(0,5,phase,true)*Utils.GetLerpValue(120,115,phase,true);
         Projectile.scale = Math.Clamp(SwordScale, .6f, 2f);
         if(!Main.dedServ)
         {
-            int historyLimit=Math.Clamp((int)(Projectile.ai[1]*.45f),8,TrailLength);
+            if(Projectile.localAI[1]==0){Projectile.localAI[1]=1;SoundEngine.PlaySound(SoundID.Item169,Projectile.Center);}
+            int historyLimit=HistoryLength;
             if(trailCount>0 && Vector2.DistanceSquared(Projectile.Center,trailCenters[0])>90000) trailCount=0;
             for(int i=Math.Min(trailCount,historyLimit-1);i>0;i--)
-            { trailPoints[i]=trailPoints[i-1];trailCenters[i]=trailCenters[i-1];trailRotations[i]=trailRotations[i-1]; }
+            { trailPoints[i]=trailPoints[i-1];trailCenters[i]=trailCenters[i-1];trailRotations[i]=trailRotations[i-1];trailPhases[i]=trailPhases[i-1]; }
             trailCenters[0]=Projectile.Center;trailRotations[0]=Projectile.rotation;
-            trailPoints[0]=Projectile.Center+(Projectile.rotation-MathHelper.PiOver4).ToRotationVector2()*26*Projectile.scale;
+            trailPhases[0]=phase;
+            trailPoints[0]=Projectile.Center+(Projectile.rotation-MathHelper.PiOver4).ToRotationVector2()*26*DisplayScale;
             trailCount=Math.Min(historyLimit,trailCount+1);
-            Color tint=SoulVisuals.Tint((int)Projectile.ai[0]);
-            Lighting.AddLight(Projectile.Center,tint.ToVector3()*.08f);
-            if(age%8==0 && t>.15f && t<.8f)
-            {
-                Dust dust=Dust.NewDustPerfect(trailPoints[0],DustID.Enchanted_Pink,
-                    Vector2.Zero,190,tint,.4f);dust.noGravity=true;dust.noLight=true;
-            }
+            if(!retired)SoulZenithEffects.EmitFlying(this,player);
         }
-        if (!released && t >= .4f)
+        if (!released && !retired && phase >= 24)
         {
             released = true;
             if (Projectile.owner == Main.myPlayer) ReleaseSpecial(player);
@@ -136,8 +204,8 @@ public class SoulBlade : ModProjectile
         float point = 0;
         Vector2 length = new Vector2((Reborn ? 40 : 26) * Projectile.scale, 0).RotatedBy(Projectile.rotation - MathHelper.PiOver4);
         var soul = WoodCombat.FindSoul(Main.player[Projectile.owner], Projectile.GetGlobalProjectile<SoulSource>().SoulId);
-        bool solid = WeaponFamilies.Of((int)Projectile.ai[0]) == BladeFamily.Solid ||
-            soul != null && soul.Supports.Any(i=>WeaponFamilies.Of(i.type)==BladeFamily.Solid);
+        bool solid = soul!=null && (soul.TraitEnabled((int)Projectile.ai[0]) && WeaponFamilies.Of((int)Projectile.ai[0]) == BladeFamily.Solid ||
+            soul.TraitSupports.Any(i=>WeaponFamilies.Of(i.type)==BladeFamily.Solid));
         // The line helper can miss a short blade wholly inside a large target.
         // The blade segment passes through its center, so containment is a hit.
         return targetHitbox.Contains(Projectile.Center.ToPoint()) || Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(),
@@ -146,26 +214,30 @@ public class SoulBlade : ModProjectile
     }
     public override void OnHitNPC(NPC target,NPC.HitInfo hit,int damageDone)
     {
-        var family=WeaponFamilies.Of((int)Projectile.ai[0]);
-        if(family==BladeFamily.Frost) target.AddBuff(BuffID.Frostburn,120);
-        else if(family==BladeFamily.Nature) target.AddBuff(BuffID.Poisoned,180);
-        var soul = WoodCombat.FindSoul(Main.player[Projectile.owner], Projectile.GetGlobalProjectile<SoulSource>().SoulId);
+        var soul=SourceSoul;
+        long key=WoodCombat.Root(target).GetGlobalNPC<HardOreTarget>().Id;
+        if(damageDone>0)targetHits[key]=targetHits.GetValueOrDefault(key)+1;
+        var family=soul==null || soul.TraitEnabled((int)Projectile.ai[0])?WeaponFamilies.Of((int)Projectile.ai[0]):BladeFamily.Plain;
+        if(family==BladeFamily.Frost) target.AddBuff(BuffID.Frostburn,(int)(120*Blessings.TraitPower));
+        else if(family==BladeFamily.Nature) target.AddBuff(BuffID.Poisoned,(int)(180*Blessings.TraitPower));
         if (soul != null)
         {
-            if (soul.Supports.Any(i => WeaponFamilies.Of(i.type) == BladeFamily.Frost)) target.AddBuff(BuffID.Frostburn, 120);
-            if (soul.Supports.Any(i => WeaponFamilies.Of(i.type) == BladeFamily.Nature)) target.AddBuff(BuffID.Poisoned, 180);
+            if (soul.TraitSupports.Any(i => WeaponFamilies.Of(i.type) == BladeFamily.Frost)) target.AddBuff(BuffID.Frostburn,(int)(120*Blessings.TraitPower));
+            if (soul.TraitSupports.Any(i => WeaponFamilies.Of(i.type) == BladeFamily.Nature)) target.AddBuff(BuffID.Poisoned,(int)(180*Blessings.TraitPower));
         }
         WoodCombat.FinishPrimaryHit(Projectile, target, damageDone);
         Main.player[Projectile.owner].GetModPlayer<HardOrePlayer>().Hit(Projectile, target, damageDone);
         OreFamily.OnMainHit(Projectile, target, damageDone);
+        Blessings.Hit(Projectile,target,damageDone);
     }
     public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
     {
+        Blessings.Prepare(Projectile,target);
         WoodCombat.PreparePrimaryHit(Projectile, target);
         WoodCombat.ModifyPrimaryHit(Projectile, target, ref modifiers);
         Main.player[Projectile.owner].GetModPlayer<HardOrePlayer>().Modify(Projectile, target, ref modifiers);
         var soul = WoodCombat.FindSoul(Main.player[Projectile.owner], Projectile.GetGlobalProjectile<SoulSource>().SoulId);
-        if (((int)Projectile.ai[0] == ItemID.CopperShortsword || soul != null && soul.Supports.Any(i => i.type == ItemID.CopperShortsword)) &&
+        if (soul!=null && (soul.TraitEnabled((int)Projectile.ai[0]) && (int)Projectile.ai[0] == ItemID.CopperShortsword || soul.TraitSupports.Any(i => i.type == ItemID.CopperShortsword)) &&
             Vector2.Distance(Main.player[Projectile.owner].Center, target.Center) < 180)
             modifiers.FinalDamage *= 1.2f;
     }
@@ -175,13 +247,15 @@ public class SoulBlade : ModProjectile
         var soul = WoodCombat.FindSoul(player, Projectile.GetGlobalProjectile<SoulSource>().SoulId);
         if (soul == null) return;
         var woodPlayer = player.GetModPlayer<WoodPlayer>();
-        foreach (var support in soul.Supports)
+        foreach (var support in soul.TraitSupports)
             if (!WoodTypes.IsWood(support.type) && SoulProgress.ZenithWeapons.Contains(support.type) &&
                 woodPlayer.Ready(soul.SoulId + ":special:" + support.type, 45))
                 ReleaseWeaponSpecial(player, support.type);
     }
     private void ReleaseWeaponSpecial(Player player, int type)
     {
+        var soul=SourceSoul;
+        if(soul!=null && !soul.TraitEnabled(type))return;
         bool arcane=WeaponFamilies.Of(type)==BladeFamily.Arcane;
         if(arcane)
         {
@@ -236,11 +310,9 @@ public class SoulBlade : ModProjectile
         Main.instance.LoadItem(itemType);
         Texture2D texture=TextureAssets.Item[itemType].Value;
         Rectangle frame=Main.itemAnimations[itemType]?.GetFrame(texture)??texture.Frame();
-        float halfLength=frame.Size().Length()*.5f*Projectile.scale;
-        float t=Math.Clamp((age-Projectile.ai[2])/Math.Max(1,Projectile.ai[1]),0,1);
-        float visibility=Math.Min(Math.Min(t/.1f,(1-t)/.16f),1);
-        return SoulRibbonMesh.Build(trailCenters,trailRotations,trailCount,halfLength,
-            SoulVisuals.Tint(itemType),visibility,Main.screenPosition,vertices);
+        float halfLength=frame.Size().Length()*.5f*DisplayScale;
+        return SoulRibbonMesh.Build(trailCenters,trailRotations,Math.Min(trailCount,TrailLength),halfLength,
+            SoulVisuals.Tint(itemType),Projectile.Opacity*(retired?1-retireAge/8f:1),Main.screenPosition,vertices);
     }
     public override bool PreDraw(ref Color lightColor)
     {
@@ -252,18 +324,26 @@ public class SoulBlade : ModProjectile
         Rectangle frame = Main.itemAnimations[itemType]?.GetFrame(texture) ?? texture.Frame();
         Vector2 origin = frame.Size() * .5f;
         Color tint=SoulVisuals.Tint(itemType);
-        float t=Math.Clamp((age-Projectile.ai[2])/Math.Max(1,Projectile.ai[1]),0,1);
-        float visibility=Math.Min(Math.Min(t/.1f,(1-t)/.16f),1);
-        // The mesh ribbon was drawn behind entities; retain two faint ghosts.
-        for(int i=5;i>=2;i-=3)
+        float visibility=BladeOpacity;
+        // Native 933 draws sword samples fifteen phase units apart. Each sample
+        // fades by its own age, so the return unwinds rather than being sucked in.
+        for(int behind=60;behind>=15;behind-=15)
         {
-            if(i>=trailCount) continue;
+            float samplePhase=MotionPhase-behind;
+            if(samplePhase<0)continue;
+            int i=0;
+            while(i+1<trailCount && Math.Abs(trailPhases[i+1]-samplePhase)<Math.Abs(trailPhases[i]-samplePhase))i++;
+            if(i>=trailCount)continue;
+            float opacity=SpriteVisibility(trailPhases[i])*Projectile.Opacity*(1-behind/75f)*(retired?1-retireAge/8f:1);
             Main.EntitySpriteDraw(texture,trailCenters[i]-Main.screenPosition,frame,
-                Color.Lerp(tint,Color.White,.3f)*(.12f*(1-i/(float)trailCount)*visibility),
-                trailRotations[i],origin,Projectile.scale,SpriteEffects.None);
+                Color.Lerp(tint,Color.White,.22f)*opacity,
+                trailRotations[i]+MathHelper.PiOver4*(1-Projectile.spriteDirection),origin,DisplayScale,DrawEffects);
         }
         Main.EntitySpriteDraw(texture, Projectile.Center - Main.screenPosition, frame, WoodTypes.SwordTint(itemType)*visibility,
-            Projectile.rotation, origin, Projectile.scale, SpriteEffects.None);
+            DrawRotation, origin, DisplayScale, DrawEffects);
+        Main.EntitySpriteDraw(texture,Projectile.Center-Main.screenPosition,frame,new Color(255,255,255,127)*visibility,
+            DrawRotation,origin,DisplayScale*1.25f,DrawEffects);
+        SoulZenithEffects.DrawTip(this);
         return false;
     }
 }

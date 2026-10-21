@@ -64,13 +64,16 @@ public static partial class SoulProgress
             string status = slot < soul.Capacity ? "已解锁" : "尚未解锁";
             return $"普通第{slot+1}槽 · {status}\n解锁：{requirement}\n{(soul.Capacity > slot ? "武器正常提供属性与主剑影" : Missing(soul,slot))}";
         }
-        if (slot < 15)
+        if (slot == SoulItem.LegendarySlotId)
+            return $"传奇剑位 · {(soul.LegendaryOn?"已激活":"未激活（仅实际传奇难度，大师＋FTW）")}\n"+
+                "只在实际传奇难度生效；可放任意可寄宿近战武器，提供独立主攻。\n关闭传奇后物品暂停保留，空手可取回；不占普通10槽、不伪造难度标记。";
+        if (SoulItem.SupportOrdinal(slot)>=0)
         {
-            int need = new[] {1,2,4,6,8}[slot-10];
-            return $"支援第{slot-9}槽 · 需要{need}种有效木剑（当前{soul.Wood.Count}种）\n基础普通与已生效支援槽计数；不出主剑、只贡献特性与羁绊\n失去条件时暂停，里面的武器仍可取回";
+            int ordinal=SoulItem.SupportOrdinal(slot);
+            return $"共用支援第{ordinal+1}槽 · {(ordinal<soul.SupportCapacity?"已激活":"未激活／暂停")}\n当前奖励：{SoulSupport.Breakdown(soul)}＝{soul.SupportCapacity}格；各族提供的槽位累加，不取较高值\n木质1/2/4/6/8种各给1格；矿石1/2/4/6/8/10材质各给1格\n支援不出主剑、计入所属族羁绊和已实装特性；失去条件时暂停，物品仍可取回";
         }
         if (slot < 17)
-            return $"森林奖励第{slot-14}槽 · 12种木剑同时有效寄宿（当前{soul.Wood.Count}/12）\n需要至少7个基础普通槽＋5个有效支援槽\n真实攻击剑位；不能反向凑齐全套，暂停时可取回";
+            return $"全收集奖励第{slot-14}槽 · {(soul.BonusCapacity>0?"已解锁":"尚未解锁")}\n12种木剑同时有效寄宿（{soul.Wood.Count}/12），或累计登记14种矿石（{soul.OreCollected}/14）\n两族共用2格真实主攻剑位；矿石登记取下不丢，木族仍需维持全套";
         return "旧扩展已停用：物品不参与伤害、特性与羁绊；只可空手取回，不可放入。";
     }
     public static void RequestCoreRecovery(SoulItem soul)

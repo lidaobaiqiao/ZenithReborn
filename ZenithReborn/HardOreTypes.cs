@@ -16,8 +16,8 @@ public static class HardOreTypes
     public static IEnumerable<HardOreKind> Traits(SoulItem soul, int sourceWeapon)
     {
         int own = Index(sourceWeapon);
-        if (own >= 0) yield return (HardOreKind)own;
-        foreach (int kind in soul.Supports.Select(i => Index(i.type)).Where(i => i >= 0 && i != own).Distinct())
+        if (own >= 0 && soul.TraitEnabled(sourceWeapon)) yield return (HardOreKind)own;
+        foreach (int kind in soul.TraitSupports.Select(i => Index(i.type)).Where(i => i >= 0 && i != own).Distinct())
             yield return (HardOreKind)kind;
     }
     public static bool Enabled(SoulItem soul, int source, HardOreKind kind) =>
@@ -39,6 +39,6 @@ public class HardOreTooltip : GlobalItem
     {
         if (!HardOreTypes.IsOre(item.type)) return;
         tooltips.Add(new(Mod, "HardOreSoul", "剑魂寄宿·肉后矿石：" + HardOreTypes.Description(item.type)));
-        tooltips.Add(new(Mod, "HardOreSource", "可放有效普通或支援槽；支援时按实际主剑分别计数与取伤害。\n连击每目标主体、每来源30帧计一次，3秒未合法命中清空；附属攻击不充能。"));
+        tooltips.Add(new(Mod, "HardOreSource", "可放有效普通或支援槽；支援时按实际主剑分别计数与取伤害。\n主剑连击每目标主体、每来源30帧计一次，3秒未命中清空。矿族8层后，飞剑首击可直接触发本剑特效，保留冷却与治疗预算；其他附属攻击不充能。"));
     }
 }

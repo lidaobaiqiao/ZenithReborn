@@ -63,7 +63,7 @@ public class WoodCombat : GlobalNPC
         string id = projectile.GetGlobalProjectile<SoulSource>().SoulId;
         SoulItem soul = FindSoul(player, id);
         if (soul == null || player.HeldItem.ModItem is not SoulItem held || held.SoulId != id) return;
-        Apply(target, player, soul, projectile.damage);
+        Apply(target, player, soul, projectile.damage,((SoulBlade)projectile.ModProjectile).Blessings.TraitPower);
         if (Main.netMode == NetmodeID.MultiplayerClient && projectile.owner == Main.myPlayer)
             SendHit(projectile, target, false);
     }
@@ -81,35 +81,39 @@ public class WoodCombat : GlobalNPC
     {
         var packet = ModContent.GetInstance<ZenithReborn>().GetPacket();
         packet.Write((byte)3); packet.Write(projectile.identity); packet.Write((short)target.whoAmI);
-        packet.Write(target.netID); packet.Write(finished); packet.Send();
+        packet.Write(target.netID); packet.Write(finished);
+        packet.Write(projectile.ModProjectile is SoulBlade blade?blade.Blessings.TraitPower:1);packet.Send();
     }
     public static void ReceiveHit(BinaryReader reader, int who)
     {
         int identity = reader.ReadInt32(), index = reader.ReadInt16(), netId = reader.ReadInt32();
         bool finished = reader.ReadBoolean();
+        float relayPower=reader.ReadSingle();
+        if(!float.IsFinite(relayPower))return;
         if (Main.netMode != NetmodeID.Server || who < 0 || who >= Main.maxPlayers || index < 0 || index >= Main.maxNPCs) return;
         Player player = Main.player[who]; NPC npc = Main.npc[index];
         Projectile blade = Main.projectile.FirstOrDefault(p => p.active && p.owner == who && p.identity == identity && p.ModProjectile is SoulBlade);
         if (!player.active || player.dead || blade == null || npc.netID != netId || !Eligible(npc)) return;
         SoulItem soul = FindSoul(player, blade.GetGlobalProjectile<SoulSource>().SoulId);
         if (soul == null || player.HeldItem.ModItem is not SoulItem held || held.SoulId != soul.SoulId) return;
-        if (!finished && npc.active) Apply(npc, player, soul, blade.damage);
+        relayPower=BlessingTuning.Blessed(soul,SoulCurse.Switching)?Math.Clamp(relayPower,1,1.5f):1;
+        if (!finished && npc.active) Apply(npc, player, soul, blade.damage,relayPower);
         else if (finished)
         {
             player.GetModPlayer<WoodPlayer>().RecordHit(soul);
             player.GetModPlayer<WoodPlayer>().GrantHitBuffs(soul);
         }
     }
-    public static void Apply(NPC target, Player player, SoulItem soul, int primaryDamage)
+    public static void Apply(NPC target, Player player, SoulItem soul, int primaryDamage,float relayPower=1)
     {
         if (!Eligible(target)) return;
         NPC root = Root(target);
-        var wood = soul.Wood;
+        var wood = soul.CombatWood;
         if (wood.Count == 0) return;
         WoodCombat combat = root.GetGlobalNPC<WoodCombat>();
         WoodContribution state = combat.Entry(player.whoAmI, soul.SoulId);
         if (state.Time[3] <= 0 && state.Time[4] <= 0 && state.Time[7] <= 0) state.Growth = 0;
-        float strength = wood.Strength, p = Math.Max(1, primaryDamage);
+        float strength = wood.Strength*Math.Clamp(relayPower,1,1.5f), p = Math.Max(1, primaryDamage);
         bool changed = false;
         // Marks first, so all DoT channels see the same enhancement on this hit.
         int[] order = [1, 2, 5, 8, 10, 3, 4, 7];
@@ -154,7 +158,7 @@ public class WoodCombat : GlobalNPC
         if (!combat.Contributions.TryGetValue((projectile.owner, id), out var state)) return;
         SoulItem soul = FindSoul(Main.player[projectile.owner], id);
         if (soul == null) return;
-        WoodLoadout wood = soul.Wood;
+        WoodLoadout wood = soul.CombatWood;
         float bonus = 0;
         if (state.Time[1] > 0 && wood.Has(WoodKind.Boreal)) bonus += .01f * state.Power[1];
         if (state.Time[8] > 0 && wood.Has(WoodKind.Pearl)) bonus += .015f * state.Power[8];
@@ -183,7 +187,7 @@ public class WoodCombat : GlobalNPC
             if (npc.buffImmune[BuffID.Poisoned]) { state.Time[3] = 0; state.Transfers.RemoveAll(t => t.Family == BuffID.Poisoned); }
             if (npc.buffImmune[BuffID.OnFire]) { state.Time[7] = 0; state.Transfers.RemoveAll(t => t.Family == BuffID.OnFire); }
             dps += state.Rate;
-            int boss = SoulProgress.BossBit(npc.type);
+            int boss = SoulCurses.BossSeal(npc.type);
             if (state.Rate > 0 && boss != 0 && Eligible(npc) && Main.netMode != NetmodeID.MultiplayerClient)
             {
                 if (!SoulEncounters.Hits.TryGetValue(boss, out var participants)) SoulEncounters.Hits[boss] = participants = [];
@@ -210,7 +214,7 @@ public class WoodCombat : GlobalNPC
             if (state.Time[10] <= 0 || state.Player < 0 || state.Player >= Main.maxPlayers) continue;
             Player player = Main.player[state.Player];
             var soul = FindSoul(player, state.Soul);
-            if (!player.active || soul == null || !soul.Wood.Has(WoodKind.Spooky)) continue;
+            if (!player.active || soul == null || !soul.CombatWood.Has(WoodKind.Spooky)) continue;
             NPC[] targets = Main.npc.Where(n => n.active && n.whoAmI != npc.whoAmI && Root(n) == n && Eligible(n) &&
                 Vector2.DistanceSquared(n.Center, npc.Center) <= 360 * 360 && Collision.CanHitLine(npc.position, npc.width, npc.height, n.position, n.width, n.height))
                 .OrderBy(n => Vector2.DistanceSquared(n.Center, npc.Center)).Take(2).ToArray();

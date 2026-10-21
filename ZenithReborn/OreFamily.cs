@@ -14,6 +14,8 @@ public enum OreMaterial
 public static class OreFamily
 {
     public const int MaterialCount = 14;
+    public const int AllMaterials = (1<<MaterialCount)-1;
+    public const float BaseFlightDamage=1.5f;
 
     // One representative type per material, used for the flying-sword sprite.
     public static readonly int[] DefaultType =
@@ -78,106 +80,138 @@ public static class OreFamily
     }
 
     public static int PopCount(int mask) => System.Numerics.BitOperations.PopCount((uint)mask);
+    public static float MainDamageMultiplier(SoulItem soul,int weapon) => !IsOre(weapon) || !soul.TraitEnabled(weapon)?1:
+        Count(soul)>=4?1.10f:Count(soul)>=2?1.05f:1;
+    public static bool TriggerEligible(SoulItem soul,int weapon,int primaryOrdinal=-1)=>
+        (primaryOrdinal<0?soul.OreFlightMains.Any(i=>i.type==weapon):
+            soul.OreFlightMains.ElementAtOrDefault(primaryOrdinal)?.type==weapon) && Count(soul)>0;
+    public static bool CanFlightTrait(SoulItem soul,int weapon)=>Count(soul)>=8 && OreItems(soul).Any(i=>i.type==weapon);
 
-    // Slot expansion was not approved. Only the original active 17-slot
-    // layout contributes; legacy recovery storage is deliberately excluded.
-    public static int Count(SoulItem soul)
-    {
-        var items = soul.Hosts.Take(soul.Capacity)
-            .Concat(soul.SupportHosts.Take(soul.SupportCapacity))
-            .Concat(soul.ForestHosts.Take(soul.BonusCapacity));
-        return PopCount(Mask(items));
-    }
+    // Switching permits the first four active primaries for ore flight only.
+    // Release restores all primaries. Support traits keep their normal filter.
+    public static int Count(SoulItem soul)=>PopCount(Mask(OreItems(soul)));
+
+    public static IEnumerable<Item> OreItems(SoulItem soul)=>soul.OreFlightMains.Concat(soul.TraitSupports);
 
     public static int[] Materials(SoulItem soul)
     {
-        int mask = Mask(soul.Hosts.Take(soul.Capacity)
-            .Concat(soul.SupportHosts.Take(soul.SupportCapacity))
-            .Concat(soul.ForestHosts.Take(soul.BonusCapacity)));
+        int mask = Mask(OreItems(soul));
         return Enumerable.Range(0, MaterialCount).Where(i => (mask & (1 << i)) != 0).ToArray();
     }
 
     public static Item Representative(SoulItem soul, int material)
     {
         foreach (var item in soul.Hosts.Take(soul.Capacity).Concat(soul.ForestHosts.Take(soul.BonusCapacity))
-            .Concat(soul.SupportHosts.Take(soul.SupportCapacity)))
+            .Concat(soul.Supports))
             if (!item.IsAir && MaterialOf(item.type) == material) return item;
         return new Item(DefaultType[material]);
     }
 
-    public static int PerSwordDamage(int sourceDamage, int count) =>
-        Math.Max(1, (int)(sourceDamage * .08f * (1 + .05f * Math.Max(0, count - 1))));
+    public static float DamageFactor(int count,bool mastered=false) =>
+        BaseFlightDamage*(1+.05f*Math.Max(0,count-1))*(count>=10?1.5f:1)*(mastered?1.3f:1);
+    public static int PerSwordDamage(int sourceDamage,int count,bool mastered=false) =>
+        Math.Max(1,(int)(sourceDamage*DamageFactor(count,mastered)));
 
-    public static void OnMainHit(Projectile projectile, NPC target, int damageDone)
+    public static void OnMainHit(Projectile projectile,NPC target,int damageDone)
     {
-        if (Main.netMode == NetmodeID.Server || projectile.owner != Main.myPlayer ||
-            projectile.owner < 0 || projectile.owner >= Main.maxPlayers || projectile.ModProjectile is not SoulBlade ||
-            damageDone <= 0 || !HardOrePlayer.ValidTarget(target, false)) return;
-        var source = projectile.GetGlobalProjectile<SoulSource>();
-        if (!IsOre(source.SourceWeapon)) return;
-        var soul = WoodCombat.FindSoul(Main.player[projectile.owner], source.SoulId);
-        if (soul == null || !soul.Attached || Main.player[projectile.owner].dead ||
-            !ReferenceEquals(Main.player[projectile.owner].HeldItem.ModItem, soul) ||
-            !soul.Active.Any(i => i.type == source.SourceWeapon)) return;
-
-        int count = Count(soul);
-        if (count <= 0) return;
-
-        uint now = Main.GameUpdateCount;
-        if (OreSystem.LastGlobal.TryGetValue(soul.SoulId, out uint global) && now - global < 30) return;
-        NPC root = WoodCombat.Root(target);
-        var key = (soul.SoulId, root.GetGlobalNPC<HardOreTarget>().Id);
-        if (OreSystem.LastTarget.TryGetValue(key, out uint last) && now - last < 60) return;
-        OreSystem.LastGlobal[soul.SoulId] = now;
-        OreSystem.LastTarget[key] = now;
-
-        int[] materials = Materials(soul);
-        for (int i = 0; i < materials.Length; i++)
-        {
-            int material = materials[i];
-            int per = PerSwordDamage(projectile.damage, count);
-            int index = Projectile.NewProjectile(projectile.GetSource_FromThis(), target.Center, Vector2.Zero,
-                ModContent.ProjectileType<OreFlyingSword>(), per, 0f, projectile.owner,
-                root.whoAmI, material, count);
-            if (index >= Main.maxProjectiles) continue;
-            Projectile sword = Main.projectile[index];
-            var mod = (OreFlyingSword)sword.ModProjectile;
-            mod.BindTarget(root);
-            mod.VisualType = Representative(soul, material).type;
-            mod.Material = material;
-            mod.Total = materials.Length;
-            mod.RingIndex = i;
-            mod.SourceSoulId = soul.SoulId;
-            sword.CritChance = projectile.CritChance;
-            sword.GetGlobalProjectile<SoulSource>().SoulId = soul.SoulId;
-            sword.GetGlobalProjectile<SoulSource>().SourceWeapon = source.SourceWeapon;
-            sword.netUpdate = true;
-        }
+        if(Main.netMode==NetmodeID.Server || projectile.owner!=Main.myPlayer ||
+            projectile.owner<0 || projectile.owner>=Main.maxPlayers || projectile.ModProjectile is not SoulBlade blade ||
+            damageDone<=0 || !HardOrePlayer.ValidTarget(target,false))return;
+        var source=projectile.GetGlobalProjectile<SoulSource>();
+        var soul=WoodCombat.FindSoul(Main.player[projectile.owner],source.SoulId);
+        if(soul==null || !soul.Attached || Main.player[projectile.owner].dead ||
+            !ReferenceEquals(Main.player[projectile.owner].HeldItem.ModItem,soul) ||
+            source.PrimaryOrdinal<0 || !TriggerEligible(soul,source.SourceWeapon,source.PrimaryOrdinal) || !blade.TryConsumeOreHit())return;
+        int[] materials=Materials(soul);
+        if(materials.Length==0)return;
+        NPC root=WoodCombat.Root(target);
+        if(!OreSystem.AddSword(soul,root,projectile,materials))return;
     }
 }
 
 public class OreSystem : ModSystem
 {
-    internal static readonly Dictionary<string, uint> LastGlobal = [];
-    internal static readonly Dictionary<(string Soul, long Target), uint> LastTarget = [];
-
+    public const uint ProcCooldown=10,FormationTimeout=180;
+    internal static readonly Dictionary<string,uint> LastGlobal=[];
+    internal static readonly Dictionary<(string Soul,long Target),uint> LastTarget=[];
+    internal static readonly Dictionary<string,uint> LastSkyfall=[];
+    public const uint SkyfallCooldown=300;
+    private sealed class Formation
+    {
+        public int[] Materials;
+        public int WaveId;
+        public uint LastHit;
+        public readonly List<OreFlyingSword> Members=[];
+    }
+    private static readonly Dictionary<(string Soul,long Target),Formation> formations=[];
+    private static bool Alive(OreFlyingSword s)=>s.Projectile.active &&
+        ReferenceEquals(Main.projectile[s.Projectile.whoAmI].ModProjectile,s);
+    private static void Release(Formation f)
+    {
+        var live=f.Members.Where(Alive).ToArray();
+        // Each member has its own age because hits create them one at a time.
+        // Schedule a common wall-clock release after the last blade has settled.
+        for(int i=0;i<live.Length;i++)
+        {
+            live[i].Total=live.Length;live[i].RingIndex=i;
+            live[i].ReleaseVolley(OreFlyingSword.GrowFrames+OreFlyingSword.ChargeFrames);
+        }
+    }
+    internal static bool AddSword(SoulItem soul,NPC target,Projectile parent,int[] materials)
+    {
+        var key=(soul.SoulId,target.GetGlobalNPC<HardOreTarget>().Id);
+        if(formations.TryGetValue(key,out var old) &&
+            (!old.Materials.SequenceEqual(materials) || old.Members.Any(s=>!Alive(s))))
+        { Release(old);formations.Remove(key); }
+        if(!formations.TryGetValue(key,out var f))
+        {
+            f=new Formation {Materials=materials,WaveId=parent.identity,LastHit=Main.GameUpdateCount};
+            formations[key]=f;
+        }
+        int ordinal=f.Members.Count,material=materials[ordinal];
+        soul.RegisterOreCollection();
+        int damage=OreFamily.PerSwordDamage(parent.damage,materials.Length,soul.OreMastered);
+        int index=Projectile.NewProjectile(parent.GetSource_FromThis(),target.Center,Vector2.Zero,
+            ModContent.ProjectileType<OreFlyingSword>(),damage,0,parent.owner,target.whoAmI,material,materials.Length);
+        if(index>=Main.maxProjectiles)return false;
+        var shot=Main.projectile[index];var mod=(OreFlyingSword)shot.ModProjectile;
+        mod.BindTarget(target);mod.VisualType=OreFamily.Representative(soul,material).type;
+        mod.Material=material;mod.Total=materials.Length;mod.RingIndex=ordinal;
+        mod.SetCount=materials.Length;
+        mod.SourceSoulId=soul.SoulId;mod.Mastered=soul.OreMastered;mod.WaveId=f.WaveId;
+        mod.DamageShare=OreFamily.DamageFactor(materials.Length,soul.OreMastered);
+        mod.WaitForVolley();
+        if(materials.Length>=8 && WeaponFamilies.Of(mod.VisualType)==BladeFamily.Solid)
+            shot.knockBack=Main.player[parent.owner].GetWeaponKnockback(OreFamily.Representative(soul,material))*1.2f;
+        shot.CritChance=parent.CritChance;
+        shot.GetGlobalProjectile<SoulSource>().SoulId=soul.SoulId;
+        shot.GetGlobalProjectile<SoulSource>().SourceWeapon=parent.GetGlobalProjectile<SoulSource>().SourceWeapon;
+        shot.netUpdate=true;f.Members.Add(mod);f.LastHit=Main.GameUpdateCount;
+        if(f.Members.Count==materials.Length)
+        {
+            Release(f);formations.Remove(key);
+            if(soul.OreMastered && (!LastSkyfall.TryGetValue(soul.SoulId,out uint sky) || Main.GameUpdateCount-sky>=SkyfallCooldown) &&
+                OreSkyfall.Spawn(soul,target,parent))LastSkyfall[soul.SoulId]=Main.GameUpdateCount;
+        }
+        return true;
+    }
     public override void PostUpdateEverything()
     {
         uint now=Main.GameUpdateCount;
-        if(now%120!=0) return;
-        foreach(var key in LastGlobal.Where(p=>now-p.Value>=30).Select(p=>p.Key).ToArray()) LastGlobal.Remove(key);
-        foreach(var key in LastTarget.Where(p=>now-p.Value>=60).Select(p=>p.Key).ToArray()) LastTarget.Remove(key);
+        foreach(var pair in formations.ToArray())
+        {
+            var f=pair.Value;var live=f.Members.Where(Alive).ToArray();
+            if(live.Length==0){formations.Remove(pair.Key);continue;}
+            int target=live[0].TargetIndex;
+            if(now-f.LastHit>=FormationTimeout || target<0 || target>=Main.maxNPCs || !Main.npc[target].active)
+            {Release(f);formations.Remove(pair.Key);}
+        }
+        if(now%120!=0)return;
+        foreach(var key in LastGlobal.Where(p=>now-p.Value>=ProcCooldown).Select(p=>p.Key).ToArray())LastGlobal.Remove(key);
+        foreach(var key in LastTarget.Where(p=>now-p.Value>=ProcCooldown).Select(p=>p.Key).ToArray())LastTarget.Remove(key);
+        foreach(var key in LastSkyfall.Where(p=>now-p.Value>=SkyfallCooldown).Select(p=>p.Key).ToArray())LastSkyfall.Remove(key);
     }
-
-    public override void OnWorldUnload()
-    {
-        LastGlobal.Clear();
-        LastTarget.Clear();
-    }
-
-    public override void Unload()
-    {
-        LastGlobal.Clear();
-        LastTarget.Clear();
-    }
+    private static void Clear(){LastGlobal.Clear();LastTarget.Clear();LastSkyfall.Clear();formations.Clear();}
+    public override void OnWorldUnload()=>Clear();
+    public override void Unload()=>Clear();
 }

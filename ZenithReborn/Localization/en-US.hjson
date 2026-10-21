@@ -127,16 +127,26 @@ Mods: {
 				DisplayName: MourningMark
 				Description: Woodland soul effect. See the soul hosting panel for details.
 			}
+
+			SoulBreach: {
+				DisplayName: Breached
+				Description: Incoming hits gain 15 armor penetration
+			}
 		}
 
 		NPCs.GuardianSlimeKing.DisplayName: King Slime, the Keeper
 
 		Projectiles: {
+			BlessingStrike.DisplayName: Blessed slash
 			SoulBlade.DisplayName: Zenith Soul Blade
 			HardOreShot.DisplayName: Hard Ore Shot
 			OreFlyingSword.DisplayName: Ore Flying Sword
+			OreSkyfall.DisplayName: Skyforged Greatsword
 		}
 
-		Keybinds.OpenSoul.DisplayName: Open soul hosting interface
+		Keybinds: {
+			ActivateYujian.DisplayName: Activate Yujian burst
+			OpenSoul.DisplayName: Open soul hosting interface
+		}
 	}
 }
