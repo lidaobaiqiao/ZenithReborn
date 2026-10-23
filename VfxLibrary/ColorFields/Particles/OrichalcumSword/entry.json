@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.OrichalcumSword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "OrichalcumSword",
+  "displayName": "山铜剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.OrichalcumSword"
+}

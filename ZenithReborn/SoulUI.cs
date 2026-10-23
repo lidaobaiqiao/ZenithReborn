@@ -19,7 +19,8 @@ public partial class SoulUI : ModSystem
     private static Vector2? windowPosition;
     private static Vector2 dragOffset;
     public static bool WindowDragging { get; private set; }
-    private static int TabCount => editing?.HasLegacyExpansion == true ? 5 : 4;
+    private static int TabCount => 6;
+    public const int EnvironmentPage=5;
     private static string feedback = "";
     private static ulong feedbackUntil;
     private static RasterizerState clipState;
@@ -181,7 +182,7 @@ public partial class SoulUI : ModSystem
         }
         if(page==0)
         {
-            float[] angles=[-90,-24,142,180,-164];
+            float[] angles=[-90,-24,142,180,-164,-128];
             Vector2 c=OrbitPoint(angles[tab],RingRadius+62);
             return new((int)c.X-24,(int)c.Y-24,48,48);
         }
@@ -357,7 +358,7 @@ public partial class SoulUI : ModSystem
         {
             DrawPageSurface(body);
             int top=body.Y-scroll;
-            int bottom=page==0?DrawHosts(soul,body,top):page==1?DrawTraits(soul,body,top):page==2?DrawProgress(soul,body,top):page==CatalogPage?DrawCatalog(soul,body,top):DrawExtended(soul,body,top);
+            int bottom=page==0?DrawHosts(soul,body,top):page==1?DrawTraits(soul,body,top):page==2?DrawProgress(soul,body,top):page==CatalogPage?DrawCatalog(soul,body,top):page==EnvironmentPage?DrawEnvironments(soul,body,top):DrawExtended(soul,body,top);
             contentHeight=bottom-top;
         }
         finally
@@ -394,6 +395,7 @@ public partial class SoulUI : ModSystem
         var chosen=soul.ItemAt(selected);
         string state=Available(soul,selected)?!soul.Attached?"预览 · 附着后启用":SoulItem.SupportOrdinal(selected)>=0?"支援 · 不出剑":"主攻 · 独立出剑":"未解锁 / 已暂停 · 可空手取回";
         bottom=Section(SlotName(selected)+(chosen.IsAir?"":" · "+chosen.Name),state,b.X+8,bottom,b.Width-16,Color.Gold);
+        if(!chosen.IsAir)bottom=Paragraph(EnvironmentSwordTooltips.Label(chosen),b.X+18,bottom,b.Width-30,Accent,.66f)+12;
         bottom=Section("解锁条件",SoulProgress.SlotHint(soul,selected),b.X+8,bottom,b.Width-16,Accent);
         bottom=Section("下一步",SoulProgress.Next(soul),b.X+8,bottom,b.Width-16,Accent);
         if(DomainMode)bottom=DrawDomainReturn(b,bottom);

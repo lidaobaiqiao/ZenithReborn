@@ -87,7 +87,8 @@ public class HardOrePlayer : ModPlayer
         bool flight=p.ModProjectile is OreFlyingSword;
         foreach (HardOreKind kind in Traits(soul,p))
         {
-            if (kind == HardOreKind.Adamantite) continue;
+            if (kind == HardOreKind.Adamantite)
+            {if(target.defense>=30)OreSwordEffects.TraitAccent(target.Center,OreFamily.Tints[12]);continue;}
             var channel = new Channel(soul.SoulId, kind, host,flight);
             var key = (channel, root);
             if (!combos.TryGetValue(key, out var combo)) combos[key] = combo = new Combo();
@@ -103,6 +104,7 @@ public class HardOrePlayer : ModPlayer
             {
                 marks.RemoveAll(m => m.Channel == channel && m.Target == root);
                 marks.Add(new(channel, root, p.identity, Clock + 180,p.ModProjectile is SoulBlade blade?blade.Blessings.TraitPower:1));
+                OreSwordEffects.TraitAccent(target.Center,OreFamily.Tints[10]);
             }
             else if (kind == HardOreKind.Palladium)
             { cooldowns[channel] = Clock + 180; Heal(soul,p.ModProjectile is SoulBlade blade?blade.Blessings.TraitPower:1); }
@@ -132,6 +134,7 @@ public class HardOrePlayer : ModPlayer
         int paid = Player.GetModPlayer<WoodPlayer>().HealFromSoul(soul, amount, ref budget);
         if (paid <= 0) return;
         Player.lifeSteal -= paid; heals.Enqueue((Clock, paid));
+        OreSwordEffects.TraitAccent(Player.Center,OreFamily.Tints[9],true);
     }
     private void Spawn(Projectile parent, NPC target, HardOreKind kind)
     {

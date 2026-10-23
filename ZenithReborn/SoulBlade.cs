@@ -19,11 +19,23 @@ public class SoulSource : GlobalProjectile
     public int SourceWeapon;
     public int PrimaryOrdinal=-1;
     public int HostSlot=-1;
+    private bool environmentFirstHit;
+    public bool EnvironmentServerHit;
+    public bool MartialCharged;
+    public override void OnHitNPC(Projectile p,NPC target,NPC.HitInfo hit,int damageDone)
+    {
+        if(string.IsNullOrEmpty(SoulId) || damageDone<=0 || p.owner<0 || p.owner>=Main.maxPlayers)return;
+        Main.player[p.owner].GetModPlayer<MartialPlayer>().PrimaryHit(p,target,damageDone);
+        bool first=p.ModProjectile is SoulBlade && !environmentFirstHit;
+        if(first)environmentFirstHit=true;
+        Main.player[p.owner].GetModPlayer<EnvironmentPlayer>().Hit(p,target,hit,damageDone,first);
+    }
     public override void ModifyHitNPC(Projectile projectile,NPC target,ref NPC.HitModifiers modifiers)
     {
         if(string.IsNullOrEmpty(SoulId) || projectile.owner<0 || projectile.owner>=Main.maxPlayers)return;
         var state=Main.player[projectile.owner].GetModPlayer<BlessingPlayer>();
         if(state.Held?.SoulId==SoulId)modifiers.FinalDamage*=state.DistanceMultiplier(state.Held,target);
+        Main.player[projectile.owner].GetModPlayer<EnvironmentPlayer>().ModifyHit(projectile,target,ref modifiers);
     }
     public override void OnSpawn(Projectile projectile, IEntitySource source)
     {

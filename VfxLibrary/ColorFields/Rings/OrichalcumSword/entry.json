@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.OrichalcumSword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "OrichalcumSword",
+  "displayName": "山铜剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.OrichalcumSword"
+}

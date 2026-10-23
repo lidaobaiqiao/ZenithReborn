@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.TitaniumSword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "TitaniumSword",
+  "displayName": "钛金剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.TitaniumSword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

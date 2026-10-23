@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.PlatinumShortsword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "PlatinumShortsword",
+  "displayName": "铂金短剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.PlatinumShortsword"
+}

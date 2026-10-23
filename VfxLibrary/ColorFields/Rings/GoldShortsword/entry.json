@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.GoldShortsword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "GoldShortsword",
+  "displayName": "金短剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.GoldShortsword"
+}

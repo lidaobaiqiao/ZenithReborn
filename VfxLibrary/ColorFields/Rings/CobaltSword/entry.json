@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.CobaltSword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "CobaltSword",
+  "displayName": "钴剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.CobaltSword"
+}

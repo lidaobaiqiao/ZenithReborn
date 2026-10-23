@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.CopperShortsword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "CopperShortsword",
+  "displayName": "铜短剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.CopperShortsword"
+}

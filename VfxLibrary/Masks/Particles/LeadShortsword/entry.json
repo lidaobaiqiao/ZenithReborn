@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.LeadShortsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "LeadShortsword",
+  "displayName": "铅短剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.LeadShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

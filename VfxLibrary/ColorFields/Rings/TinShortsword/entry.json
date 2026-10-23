@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.TinShortsword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "TinShortsword",
+  "displayName": "锡短剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.TinShortsword"
+}

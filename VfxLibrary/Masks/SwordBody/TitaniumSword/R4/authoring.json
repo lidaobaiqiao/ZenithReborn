@@ -1,0 +1,46 @@
+{
+  "revision": "R4",
+  "method": "native SpriteBatch vector-mask authoring; no production renderer changes",
+  "canvas": [
+    448,
+    256
+  ],
+  "pivot": [
+    305,
+    128
+  ],
+  "tip": [
+    408,
+    128
+  ],
+  "frames": 16,
+  "fps": 20,
+  "loopSeconds": 0.8,
+  "bodyHalfWidth": 26,
+  "tailHalfWidth": 8,
+  "centerAlpha": 0.16,
+  "edgeAlpha": 0.72,
+  "leadingExtensionPixels": 6,
+  "wave": {
+    "startX": 408,
+    "endX": 48,
+    "topPhase": 0,
+    "bottomPhase": 0.43,
+    "height": 30,
+    "leadingWidth": 5,
+    "trailingWidth": 60
+  },
+  "shape": "continuous translucent blade-fitting film, tapered wake, advecting contour crests",
+  "colorField": "color._Shared.SlowFlowRadiantR4",
+  "artApproved": false,
+  "runtimeIntegrated": false,
+  "profile": "broad-film",
+  "evolvingTongues": true,
+  "rippleHeight": 0,
+  "bodyFlowDepth": 0.12,
+  "curlTongue": true,
+  "status": "withdrawn",
+  "supersededBy": "R2",
+  "reason": "User prefers R2 and rejected the hook direction",
+  "preferenceRecord": "docs/特效审核-用户反馈以R2为基准-2026-10-23.md"
+}

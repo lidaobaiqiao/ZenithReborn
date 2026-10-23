@@ -25,8 +25,8 @@ public partial class SoulUI
     public static float RingRadius => Math.Max(104,Math.Min((BaseRingCanvasHeight-188)*.5f,(RingViewport.Width-80)*.5f-62));
     public static Vector2 RingCenter => new(RingViewport.Center.X,ContentBounds().Y+BaseRingCanvasHeight*.5f-scroll);
     public static Vector2 OrbitPoint(float degrees,float radius) => RingCenter+MathHelper.ToRadians(degrees).ToRotationVector2()*radius;
-    private static readonly string[] PageNames=["武器寄宿","生效特性","成长记忆","特性图鉴","旧物取回"];
-    private static readonly Color[] PageColors=[new(116,224,244),new(194,160,250),new(252,207,113),new(139,232,188),new(227,170,148)];
+    private static readonly string[] PageNames=["武器寄宿","生效特性","成长记忆","特性图鉴","旧物取回","环境之力"];
+    private static readonly Color[] PageColors=[new(116,224,244),new(194,160,250),new(252,207,113),new(139,232,188),new(227,170,148),new(126,222,151)];
 
     private static void EnsureEffects()
     {

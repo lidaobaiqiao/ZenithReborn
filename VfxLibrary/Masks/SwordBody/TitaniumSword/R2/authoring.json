@@ -1,0 +1,28 @@
+{
+  "revision": "R2",
+  "method": "native SpriteBatch vector-mask authoring; no production renderer changes",
+  "canvas": [448, 256],
+  "pivot": [305, 128],
+  "tip": [408, 128],
+  "frames": 16,
+  "fps": 20,
+  "loopSeconds": 0.8,
+  "bodyHalfWidth": 20,
+  "tailHalfWidth": 8,
+  "centerAlpha": 0.16,
+  "edgeAlpha": 0.64,
+  "leadingExtensionPixels": 6,
+  "wave": {
+    "startX": 390,
+    "endX": 48,
+    "topPhase": 0,
+    "bottomPhase": 0.45,
+    "height": 18,
+    "leadingWidth": 10,
+    "trailingWidth": 35
+  },
+  "shape": "continuous translucent blade-fitting film, tapered wake, advecting contour crests",
+  "colorField": "color._Shared.SlowFlowRadiantR2",
+  "artApproved": false,
+  "runtimeIntegrated": false
+}

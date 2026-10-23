@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.LeadBroadsword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "LeadBroadsword",
+  "displayName": "铅宽剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.LeadBroadsword"
+}

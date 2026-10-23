@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.TinShortsword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "TinShortsword",
+  "displayName": "锡短剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.TinShortsword"
+}

@@ -18,7 +18,7 @@ internal static class EnvironmentAttributeCheck
         {
             var d=catalog[i];
             check((byte)d.Id==i+1 && EnvironmentAttributes.Get(d.Id)==d,"Environment ID round-trip agrees with E01-E21: "+d.Key);
-            check(d.Values.Count==0 && d.Traits.Count==0,"Environment has no placeholder combat numbers or active traits: "+d.Key);
+            check(d.Values.Count>0 && d.Traits.Count==1,"Environment publishes its tuned values and named mechanism: "+d.Key);
         }
         check(!EnvironmentAttributes.TryGet(SwordEnvironment.None,out _) && !EnvironmentAttributes.TryGet((SwordEnvironment)255,out _),
             "Unset or unknown IDs are not real environment attributes");
@@ -26,7 +26,8 @@ internal static class EnvironmentAttributeCheck
             new Item(ItemID.AshWoodSword).GetEnvironmentAttributes().Single().Id==SwordEnvironment.Underworld,
             "Confirmed wooden environment themes are registered by actual load hooks");
         check(new Item().GetEnvironmentAttributes().Count==0 && WeaponEnvironmentAttributes.For(null).Count==0 &&
-            new Item(ItemID.CopperBroadsword).GetEnvironmentAttributes().Count==0,"Air and unassigned metal swords do not invent environment tags");
+            new Item(ItemID.WoodenBow).GetEnvironmentAttributes().Count==0,"Air and unassigned bows do not invent environment tags");
+        var original=WeaponEnvironmentAttributes.ForType(ItemID.CopperBroadsword).Select(d=>d.Id).ToArray();
         var tags=new[]{SwordEnvironment.Caverns,SwordEnvironment.Underground,SwordEnvironment.Caverns};
         int previousGameMode=Main.GameMode;
         try
@@ -65,7 +66,7 @@ internal static class EnvironmentAttributeCheck
             check(soul.InspectEnvironmentAttributes().Any(v=>ReferenceEquals(v.Weapon,soul.LegendaryHost) && !v.IsSupport),
                 "Legendary primary participates through the existing active source enumeration");
         }
-        finally{WeaponEnvironmentAttributes.SetForType(ItemID.CopperBroadsword);Main.GameMode=previousGameMode;Main.getGoodWorld=false;}
-        check(WeaponEnvironmentAttributes.ForType(ItemID.CopperBroadsword).Count==0,"Clearing an authoring row restores an unassigned weapon");
+        finally{WeaponEnvironmentAttributes.SetForType(ItemID.CopperBroadsword,original);Main.GameMode=previousGameMode;Main.getGoodWorld=false;}
+        check(WeaponEnvironmentAttributes.ForType(ItemID.CopperBroadsword).Select(d=>d.Id).SequenceEqual(original),"Metadata authoring test restores the original ore environment binding");
     }
 }

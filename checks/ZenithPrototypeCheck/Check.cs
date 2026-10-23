@@ -80,7 +80,14 @@ public class Check : ModSystem
                 BlessingCheck.Run(Assert);
                 BlessingCameraCheck.Run(Assert);
                 EnvironmentAttributeCheck.Run(Assert);
+                SpiritFamilyCheck.Run(Assert);
+                EnvironmentCombatCheck.Run(Assert);
+                MartialCheck.Run(Assert);
+                MartialSlashCheck.Run(Assert);
+                FlowParticleCheck.Run(Assert);
+                OrePierceCheck.Run(Assert);
                 File.WriteAllText(path,$"PASS: {checks} focused checks; fullscreen domain layout, direct inventory sword exchange/return and loss protection, native legendary toggle/restoration/world-state persistence; six curse groups and distinct personal boss stages, actual blessed ItemCheck cadence up to ten blades, direct-hit limits and terrain interception, legacy migration and HERO/reforge/save/network preservation; active-only traits/codex, ten primary slots, additive shared supports and legacy recovery, UI click-through shielding, drag/viewport/slot mappings; six hardmode ore mechanisms, independent damage, cumulative ore mastery and piercing multi-target frame damage; actual native ItemCheck cadence across prefixes/speed modifiers, native two-update flight without phase rescaling, seeded actual vanilla dust comparison, tip flare envelope; compact tooltips, palettes, lunar recovery, progression, wood and DoT regressions. Graphical checks recorded separately; no live multiplayer validation.\n");
+                File.AppendAllText(path,"Martial attack prototype: retained manual three-tier meter, independent weapon snapshots, rear formation and embedded DoT, giant pin release, player dash, two-second hold damage, reversible NPC/projectile time stop, finishing wave/scar, serialization and legacy-input fallback verified. Graphical-world checkpoints recorded separately.\n");
                 Console.WriteLine("ZENITH_WOOD_PASS "+checks); Environment.Exit(0); return;
             }
             if(Environment.GetEnvironmentVariable("ZENITH_STAGE_ONE")=="1")

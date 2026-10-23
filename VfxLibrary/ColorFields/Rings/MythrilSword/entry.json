@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.MythrilSword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "MythrilSword",
+  "displayName": "秘银剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.MythrilSword"
+}

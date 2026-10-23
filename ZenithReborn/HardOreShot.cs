@@ -1,5 +1,7 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -14,10 +16,12 @@ public class HardOreShot : ModProjectile
     public override void ModifyHitNPC(NPC target,ref NPC.HitModifiers modifiers)
     {if(FromOreFlight)modifiers.DefenseEffectiveness*=Math.Clamp(FlightDamageShare,0,1);}
     private long targetGeneration;
+    private readonly SwordFlightTrail visualTrail=new();
     public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.CrystalShard;
     public override void SetDefaults()
     {
         FromOreFlight=false;FlightDamageShare=1;
+        visualTrail.Clear();
         Projectile.width = Projectile.height = 12;
         Projectile.friendly = true; Projectile.DamageType = DamageClass.Melee;
         Projectile.tileCollide = false; Projectile.ignoreWater = true;
@@ -74,11 +78,33 @@ public class HardOreShot : ModProjectile
             Projectile.velocity = Vector2.Lerp(Projectile.velocity, desired, kind == HardOreKind.Cobalt ? .16f : .1f);
             Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
         }
-        if (!Main.dedServ && (int)age % 8 == 0)
-        {
-            var dust = Dust.NewDustPerfect(Projectile.Center, DustID.Enchanted_Pink, Vector2.Zero, 190,
-                SoulVisuals.Tint(HardOreTypes.Types[(int)kind]), .4f);
-            dust.noGravity = true; dust.noLight = true;
-        }
+        if(!Main.dedServ)visualTrail.Record(Projectile.Center,Projectile.rotation);
+    }
+    public void DrawOrePrimitives()
+    {
+        var kind=(HardOreKind)Math.Clamp((int)Projectile.ai[1],0,5);
+        float rotation=kind==HardOreKind.Titanium?Projectile.rotation:Projectile.velocity.ToRotation();
+        float clock=Main.GlobalTimeWrappedHourly;
+        if(visualTrail.Count>=2)OreVisualRenderer.Flight(visualTrail,OreFamily.Tints[8+(int)kind],kind==HardOreKind.Titanium?6:8,clock,tipReach:12,head:Projectile.Center);
+        else OreVisualRenderer.Shard(Projectile.Center,rotation,kind,Projectile.localAI[0],clock);
+    }
+    public override bool PreDraw(ref Color lightColor)
+    {
+        Color tint=OreFamily.Tints[8+Math.Clamp((int)Projectile.ai[1],0,5)];
+        var texture=OreSwordEffects.SpectralTexture(TextureAssets.Projectile[ProjectileID.CrystalShard].Value);
+        Main.EntitySpriteDraw(texture,Projectile.Center-Main.screenPosition,null,Color.Lerp(tint,Color.White,.55f)*.85f,
+            Projectile.rotation,texture.Size()*.5f,Projectile.scale,SpriteEffects.None);
+        return false;
+    }
+    public OreAirFront AirFront()
+    {
+        Vector2 axis=(int)Projectile.ai[1]==(int)HardOreKind.Titanium?Projectile.rotation.ToRotationVector2():Projectile.velocity.SafeNormalize(Vector2.UnitX);
+        return new(Projectile.Center+axis*12,axis,OreFamily.Tints[8+Math.Clamp((int)Projectile.ai[1],0,5)],.55f);
+    }
+    public override void OnKill(int timeLeft)
+    {
+        if(Main.dedServ || Projectile.localAI[0]<=0)return;
+        var front=AirFront();
+        OrePierceFeedback.EndWeapon(new(Projectile.Center,Projectile.Center,front.Axis,front.Tint,-ProjectileID.CrystalShard,Projectile.scale,false));
     }
 }

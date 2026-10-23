@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "scope": "authoring-only",
+  "runtimeIntegrated": false,
+  "categories": {
+    "SwordBody": {
+      "displayName": "剑身一体组",
+      "components": [
+        "trail",
+        "bladeFlow",
+        "edgeMotion",
+        "tipAirbreak"
+      ],
+      "oneColorField": true
+    },
+    "Rings": {
+      "displayName": "圆环",
+      "components": [
+        "ring"
+      ]
+    },
+    "Particles": {
+      "displayName": "粒子",
+      "components": [
+        "particle"
+      ]
+    }
+  },
+  "swords": [
+    {
+      "id": "CopperShortsword",
+      "displayName": "铜短剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.CopperShortsword"
+      }
+    },
+    {
+      "id": "CopperBroadsword",
+      "displayName": "铜宽剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.CopperBroadsword"
+      }
+    },
+    {
+      "id": "TinShortsword",
+      "displayName": "锡短剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.TinShortsword"
+      }
+    },
+    {
+      "id": "TinBroadsword",
+      "displayName": "锡宽剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.TinBroadsword"
+      }
+    },
+    {
+      "id": "IronShortsword",
+      "displayName": "铁短剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.IronShortsword"
+      }
+    },
+    {
+      "id": "IronBroadsword",
+      "displayName": "铁宽剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.IronBroadsword"
+      }
+    },
+    {
+      "id": "LeadShortsword",
+      "displayName": "铅短剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.LeadShortsword"
+      }
+    },
+    {
+      "id": "LeadBroadsword",
+      "displayName": "铅宽剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.LeadBroadsword"
+      }
+    },
+    {
+      "id": "SilverShortsword",
+      "displayName": "银短剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.SilverShortsword"
+      }
+    },
+    {
+      "id": "SilverBroadsword",
+      "displayName": "银宽剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.SilverBroadsword"
+      }
+    },
+    {
+      "id": "TungstenShortsword",
+      "displayName": "钨短剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.TungstenShortsword"
+      }
+    },
+    {
+      "id": "TungstenBroadsword",
+      "displayName": "钨宽剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.TungstenBroadsword"
+      }
+    },
+    {
+      "id": "GoldShortsword",
+      "displayName": "金短剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.GoldShortsword"
+      }
+    },
+    {
+      "id": "GoldBroadsword",
+      "displayName": "金宽剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.GoldBroadsword"
+      }
+    },
+    {
+      "id": "PlatinumShortsword",
+      "displayName": "铂金短剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.PlatinumShortsword"
+      }
+    },
+    {
+      "id": "PlatinumBroadsword",
+      "displayName": "铂金宽剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.PlatinumBroadsword"
+      }
+    },
+    {
+      "id": "CobaltSword",
+      "displayName": "钴剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.CobaltSword"
+      }
+    },
+    {
+      "id": "PalladiumSword",
+      "displayName": "钯金剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.PalladiumSword"
+      }
+    },
+    {
+      "id": "MythrilSword",
+      "displayName": "秘银剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.MythrilSword"
+      }
+    },
+    {
+      "id": "OrichalcumSword",
+      "displayName": "山铜剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.OrichalcumSword"
+      }
+    },
+    {
+      "id": "AdamantiteSword",
+      "displayName": "精金剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.AdamantiteSword"
+      }
+    },
+    {
+      "id": "TitaniumSword",
+      "displayName": "钛金剑",
+      "source": {
+        "kind": "terraria-item",
+        "key": "Terraria/ItemID.TitaniumSword"
+      }
+    },
+    {
+      "id": "HeavenforgedGreatsword",
+      "displayName": "天铸巨剑",
+      "source": {
+        "kind": "summoned-form",
+        "key": "ZenithReborn/OreSkyfall",
+        "displayWeapon": "runtime representative item"
+      }
+    }
+  ]
+}

@@ -121,13 +121,13 @@ internal static class OreRewardCheck
         (p,s,n)=Setup(10);Primary(p,s,9,n);
         check(Flights().Length==1 && Flights()[0].SetCount==10,"Ten-tier ore support makes a non-ore primary charge exactly one sword");
         Gather(p,s,n,9,9);check(Flights().Length==10,"Ten supported first hits complete one ten-material formation");
-        check(Flights().All(f=>Math.Abs(f.Projectile.velocity.Length()-OreFlyingSword.LungeSpeed*1.5f)<.01f) &&
+        check(Flights().All(f=>Math.Abs(f.Projectile.velocity.Length()-OreFlyingSword.LungeSpeed*1.5f*OreFlightMotion.InitialSpeed)<.01f) &&
             Flights().All(f=>f.Projectile.damage==OreFamily.PerSwordDamage(100,10)),"Ten-tier damage and native movement speed both gain fifty percent");
         first=Flights()[0];using(var bytes=new MemoryStream())
         {
             first.SendExtraAI(new BinaryWriter(bytes));bytes.Position=0;var clone=new Projectile();clone.SetDefaults(first.Projectile.type);
             var received=(OreFlyingSword)clone.ModProjectile;received.ReceiveExtraAI(new BinaryReader(bytes));
-            check(received.SetCount==10 && received.AttackPass==first.AttackPass && received.FlightSpeed==first.FlightSpeed && bytes.Position==bytes.Length,"Tier and additional-pass state consume exactly the network payload");
+            check(received.SetCount==10 && received.AttackPass==first.AttackPass && received.PassAge==first.PassAge && received.FlightSpeed==first.FlightSpeed && bytes.Position==bytes.Length,"Tier, motion age and additional-pass state consume exactly the network payload");
         }
         s.SupportHosts[0].TurnToAir();Primary(p,s,9,n);
         check(Flights().Length==11 && Flights().Last().SetCount==9 && Math.Abs(Flights().Last().FlightSpeed-OreFlyingSword.LungeSpeed)<.01f,
@@ -194,12 +194,24 @@ internal static class OreRewardCheck
     private static void NativeReturn(Action<bool,string> check)
     {
         var(p,s,n)=Setup(6);Gather(p,s,n,6,0);OreTierProbe.Passes.Clear();
+        Vector2 center=n.Center;n.width=n.height=8;n.Center=center;
+        var moving=Flights()[0];var speeds=new List<float>();int turnaround=-1;
         for(int tick=0;tick<150;tick++)
         {
             AdvanceTime(1);p.GetModPlayer<HardOrePlayer>().PostUpdate();Array.Clear(n.immune);
             foreach(var q in Main.projectile.Where(q=>q.active).ToArray())q.Update(q.whoAmI);
+            if(moving.Projectile.active && moving.AttackPass==0 && speeds.Count<8)speeds.Add(moving.Projectile.velocity.Length());
+            if(moving.AttackPass==1 && turnaround<0)turnaround=tick+1;
         }
-        check(OreTierProbe.Passes.Contains(0) && OreTierProbe.Passes.Contains(1),"Actual native movement and collision deal damage on both outgoing and returning passes");
+        check(OreTierProbe.Passes.Contains(0) && OreTierProbe.Passes.Contains(1),"Accelerating native movement and swept collision hit an eight-pixel target on outgoing and returning passes");
+        check(speeds.Count==8 && speeds[0]<speeds[2] && speeds[2]<speeds[5] && speeds[^1]>speeds[0]*4,
+            "Actual native projectile updates accelerate through the opening frames instead of gliding at constant speed");
+        check(turnaround>0 && turnaround<32,"Actual accelerated outgoing pass completes substantially faster than the old 49-tick glide");
+        string report=Environment.GetEnvironmentVariable("ZENITH_CHECK_REPORT");
+        if(!string.IsNullOrEmpty(report))File.WriteAllText(Path.Combine(Path.GetDirectoryName(report),"ore-motion-0.3.49.json"),
+            System.Text.Json.JsonSerializer.Serialize(new{actualNativeProjectileUpdates=true,firstEightSpeeds=speeds,
+                outgoingFrames=turnaround,thinTargetPixels=8,outgoingAndReturningHit=OreTierProbe.Passes.Contains(0)&&OreTierProbe.Passes.Contains(1),
+                realWorldTested=false,multiplayerTested=false},new System.Text.Json.JsonSerializerOptions{WriteIndented=true}));
         (p,s,n)=Setup(1);s.OreCollectionMask=OreFamily.AllMaterials;Primary(p,s,0,n);OreTierProbe.GiantDamages.Clear();
         var giant=Main.projectile.Single(q=>q.active && q.ModProjectile is OreSkyfall);
         for(int tick=0;tick<100 && giant.active;tick++){Array.Clear(n.immune);giant.Update(giant.whoAmI);}

@@ -1,0 +1,24 @@
+{
+  "id": "mask.SwordBody.SilverShortsword",
+  "kind": "mask",
+  "category": "SwordBody",
+  "sword": "SilverShortsword",
+  "displayName": "银短剑 / 剑身一体组",
+  "status": "awaiting-art",
+  "components": [
+    "trail",
+    "bladeFlow",
+    "edgeMotion",
+    "tipAirbreak"
+  ],
+  "channel": "alpha",
+  "colorField": "color.SwordBody.SilverShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

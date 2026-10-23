@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.PlatinumShortsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "PlatinumShortsword",
+  "displayName": "铂金短剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.PlatinumShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

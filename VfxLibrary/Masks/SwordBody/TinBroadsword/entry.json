@@ -1,0 +1,24 @@
+{
+  "id": "mask.SwordBody.TinBroadsword",
+  "kind": "mask",
+  "category": "SwordBody",
+  "sword": "TinBroadsword",
+  "displayName": "锡宽剑 / 剑身一体组",
+  "status": "awaiting-art",
+  "components": [
+    "trail",
+    "bladeFlow",
+    "edgeMotion",
+    "tipAirbreak"
+  ],
+  "channel": "alpha",
+  "colorField": "color.SwordBody.TinBroadsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

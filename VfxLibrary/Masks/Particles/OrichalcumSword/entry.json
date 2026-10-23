@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.OrichalcumSword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "OrichalcumSword",
+  "displayName": "山铜剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.OrichalcumSword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

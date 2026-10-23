@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.GoldShortsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "GoldShortsword",
+  "displayName": "金短剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.GoldShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

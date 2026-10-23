@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.TitaniumSword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "TitaniumSword",
+  "displayName": "钛金剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.TitaniumSword"
+}

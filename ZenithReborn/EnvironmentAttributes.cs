@@ -21,14 +21,13 @@ public sealed class EnvironmentAttributeDefinition
     public SwordEnvironment Id { get; }
     public string Key { get; }
     public string Name { get; }
-    // Intentionally empty: absence is not a tuned zero or an active effect.
     public IReadOnlyDictionary<string,float> Values { get; }
     public IReadOnlyList<string> Traits { get; }
     internal EnvironmentAttributeDefinition(SwordEnvironment id,string key,string name)
     {
         Id=id;Key=key;Name=name;
-        Values=new ReadOnlyDictionary<string,float>(new Dictionary<string,float>(StringComparer.Ordinal));
-        Traits=Array.AsReadOnly(Array.Empty<string>());
+        Values=EnvironmentRules.Values(id);
+        Traits=Array.AsReadOnly(new[]{EnvironmentRules.MechanismNames[(int)id]});
     }
 }
 
@@ -87,8 +86,8 @@ public static class WeaponEnvironmentAttributes
     internal static void Reset()=>bindings.Clear();
     internal static void RegisterBuiltins()
     {
-        // Only themes already explicit in the wooden-sword D2 member table.
-        // Other weapons remain unassigned until their environment design exists.
+        // Existing wood themes plus clear source bindings from E1. Empty-source
+        // environments remain collectible through actual natural-biome combat.
         SetForType(ItemID.WoodenSword,SwordEnvironment.Forest);
         SetForType(ItemID.BorealWoodSword,SwordEnvironment.Snow);
         SetForType(ItemID.PalmWoodSword,SwordEnvironment.Ocean);
@@ -98,6 +97,30 @@ public static class WeaponEnvironmentAttributes
         SetForType(ItemID.ShadewoodSword,SwordEnvironment.Crimson);
         SetForType(ItemID.AshWoodSword,SwordEnvironment.Underworld);
         SetForType(ItemID.PearlwoodSword,SwordEnvironment.Hallow);
+        foreach(int type in Enumerable.Range(1,ItemID.Count-1).Where(t=>OreFamily.IsOre(t)))
+            SetForType(type,SwordEnvironment.Underground,SwordEnvironment.Caverns);
+        void Bind(SwordEnvironment e,params int[] types){foreach(int type in types)SetForType(type,e);}
+        Bind(SwordEnvironment.Underground,ItemID.BoneSword,ItemID.EnchantedSword,ItemID.BatBat,ItemID.Gladius);
+        Bind(SwordEnvironment.Underworld,ItemID.FieryGreatsword);
+        Bind(SwordEnvironment.Space,ItemID.Starfury);
+        Bind(SwordEnvironment.Snow,ItemID.IceBlade);
+        Bind(SwordEnvironment.Ice,ItemID.Frostbrand,ItemID.IceSickle);
+        Bind(SwordEnvironment.UndergroundDesert,ItemID.AntlionClaw);
+        Bind(SwordEnvironment.Jungle,ItemID.BladeofGrass);
+        Bind(SwordEnvironment.UndergroundJungle,ItemID.BeeKeeper,ItemID.Seedler,ItemID.ChlorophyteSaber,ItemID.ChlorophyteClaymore);
+        Bind(SwordEnvironment.Corruption,ItemID.LightsBane,ItemID.PurpleClubberfish);
+        Bind(SwordEnvironment.Crimson,ItemID.BloodButcherer,ItemID.Bladetongue,ItemID.FetidBaghnakhs);
+        Bind(SwordEnvironment.Hallow,ItemID.Excalibur,ItemID.PiercingStarlight);
+        Bind(SwordEnvironment.Dungeon,ItemID.Muramasa,ItemID.BeamSword,ItemID.PaladinsHammer);
+        SetForType(ItemID.BoneSword,SwordEnvironment.Underground,SwordEnvironment.Caverns,SwordEnvironment.Dungeon);
+        foreach(int type in new[]{ItemID.EnchantedSword,ItemID.BatBat,ItemID.Gladius})
+            SetForType(type,SwordEnvironment.Underground,SwordEnvironment.Caverns);
+        SetForType(ItemID.BeeKeeper,SwordEnvironment.Jungle,SwordEnvironment.UndergroundJungle);
+        SetForType(ItemID.Keybrand,SwordEnvironment.Underworld,SwordEnvironment.Dungeon);
+        SetForType(ItemID.TentacleSpike,SwordEnvironment.Corruption,SwordEnvironment.Crimson);
+        SetForType(ItemID.ZombieArm,SwordEnvironment.Forest);
+        SetForType(ItemID.Flymeal,SwordEnvironment.Forest);
+        SetForType(ItemID.BreathingReed,SwordEnvironment.Ocean);
     }
 }
 

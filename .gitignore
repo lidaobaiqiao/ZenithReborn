@@ -4,6 +4,8 @@ build-profile/
 check-profile/
 wood-check-profile/
 stage-one-playtest/
+environment-render-profile/
+martial-playtest/
 .smoke-user-data/
 artifacts/
 **/__pycache__/

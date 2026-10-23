@@ -1,0 +1,49 @@
+{
+  "id": "color._Shared.SlowFlowM1",
+  "kind": "color",
+  "category": "_Shared",
+  "sword": "SlowFlowM1",
+  "displayName": "M1青紫慢流动底色示例",
+  "status": "example",
+  "recipe": {
+    "clear": [
+      15,
+      18,
+      47
+    ],
+    "layers": [
+      {
+        "tint": [
+          65,
+          205,
+          235
+        ],
+        "opacity": 0.75,
+        "scrollPixelsPerSecond": [
+          8,
+          0
+        ]
+      },
+      {
+        "tint": [
+          132,
+          60,
+          205
+        ],
+        "opacity": 0.28,
+        "scrollPixelsPerSecond": [
+          -5,
+          0
+        ],
+        "initialYOffset": "textureHeight/3"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
+      "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
+    }
+  ],
+  "notes": "仅复现M1底色配方；最终每把剑的配色与绑定未指定。"
+}

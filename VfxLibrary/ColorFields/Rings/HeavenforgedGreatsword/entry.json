@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.HeavenforgedGreatsword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "HeavenforgedGreatsword",
+  "displayName": "天铸巨剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.HeavenforgedGreatsword"
+}

@@ -1,5 +1,6 @@
 displayName = 天顶复苏 · 诅咒残魂
 author = Zenith Reborn
-version = 0.3.39
+version = 0.3.54
+modReferences = Luminance
 includeSource = true
 buildIgnore = bin/*, obj/*, *.csproj

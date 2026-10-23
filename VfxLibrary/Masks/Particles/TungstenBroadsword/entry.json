@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.TungstenBroadsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "TungstenBroadsword",
+  "displayName": "钨宽剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.TungstenBroadsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

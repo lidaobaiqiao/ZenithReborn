@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.AdamantiteSword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "AdamantiteSword",
+  "displayName": "精金剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.AdamantiteSword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

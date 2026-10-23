@@ -1,0 +1,14 @@
+{
+  "id": "color.SwordBody.TungstenShortsword",
+  "kind": "color",
+  "category": "SwordBody",
+  "sword": "TungstenShortsword",
+  "displayName": "钨短剑 / 剑身一体组底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": null,
+  "candidateFields": [
+    "color._Shared.SlowFlowM1"
+  ],
+  "palette": null
+}

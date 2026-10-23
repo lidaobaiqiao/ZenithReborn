@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.CobaltSword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "CobaltSword",
+  "displayName": "钴剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.CobaltSword"
+}

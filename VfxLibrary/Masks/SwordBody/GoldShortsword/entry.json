@@ -1,0 +1,24 @@
+{
+  "id": "mask.SwordBody.GoldShortsword",
+  "kind": "mask",
+  "category": "SwordBody",
+  "sword": "GoldShortsword",
+  "displayName": "金短剑 / 剑身一体组",
+  "status": "awaiting-art",
+  "components": [
+    "trail",
+    "bladeFlow",
+    "edgeMotion",
+    "tipAirbreak"
+  ],
+  "channel": "alpha",
+  "colorField": "color.SwordBody.GoldShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

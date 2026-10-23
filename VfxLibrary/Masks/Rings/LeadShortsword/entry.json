@@ -1,0 +1,21 @@
+{
+  "id": "mask.Rings.LeadShortsword",
+  "kind": "mask",
+  "category": "Rings",
+  "sword": "LeadShortsword",
+  "displayName": "铅短剑 / 圆环",
+  "status": "awaiting-art",
+  "components": [
+    "ring"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Rings.LeadShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

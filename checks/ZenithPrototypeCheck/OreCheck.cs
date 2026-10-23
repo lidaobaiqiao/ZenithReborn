@@ -84,7 +84,7 @@ internal static class OreCheck
         for(int i=0;i<26;i++)foreach(var q in wave)q.ModProjectile.AI();
         check(wave.All(q=>!((OreFlyingSword)q.ModProjectile).Launched),"Older and newer collected blades wait for the same last-sword settle and charge");
         foreach(var q in wave)q.ModProjectile.AI();
-        check(wave.All(q=>((OreFlyingSword)q.ModProjectile).Launched && Math.Abs(q.velocity.Length()-11.55f)<.01),"All collected swords launch together at ten-percent faster flight speed");
+        check(wave.All(q=>((OreFlyingSword)q.ModProjectile).Launched && Math.Abs(q.velocity.Length()-11.55f*OreFlightMotion.InitialSpeed)<.01),"All collected swords launch together at the initial acceleration speed");
         check(Vector2.Distance(wave[0].Center,target.Center)>=169 && OreFlyingSword.BloomScale(10)>OreFlyingSword.BloomScale(18),"Distant formation retains the grow-then-settle animation");
         check(Math.Abs(first.DisplayScale-1.85f*wave[0].scale)<.001f && wave[0].width==20,"Display scale stays large without enlarging the original hitbox");
         check(!wave[0].hide && first.VisualType==soul.Hosts[0].type,"Actual hosted sword visual has a visible normal drawing path");

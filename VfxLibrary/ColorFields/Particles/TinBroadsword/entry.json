@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.TinBroadsword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "TinBroadsword",
+  "displayName": "锡宽剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.TinBroadsword"
+}

@@ -1,0 +1,31 @@
+{
+  "project": "CalamityOverhaul",
+  "author": "HoCha113",
+  "license": "MIT",
+  "url": "https://github.com/hocha113/CalamityOverhaul",
+  "version": "0.9209",
+  "package_sha256": "a9a6b28acd83420ed8c08928b8a21691f5c44b7114cc721e853c5f27b1207223",
+  "resources": [
+    {
+      "original": "Assets/Effects/OniCrimsonSlash.fx",
+      "file": "OniCrimsonSlash.fx",
+      "sha256": "38dde0605ecae67405ff3e6a9417a4df94535bffde3eddc562da6928ccbd49f0"
+    },
+    {
+      "original": "Assets/Effects/OniCrimsonSlash.fxc",
+      "file": "OniCrimsonSlash.fxc",
+      "sha256": "dc185407c64cdfaa18bbf84aae2e312161d833bb657decac3f4d61e2de054900"
+    },
+    {
+      "original": "Assets/Masking/SlashBrush01.rawimg",
+      "file": "SlashBrush01.rawimg",
+      "sha256": "34ef89ee5cf6da25f30eadc962fd2f00cc7361193abdf565776de2664c6e660a"
+    },
+    {
+      "original": "Assets/Masking/NoiseSoft01.rawimg",
+      "file": "NoiseSoft01.rawimg",
+      "sha256": "a086b4cab49885898e6862415add4cc2a1cde0e74ef8822a2cefc8c3c5b52eb7"
+    }
+  ],
+  "modifications": "None. Runtime parameters and geometry are supplied by ZenithReborn."
+}

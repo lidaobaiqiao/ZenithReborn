@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.TinShortsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "TinShortsword",
+  "displayName": "锡短剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.TinShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

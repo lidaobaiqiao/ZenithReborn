@@ -4,4 +4,10 @@
     <BuildMod>false</BuildMod><ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable>
   </PropertyGroup>
   <Import Project="E:/SteamLibrary/steamapps/common/tModLoader/tMLMod.targets" />
+  <ItemGroup>
+    <Reference Include="Luminance"><HintPath>../artifacts/dependencies/Luminance/Luminance.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <Target Name="PrepareLuminance" BeforeTargets="ResolveReferences">
+    <Exec Command="python &quot;$(MSBuildProjectDirectory)/../checks/prepare_luminance.py&quot;" />
+  </Target>
 </Project>

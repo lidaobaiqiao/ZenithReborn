@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.CopperBroadsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "CopperBroadsword",
+  "displayName": "铜宽剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.CopperBroadsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

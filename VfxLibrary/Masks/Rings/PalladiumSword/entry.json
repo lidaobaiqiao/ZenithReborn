@@ -1,0 +1,21 @@
+{
+  "id": "mask.Rings.PalladiumSword",
+  "kind": "mask",
+  "category": "Rings",
+  "sword": "PalladiumSword",
+  "displayName": "钯金剑 / 圆环",
+  "status": "awaiting-art",
+  "components": [
+    "ring"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Rings.PalladiumSword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

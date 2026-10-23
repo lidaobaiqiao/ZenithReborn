@@ -18,12 +18,16 @@ internal static class HeroPrefixCompat
     private static string soulId;
     private static int kills, cores, oreCollection;
     private static int seals,legacy,yujian;
+    private static int martialCharge,martialTier;
+    private static int environments,environmentBlessings;
+    private static SwordEnvironment domain;
     private static bool has;
     private static bool attached, memory;
 
     internal static void Remember(SoulItem soul)
     {
         soul.RegisterOreCollection();
+        soul.RegisterEnvironments();environments=soul.EnvironmentCollection;environmentBlessings=soul.EnvironmentBlessings;domain=soul.DomainEnvironment;
         hosts = soul.Hosts.Select(i => i.Clone()).ToArray();
         supports = soul.SupportHosts.Select(i => i.Clone()).ToArray();
         forest = soul.ForestHosts.Select(i => i.Clone()).ToArray();
@@ -35,6 +39,7 @@ internal static class HeroPrefixCompat
         cores = soul.Cores;
         oreCollection=soul.OreCollectionMask;
         seals=soul.Seals;legacy=soul.LegacyReleased;yujian=soul.YujianCharge;
+        martialCharge=soul.MartialCharge;martialTier=soul.MartialTier;
         attached = soul.Attached; memory = soul.KingMemory;
         has = true;
     }
@@ -43,7 +48,7 @@ internal static class HeroPrefixCompat
     {
         if (!has) return false;
         // Only fill a freshly rebuilt, empty soul. Never overwrite real data.
-        if (soul.Stored.Any(h => !h.IsAir) || soul.Kills != 0 || soul.Cores != 0 || soul.OreCollectionMask!=0 || soul.Seals!=0) return false;
+        if (soul.Stored.Any(h => !h.IsAir) || soul.Kills != 0 || soul.Cores != 0 || soul.OreCollectionMask!=0 || soul.Seals!=0 || soul.EnvironmentCollection!=0) return false;
         for (int i = 0; i < soul.Hosts.Length && i < hosts.Length; i++)
             if (soul.Hosts[i].IsAir && !hosts[i].IsAir)
                 soul.Hosts[i] = hosts[i].Clone();
@@ -58,6 +63,8 @@ internal static class HeroPrefixCompat
         soul.AwakeningMemory = awakened;
         soul.OreCollectionMask=oreCollection & OreFamily.AllMaterials;
         soul.Seals=seals;soul.LegacyReleased=legacy;soul.YujianCharge=yujian;
+        soul.MartialCharge=martialCharge;soul.MartialTier=martialTier;
+        soul.EnvironmentCollection=environments;soul.EnvironmentBlessings=environmentBlessings;soul.DomainEnvironment=domain;soul.NormalizeEnvironments();
         return true;
     }
 

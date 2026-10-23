@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.TungstenShortsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "TungstenShortsword",
+  "displayName": "钨短剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.TungstenShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

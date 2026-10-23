@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.IronShortsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "IronShortsword",
+  "displayName": "铁短剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.IronShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

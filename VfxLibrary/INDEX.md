@@ -1,0 +1,40 @@
+# 特效库索引
+
+钛金剑剑身一体组当前选择用户偏好的[R2视觉基准](Masks/SwordBody/TitaniumSword/R2/README.md)，R3／R4及钩子衍生研究已撤回；其余逐剑蒙版待制作。用户偏好不等于正式包已安装或实战验收。
+
+| 剑名 | 剑身一体蒙版 | 圆环蒙版 | 粒子蒙版 | 底色入口 |
+|---|---|---|---|---|
+| 铜短剑 | [剑身一体组](Masks/SwordBody/CopperShortsword/entry.json) | [圆环](Masks/Rings/CopperShortsword/entry.json) | [粒子](Masks/Particles/CopperShortsword/entry.json) | [剑身](ColorFields/SwordBody/CopperShortsword/entry.json) / [圆环](ColorFields/Rings/CopperShortsword/entry.json) / [粒子](ColorFields/Particles/CopperShortsword/entry.json) |
+| 铜宽剑 | [剑身一体组](Masks/SwordBody/CopperBroadsword/entry.json) | [圆环](Masks/Rings/CopperBroadsword/entry.json) | [粒子](Masks/Particles/CopperBroadsword/entry.json) | [剑身](ColorFields/SwordBody/CopperBroadsword/entry.json) / [圆环](ColorFields/Rings/CopperBroadsword/entry.json) / [粒子](ColorFields/Particles/CopperBroadsword/entry.json) |
+| 锡短剑 | [剑身一体组](Masks/SwordBody/TinShortsword/entry.json) | [圆环](Masks/Rings/TinShortsword/entry.json) | [粒子](Masks/Particles/TinShortsword/entry.json) | [剑身](ColorFields/SwordBody/TinShortsword/entry.json) / [圆环](ColorFields/Rings/TinShortsword/entry.json) / [粒子](ColorFields/Particles/TinShortsword/entry.json) |
+| 锡宽剑 | [剑身一体组](Masks/SwordBody/TinBroadsword/entry.json) | [圆环](Masks/Rings/TinBroadsword/entry.json) | [粒子](Masks/Particles/TinBroadsword/entry.json) | [剑身](ColorFields/SwordBody/TinBroadsword/entry.json) / [圆环](ColorFields/Rings/TinBroadsword/entry.json) / [粒子](ColorFields/Particles/TinBroadsword/entry.json) |
+| 铁短剑 | [剑身一体组](Masks/SwordBody/IronShortsword/entry.json) | [圆环](Masks/Rings/IronShortsword/entry.json) | [粒子](Masks/Particles/IronShortsword/entry.json) | [剑身](ColorFields/SwordBody/IronShortsword/entry.json) / [圆环](ColorFields/Rings/IronShortsword/entry.json) / [粒子](ColorFields/Particles/IronShortsword/entry.json) |
+| 铁宽剑 | [剑身一体组](Masks/SwordBody/IronBroadsword/entry.json) | [圆环](Masks/Rings/IronBroadsword/entry.json) | [粒子](Masks/Particles/IronBroadsword/entry.json) | [剑身](ColorFields/SwordBody/IronBroadsword/entry.json) / [圆环](ColorFields/Rings/IronBroadsword/entry.json) / [粒子](ColorFields/Particles/IronBroadsword/entry.json) |
+| 铅短剑 | [剑身一体组](Masks/SwordBody/LeadShortsword/entry.json) | [圆环](Masks/Rings/LeadShortsword/entry.json) | [粒子](Masks/Particles/LeadShortsword/entry.json) | [剑身](ColorFields/SwordBody/LeadShortsword/entry.json) / [圆环](ColorFields/Rings/LeadShortsword/entry.json) / [粒子](ColorFields/Particles/LeadShortsword/entry.json) |
+| 铅宽剑 | [剑身一体组](Masks/SwordBody/LeadBroadsword/entry.json) | [圆环](Masks/Rings/LeadBroadsword/entry.json) | [粒子](Masks/Particles/LeadBroadsword/entry.json) | [剑身](ColorFields/SwordBody/LeadBroadsword/entry.json) / [圆环](ColorFields/Rings/LeadBroadsword/entry.json) / [粒子](ColorFields/Particles/LeadBroadsword/entry.json) |
+| 银短剑 | [剑身一体组](Masks/SwordBody/SilverShortsword/entry.json) | [圆环](Masks/Rings/SilverShortsword/entry.json) | [粒子](Masks/Particles/SilverShortsword/entry.json) | [剑身](ColorFields/SwordBody/SilverShortsword/entry.json) / [圆环](ColorFields/Rings/SilverShortsword/entry.json) / [粒子](ColorFields/Particles/SilverShortsword/entry.json) |
+| 银宽剑 | [剑身一体组](Masks/SwordBody/SilverBroadsword/entry.json) | [圆环](Masks/Rings/SilverBroadsword/entry.json) | [粒子](Masks/Particles/SilverBroadsword/entry.json) | [剑身](ColorFields/SwordBody/SilverBroadsword/entry.json) / [圆环](ColorFields/Rings/SilverBroadsword/entry.json) / [粒子](ColorFields/Particles/SilverBroadsword/entry.json) |
+| 钨短剑 | [剑身一体组](Masks/SwordBody/TungstenShortsword/entry.json) | [圆环](Masks/Rings/TungstenShortsword/entry.json) | [粒子](Masks/Particles/TungstenShortsword/entry.json) | [剑身](ColorFields/SwordBody/TungstenShortsword/entry.json) / [圆环](ColorFields/Rings/TungstenShortsword/entry.json) / [粒子](ColorFields/Particles/TungstenShortsword/entry.json) |
+| 钨宽剑 | [剑身一体组](Masks/SwordBody/TungstenBroadsword/entry.json) | [圆环](Masks/Rings/TungstenBroadsword/entry.json) | [粒子](Masks/Particles/TungstenBroadsword/entry.json) | [剑身](ColorFields/SwordBody/TungstenBroadsword/entry.json) / [圆环](ColorFields/Rings/TungstenBroadsword/entry.json) / [粒子](ColorFields/Particles/TungstenBroadsword/entry.json) |
+| 金短剑 | [剑身一体组](Masks/SwordBody/GoldShortsword/entry.json) | [圆环](Masks/Rings/GoldShortsword/entry.json) | [粒子](Masks/Particles/GoldShortsword/entry.json) | [剑身](ColorFields/SwordBody/GoldShortsword/entry.json) / [圆环](ColorFields/Rings/GoldShortsword/entry.json) / [粒子](ColorFields/Particles/GoldShortsword/entry.json) |
+| 金宽剑 | [剑身一体组](Masks/SwordBody/GoldBroadsword/entry.json) | [圆环](Masks/Rings/GoldBroadsword/entry.json) | [粒子](Masks/Particles/GoldBroadsword/entry.json) | [剑身](ColorFields/SwordBody/GoldBroadsword/entry.json) / [圆环](ColorFields/Rings/GoldBroadsword/entry.json) / [粒子](ColorFields/Particles/GoldBroadsword/entry.json) |
+| 铂金短剑 | [剑身一体组](Masks/SwordBody/PlatinumShortsword/entry.json) | [圆环](Masks/Rings/PlatinumShortsword/entry.json) | [粒子](Masks/Particles/PlatinumShortsword/entry.json) | [剑身](ColorFields/SwordBody/PlatinumShortsword/entry.json) / [圆环](ColorFields/Rings/PlatinumShortsword/entry.json) / [粒子](ColorFields/Particles/PlatinumShortsword/entry.json) |
+| 铂金宽剑 | [剑身一体组](Masks/SwordBody/PlatinumBroadsword/entry.json) | [圆环](Masks/Rings/PlatinumBroadsword/entry.json) | [粒子](Masks/Particles/PlatinumBroadsword/entry.json) | [剑身](ColorFields/SwordBody/PlatinumBroadsword/entry.json) / [圆环](ColorFields/Rings/PlatinumBroadsword/entry.json) / [粒子](ColorFields/Particles/PlatinumBroadsword/entry.json) |
+| 钴剑 | [剑身一体组](Masks/SwordBody/CobaltSword/entry.json) | [圆环](Masks/Rings/CobaltSword/entry.json) | [粒子](Masks/Particles/CobaltSword/entry.json) | [剑身](ColorFields/SwordBody/CobaltSword/entry.json) / [圆环](ColorFields/Rings/CobaltSword/entry.json) / [粒子](ColorFields/Particles/CobaltSword/entry.json) |
+| 钯金剑 | [剑身一体组](Masks/SwordBody/PalladiumSword/entry.json) | [圆环](Masks/Rings/PalladiumSword/entry.json) | [粒子](Masks/Particles/PalladiumSword/entry.json) | [剑身](ColorFields/SwordBody/PalladiumSword/entry.json) / [圆环](ColorFields/Rings/PalladiumSword/entry.json) / [粒子](ColorFields/Particles/PalladiumSword/entry.json) |
+| 秘银剑 | [剑身一体组](Masks/SwordBody/MythrilSword/entry.json) | [圆环](Masks/Rings/MythrilSword/entry.json) | [粒子](Masks/Particles/MythrilSword/entry.json) | [剑身](ColorFields/SwordBody/MythrilSword/entry.json) / [圆环](ColorFields/Rings/MythrilSword/entry.json) / [粒子](ColorFields/Particles/MythrilSword/entry.json) |
+| 山铜剑 | [剑身一体组](Masks/SwordBody/OrichalcumSword/entry.json) | [圆环](Masks/Rings/OrichalcumSword/entry.json) | [粒子](Masks/Particles/OrichalcumSword/entry.json) | [剑身](ColorFields/SwordBody/OrichalcumSword/entry.json) / [圆环](ColorFields/Rings/OrichalcumSword/entry.json) / [粒子](ColorFields/Particles/OrichalcumSword/entry.json) |
+| 精金剑 | [剑身一体组](Masks/SwordBody/AdamantiteSword/entry.json) | [圆环](Masks/Rings/AdamantiteSword/entry.json) | [粒子](Masks/Particles/AdamantiteSword/entry.json) | [剑身](ColorFields/SwordBody/AdamantiteSword/entry.json) / [圆环](ColorFields/Rings/AdamantiteSword/entry.json) / [粒子](ColorFields/Particles/AdamantiteSword/entry.json) |
+| 钛金剑 | [剑身一体组](Masks/SwordBody/TitaniumSword/entry.json) | [圆环](Masks/Rings/TitaniumSword/entry.json) | [粒子](Masks/Particles/TitaniumSword/entry.json) | [剑身](ColorFields/SwordBody/TitaniumSword/entry.json) / [圆环](ColorFields/Rings/TitaniumSword/entry.json) / [粒子](ColorFields/Particles/TitaniumSword/entry.json) |
+| 天铸巨剑 | [剑身一体组](Masks/SwordBody/HeavenforgedGreatsword/entry.json) | [圆环](Masks/Rings/HeavenforgedGreatsword/entry.json) | [粒子](Masks/Particles/HeavenforgedGreatsword/entry.json) | [剑身](ColorFields/SwordBody/HeavenforgedGreatsword/entry.json) / [圆环](ColorFields/Rings/HeavenforgedGreatsword/entry.json) / [粒子](ColorFields/Particles/HeavenforgedGreatsword/entry.json) |
+
+共享来源：
+
+- [M1慢流动底色](ColorFields/_Shared/SlowFlowM1/entry.json)
+- [R2青紫慢流动底色候选](ColorFields/_Shared/SlowFlowRadiantR2/entry.json)
+- [R3青紫慢流动底色候选](ColorFields/_Shared/SlowFlowRadiantR3/entry.json)
+- [原版火焰动态形状来源](Masks/Particles/_Shared/VanillaFlames/entry.json)
+- [原版SharpTears粒子形状来源](Masks/Particles/_Shared/VanillaSharpTears/entry.json)
+- [M1技术演示绑定](Examples/M1/composition.json)
+
+分类及复用规则见[README](README.md)。

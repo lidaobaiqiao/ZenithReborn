@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.LeadShortsword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "LeadShortsword",
+  "displayName": "铅短剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.LeadShortsword"
+}

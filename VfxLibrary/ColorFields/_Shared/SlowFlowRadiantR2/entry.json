@@ -1,0 +1,51 @@
+{
+  "id": "color._Shared.SlowFlowRadiantR2",
+  "kind": "color",
+  "category": "_Shared",
+  "sword": "SlowFlowRadiantR2",
+  "displayName": "R2青紫慢流动底色候选",
+  "status": "user-preferred-baseline",
+  "recipe": {
+    "clear": [
+      20,
+      32,
+      72
+    ],
+    "composition": "additive",
+    "layers": [
+      {
+        "tint": [
+          120,
+          200,
+          255
+        ],
+        "opacity": 0.45,
+        "scrollPixelsPerSecond": [
+          8,
+          0
+        ]
+      },
+      {
+        "tint": [
+          180,
+          110,
+          240
+        ],
+        "opacity": 0.4,
+        "scrollPixelsPerSecond": [
+          -5,
+          0
+        ],
+        "initialYOffset": "textureHeight/3"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
+      "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
+    }
+  ],
+  "notes": "用户当前偏好R2整体视觉，配方保持送审时原样；正式运行时未接入。",
+  "userPreferred": true
+}

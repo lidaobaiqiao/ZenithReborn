@@ -1,0 +1,16 @@
+{
+  "id": "mask.Particles.VanillaSharpTears",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "_Shared",
+  "displayName": "原版SharpTears粒子形状来源",
+  "status": "source-reference",
+  "channel": "alpha",
+  "resources": [
+    {
+      "nativeAsset": "Terraria/Images/Extra[ExtrasID.SharpTears]"
+    }
+  ],
+  "animation": null,
+  "notes": "现有SoulFlowSpark使用的静态形状来源，不冒充逐帧动态蒙版。"
+}

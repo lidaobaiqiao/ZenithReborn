@@ -1,0 +1,27 @@
+{
+  "id": "mask.Particles.VanillaFlames",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "_Shared",
+  "displayName": "原版火焰图集来源",
+  "status": "source-reference",
+  "channel": "alpha",
+  "resources": [
+    {
+      "nativeAsset": "Terraria/Images/Projectile_85"
+    }
+  ],
+  "atlas": {
+    "size": [
+      98,
+      686
+    ],
+    "rows": 7,
+    "frameSize": [
+      98,
+      98
+    ],
+    "projectileFrameMetadata": 1
+  },
+  "notes": "原版手动分行图集。M1只使用0/1/2行示范动态蒙版；不是已确认的剑身一体蒙版。"
+}

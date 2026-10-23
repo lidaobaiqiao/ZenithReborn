@@ -1,0 +1,24 @@
+{
+  "id": "mask.SwordBody.TinShortsword",
+  "kind": "mask",
+  "category": "SwordBody",
+  "sword": "TinShortsword",
+  "displayName": "锡短剑 / 剑身一体组",
+  "status": "awaiting-art",
+  "components": [
+    "trail",
+    "bladeFlow",
+    "edgeMotion",
+    "tipAirbreak"
+  ],
+  "channel": "alpha",
+  "colorField": "color.SwordBody.TinShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

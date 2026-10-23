@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.CopperShortsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "CopperShortsword",
+  "displayName": "铜短剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.CopperShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

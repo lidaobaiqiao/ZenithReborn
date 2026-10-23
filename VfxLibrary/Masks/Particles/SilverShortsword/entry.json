@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.SilverShortsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "SilverShortsword",
+  "displayName": "银短剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.SilverShortsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

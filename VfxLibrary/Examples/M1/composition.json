@@ -1,0 +1,18 @@
+{
+  "id": "example.M1.Composition",
+  "status": "technical-example",
+  "colorField": "color._Shared.SlowFlowM1",
+  "mask": "mask.Particles.VanillaFlames",
+  "maskRows": [
+    0,
+    1,
+    2
+  ],
+  "sampleRate": 6,
+  "sequence": "ping-pong",
+  "interpolation": "alpha-crossfade",
+  "composition": "color * maskAlpha",
+  "preview": "artifacts/mask-composition-preview/composition.mp4",
+  "implementation": "checks/ZenithPrototypeCheck/MaskCompositionPreview.cs",
+  "finalWeaponArtApproved": false
+}

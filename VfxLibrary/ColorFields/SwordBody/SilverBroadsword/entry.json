@@ -1,0 +1,14 @@
+{
+  "id": "color.SwordBody.SilverBroadsword",
+  "kind": "color",
+  "category": "SwordBody",
+  "sword": "SilverBroadsword",
+  "displayName": "银宽剑 / 剑身一体组底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": null,
+  "candidateFields": [
+    "color._Shared.SlowFlowM1"
+  ],
+  "palette": null
+}

@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.IronShortsword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "IronShortsword",
+  "displayName": "铁短剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.IronShortsword"
+}

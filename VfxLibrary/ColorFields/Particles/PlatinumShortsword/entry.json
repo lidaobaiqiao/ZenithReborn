@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.PlatinumShortsword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "PlatinumShortsword",
+  "displayName": "铂金短剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.PlatinumShortsword"
+}

@@ -70,13 +70,6 @@ public class OreSkyfall : ModProjectile
             }
             Projectile.Center=new Vector2(aim.X,Math.Max(48,aim.Y-600));
             Projectile.rotation=MathHelper.PiOver2;Projectile.velocity=Vector2.Zero;
-            if(!Main.dedServ && age%3==0)
-            {
-                float angle=age*2.4f;
-                Vector2 offset=angle.ToRotationVector2()*MathHelper.Lerp(62,24,age/(float)WarningFrames);
-                offset.Y*=.35f;
-                SwordSpark.Emit(aim+offset,-offset*.025f-new Vector2(0,.6f),new Color(255,213,125),.65f);
-            }
             return;
         }
         Projectile.velocity=new Vector2(0,FallSpeed);Projectile.rotation=MathHelper.PiOver2;
@@ -84,11 +77,6 @@ public class OreSkyfall : ModProjectile
         {
             trail.Record(Projectile.Center,Projectile.rotation);
             Lighting.AddLight(Projectile.Center,new Vector3(.65f,.5f,.25f));
-            if(age%2==0)
-            {
-                SwordSpark.Emit(Projectile.Center+new Vector2(Main.rand.NextFloat(-24,24),65),new Vector2(0,-2),new Color(255,221,145),1);
-                SwordSpark.Emit(Projectile.Center+new Vector2(Main.rand.NextBool()?-28:28,-40),new Vector2(0,-3),new Color(255,213,125),.65f);
-            }
         }
         if(Projectile.Center.Y>aim.Y+420)Projectile.Kill();
     }
@@ -114,33 +102,31 @@ public class OreSkyfall : ModProjectile
     {SoulId=reader.ReadString();VisualType=reader.ReadInt32();aim=new(reader.ReadSingle(),reader.ReadSingle());age=reader.ReadInt32();FallSpeed=reader.ReadSingle();}
     public override bool PreDraw(ref Color lightColor)
     {
-        Color gold=new(255,213,125);float reveal=Math.Clamp(age/18f,0,1);
-        if(!Falling)
-        {
-            float charge=age/(float)WarningFrames;
-            OreSwordEffects.Ring(aim,gold,MathHelper.Lerp(70,28,charge),reveal*.42f,.32f);
-            OreSwordEffects.Halo(aim,gold,50,reveal*.12f);
-            OreSwordEffects.Star(aim,gold,.8f,reveal*.6f);
-            OreSwordEffects.Line(aim-new Vector2(0,580),aim,gold,2,.08f*reveal);
-            // Narrow converging side marks instead of a screen-filling column.
-            for(int side=-1;side<=1;side+=2)
-                OreSwordEffects.Line(aim+new Vector2(side*48,-18),aim+new Vector2(side*18,-18),gold,1.5f,reveal*.35f);
-        }
-        OreSwordEffects.Trail(trail,gold,46);
         int type=OreFamily.IsOre(VisualType)?VisualType:ItemID.TitaniumSword;Main.instance.LoadItem(type);
-        var texture=TextureAssets.Item[type].Value;float scale=5.6f;
-        for(int i=Math.Min(trail.Count-1,6);i>=2;i-=2)
-            Main.spriteBatch.Draw(texture,trail.Point(i)-Main.screenPosition,null,gold*(.1f*SwordFlightTrail.Strength(i-1,trail.Count)),
-                MathHelper.Pi*.75f,texture.Size()*.5f,scale,SpriteEffects.None,0);
-        OreSwordEffects.Blade(texture,Projectile.Center,MathHelper.PiOver2,scale,gold,Falling?1:reveal*.55f,1);
-        if(impactAge<18)
-        {
-            float t=impactAge/18f,fade=1-t;
-            OreSwordEffects.Ring(impactAt,gold,18+t*100,.65f*fade,.36f);
-            OreSwordEffects.Ring(impactAt,Color.White,10+t*65,.3f*fade,.36f);
-            OreSwordEffects.Halo(impactAt,gold,65,fade*.3f);
-            OreSwordEffects.Star(impactAt,gold,1.5f*fade,.8f*fade);
-        }
+        OreSwordEffects.Blade(TextureAssets.Item[type].Value,Projectile.Center,MathHelper.PiOver2,5.6f,
+            OreVisualRenderer.ForgeGold,Falling?1:Math.Clamp(age/18f,0,1)*.55f,1);
         return false;
+    }
+    public void DrawOrePrimitives()
+    {
+        float clock=Main.GlobalTimeWrappedHourly;
+        float reach=Vector2.Distance(Projectile.Center,AirFront().Tip);
+        if(Falling && trail.Count>=2)
+            OreVisualRenderer.Flight(trail,OreVisualRenderer.ForgeGold,43,clock,tailOffset:140,tipReach:reach,head:Projectile.Center);
+        else OreVisualRenderer.Sheath(Projectile.Center,MathHelper.PiOver2,reach,5.6f,
+            OreVisualRenderer.ForgeGold,Math.Clamp(age/18f,0,1)*.55f,clock);
+    }
+    public OreAirFront AirFront()
+    {
+        int type=OreFamily.IsOre(VisualType)?VisualType:ItemID.TitaniumSword;Main.instance.LoadItem(type);
+        return new(Projectile.Center+Vector2.UnitY*OreSwordEffects.BladeReach(TextureAssets.Item[type].Value,5.6f),
+            Vector2.UnitY,OreVisualRenderer.ForgeGold,2.5f);
+    }
+    public override void OnKill(int timeLeft)
+    {
+        if(Main.dedServ || age<=0 && struck.Count==0)return;
+        int type=OreFamily.IsOre(VisualType)?VisualType:ItemID.TitaniumSword;
+        OrePierceFeedback.EndWeapon(new(Projectile.Center,struck.Count>0?impactAt:Projectile.Center,Vector2.UnitY,
+            OreVisualRenderer.ForgeGold,type,5.6f,Falling||struck.Count>0));
     }
 }

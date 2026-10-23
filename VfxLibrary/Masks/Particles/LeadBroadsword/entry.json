@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.LeadBroadsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "LeadBroadsword",
+  "displayName": "铅宽剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.LeadBroadsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

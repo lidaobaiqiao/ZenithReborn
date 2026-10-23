@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.LeadBroadsword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "LeadBroadsword",
+  "displayName": "铅宽剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.LeadBroadsword"
+}

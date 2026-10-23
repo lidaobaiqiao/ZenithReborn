@@ -137,7 +137,7 @@ public partial class SoulUI
             CenterText(Fit(item.Name,r.Width-6,.46f),new(r.Center.X,r.Bottom-22),stored?Muted:Ink,.46f);
             if(hover)
             {
-                HoveredSlotRequirement=item.Name+" · 伤害 "+item.damage+(stored?" · 已寄宿同种":" · 点击装入选中剑位");
+                HoveredSlotRequirement=item.Name+" · "+EnvironmentSwordTooltips.Label(item)+" · 伤害 "+item.damage+(stored?" · 已寄宿同种":" · 点击装入选中剑位");
                 if(Main.mouseLeft && Main.mouseLeftRelease)
                 {
                     Main.mouseLeftRelease=false;

@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.IronBroadsword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "IronBroadsword",
+  "displayName": "铁宽剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.IronBroadsword"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.TungstenBroadsword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "TungstenBroadsword",
+  "displayName": "钨宽剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.TungstenBroadsword"
+}

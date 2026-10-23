@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.CopperBroadsword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "CopperBroadsword",
+  "displayName": "铜宽剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.CopperBroadsword"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.TitaniumSword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "TitaniumSword",
+  "displayName": "钛金剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.TitaniumSword"
+}

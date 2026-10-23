@@ -25,7 +25,8 @@ public class OreFlyingSword : ModProjectile
     public int SetCount=1;
     public int AttackPass {get;private set;}
     private bool traitAttempted;
-    public float FlightSpeed=>LungeSpeed*(SetCount>=10?1.5f:1);
+    public float FlightSpeed=>LungeSpeed*(SetCount>=10?1.5f:1)*(Projectile.owner>=0 && Projectile.owner<Main.maxPlayers?
+        1+Main.player[Projectile.owner].GetModPlayer<EnvironmentPlayer>().Stat("FlightSpeed"):1);
     public bool TraitWindow=>!traitAttempted && SetCount>=8;
     public float FlightDistance=>Mastered?840f:560f;
     public float FormationAge=>age;
@@ -40,8 +41,12 @@ public class OreFlyingSword : ModProjectile
     public int TargetIndex, Material, Total, RingIndex, VisualType;
     public string SourceSoulId = "";
     private int age;
+    private int passAge;
+    public int PassAge=>passAge;
     private int hitFlashAge=30,launchFlashAge=30;
     private Vector2 hitFlashAt;
+    private int visualPass=-1;
+    private readonly HashSet<long> visualStruck=[];
     private long targetIdentity;
     private Vector2 launchedFrom,aimPoint,aimVelocity,previousCenter;
     private readonly SwordFlightTrail trail=new();
@@ -62,8 +67,10 @@ public class OreFlyingSword : ModProjectile
         Projectile.hide=false;
         trail.Clear();
         age=0;Launched=false;targetIdentity=0;WaitingForVolley=false;readyAge=GrowFrames+ChargeFrames;
+        passAge=0;
         SetCount=1;AttackPass=0;traitAttempted=false;
         hitFlashAge=launchFlashAge=30;
+        visualPass=-1;visualStruck.Clear();
     }
     private NPC Target()
     {
@@ -95,6 +102,7 @@ public class OreFlyingSword : ModProjectile
         writer.Write(WaitingForVolley);writer.Write(readyAge);writer.Write(DamageShare);
         writer.Write(aimPoint.X);writer.Write(aimPoint.Y);writer.Write(aimVelocity.X);writer.Write(aimVelocity.Y);
         writer.Write(SetCount);writer.Write(AttackPass);writer.Write(traitAttempted);
+        writer.Write(passAge);
     }
     public override void ReceiveExtraAI(BinaryReader reader)
     {
@@ -106,6 +114,7 @@ public class OreFlyingSword : ModProjectile
         WaitingForVolley=reader.ReadBoolean();readyAge=Math.Max(0,reader.ReadInt32());DamageShare=reader.ReadSingle();
         aimPoint=new(reader.ReadSingle(),reader.ReadSingle());aimVelocity=new(reader.ReadSingle(),reader.ReadSingle());
         SetCount=Math.Clamp(reader.ReadInt32(),1,14);AttackPass=Math.Clamp(reader.ReadInt32(),0,1);traitAttempted=reader.ReadBoolean();
+        passAge=Math.Max(0,reader.ReadInt32());
     }
     public override void AI()
     {
@@ -121,6 +130,7 @@ public class OreFlyingSword : ModProjectile
             { Projectile.Kill();return; } // Reused slot or invalid/friendly target.
             float angle=FormationAngle(RingIndex,Total);
             float radius=Math.Clamp(Math.Max(170,(target==null?0:Math.Max(target.width,target.height))*.5f+110),170,360);
+            if(!WaitingForVolley)radius+=OreFlightMotion.Pullback(age,GatherFrames);
             Projectile.Center=aimPoint+angle.ToRotationVector2()*radius;
             Projectile.velocity=Vector2.Zero;
             Projectile.rotation=(aimPoint-Projectile.Center).ToRotation();
@@ -129,36 +139,33 @@ public class OreFlyingSword : ModProjectile
             {
                 Color tint=OreFamily.Tints[Math.Clamp(Material,0,13)];
                 Lighting.AddLight(Projectile.Center,tint.ToVector3()*.22f);
-                if((int)FormationAge%4==0) Spark(1,Main.rand.NextVector2Circular(.7f,.7f),.75f);
             }
             if(WaitingForVolley){Projectile.timeLeft=Math.Max(Projectile.timeLeft,120);return;}
             if(age<=GatherFrames)return;
             // Per-member ready ages correspond to one common release tick,
             // after the final collected blade has finished settling.
             Launched=true;Projectile.hide=false;
+            passAge=0;
             launchFlashAge=0;
             trail.Clear();
             launchedFrom=Projectile.Center;
-            float lead=Math.Min(24,Vector2.Distance(aimPoint,Projectile.Center)/FlightSpeed);
+            float lead=Math.Min(24,OreFlightMotion.TravelFrames(Vector2.Distance(aimPoint,Projectile.Center),FlightSpeed));
             Projectile.velocity=(aimPoint+aimVelocity*lead-Projectile.Center).SafeNormalize(Vector2.UnitY)*FlightSpeed;
             previousCenter=Projectile.Center;
-            Projectile.timeLeft=(int)Math.Ceiling(FlightDistance/FlightSpeed)+3;
+            Projectile.timeLeft=OreFlightMotion.TravelFrames(FlightDistance,FlightSpeed)+4;
             Projectile.netUpdate=true;
-            if(!Main.dedServ) Spark(3,-Projectile.velocity*.1f,.8f);
         }
+        Projectile.velocity=Projectile.velocity.SafeNormalize(Vector2.UnitY)*FlightSpeed*OreFlightMotion.SpeedMultiplier(passAge);
+        passAge++;
         Projectile.rotation=Projectile.velocity.ToRotation();
         if(!Main.dedServ)
         {
-            trail.Record(Projectile.Center,Projectile.rotation);
-            if(age%3==0)
+            if(visualPass!=AttackPass)
             {
-                Color tint=OreFamily.Tints[Math.Clamp(Material,0,13)];
-                Vector2 axis=Projectile.rotation.ToRotationVector2();
-                SwordSpark.Emit(Projectile.Center+axis*22*Projectile.scale,
-                    -Projectile.velocity*.08f+Main.rand.NextVector2Circular(.6f,.6f),tint,.65f);
-                if(age%6==0)SwordSpark.Emit(Projectile.Center-axis*16,
-                    -Projectile.velocity*.06f,tint,.4f);
+                visualPass=AttackPass;launchFlashAge=0;
+                OrePierceFeedback.Launch(Projectile.Center,Projectile.velocity,OreFamily.Tints[Math.Clamp(Material,0,13)]);
             }
+            trail.Record(Projectile.Center,Projectile.rotation);
             Lighting.AddLight(Projectile.Center,OreFamily.Tints[Math.Clamp(Material,0,13)].ToVector3()*.22f);
         }
         if(Vector2.Distance(launchedFrom,Projectile.Center)>FlightDistance)
@@ -166,10 +173,11 @@ public class OreFlyingSword : ModProjectile
             if(SetCount>=6 && AttackPass==0)
             {
                 AttackPass=1;launchedFrom=Projectile.Center;previousCenter=Projectile.Center;
+                passAge=0;
                 launchFlashAge=0;
-                Projectile.velocity=-Projectile.velocity;Projectile.rotation=Projectile.velocity.ToRotation();
-                Projectile.timeLeft=(int)Math.Ceiling(FlightDistance/FlightSpeed)+3;trail.Clear();Projectile.netUpdate=true;
-                if(!Main.dedServ)Spark(5,-Projectile.velocity*.08f,.85f);
+                Projectile.velocity=-Projectile.velocity.SafeNormalize(Vector2.UnitY)*FlightSpeed*OreFlightMotion.SpeedMultiplier(0);Projectile.rotation=Projectile.velocity.ToRotation();
+                Projectile.timeLeft=OreFlightMotion.TravelFrames(FlightDistance,FlightSpeed)+4;trail.Clear();Projectile.netUpdate=true;
+                visualStruck.Clear();
             }
             else Projectile.Kill();
         }
@@ -193,10 +201,10 @@ public class OreFlyingSword : ModProjectile
     public override void OnHitNPC(NPC target,NPC.HitInfo hit,int damageDone)
     {
         if(CanHitNPC(target)==false) return;
-        if(!Main.dedServ && hitFlashAge>=12)
+        if(!Main.dedServ && damageDone>0 && visualStruck.Add(WoodCombat.Root(target).GetGlobalNPC<HardOreTarget>().Id))
         {
             hitFlashAge=0;hitFlashAt=Vector2.Clamp(Projectile.Center,target.Hitbox.TopLeft(),target.Hitbox.BottomRight());
-            OreSwordEffects.Impact(hitFlashAt,-Projectile.velocity,OreFamily.Tints[Math.Clamp(Material,0,13)],false);
+            OrePierceFeedback.Strike(hitFlashAt,Projectile.velocity,OreFamily.Tints[Math.Clamp(Material,0,13)]);
         }
         if(TraitWindow && damageDone>0)
         {
@@ -208,42 +216,39 @@ public class OreFlyingSword : ModProjectile
     }
     public override bool PreDraw(ref Color lightColor)
     {
-        if(Projectile.hide || !Launched && FormationAge<=0) return false;
+        if(Projectile.hide || !Launched && FormationAge<=0)return false;
         int type=OreFamily.MaterialOf(VisualType)==Material?VisualType:OreFamily.DefaultType[Material];
         Main.instance.LoadItem(type);
-        Texture2D texture=TextureAssets.Item[type].Value;
-        Color tint=OreFamily.Tints[Math.Clamp(Material,0,13)];
         float alpha=Launched?1:MathHelper.SmoothStep(0,1,Math.Clamp(FormationAge/6,0,1));
-        float scale=DisplayScale;
-        OreSwordEffects.Trail(trail,tint,12*Projectile.scale);
-        for(int i=Math.Min(trail.Count-1,6);i>=2;i-=2)
-            Main.spriteBatch.Draw(texture,trail.Point(i)-Main.screenPosition,null,tint*(.17f*SwordFlightTrail.Strength(i-1,trail.Count)),
-                trail.Rotation(i)+MathHelper.PiOver4,texture.Size()*.5f,scale,SpriteEffects.None,0);
-        float pulse=.8f+.2f*MathF.Sin(age*.12f+RingIndex);
-        OreSwordEffects.Blade(texture,Projectile.Center,Projectile.rotation,scale,tint,alpha,pulse);
-        if(!Launched)
-        {
-            float bloom=1-Math.Clamp(FormationAge/22,0,1);
-            if(bloom>0)OreSwordEffects.Ring(Projectile.Center,tint,12+22*(1-bloom),bloom*.36f);
-        }
-        // A small moving highlight across the blade, separate from the trail.
-        Vector2 gleam=Projectile.Center+
-            Projectile.rotation.ToRotationVector2()*MathF.Sin(age*.18f)*texture.Size().Length()*.2f*scale;
-        OreSwordEffects.Star(gleam,tint,.32f,.42f*alpha,Projectile.rotation);
-        if(launchFlashAge<8)OreSwordEffects.Star(Projectile.Center,tint,.8f,1-launchFlashAge/8f,Projectile.rotation);
-        if(hitFlashAge<12)
-        {
-            float fade=1-hitFlashAge/12f;
-            OreSwordEffects.Star(hitFlashAt,tint,.6f*fade,.65f*fade,Projectile.rotation+.6f);
-        }
+        OreSwordEffects.FlyingBlade(TextureAssets.Item[type].Value,Projectile.Center,Projectile.rotation,DisplayScale,
+            OreFamily.Tints[Math.Clamp(Material,0,13)],alpha,1,Launched?launchFlashAge:30);
         return false;
     }
-    private void Spark(int count,Vector2 drift,float scale)
+    public void DrawOrePrimitives()
     {
-        Color tint=OreFamily.Tints[Math.Clamp(Material,0,13)];
-        for(int i=0;i<count;i++)
-        {
-            SwordSpark.Emit(Projectile.Center,drift+Main.rand.NextVector2Circular(1.5f,1.5f),tint,scale);
-        }
+        if(Projectile.hide || !Launched && FormationAge<=0)return;
+        var front=AirFront();float clock=Main.GlobalTimeWrappedHourly;
+        float reach=Vector2.Distance(Projectile.Center,front.Tip);
+        if(Launched && trail.Count>=2)
+            OreVisualRenderer.Flight(trail,front.Tint,14*Projectile.scale,clock,tailOffset:32*Projectile.scale,
+                tipReach:reach,heat:Math.Clamp(1-hitFlashAge/12f,0,1),head:Projectile.Center);
+        else OreVisualRenderer.Sheath(Projectile.Center,Projectile.rotation,reach,DisplayScale,front.Tint,
+            Math.Clamp(FormationAge/6,0,1),clock);
+    }
+    public OreAirFront AirFront()
+    {
+        int type=OreFamily.MaterialOf(VisualType)==Material?VisualType:OreFamily.DefaultType[Math.Clamp(Material,0,13)];
+        Main.instance.LoadItem(type);
+        float snap=launchFlashAge<4?1-launchFlashAge/4f:0;
+        Vector2 axis=Projectile.rotation.ToRotationVector2();
+        float tip=OreSwordEffects.BladeReach(TextureAssets.Item[type].Value,DisplayScale*(1+snap*.12f));
+        return new(Projectile.Center+axis*tip,axis,OreFamily.Tints[Math.Clamp(Material,0,13)],Projectile.scale);
+    }
+    public override void OnKill(int timeLeft)
+    {
+        if(Main.dedServ || Projectile.hide || !Launched && FormationAge<=0)return;
+        int type=OreFamily.MaterialOf(VisualType)==Material?VisualType:OreFamily.DefaultType[Math.Clamp(Material,0,13)];
+        OrePierceFeedback.EndWeapon(new(Projectile.Center,Projectile.Center,Projectile.velocity.SafeNormalize(Vector2.UnitX),
+            OreFamily.Tints[Math.Clamp(Material,0,13)],type,DisplayScale,false));
     }
 }

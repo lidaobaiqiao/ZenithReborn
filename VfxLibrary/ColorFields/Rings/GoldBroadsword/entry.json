@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.GoldBroadsword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "GoldBroadsword",
+  "displayName": "金宽剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.GoldBroadsword"
+}

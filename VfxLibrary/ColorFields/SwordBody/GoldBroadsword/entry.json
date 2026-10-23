@@ -1,0 +1,14 @@
+{
+  "id": "color.SwordBody.GoldBroadsword",
+  "kind": "color",
+  "category": "SwordBody",
+  "sword": "GoldBroadsword",
+  "displayName": "金宽剑 / 剑身一体组底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": null,
+  "candidateFields": [
+    "color._Shared.SlowFlowM1"
+  ],
+  "palette": null
+}

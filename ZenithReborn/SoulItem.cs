@@ -145,7 +145,9 @@ public partial class SoulItem : ModItem
         Hosts = Enumerable.Range(0, 12).Select(_ => new Item()).ToArray();
         SupportHosts = EmptySlots(11); ForestHosts = EmptySlots(2); AwakeningMemory = false;
         AdditionalSupports=[]; LegendaryHost = new();
+        EnvironmentCollection=EnvironmentBlessings=0;DomainEnvironment=SwordEnvironment.None;
         Kills = Cores = OreCollectionMask = Seals = LegacyReleased = YujianCharge = 0;
+        MartialCharge=0;MartialTier=1;
         Attached = KingMemory = false;
         Item.width = Item.height = 40; Item.damage = 20; Item.knockBack = 3;
         var zenith=new Item(ItemID.Zenith);
@@ -183,10 +185,14 @@ public partial class SoulItem : ModItem
     private static string reforgeSoulId;
     private static int reforgeKills, reforgeCores, reforgeOreCollection;
     private static int reforgeSeals,reforgeLegacy;
+    private static int reforgeEnvironments,reforgeEnvironmentBlessings;
+    private static SwordEnvironment reforgeDomain;
     private static bool reforgeAttached, reforgeMemory;
     public override void PreReforge()
     {
         RegisterOreCollection();
+        RegisterEnvironments();
+        reforgeEnvironments=EnvironmentCollection;reforgeEnvironmentBlessings=EnvironmentBlessings;reforgeDomain=DomainEnvironment;
         reforgeHosts = Hosts.Select(i => i.Clone()).ToArray();
         reforgeSupports = SupportHosts.Select(i => i.Clone()).ToArray();
         reforgeForest = ForestHosts.Select(i => i.Clone()).ToArray();
@@ -198,6 +204,7 @@ public partial class SoulItem : ModItem
         reforgeCores = Cores;
         reforgeOreCollection = OreCollectionMask;
         reforgeYujian=YujianCharge;
+        reforgeMartialCharge=MartialCharge;reforgeMartialTier=MartialTier;
         reforgeSeals=Seals;reforgeLegacy=LegacyReleased;
         reforgeAttached = Attached; reforgeMemory = KingMemory;
         RefreshStats();
@@ -225,6 +232,9 @@ public partial class SoulItem : ModItem
             AwakeningMemory = reforgeAwakened;
             OreCollectionMask = reforgeOreCollection & OreFamily.AllMaterials;
             YujianCharge=reforgeYujian;
+            MartialCharge=reforgeMartialCharge;MartialTier=reforgeMartialTier;
+            EnvironmentCollection=reforgeEnvironments;EnvironmentBlessings=reforgeEnvironmentBlessings;DomainEnvironment=reforgeDomain;
+            NormalizeEnvironments();
             Seals=reforgeSeals;LegacyReleased=reforgeLegacy;
         }
         reforgeHosts = null;
@@ -243,7 +253,10 @@ public partial class SoulItem : ModItem
     {
         AwakeningMemory |= CanAwaken;
         RegisterOreCollection();
-        tag["version"] = 7; tag["id"] = SoulId; tag["kills"] = Kills; tag["cores"] = Cores;
+        RegisterEnvironments();
+        tag["version"] = 9; tag["id"] = SoulId; tag["kills"] = Kills; tag["cores"] = Cores;
+        SaveMartial(tag);
+        tag["environments"]=EnvironmentCollection;tag["environmentBlessings"]=EnvironmentBlessings;tag["environmentDomain"]=(int)DomainEnvironment;
         SaveCurses(tag);
         tag["oreCollection"] = OreCollectionMask;
         tag["yujianCharge"]=Math.Clamp(YujianCharge,0,BlessingTuning.ChargeFrames);
@@ -273,7 +286,10 @@ public partial class SoulItem : ModItem
         OreCollectionMask=tag.GetInt("oreCollection") & OreFamily.AllMaterials;
         LoadCurses(tag);
         YujianCharge=Math.Clamp(tag.GetInt("yujianCharge"),0,BlessingTuning.ChargeFrames);
+        LoadMartial(tag);
         RegisterOreCollection();
+        EnvironmentCollection=tag.GetInt("environments");EnvironmentBlessings=tag.GetInt("environmentBlessings");
+        DomainEnvironment=(SwordEnvironment)tag.GetInt("environmentDomain");RegisterEnvironments();NormalizeEnvironments();
     }
     private static Item[] LoadSlots(TagCompound tag, string key, int count)
     {
@@ -293,6 +309,8 @@ public partial class SoulItem : ModItem
         foreach(var item in AdditionalSupports)ItemIO.Send(item,writer,writeStack:true,writeFavorite:true);
         ItemIO.Send(LegendaryHost,writer,writeStack:true,writeFavorite:true);
         writer.Write((ushort)Math.Clamp(YujianCharge,0,BlessingTuning.ChargeFrames));
+        RegisterEnvironments();NormalizeEnvironments();writer.Write(EnvironmentCollection);writer.Write(EnvironmentBlessings);writer.Write((byte)DomainEnvironment);
+        SendMartial(writer);
     }
     public override void NetReceive(BinaryReader reader)
     {
@@ -308,6 +326,8 @@ public partial class SoulItem : ModItem
         AdditionalSupports=Enumerable.Range(0,count).Select(_=>ItemIO.Receive(reader,readStack:true,readFavorite:true)).ToList();
         LegendaryHost=ItemIO.Receive(reader,readStack:true,readFavorite:true);
         YujianCharge=Math.Clamp((int)reader.ReadUInt16(),0,BlessingTuning.ChargeFrames);
+        EnvironmentCollection=reader.ReadInt32();EnvironmentBlessings=reader.ReadInt32();DomainEnvironment=(SwordEnvironment)reader.ReadByte();NormalizeEnvironments();
+        ReceiveMartial(reader);
     }
     public override bool AltFunctionUse(Player player) => true;
     public override bool CanUseItem(Player player)
@@ -329,6 +349,7 @@ public partial class SoulItem : ModItem
     public void RefreshStats()
     {
         RegisterOreCollection();
+        RegisterEnvironments();
         AwakeningMemory |= CanAwaken;
         var active = Active.ToArray();
         Item.damage = active.Length == 0 ? 1 : Math.Max(1, (int)(active.Average(i => i.damage) * Potency));
@@ -364,13 +385,14 @@ public partial class SoulItem : ModItem
             range*=(float)Active.Average(i=>TraitEnabled(i.type)?WeaponFamilies.Range(i.type):1);
         if(TraitSupports.Any(i=>WeaponFamilies.Of(i.type)==BladeFamily.Swift))range*=.85f;
         range=Curse(SoulCurse.Binding)<CurseStage.Released?Math.Max(160,range*.65f):range;
-        return range*(player.GetModPlayer<BlessingPlayer>().BurstFor(this)?2:1);
+        return range*(player.GetModPlayer<BlessingPlayer>().BurstFor(this)?2:1)*(1+player.GetModPlayer<EnvironmentPlayer>().Stat("Reach"));
     }
-    public override void UseAnimation(Player player) => player.GetModPlayer<SoulSwingPlayer>().Begin(this);
+    public override void UseAnimation(Player player)
+    {if(!player.GetModPlayer<MartialPlayer>().BeginAttack(this))player.GetModPlayer<SoulSwingPlayer>().Begin(this);}
     // Native swing style supplies the pose; ItemCheck supplies the firing clock.
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
         Vector2 velocity, int type, int damage, float knockback)
-    { player.GetModPlayer<SoulSwingPlayer>().FireHost(); return false; }
+    { if(!player.GetModPlayer<MartialPlayer>().SuppressNative(this))player.GetModPlayer<SoulSwingPlayer>().FireHost(); return false; }
 
     public int EmitBlade(Player player, Item host, int ordinal, int hostCount)
     {
@@ -389,7 +411,7 @@ public partial class SoulItem : ModItem
         var blade = (SoulBlade)Main.projectile[index].ModProjectile;
         blade.ConfigureReborn(Awakened);
         blade.TargetOffset = delta.RotatedBy((ordinal - (hostCount - 1) * .5f) * .06f);
-        blade.SwordScale = host.scale;
+        blade.SwordScale = host.scale*(1+player.GetModPlayer<EnvironmentPlayer>().Stat("Size"));
         blade.SpecialDamage = baseHostDamage;
         // Vanilla Zenith 933: one ellipse, ai[0] = Random.Next(-100, 101).
         blade.Vertical = Main.rand.Next(-100, 101);
@@ -409,7 +431,7 @@ public partial class SoulItem : ModItem
     {
         // Keep the inventory tooltip bounded regardless of the hosted loadout.
         // Full effects, conditions and progression live in the scrollable UI.
-        tooltips.Add(new(Mod,"SoulControl","按P或手持右键打开剑魂窗口"));
+        tooltips.Add(new(Mod,"SoulControl",Attached && MartialTuning.Enabled?"P打开魂域；G武技，V选档":"按P或手持右键打开剑魂窗口"));
         tooltips.Add(new(Mod,"SoulStats",$"主攻 {Active.Count()}/{Capacity+BonusCapacity+(LegendaryOn?1:0)} · 支援 {Supports.Count()}/{SupportCapacity}"));
         tooltips.Add(new(Mod,"TraitCodex","特性与成长详情请在窗口内查看"));
         if(!Attached) tooltips.Add(new(Mod,"Unstable","尚未附着：与友善史莱姆王对话"));

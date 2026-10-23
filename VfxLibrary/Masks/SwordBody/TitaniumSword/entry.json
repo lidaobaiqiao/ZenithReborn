@@ -1,0 +1,70 @@
+{
+  "id": "mask.SwordBody.TitaniumSword",
+  "kind": "mask",
+  "category": "SwordBody",
+  "sword": "TitaniumSword",
+  "displayName": "钛金剑 / 剑身一体组",
+  "status": "user-preferred-baseline",
+  "components": [
+    "trail",
+    "bladeFlow",
+    "edgeMotion",
+    "tipAirbreak"
+  ],
+  "channel": "alpha",
+  "colorField": "color.SwordBody.TitaniumSword",
+  "canvas": [
+    448,
+    256
+  ],
+  "pivot": [
+    305,
+    128
+  ],
+  "clips": {
+    "appear": {
+      "metadata": "R2/clip.json",
+      "atlas": "R2/active.png",
+      "phase": "appear"
+    },
+    "active": {
+      "metadata": "R2/clip.json",
+      "atlas": "R2/active.png",
+      "phase": "active"
+    },
+    "finish": {
+      "metadata": "R2/clip.json",
+      "atlas": "R2/active.png",
+      "phase": "finish"
+    }
+  },
+  "resources": [
+    {
+      "repoPath": "VfxLibrary/Masks/SwordBody/TitaniumSword/R2/active.png",
+      "provenance": "VfxLibrary/Masks/SwordBody/TitaniumSword/R2/authoring.json"
+    }
+  ],
+  "revision": "R2",
+  "runtimeIntegrated": false,
+  "finalArtApproved": false,
+  "previousRevisions": [
+    {
+      "revision": "R1",
+      "status": "art-rejected"
+    },
+    {
+      "revision": "R3",
+      "status": "withdrawn"
+    },
+    {
+      "revision": "R4",
+      "status": "user-rejected"
+    },
+    {
+      "revision": "R5",
+      "status": "cancelled-study"
+    }
+  ],
+  "userPreferred": true,
+  "preferenceRecord": "docs/特效审核-用户反馈以R2为基准-2026-10-23.md"
+}

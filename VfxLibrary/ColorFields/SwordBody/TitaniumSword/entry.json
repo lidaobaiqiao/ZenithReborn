@@ -1,0 +1,15 @@
+{
+  "id": "color.SwordBody.TitaniumSword",
+  "kind": "color",
+  "category": "SwordBody",
+  "sword": "TitaniumSword",
+  "displayName": "钛金剑 / 剑身一体组底色",
+  "status": "user-preferred-baseline",
+  "resources": [],
+  "reference": "color._Shared.SlowFlowRadiantR2",
+  "candidateFields": [
+    "color._Shared.SlowFlowM1"
+  ],
+  "palette": null,
+  "notes": "用户当前偏好R2整体视觉；保持原比例配色，不接入正式包。"
+}

@@ -4,6 +4,8 @@ $loaderRoot = 'E:/SteamLibrary/steamapps/common/tModLoader'
 $dotnet = 'C:/Program Files/dotnet/dotnet.exe'
 $testProfile = Join-Path $taskRoot 'wood-check-profile'
 New-Item -ItemType Directory -Force -Path "$testProfile/Mods", "$taskRoot/artifacts" | Out-Null
+& python "$PSScriptRoot/prepare_luminance.py" --profile "$taskRoot/build-profile" --profile $testProfile
+if ($LASTEXITCODE -ne 0) { throw 'Luminance dependency preparation failed' }
 foreach ($name in @('ZenithReborn', 'ZenithPrototypeCheck')) {
     $source = if ($name -eq 'ZenithReborn') { "$taskRoot/ZenithReborn" } else { "$taskRoot/checks/ZenithPrototypeCheck" }
     & $dotnet build "$source/$name.csproj" -c Release --nologo *> "$taskRoot/artifacts/$name-wood-build.log"
@@ -15,7 +17,7 @@ foreach ($name in @('ZenithReborn', 'ZenithPrototypeCheck')) {
     } finally { Pop-Location }
     Copy-Item -LiteralPath "$taskRoot/build-profile/Mods/$name.tmod" -Destination "$testProfile/Mods/$name.tmod"
 }
-'["ZenithReborn","ZenithPrototypeCheck"]' | Set-Content -Encoding utf8 -LiteralPath "$testProfile/Mods/enabled.json"
+'["Luminance","ZenithReborn","ZenithPrototypeCheck"]' | Set-Content -Encoding utf8 -LiteralPath "$testProfile/Mods/enabled.json"
 $env:ZENITH_WOOD = '1'
 $env:ZENITH_CHECK_REPORT = "$taskRoot/artifacts/wood-check.txt"
 Push-Location $loaderRoot

@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.GoldShortsword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "GoldShortsword",
+  "displayName": "金短剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.GoldShortsword"
+}

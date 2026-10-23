@@ -29,6 +29,7 @@ public class SoulSwingPlayer : ModPlayer
 
     private bool Valid()=>swinging!=null && !Player.dead && Player.HeldItem.ModItem==swinging &&
         swinging.Attached && Player.altFunctionUse!=2 && Player.itemAnimation>0 && !SoulUI.IsEditing(swinging) &&
+        !Player.GetModPlayer<MartialPlayer>().SuppressNative(swinging) &&
         hosts.Length>0 && swinging.Active.SequenceEqual(hosts) && hosts.Select(i=>i.type).SequenceEqual(types);
 
     public void FireHost()

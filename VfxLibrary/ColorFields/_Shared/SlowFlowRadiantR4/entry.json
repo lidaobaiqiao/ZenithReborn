@@ -1,0 +1,92 @@
+{
+  "id": "color._Shared.SlowFlowRadiantR4",
+  "kind": "color",
+  "category": "_Shared",
+  "sword": "SlowFlowRadiantR4",
+  "displayName": "R4前青后紫慢流动底色候选",
+  "status": "withdrawn-study",
+  "recipe": {
+    "clear": [
+      12,
+      20,
+      60
+    ],
+    "composition": "additive",
+    "layers": [
+      {
+        "tint": [
+          65,
+          180,
+          230
+        ],
+        "opacity": 0.45,
+        "scrollPixelsPerSecond": [
+          8,
+          0
+        ]
+      },
+      {
+        "tint": [
+          148,
+          65,
+          224
+        ],
+        "opacity": 0.4,
+        "scrollPixelsPerSecond": [
+          -5,
+          0
+        ],
+        "initialYOffset": "textureHeight/3"
+      }
+    ],
+    "baseGradient": [
+      {
+        "at": 0,
+        "color": [
+          12,
+          8,
+          40
+        ]
+      },
+      {
+        "at": 0.55,
+        "color": [
+          20,
+          32,
+          90
+        ]
+      },
+      {
+        "at": 0.78,
+        "color": [
+          24,
+          100,
+          174
+        ]
+      },
+      {
+        "at": 0.95,
+        "color": [
+          24,
+          140,
+          210
+        ]
+      },
+      {
+        "at": 1,
+        "color": [
+          20,
+          104,
+          180
+        ]
+      }
+    ]
+  },
+  "resources": [
+    {
+      "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
+      "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
+    }
+  ],
+  "notes": "历史研究，不作为当前视觉基准；用户选择R2。"
+}

@@ -86,7 +86,7 @@ public class WoodPlayer : ModPlayer
     public int BoostSoulHealing(int baseAmount, int remainingBudget)
     {
         float bonus = Loadout.Has(WoodKind.Shade) && Player.HasBuff(ModContent.BuffType<BloodFragrance>()) ? .04f * Loadout.Strength : 0;
-        return Math.Clamp((int)(baseAmount * (1 + bonus)), 0, Math.Max(0, remainingBudget));
+        return Math.Clamp((int)(baseAmount * (1 + bonus)*Player.GetModPlayer<EnvironmentPlayer>().HealingMultiplier), 0, Math.Max(0, remainingBudget));
     }
     // Shared entry for direct-healing sword traits. Never scales unrelated potions or global life steal.
     public int HealFromSoul(SoulItem soul, int baseAmount, ref float remainingBudget)

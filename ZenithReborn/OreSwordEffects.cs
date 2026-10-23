@@ -10,6 +10,35 @@ namespace ZenithReborn;
 // Client-only drawing helpers. No extra projectiles, combat state or blend-state changes.
 public static class OreSwordEffects
 {
+    private static readonly Dictionary<Texture2D,Texture2D> spectralTextures=new();
+    private static readonly Dictionary<Texture2D,float> bladeReach=new();
+    public static float BladeReach(Texture2D texture,float scale)
+    {SpectralTexture(texture);return bladeReach[texture]*scale;}
+    // Preserve the vanilla silhouette, alpha and relief. Remove the source
+    // sprite's competing hue once, then light it with the blade's own palette.
+    public static Texture2D SpectralTexture(Texture2D source)
+    {
+        if(spectralTextures.TryGetValue(source,out var cached))return cached;
+        var pixels=new Color[source.Width*source.Height];source.GetData(pixels);
+        float reach=1;
+        for(int i=0;i<pixels.Length;i++)
+        {
+            Color c=pixels[i];
+            if(c.A>32)
+                reach=Math.Max(reach,((i%source.Width+1-source.Width*.5f)-(i/source.Width-source.Height*.5f))*.70710678f);
+            float light=c.A==0?0:Math.Clamp((c.R*.2126f+c.G*.7152f+c.B*.0722f)/c.A,0,1);
+            byte value=(byte)Math.Clamp((.08f+.92f*MathF.Sqrt(light))*c.A,0,255);
+            pixels[i]=new(value,value,value,c.A);
+        }
+        var copy=new Texture2D(Main.graphics.GraphicsDevice,source.Width,source.Height);copy.SetData(pixels);
+        spectralTextures[source]=copy;spectralTextures[copy]=copy;
+        bladeReach[source]=bladeReach[copy]=reach;return copy;
+    }
+    public static void Unload()
+    {
+        var owned=spectralTextures.Values.Distinct().ToArray();spectralTextures.Clear();bladeReach.Clear();
+        Main.QueueMainThreadAction(()=>{foreach(var texture in owned)texture.Dispose();});
+    }
     private static Color Glow(Color tint,float strength)
     { var color=tint*Math.Clamp(strength,0,1);color.A=0;return color; }
 
@@ -64,15 +93,9 @@ public static class OreSwordEffects
 
     public static void Blade(Texture2D texture,Vector2 at,float rotation,float scale,Color tint,float alpha,float pulse)
     {
-        Vector2 normal=(rotation+MathHelper.PiOver2).ToRotationVector2();
-        for(int side=-1;side<=1;side+=2)
-            Main.spriteBatch.Draw(texture,at-Main.screenPosition+normal*side*1.4f,null,Glow(tint,.15f*alpha),
-                rotation+MathHelper.PiOver4,texture.Size()*.5f,scale,SpriteEffects.None,0);
-        Halo(at,tint,16*scale,.09f*alpha);
-        Main.spriteBatch.Draw(texture,at-Main.screenPosition,null,Color.Lerp(tint,Color.White,.72f)*alpha,
+        texture=SpectralTexture(texture);
+        Main.spriteBatch.Draw(texture,at-Main.screenPosition,null,Color.Lerp(tint,Color.White,.12f)*(alpha*.6f),
             rotation+MathHelper.PiOver4,texture.Size()*.5f,scale,SpriteEffects.None,0);
-        Vector2 tip=at+rotation.ToRotationVector2()*texture.Size().Length()*.32f*scale;
-        Star(tip,tint,.42f*scale,.4f*alpha*pulse,rotation);
     }
 
     public static void Impact(Vector2 at,Vector2 direction,Color tint,bool giant)
@@ -83,7 +106,32 @@ public static class OreSwordEffects
         for(int i=0;i<count;i++)
         {
             Vector2 velocity=axis.RotatedBy(Main.rand.NextFloat(-1.15f,1.15f))*Main.rand.NextFloat(1.5f,giant?7:3.5f);
-            SwordSpark.Emit(at+Main.rand.NextVector2Circular(5,5),velocity,tint,giant?1.1f:.65f);
+            Ember(at+Main.rand.NextVector2Circular(5,5),velocity*(giant?1.8f:1.5f),tint,giant?1.25f:.8f,i%3==0);
+        }
+    }
+    public static void FlyingBlade(Texture2D texture,Vector2 at,float rotation,float scale,Color tint,
+        float alpha,float pulse,int launchAge,float preparation=0)
+    {
+        texture=SpectralTexture(texture);
+        Vector2 axis=rotation.ToRotationVector2();
+        float snap=launchAge<4?1-launchAge/4f:0;
+        // Anticipation is display-only while CanDamage is false. The launched
+        // blade stays centered on its real projectile/collision position.
+        at-=axis*(preparation*9);
+        Blade(texture,at,rotation,scale*(1+snap*.12f-preparation*.06f),tint,alpha,pulse);
+    }
+    public static void Ember(Vector2 at,Vector2 velocity,Color tint,float size,bool mote=false)
+    {
+        if(Main.dedServ)return;
+        SoulFlowSpark.Spawn(new(at,velocity,tint,size,mote?36:25,mote));
+    }
+    public static void TraitAccent(Vector2 at,Color tint,bool inward=false)
+    {
+        if(Main.dedServ)return;
+        for(int i=0;i<8;i++)
+        {
+            Vector2 axis=(i*MathHelper.TwoPi/8).ToRotationVector2();
+            Ember(at+axis*(inward?35:5),axis*(inward?-1.9f:2.5f)+axis.RotatedBy(MathHelper.PiOver2)*1.4f,tint,.7f,true);
         }
     }
 }

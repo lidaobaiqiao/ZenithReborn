@@ -9,15 +9,22 @@ public class ZenithReborn : Mod
 {
     internal static ModKeybind OpenSoul;
     internal static ModKeybind ActivateYujian;
+    internal static ModKeybind ActivateMartial,CycleMartial;
     public override void Load()
     {
         if (!Main.dedServ) OpenSoul = KeybindLoader.RegisterKeybind(this, "OpenSoul", "P");
         if (!Main.dedServ) ActivateYujian = KeybindLoader.RegisterKeybind(this,"ActivateYujian","O");
+        if(!Main.dedServ)
+        {
+            ActivateMartial=KeybindLoader.RegisterKeybind(this,"ActivateMartial","G");
+            CycleMartial=KeybindLoader.RegisterKeybind(this,"CycleMartial","V");
+        }
     }
-    public override void Unload() {OpenSoul = null;ActivateYujian=null;}
+    public override void Unload() {OpenSoul = null;ActivateYujian=null;ActivateMartial=CycleMartial=null;}
     public override void HandlePacket(BinaryReader reader,int whoAmI)
     {
         byte action=reader.ReadByte();
+        if(action==11){EnvironmentPlayer.ReceiveHit(reader,whoAmI);return;}
         if(action==10){BlessingPlayer.Receive(reader,whoAmI);return;}
         if (action == 3) { WoodCombat.ReceiveHit(reader, whoAmI); return; }
         if (action == 4)

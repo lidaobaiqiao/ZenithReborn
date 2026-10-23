@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.PlatinumBroadsword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "PlatinumBroadsword",
+  "displayName": "铂金宽剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.PlatinumBroadsword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.CopperShortsword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "CopperShortsword",
+  "displayName": "铜短剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.CopperShortsword"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "color.Particles.MythrilSword",
+  "kind": "color",
+  "category": "Particles",
+  "sword": "MythrilSword",
+  "displayName": "秘银剑 / 粒子底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.MythrilSword"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "mask.Particles.MythrilSword",
+  "kind": "mask",
+  "category": "Particles",
+  "sword": "MythrilSword",
+  "displayName": "秘银剑 / 粒子",
+  "status": "awaiting-art",
+  "components": [
+    "particle"
+  ],
+  "channel": "alpha",
+  "colorField": "color.Particles.MythrilSword",
+  "canvas": null,
+  "pivot": null,
+  "clips": {
+    "appear": null,
+    "active": null,
+    "finish": null
+  },
+  "resources": []
+}

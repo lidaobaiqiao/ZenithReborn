@@ -1,0 +1,157 @@
+{
+  "revision": "R2",
+  "status": "user-preferred-baseline",
+  "grid": [
+    4,
+    4
+  ],
+  "frameSize": [
+    448,
+    256
+  ],
+  "canvas": [
+    448,
+    256
+  ],
+  "pivot": [
+    305,
+    128
+  ],
+  "tip": [
+    408,
+    128
+  ],
+  "frames": 16,
+  "fps": 20,
+  "loop": true,
+  "interpolation": "alpha-linear",
+  "channel": "alpha",
+  "encoding": "RGBA premultiplied white, use Alpha only",
+  "atlasSha256": "605b4716b3e4195e4ccc95327a11218d8d54749f9dbcd89aa786cfcf88a99a67",
+  "authoring": "authoring.json",
+  "sourceMethod": "Native SpriteBatch vector recipe; GPU Alpha output packed unchanged",
+  "sourceCode": "checks/ZenithPrototypeCheck/SwordBodyVectorMask.cs",
+  "crestPositions": [
+    {
+      "frame": 0,
+      "upper": 390.0,
+      "lower": 236.1
+    },
+    {
+      "frame": 1,
+      "upper": 368.625,
+      "lower": 214.725
+    },
+    {
+      "frame": 2,
+      "upper": 347.25,
+      "lower": 193.35
+    },
+    {
+      "frame": 3,
+      "upper": 325.875,
+      "lower": 171.975
+    },
+    {
+      "frame": 4,
+      "upper": 304.5,
+      "lower": 150.6
+    },
+    {
+      "frame": 5,
+      "upper": 283.125,
+      "lower": 129.225
+    },
+    {
+      "frame": 6,
+      "upper": 261.75,
+      "lower": 107.85
+    },
+    {
+      "frame": 7,
+      "upper": 240.375,
+      "lower": 86.475
+    },
+    {
+      "frame": 8,
+      "upper": 219.0,
+      "lower": 65.1
+    },
+    {
+      "frame": 9,
+      "upper": 197.625,
+      "lower": 385.725
+    },
+    {
+      "frame": 10,
+      "upper": 176.25,
+      "lower": 364.35
+    },
+    {
+      "frame": 11,
+      "upper": 154.875,
+      "lower": 342.975
+    },
+    {
+      "frame": 12,
+      "upper": 133.5,
+      "lower": 321.6
+    },
+    {
+      "frame": 13,
+      "upper": 112.125,
+      "lower": 300.225
+    },
+    {
+      "frame": 14,
+      "upper": 90.75,
+      "lower": 278.85
+    },
+    {
+      "frame": 15,
+      "upper": 69.375,
+      "lower": 257.475
+    }
+  ],
+  "adjacentAlphaMeanChanges": [
+    2.3338187081473216,
+    2.5447562081473216,
+    2.542018345424107,
+    2.46624755859375,
+    2.2809535435267856,
+    2.1082850864955356,
+    2.0509033203125,
+    2.021815708705357,
+    2.45587158203125,
+    2.3751133510044644,
+    2.4011404854910716,
+    2.29779052734375,
+    2.0735909598214284,
+    1.9039219447544642,
+    1.81329345703125,
+    2.2826625279017856
+  ],
+  "phases": {
+    "appear": {
+      "seconds": 0.3,
+      "activeMaskContinues": true,
+      "envelope": "tip-to-tail reveal"
+    },
+    "active": {
+      "seconds": 1.6,
+      "activeMaskContinues": true
+    },
+    "finish": {
+      "seconds": 0.5,
+      "activeMaskContinues": true,
+      "envelope": "tail-to-tip retreat and fade"
+    }
+  },
+  "contextBlend": "premultiplied additive",
+  "colorField": "color._Shared.SlowFlowRadiantR2",
+  "runtimeIntegrated": false,
+  "finalArtApproved": false,
+  "userPreferred": true,
+  "preferenceRecord": "docs/特效审核-用户反馈以R2为基准-2026-10-23.md",
+  "sourceCodeSha256": "39f7ed685d67df0d2815c76e8fda415cb80ed4d9615b921b3a0e6de14fa813f1"
+}

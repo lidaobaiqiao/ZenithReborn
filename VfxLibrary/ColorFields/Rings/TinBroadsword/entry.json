@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.TinBroadsword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "TinBroadsword",
+  "displayName": "锡宽剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.TinBroadsword"
+}

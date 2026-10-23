@@ -1,0 +1,263 @@
+{
+  "revision": "R1",
+  "status": "art-rejected",
+  "grid": [
+    4,
+    4
+  ],
+  "frameSize": [
+    448,
+    256
+  ],
+  "canvas": [
+    448,
+    256
+  ],
+  "pivot": [
+    305,
+    128
+  ],
+  "tip": [
+    408,
+    128
+  ],
+  "frames": 16,
+  "fps": 20,
+  "loop": true,
+  "interpolation": "alpha-linear",
+  "sourceSha256": "f0d73ceab290d63c08f8833d2bc159cfb68e9ffa613e6962d73ef4d64fb11f9c",
+  "atlasSha256": "36cd9a9e70005646e06d4d03bfaa2041687a9ff640b5a0dab1e3adeb8904cbe2",
+  "sourceMethod": "built-in image_gen; alpha extraction and integer registration only",
+  "registrations": [
+    {
+      "frame": 0,
+      "sourceTip": [
+        368,
+        128
+      ],
+      "translation": [
+        40,
+        0
+      ]
+    },
+    {
+      "frame": 1,
+      "sourceTip": [
+        367,
+        130
+      ],
+      "translation": [
+        41,
+        -2
+      ]
+    },
+    {
+      "frame": 2,
+      "sourceTip": [
+        366,
+        130
+      ],
+      "translation": [
+        42,
+        -2
+      ]
+    },
+    {
+      "frame": 3,
+      "sourceTip": [
+        361,
+        130
+      ],
+      "translation": [
+        47,
+        -2
+      ]
+    },
+    {
+      "frame": 4,
+      "sourceTip": [
+        368,
+        120
+      ],
+      "translation": [
+        40,
+        8
+      ]
+    },
+    {
+      "frame": 5,
+      "sourceTip": [
+        367,
+        120
+      ],
+      "translation": [
+        41,
+        8
+      ]
+    },
+    {
+      "frame": 6,
+      "sourceTip": [
+        366,
+        120
+      ],
+      "translation": [
+        42,
+        8
+      ]
+    },
+    {
+      "frame": 7,
+      "sourceTip": [
+        363,
+        121
+      ],
+      "translation": [
+        45,
+        7
+      ]
+    },
+    {
+      "frame": 8,
+      "sourceTip": [
+        368,
+        111
+      ],
+      "translation": [
+        40,
+        17
+      ]
+    },
+    {
+      "frame": 9,
+      "sourceTip": [
+        367,
+        110
+      ],
+      "translation": [
+        41,
+        18
+      ]
+    },
+    {
+      "frame": 10,
+      "sourceTip": [
+        366,
+        110
+      ],
+      "translation": [
+        42,
+        18
+      ]
+    },
+    {
+      "frame": 11,
+      "sourceTip": [
+        362,
+        112
+      ],
+      "translation": [
+        46,
+        16
+      ]
+    },
+    {
+      "frame": 12,
+      "sourceTip": [
+        367,
+        100
+      ],
+      "translation": [
+        41,
+        28
+      ]
+    },
+    {
+      "frame": 13,
+      "sourceTip": [
+        367,
+        100
+      ],
+      "translation": [
+        41,
+        28
+      ]
+    },
+    {
+      "frame": 14,
+      "sourceTip": [
+        366,
+        99
+      ],
+      "translation": [
+        42,
+        29
+      ]
+    },
+    {
+      "frame": 15,
+      "sourceTip": [
+        361,
+        100
+      ],
+      "translation": [
+        47,
+        28
+      ]
+    }
+  ],
+  "adjacentAlphaMeanChanges": [
+    8.576075962611608,
+    8.719648088727679,
+    11.983930315290179,
+    12.244367327008929,
+    12.132080078125,
+    9.70562744140625,
+    8.301504952566964,
+    10.424150739397321,
+    10.175728934151786,
+    13.015956333705358,
+    11.23077392578125,
+    11.236703055245536,
+    12.056178501674108,
+    7.620744977678571,
+    6.655630929129464,
+    6.896937779017857
+  ],
+  "adjacentCoverageChanges": [
+    5353,
+    5047,
+    7380,
+    7221,
+    7106,
+    5615,
+    4888,
+    6146,
+    6244,
+    7337,
+    6567,
+    6621,
+    7464,
+    4207,
+    3429,
+    4095
+  ],
+  "runtimeIntegrated": false,
+  "finalArtApproved": false,
+  "phases": {
+    "appear": {
+      "seconds": 0.3,
+      "activeMaskContinues": true,
+      "envelope": "reveal from blade tip toward tail"
+    },
+    "active": {
+      "seconds": 1.6,
+      "activeMaskContinues": true
+    },
+    "finish": {
+      "seconds": 0.5,
+      "activeMaskContinues": true,
+      "envelope": "tail-to-tip soft retreat and fade"
+    }
+  }
+}

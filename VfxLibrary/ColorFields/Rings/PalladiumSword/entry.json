@@ -1,0 +1,10 @@
+{
+  "id": "color.Rings.PalladiumSword",
+  "kind": "color",
+  "category": "Rings",
+  "sword": "PalladiumSword",
+  "displayName": "钯金剑 / 圆环底色",
+  "status": "unassigned",
+  "resources": [],
+  "reference": "color.SwordBody.PalladiumSword"
+}
