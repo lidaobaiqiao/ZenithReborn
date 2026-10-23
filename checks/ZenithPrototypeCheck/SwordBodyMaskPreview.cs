@@ -151,18 +151,24 @@ public class SwordBodyMaskPreview : ModSystem
                 Save(scene,$"motion/frame-{tick:000}.png");
             }
             Render(2.4f,true);var endPixels=new Color[w*h];result.GetData(endPixels);expiredPixels=endPixels.Count(c=>c.A!=0);
+            if(vector!=null)File.WriteAllText(Path.Combine(output,"profile.json"),JsonSerializer.Serialize(new{
+                item=itemName,nativeWeapon="Terraria/ItemID."+itemName+", original sprite, no recoloring",
+                pivot=new[]{(int)maskPivot.X,(int)maskPivot.Y},tip=new[]{(int)maskTip.X,(int)maskTip.Y},
+                bladeCanvasPx=vector.BladeCanvasPx,revision,
+                sourceMethod="native SpriteBatch vector recipe; auto-fitted from vanilla sprite, R2 recipe family"
+            },new JsonSerializerOptions{WriteIndented=true}));
             var package=File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod"));
             File.WriteAllText(Path.Combine(output,"gpu.json"),JsonSerializer.Serialize(new{
                 passed=changed>120 && contourChanged>100 && multiplyError<=2 && expiredPixels==0,
                 actualGpu=true,revision,localStudy,maskFrames=16,breakdownFrames=frameCount,loopFrames=Math.Min(120,frameCount),lifecycleFrames=localStudy?0:144,motionFrames,fps=60,
                 fixedPoseMaskChanges=changed,fixedPoseCoverageChanges=contourChanged,multiplicationMaxError=multiplyError,expiredPixels,
-                normalSpriteScale=1.85,atlasPixelsPerWorldPixel=1/normalScale,anchor=new[]{305,128},tip=new[]{408,128},
+                normalSpriteScale=1.85,atlasPixelsPerWorldPixel=1/normalScale,anchor=new[]{(int)maskPivot.X,(int)maskPivot.Y},tip=new[]{(int)maskTip.X,(int)maskTip.Y},
                 contextBlend=emissive?"premultiplied additive":"premultiplied alpha",colorRecipe,
                 motionSource="controlled GPU replay of production OreFlightMotion; not Projectile.Update or world combat",travelFrames,
                 maskSource=vector!=null?"native SpriteBatch vector recipe exported to atlas; exact atlas used in all previews":"image_gen registered atlas",
                 maskSha256=Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(input))).ToLowerInvariant(),
                 productionPackageSha256=Convert.ToHexString(SHA256.HashData(package)).ToLowerInvariant(),
-                nativeWeapon="Terraria/ItemID.TitaniumSword, original sprite, no recoloring",
+                nativeWeapon="Terraria/ItemID."+itemName+", original sprite, no recoloring",
                 productionModified=false,installed=false,worldCombatTested=false,multiplayerTested=false,artApproved=false
             },new JsonSerializerOptions{WriteIndented=true}));
 

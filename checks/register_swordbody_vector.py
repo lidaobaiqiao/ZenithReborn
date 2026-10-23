@@ -3,7 +3,10 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    from png_stdlib import Image
 
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('render',type=Path)
@@ -16,6 +19,18 @@ assert report['revision']==recipe['revision']
 raw=(a.render/'active.png').read_bytes()
 assert hashlib.sha256(raw).hexdigest()==report['maskSha256']
 (a.destination/'active.png').write_bytes(raw)
+# autoFit recipes omit tip/pivot/widths; the GPU pass measured them from the vanilla
+# sprite and reported them in profile.json. Fold the measured geometry back into the
+# archived recipe so the registration is self-contained.
+if recipe.get('autoFit'):
+    profile=json.loads((a.render/'profile.json').read_text(encoding='utf-8'))
+    recipe['pivot']=profile['pivot']
+    recipe['tip']=profile['tip']
+    recipe['bladeCanvasPx']=profile['bladeCanvasPx']
+    wave=recipe.setdefault('wave',{})
+    wave.setdefault('startX',round(recipe['tip'][0]-18,3))
+    wave.setdefault('endX',round(recipe['pivot'][0]-257,3))
+    (a.destination/'authoring.json').write_text(json.dumps(recipe,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 atlas=Image.open(a.destination/'active.png').convert('RGBA')
 alpha=atlas.getchannel('A')
 Image.merge('RGB',(alpha,alpha,alpha)).save(a.destination/'contact-sheet.png')

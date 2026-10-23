@@ -1,5 +1,7 @@
 {
   "revision": "R2",
+  "family": "R2",
+  "autoFit": false,
   "method": "native SpriteBatch vector-mask authoring; no production renderer changes",
   "canvas": [448, 256],
   "pivot": [305, 128],

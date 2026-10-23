@@ -1,10 +1,17 @@
-param([string]$Revision='R2',[switch]$Emissive=$true,[switch]$Vector,[switch]$Local)
+param([string]$Revision='R2',[string]$Sword='TitaniumSword',[switch]$Emissive=$true,[switch]$Vector,[switch]$Local,[switch]$NoWait)
 $ErrorActionPreference='Stop'
 $taskRoot=Split-Path $PSScriptRoot -Parent
 $profile=Join-Path $taskRoot 'artifacts/swordbody-preview-profile'
-$output=Join-Path $taskRoot "artifacts/swordbody-$Revision"
+$output=Join-Path $taskRoot "artifacts/swordbody-$Sword-$Revision"
 if($Emissive){$output+='-emissive'}
 if($Local){$output+='-local'}
+$library=Get-Content -LiteralPath (Join-Path $taskRoot 'VfxLibrary/library.json') -Raw | ConvertFrom-Json
+$entry=$library.swords | Where-Object { $_.id -eq $Sword }
+if(-not $entry){throw "Unknown sword $Sword in VfxLibrary/library.json"}
+$itemName=($entry.source.key -split '/')[-1]
+if($itemName -notlike 'ItemID.*'){throw "Sword $Sword has no vanilla ItemID source ($($entry.source.key)); autoFit needs the original sprite."}
+$itemName=$itemName -replace '^ItemID\.',''
+$recipeDir=Join-Path $taskRoot "VfxLibrary/Masks/SwordBody/$Sword/$Revision"
 $loader='E:/SteamLibrary/steamapps/common/tModLoader'
 $dotnet='C:/Program Files/dotnet/dotnet.exe'
 New-Item -ItemType Directory -Force -Path "$profile/Mods",$output | Out-Null
@@ -23,13 +30,14 @@ Copy-Item -LiteralPath 'C:/Users/15537/Documents/My Games/Terraria/tModLoader/Mo
 @{Language='zh-Hans';Fullscreen=$false;WindowBorderless=$false;DisplayWidth=1280;DisplayHeight=720;VolumeMusic=0;VolumeSound=0;VolumeAmbient=0;AutoSave=$false;LastLaunchedVersion=279;LastLaunchedTModLoaderVersion='2026.8.3.0';SeenFirstLaunchModderWelcomeMessage=$true} | ConvertTo-Json | Set-Content -Encoding utf8 -LiteralPath "$profile/config.json"
 $env:ZENITH_MASK_PREVIEW=''
 $env:ZENITH_SWORDBODY_PREVIEW=$output
-$env:ZENITH_SWORDBODY_ATLAS=Join-Path $taskRoot "VfxLibrary/Masks/SwordBody/TitaniumSword/$Revision/active.png"
-$env:ZENITH_SWORDBODY_AUTHORING=if($Vector){Join-Path $taskRoot "VfxLibrary/Masks/SwordBody/TitaniumSword/$Revision/authoring.json"}else{''}
+$env:ZENITH_SWORDBODY_ATLAS=Join-Path $recipeDir 'active.png'
+$env:ZENITH_SWORDBODY_AUTHORING=if($Vector){Join-Path $recipeDir 'authoring.json'}else{''}
 $env:ZENITH_SWORDBODY_REVISION=$Revision
+$env:ZENITH_SWORDBODY_ITEM=$itemName
 $env:ZENITH_SWORDBODY_LOCAL=if($Local){'1'}else{'0'}
 $env:ZENITH_SWORDBODY_COLORFIELD=''
-if(Test-Path -LiteralPath (Join-Path $taskRoot "VfxLibrary/Masks/SwordBody/TitaniumSword/$Revision/authoring.json")){
-    $taskRecipe=Get-Content -LiteralPath (Join-Path $taskRoot "VfxLibrary/Masks/SwordBody/TitaniumSword/$Revision/authoring.json") -Raw | ConvertFrom-Json
+if(Test-Path -LiteralPath (Join-Path $recipeDir 'authoring.json')){
+    $taskRecipe=Get-Content -LiteralPath (Join-Path $recipeDir 'authoring.json') -Raw | ConvertFrom-Json
     $taskFieldName=$taskRecipe.colorField.Split('.')[-1]
     $env:ZENITH_SWORDBODY_COLORFIELD=Join-Path $taskRoot "VfxLibrary/ColorFields/_Shared/$taskFieldName/entry.json"
 }
@@ -37,4 +45,13 @@ $env:ZENITH_SWORDBODY_EMISSIVE=if($Emissive){'1'}else{'0'}
 $env:ZENITH_SLASH_RENDER=''
 $env:SDL_WINDOW_ACTIVATE_WHEN_SHOWN='0'
 $process=Start-Process -FilePath $dotnet -ArgumentList @('tModLoader.dll','-nosteam','-tmlsavedirectory',('"{0}"' -f $profile)) -WorkingDirectory $loader -WindowStyle Hidden -PassThru -RedirectStandardOutput "$output/stdout.log" -RedirectStandardError "$output/stderr.log"
-Write-Output "Isolated mask preview PID $($process.Id); output $output"
+Write-Output "Isolated mask preview PID $($process.Id); sword $Sword ($itemName); output $output"
+if($NoWait){return}
+$process.WaitForExit(300000) | Out-Null
+if(-not $process.HasExited){Stop-Process -Id $process.Id -Force;throw 'Isolated GPU preview timed out'}
+$gpu=Join-Path $output 'gpu.json'
+if(Test-Path -LiteralPath $gpu){
+    $report=Get-Content -LiteralPath $gpu -Raw | ConvertFrom-Json
+    if(-not $report.passed){throw "GPU preview did not pass: $gpu"}
+    Write-Output "GPU preview passed: $Sword/$Revision maskSha256=$($report.maskSha256)"
+} else {throw 'Isolated GPU preview produced no gpu.json'}
