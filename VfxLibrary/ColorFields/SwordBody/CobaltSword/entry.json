@@ -3,12 +3,69 @@
   "kind": "color",
   "category": "SwordBody",
   "sword": "CobaltSword",
-  "displayName": "钴剑 / 剑身一体组底色",
-  "status": "unassigned",
-  "resources": [],
+  "displayName": "CobaltSword / 剑身一体组底色",
+  "status": "recipe-candidate",
+  "recipe": {
+    "clear": [
+      9,
+      15,
+      36
+    ],
+    "composition": "additive",
+    "layers": [
+      {
+        "tint": [
+          72,
+          132,
+          255
+        ],
+        "opacity": 0.46,
+        "scrollPixelsPerSecond": [
+          9,
+          0
+        ]
+      },
+      {
+        "tint": [
+          38,
+          68,
+          182
+        ],
+        "opacity": 0.4,
+        "scrollPixelsPerSecond": [
+          -6,
+          0
+        ],
+        "initialYOffset": "textureHeight/3"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
+      "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
+    }
+  ],
+  "notes": "按矿石金属性定稿的逐剑底色；配方语言沿用R2家族（暗底+双向噪声流动），运行时未接入。",
   "reference": null,
   "candidateFields": [
-    "color._Shared.SlowFlowM1"
+    "color.SwordBody.CobaltSword"
   ],
-  "palette": null
+  "palette": {
+    "clear": [
+      9,
+      15,
+      36
+    ],
+    "primary": [
+      72,
+      132,
+      255
+    ],
+    "secondary": [
+      38,
+      68,
+      182
+    ]
+  }
 }

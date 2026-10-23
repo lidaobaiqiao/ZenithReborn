@@ -3,12 +3,69 @@
   "kind": "color",
   "category": "SwordBody",
   "sword": "SilverShortsword",
-  "displayName": "银短剑 / 剑身一体组底色",
-  "status": "unassigned",
-  "resources": [],
+  "displayName": "SilverShortsword / 剑身一体组底色",
+  "status": "recipe-candidate",
+  "recipe": {
+    "clear": [
+      19,
+      21,
+      27
+    ],
+    "composition": "additive",
+    "layers": [
+      {
+        "tint": [
+          222,
+          231,
+          245
+        ],
+        "opacity": 0.48,
+        "scrollPixelsPerSecond": [
+          9,
+          0
+        ]
+      },
+      {
+        "tint": [
+          138,
+          153,
+          178
+        ],
+        "opacity": 0.4,
+        "scrollPixelsPerSecond": [
+          -5,
+          0
+        ],
+        "initialYOffset": "textureHeight/3"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
+      "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
+    }
+  ],
+  "notes": "按矿石金属性定稿的逐剑底色；配方语言沿用R2家族（暗底+双向噪声流动），运行时未接入。",
   "reference": null,
   "candidateFields": [
-    "color._Shared.SlowFlowM1"
+    "color.SwordBody.SilverShortsword"
   ],
-  "palette": null
+  "palette": {
+    "clear": [
+      19,
+      21,
+      27
+    ],
+    "primary": [
+      222,
+      231,
+      245
+    ],
+    "secondary": [
+      138,
+      153,
+      178
+    ]
+  }
 }

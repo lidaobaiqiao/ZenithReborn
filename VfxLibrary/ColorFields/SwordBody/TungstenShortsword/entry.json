@@ -3,12 +3,69 @@
   "kind": "color",
   "category": "SwordBody",
   "sword": "TungstenShortsword",
-  "displayName": "钨短剑 / 剑身一体组底色",
-  "status": "unassigned",
-  "resources": [],
+  "displayName": "TungstenShortsword / 剑身一体组底色",
+  "status": "recipe-candidate",
+  "recipe": {
+    "clear": [
+      22,
+      20,
+      14
+    ],
+    "composition": "additive",
+    "layers": [
+      {
+        "tint": [
+          232,
+          202,
+          132
+        ],
+        "opacity": 0.46,
+        "scrollPixelsPerSecond": [
+          7,
+          0
+        ]
+      },
+      {
+        "tint": [
+          148,
+          118,
+          58
+        ],
+        "opacity": 0.4,
+        "scrollPixelsPerSecond": [
+          -4,
+          0
+        ],
+        "initialYOffset": "textureHeight/3"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
+      "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
+    }
+  ],
+  "notes": "按矿石金属性定稿的逐剑底色；配方语言沿用R2家族（暗底+双向噪声流动），运行时未接入。",
   "reference": null,
   "candidateFields": [
-    "color._Shared.SlowFlowM1"
+    "color.SwordBody.TungstenShortsword"
   ],
-  "palette": null
+  "palette": {
+    "clear": [
+      22,
+      20,
+      14
+    ],
+    "primary": [
+      232,
+      202,
+      132
+    ],
+    "secondary": [
+      148,
+      118,
+      58
+    ]
+  }
 }

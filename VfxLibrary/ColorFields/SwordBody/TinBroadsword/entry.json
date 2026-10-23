@@ -3,12 +3,69 @@
   "kind": "color",
   "category": "SwordBody",
   "sword": "TinBroadsword",
-  "displayName": "锡宽剑 / 剑身一体组底色",
-  "status": "unassigned",
-  "resources": [],
+  "displayName": "TinBroadsword / 剑身一体组底色",
+  "status": "recipe-candidate",
+  "recipe": {
+    "clear": [
+      15,
+      19,
+      25
+    ],
+    "composition": "additive",
+    "layers": [
+      {
+        "tint": [
+          172,
+          192,
+          214
+        ],
+        "opacity": 0.44,
+        "scrollPixelsPerSecond": [
+          8,
+          0
+        ]
+      },
+      {
+        "tint": [
+          104,
+          126,
+          158
+        ],
+        "opacity": 0.38,
+        "scrollPixelsPerSecond": [
+          -5,
+          0
+        ],
+        "initialYOffset": "textureHeight/3"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
+      "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
+    }
+  ],
+  "notes": "按矿石金属性定稿的逐剑底色；配方语言沿用R2家族（暗底+双向噪声流动），运行时未接入。",
   "reference": null,
   "candidateFields": [
-    "color._Shared.SlowFlowM1"
+    "color.SwordBody.TinBroadsword"
   ],
-  "palette": null
+  "palette": {
+    "clear": [
+      15,
+      19,
+      25
+    ],
+    "primary": [
+      172,
+      192,
+      214
+    ],
+    "secondary": [
+      104,
+      126,
+      158
+    ]
+  }
 }

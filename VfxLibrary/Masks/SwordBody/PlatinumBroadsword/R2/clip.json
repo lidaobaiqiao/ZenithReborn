@@ -27,7 +27,7 @@
   "interpolation": "alpha-linear",
   "channel": "alpha",
   "encoding": "RGBA premultiplied white, use Alpha only",
-  "atlasSha256": "e5e5b6146f2cfd97a1c760fb8b9ff133660b65202f2192723fb32883ff498cc2",
+  "atlasSha256": "f1aa4e56187ff55003335edffda3c256cb106b18d17e4557c829f74c740062fd",
   "authoring": "authoring.json",
   "sourceMethod": "Native SpriteBatch vector recipe; GPU Alpha output packed unchanged",
   "sourceCode": "checks/ZenithPrototypeCheck/SwordBodyVectorMask.cs",
@@ -115,22 +115,22 @@
     }
   ],
   "adjacentAlphaMeanChanges": [
-    1.4436296735491072,
-    1.39178466796875,
-    1.30902099609375,
-    1.1445399693080358,
-    0.9503696986607143,
-    0.8610665457589286,
-    0.8197980608258929,
-    0.8141217912946429,
-    1.2396327427455358,
-    1.2581089564732142,
-    1.2361711774553572,
-    1.1156005859375,
-    0.9534476143973214,
-    0.854248046875,
-    0.7842320033482143,
-    1.3834141322544642
+    1.5380423409598214,
+    1.4802420479910714,
+    1.3813825334821428,
+    1.1997593470982142,
+    0.9889351981026786,
+    0.8875732421875,
+    0.8424333844866071,
+    0.8348301478794643,
+    1.3093784877232142,
+    1.3346644810267858,
+    1.30206298828125,
+    1.1651698521205358,
+    0.9890223911830357,
+    0.8805890764508929,
+    0.8042253766741071,
+    1.45977783203125
   ],
   "phases": {
     "appear": {
@@ -149,7 +149,7 @@
     }
   },
   "contextBlend": "premultiplied additive",
-  "colorField": "color._Shared.SlowFlowRadiantR2",
+  "colorField": "color.SwordBody.PlatinumBroadsword",
   "runtimeIntegrated": false,
   "finalArtApproved": false
 }

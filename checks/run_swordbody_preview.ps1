@@ -38,8 +38,8 @@ $env:ZENITH_SWORDBODY_LOCAL=if($Local){'1'}else{'0'}
 $env:ZENITH_SWORDBODY_COLORFIELD=''
 if(Test-Path -LiteralPath (Join-Path $recipeDir 'authoring.json')){
     $taskRecipe=Get-Content -LiteralPath (Join-Path $recipeDir 'authoring.json') -Raw | ConvertFrom-Json
-    $taskFieldName=$taskRecipe.colorField.Split('.')[-1]
-    $env:ZENITH_SWORDBODY_COLORFIELD=Join-Path $taskRoot "VfxLibrary/ColorFields/_Shared/$taskFieldName/entry.json"
+    $taskFieldId=$taskRecipe.colorField.Split('.')
+    $env:ZENITH_SWORDBODY_COLORFIELD=Join-Path $taskRoot "VfxLibrary/ColorFields/$($taskFieldId[1])/$($taskFieldId[2])/entry.json"
 }
 $env:ZENITH_SWORDBODY_EMISSIVE=if($Emissive){'1'}else{'0'}
 $env:ZENITH_SLASH_RENDER=''

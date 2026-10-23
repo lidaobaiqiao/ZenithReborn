@@ -241,6 +241,24 @@ public class MartialGiant : ModProjectile
             q.GetGlobalProjectile<SoulSource>().SoulId==id).ToArray();
         for(int i=0;i<pins.Length;i++)((MartialBlade)pins[i].ModProjectile).Fling(aim.RotatedBy((i-(pins.Length-1)*.5f)*.045f));
     }
+    // When the slash finishes, fine circular motels peel off the whole outline
+    // of the arc and drift upward, shrinking as if the light is boiling dry.
+    // This pairs with the shader's irregular erosion (uErode) eating inward
+    // from every edge at once during Phase 5.
+    private void SpawnEvaporationBurst()
+    {
+        if(Main.dedServ)return;
+        Vector2 dir=Projectile.rotation.ToRotationVector2();
+        for(int i=0;i<10;i++)
+        {
+            float along=Main.rand.NextFloat(0f,1f);
+            Vector2 at=Owner.Center+dir*(30+280*along);
+            var d=Dust.NewDustPerfect(at,DustID.Cloud,
+                new Vector2(Main.rand.NextFloat(-.2f,.2f),Main.rand.NextFloat(-1.4f,-.6f)),
+                0,new Color(235,242,255,140),Main.rand.NextFloat(.15f,.3f));
+            d.noGravity=true;d.fadeIn=0;
+        }
+    }
     public override void AI()
     {
         if(Projectile.owner<0 || Projectile.owner>=Main.maxPlayers){Projectile.Kill();return;}
@@ -294,7 +312,7 @@ public class MartialGiant : ModProjectile
                 FlingPins();
                 if(Tier==3 && !wave && Local){wave=true;MartialWave.Spawn(Projectile,Owner.Center+aim*160,aim);}
             }
-            if(age>=MartialTuning.SlashFrames)Transition(5);
+            if(age>=MartialTuning.SlashFrames){SpawnEvaporationBurst();Transition(5);}
         }
         else if(Phase==5 && age>=16){Projectile.Kill();return;}
         Projectile.Center=Owner.Center;Owner.direction=aim.X>=0?1:-1;
@@ -302,6 +320,21 @@ public class MartialGiant : ModProjectile
         if(Main.dedServ)return;
         SlashTrail.Update(Owner.Center,Projectile.rotation,Phase==4 && Age>0,Phase==5);
         slashSparks.Update(Owner.Center,Projectile.rotation,Tier,Age,Phase==4 && Age>0,spawn=>SoulFlowSpark.Spawn(spawn));
+        // Evaporation motes: small circles peel off the arc outline and drift
+        // upward while the shader erodes the blade from every edge at once.
+        if(Phase==5 && !Main.dedServ)
+        {
+            Vector2 dir=Projectile.rotation.ToRotationVector2();
+            for(int i=0;i<2;i++)
+            {
+                float along=Main.rand.NextFloat(0f,1f);
+                Vector2 at=Owner.Center+dir*(30+280*along);
+                var d=Dust.NewDustPerfect(at,DustID.Cloud,
+                    new Vector2(Main.rand.NextFloat(-.15f,.15f),Main.rand.NextFloat(-1.2f,-.5f)),
+                    0,new Color(235,242,255,120),Main.rand.NextFloat(.12f,.25f));
+                d.noGravity=true;d.fadeIn=0;
+            }
+        }
         if(clock%3==0)MartialVisual.Spark(Owner.Center+Projectile.rotation.ToRotationVector2()*Main.rand.NextFloat(100,330),Main.rand.NextVector2Circular(1,1),Tier==3?MartialVisual.Violet:MartialVisual.Cyan);
         if(Phase==4 && age==1)SoundEngine.PlaySound(SoundID.Item71 with {Volume=.65f},Owner.Center);
         Lighting.AddLight(Owner.Center,MartialVisual.Cyan.ToVector3()*.7f);
@@ -310,8 +343,22 @@ public class MartialGiant : ModProjectile
     {if(Local && Owner.GetModPlayer<MartialPlayer>().FormSoul==Projectile.GetGlobalProjectile<SoulSource>().SoulId)Owner.GetModPlayer<MartialPlayer>().Complete();}
     public override bool PreDraw(ref Color lightColor)
     {
-        Color tint=Tier==3?MartialVisual.Violet:MartialVisual.Cyan;
-        float opacity=Phase==5?Math.Max(0,1-Age/16f):1;
+        Color tint;
+        float opacity;
+        if(Phase==5)
+        {
+            float t=Math.Clamp(Age/16f,0,1);
+            // Fade the blade out in step with the arc's erosion; warm toward
+            // white as if the light is evaporating. The real irregular outline
+            // eating inward is done by the crescent shader, not this sprite.
+            opacity=MathF.Pow(1-t,.7f);
+            tint=Color.Lerp(Tier==3?MartialVisual.Violet:MartialVisual.Cyan,new Color(235,242,255),t);
+        }
+        else
+        {
+            tint=Tier==3?MartialVisual.Violet:MartialVisual.Cyan;
+            opacity=1f;
+        }
         SlashTrail.DrawSwordGhosts(Tier);
         var direction=Projectile.rotation.ToRotationVector2();
         MartialVisual.Sword(ItemID.Zenith,Owner.Center+direction*145,Projectile.rotation+MathHelper.PiOver4,300*Projectile.scale,tint,opacity);

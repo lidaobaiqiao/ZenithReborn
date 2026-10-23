@@ -16,14 +16,14 @@
   "wave": {
     "topPhase": 0,
     "bottomPhase": 0.45,
-    "height": 18,
+    "height": 20,
     "leadingWidth": 10,
     "trailingWidth": 35,
     "startX": 353,
     "endX": 48
   },
   "shape": "continuous translucent blade-fitting film, tapered wake, advecting contour crests",
-  "colorField": "color._Shared.SlowFlowRadiantR2",
+  "colorField": "color.SwordBody.PlatinumBroadsword",
   "artApproved": false,
   "runtimeIntegrated": false,
   "pivot": [
@@ -34,5 +34,9 @@
     371,
     128
   ],
-  "bladeCanvasPx": 66.95001
+  "bladeCanvasPx": 66.95001,
+  "evolution": {
+    "group": "BROAD_HIGH",
+    "note": "R2-family rhythm differentiation; shape language unchanged"
+  }
 }

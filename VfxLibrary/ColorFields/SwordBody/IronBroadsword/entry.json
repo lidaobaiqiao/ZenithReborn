@@ -3,12 +3,69 @@
   "kind": "color",
   "category": "SwordBody",
   "sword": "IronBroadsword",
-  "displayName": "铁宽剑 / 剑身一体组底色",
-  "status": "unassigned",
-  "resources": [],
+  "displayName": "IronBroadsword / 剑身一体组底色",
+  "status": "recipe-candidate",
+  "recipe": {
+    "clear": [
+      18,
+      18,
+      22
+    ],
+    "composition": "additive",
+    "layers": [
+      {
+        "tint": [
+          162,
+          172,
+          188
+        ],
+        "opacity": 0.44,
+        "scrollPixelsPerSecond": [
+          8,
+          0
+        ]
+      },
+      {
+        "tint": [
+          96,
+          106,
+          128
+        ],
+        "opacity": 0.38,
+        "scrollPixelsPerSecond": [
+          -5,
+          0
+        ],
+        "initialYOffset": "textureHeight/3"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
+      "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
+    }
+  ],
+  "notes": "按矿石金属性定稿的逐剑底色；配方语言沿用R2家族（暗底+双向噪声流动），运行时未接入。",
   "reference": null,
   "candidateFields": [
-    "color._Shared.SlowFlowM1"
+    "color.SwordBody.IronBroadsword"
   ],
-  "palette": null
+  "palette": {
+    "clear": [
+      18,
+      18,
+      22
+    ],
+    "primary": [
+      162,
+      172,
+      188
+    ],
+    "secondary": [
+      96,
+      106,
+      128
+    ]
+  }
 }

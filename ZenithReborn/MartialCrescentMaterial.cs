@@ -31,9 +31,12 @@ internal static class MartialCrescentMaterial
         p["uMode"].SetValue(0f);p["uSweep"].SetValue(1f);
         p["uArcSpan"].SetValue(span);p["uFlip"].SetValue(MathF.Sign(signedSpan));
         p["uThick"].SetValue(tier==3?.34f:.30f);
-        p["uOpacity"].SetValue(MathF.Pow(remaining,.65f)*.98f);
-        p["uErode"].SetValue(MathF.Pow(1-remaining,1.3f)*.95f);
-        p["uTailErode"].SetValue((1-remaining)*.5f);
+        p["uOpacity"].SetValue(MathF.Pow(remaining,.5f)*.98f);
+        // Erode inward from every edge at once, not just the tail. Push erosion
+        // early and near-linear so the whole outline starts irregularly
+        // shrinking immediately instead of waiting until the end to vanish.
+        p["uErode"].SetValue(MathF.Pow(1-remaining,.8f)*1.0f);
+        p["uTailErode"].SetValue((1-remaining)*.15f);
         p["uFlash"].SetValue(.08f*remaining);
         p["uFlowPhase"].SetValue(clock*.9f);
         p["uColorShift"].SetValue(0f);p["uSeed"].SetValue(.237f);

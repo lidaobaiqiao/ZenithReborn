@@ -9,21 +9,21 @@
   ],
   "frames": 16,
   "fps": 20,
-  "loopSeconds": 0.8,
+  "loopSeconds": 0.7,
   "centerAlpha": 0.16,
   "edgeAlpha": 0.64,
   "leadingExtensionPixels": 6,
   "wave": {
     "topPhase": 0,
     "bottomPhase": 0.45,
-    "height": 18,
+    "height": 16,
     "leadingWidth": 10,
     "trailingWidth": 35,
     "startX": 340,
     "endX": 48
   },
   "shape": "continuous translucent blade-fitting film, tapered wake, advecting contour crests",
-  "colorField": "color._Shared.SlowFlowRadiantR2",
+  "colorField": "color.SwordBody.LeadShortsword",
   "artApproved": false,
   "runtimeIntegrated": false,
   "pivot": [
@@ -34,5 +34,9 @@
     358,
     128
   ],
-  "bladeCanvasPx": 53.216675
+  "bladeCanvasPx": 53.216675,
+  "evolution": {
+    "group": "SHORT",
+    "note": "R2-family rhythm differentiation; shape language unchanged"
+  }
 }

@@ -25,8 +25,10 @@ foreach($s in $swords){
     $out="artifacts/swordbody-$s-R2-emissive-local"
     if(Test-Path "$dir/clip.json"){Write-Output "$s SKIP (already registered)";$done+="$s SKIP";continue}
     New-Item -ItemType Directory -Force -Path $out | Out-Null
-    & $py checks/make_autofit_recipe.py $dir | Out-Null
-    if($LASTEXITCODE -ne 0){Write-Output "$s RECIPE-FAIL";$done+="$s RECIPE-FAIL";continue}
+    if(-not (Test-Path "$dir/authoring.json")){
+        & $py checks/make_autofit_recipe.py $dir | Out-Null
+        if($LASTEXITCODE -ne 0){Write-Output "$s RECIPE-FAIL";$done+="$s RECIPE-FAIL";continue}
+    }
     $ok=Invoke-Preview $s $dir $out
     if(-not $ok){
         Get-Process -Name dotnet -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne $PID } | Stop-Process -Force -ErrorAction SilentlyContinue
