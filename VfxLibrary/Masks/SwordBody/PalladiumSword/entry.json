@@ -4,7 +4,7 @@
   "category": "SwordBody",
   "sword": "PalladiumSword",
   "displayName": "钯金剑 / 剑身一体组",
-  "status": "awaiting-art",
+  "status": "review-candidate",
   "components": [
     "trail",
     "bladeFlow",
@@ -13,12 +13,38 @@
   ],
   "channel": "alpha",
   "colorField": "color.SwordBody.PalladiumSword",
-  "canvas": null,
-  "pivot": null,
+  "canvas": [
+    448,
+    256
+  ],
+  "pivot": [
+    305,
+    128
+  ],
   "clips": {
-    "appear": null,
-    "active": null,
-    "finish": null
+    "appear": {
+      "metadata": "R2/clip.json",
+      "atlas": "R2/active.png",
+      "phase": "appear"
+    },
+    "active": {
+      "metadata": "R2/clip.json",
+      "atlas": "R2/active.png",
+      "phase": "active"
+    },
+    "finish": {
+      "metadata": "R2/clip.json",
+      "atlas": "R2/active.png",
+      "phase": "finish"
+    }
   },
-  "resources": []
+  "resources": [
+    {
+      "repoPath": "VfxLibrary/Masks/SwordBody/PalladiumSword/R2/active.png",
+      "provenance": "VfxLibrary/Masks/SwordBody/PalladiumSword/R2/authoring.json"
+    }
+  ],
+  "revision": "R2",
+  "runtimeIntegrated": false,
+  "finalArtApproved": false
 }

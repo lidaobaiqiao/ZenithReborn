@@ -1,0 +1,155 @@
+{
+  "revision": "R2",
+  "status": "review-candidate",
+  "grid": [
+    4,
+    4
+  ],
+  "frameSize": [
+    448,
+    256
+  ],
+  "canvas": [
+    448,
+    256
+  ],
+  "pivot": [
+    305,
+    128
+  ],
+  "tip": [
+    402,
+    128
+  ],
+  "frames": 16,
+  "fps": 20,
+  "loop": true,
+  "interpolation": "alpha-linear",
+  "channel": "alpha",
+  "encoding": "RGBA premultiplied white, use Alpha only",
+  "atlasSha256": "59af39b74a1ada6b5b2fd04cd172fda992a873ad1880166c5669bc48b1effe61",
+  "authoring": "authoring.json",
+  "sourceMethod": "Native SpriteBatch vector recipe; GPU Alpha output packed unchanged",
+  "sourceCode": "checks/ZenithPrototypeCheck/SwordBodyVectorMask.cs",
+  "sourceCodeSha256": "6ef861ff4a4c0ac10146ad9ebb3a99b0d9b348b126aab902d3fa28d482e3a407",
+  "crestPositions": [
+    {
+      "frame": 0,
+      "upper": 384.0,
+      "lower": 232.8
+    },
+    {
+      "frame": 1,
+      "upper": 363.0,
+      "lower": 211.8
+    },
+    {
+      "frame": 2,
+      "upper": 342.0,
+      "lower": 190.8
+    },
+    {
+      "frame": 3,
+      "upper": 321.0,
+      "lower": 169.8
+    },
+    {
+      "frame": 4,
+      "upper": 300.0,
+      "lower": 148.8
+    },
+    {
+      "frame": 5,
+      "upper": 279.0,
+      "lower": 127.8
+    },
+    {
+      "frame": 6,
+      "upper": 258.0,
+      "lower": 106.8
+    },
+    {
+      "frame": 7,
+      "upper": 237.0,
+      "lower": 85.8
+    },
+    {
+      "frame": 8,
+      "upper": 216.0,
+      "lower": 64.8
+    },
+    {
+      "frame": 9,
+      "upper": 195.0,
+      "lower": 379.8
+    },
+    {
+      "frame": 10,
+      "upper": 174.0,
+      "lower": 358.8
+    },
+    {
+      "frame": 11,
+      "upper": 153.0,
+      "lower": 337.8
+    },
+    {
+      "frame": 12,
+      "upper": 132.0,
+      "lower": 316.8
+    },
+    {
+      "frame": 13,
+      "upper": 111.0,
+      "lower": 295.8
+    },
+    {
+      "frame": 14,
+      "upper": 90.0,
+      "lower": 274.8
+    },
+    {
+      "frame": 15,
+      "upper": 69.0,
+      "lower": 253.8
+    }
+  ],
+  "adjacentAlphaMeanChanges": [
+    1.7268589564732142,
+    1.8436017717633928,
+    1.8400791713169642,
+    1.7722952706473214,
+    1.5874459402901786,
+    1.4302106584821428,
+    1.3148542131696428,
+    1.2743181501116072,
+    1.7508806501116072,
+    1.6540265764508928,
+    1.6913888113839286,
+    1.6273716517857142,
+    1.4638148716517858,
+    1.3162928989955358,
+    1.2198311941964286,
+    1.6399797712053572
+  ],
+  "phases": {
+    "appear": {
+      "seconds": 0.3,
+      "activeMaskContinues": true,
+      "envelope": "tip-to-tail reveal"
+    },
+    "active": {
+      "seconds": 1.6,
+      "activeMaskContinues": true
+    },
+    "finish": {
+      "seconds": 0.5,
+      "activeMaskContinues": true,
+      "envelope": "tail-to-tip retreat and fade"
+    }
+  },
+  "contextBlend": "premultiplied additive",
+  "colorField": "color._Shared.SlowFlowRadiantR2",
+  "runtimeIntegrated": false,
+  "finalArtApproved": false
+}

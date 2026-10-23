@@ -1,0 +1,38 @@
+{
+  "revision": "R2",
+  "family": "R2",
+  "autoFit": true,
+  "method": "native SpriteBatch vector-mask authoring; no production renderer changes",
+  "canvas": [
+    448,
+    256
+  ],
+  "frames": 16,
+  "fps": 20,
+  "loopSeconds": 0.8,
+  "centerAlpha": 0.16,
+  "edgeAlpha": 0.64,
+  "leadingExtensionPixels": 6,
+  "wave": {
+    "topPhase": 0,
+    "bottomPhase": 0.45,
+    "height": 18,
+    "leadingWidth": 10,
+    "trailingWidth": 35,
+    "startX": 383,
+    "endX": 48
+  },
+  "shape": "continuous translucent blade-fitting film, tapered wake, advecting contour crests",
+  "colorField": "color._Shared.SlowFlowRadiantR2",
+  "artApproved": false,
+  "runtimeIntegrated": false,
+  "pivot": [
+    305,
+    128
+  ],
+  "tip": [
+    401,
+    128
+  ],
+  "bladeCanvasPx": 96.13333
+}

@@ -1,4 +1,4 @@
-param([string]$Revision='R2',[string]$Sword='TitaniumSword',[switch]$Emissive=$true,[switch]$Vector,[switch]$Local,[switch]$NoWait)
+param([string]$Revision='R2',[string]$Sword='TitaniumSword',[switch]$Emissive=$true,[switch]$Vector,[switch]$Local,[switch]$NoWait,[int]$TimeoutMs=300000)
 $ErrorActionPreference='Stop'
 $taskRoot=Split-Path $PSScriptRoot -Parent
 $profile=Join-Path $taskRoot 'artifacts/swordbody-preview-profile'
@@ -47,7 +47,7 @@ $env:SDL_WINDOW_ACTIVATE_WHEN_SHOWN='0'
 $process=Start-Process -FilePath $dotnet -ArgumentList @('tModLoader.dll','-nosteam','-tmlsavedirectory',('"{0}"' -f $profile)) -WorkingDirectory $loader -WindowStyle Hidden -PassThru -RedirectStandardOutput "$output/stdout.log" -RedirectStandardError "$output/stderr.log"
 Write-Output "Isolated mask preview PID $($process.Id); sword $Sword ($itemName); output $output"
 if($NoWait){return}
-$process.WaitForExit(300000) | Out-Null
+$process.WaitForExit($TimeoutMs) | Out-Null
 if(-not $process.HasExited){Stop-Process -Id $process.Id -Force;throw 'Isolated GPU preview timed out'}
 $gpu=Join-Path $output 'gpu.json'
 if(Test-Path -LiteralPath $gpu){
