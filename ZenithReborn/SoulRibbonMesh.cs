@@ -6,7 +6,7 @@ namespace ZenithReborn;
 // Pure geometry, shared by the renderer and headless regression checks.
 public static class SoulRibbonMesh
 {
-    public const int HistoryLength = 24;
+    public const int HistoryLength = 60;   // 对齐原版天顶飞剑的 TrailCacheLength
     private const int Subdivisions = 4;
     public const int MaxVertices = (HistoryLength-1)*Subdivisions*18;
 

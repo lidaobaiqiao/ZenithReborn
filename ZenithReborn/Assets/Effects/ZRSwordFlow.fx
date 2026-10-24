@@ -20,7 +20,8 @@ sampler zoneSampler=sampler_state
     MinFilter=Linear;MagFilter=Linear;MipFilter=Linear;
     AddressU=Wrap;AddressV=Clamp;
 };
-float uEmissionStrength;  // 带面自发光：玻璃只靠透射/反光会读作灰膜，必须自己发光
+float uEmissionStrength;  // 带面自发光
+float uStripeStrength;    // 沿迹条纹强度：连续带面上形成分段间隔感：玻璃只靠透射/反光会读作灰膜，必须自己发光
 float4 uDetailA[4];     // x=强度 y=混合(0相加1相乘) z=频率U w=滚动U
 float4 uDetailB[4];     // x=频率V y=滚动V z=阈值(只贴刃侧) w=保留
 float4 uDetailColor[4]; // 该层染色

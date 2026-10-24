@@ -9,7 +9,7 @@ namespace ZenithReborn;
 // 在物块与实体绘制之间统一画轨迹带面，剑体随后覆盖在上面。
 public class SoulVisuals : ModSystem
 {
-    private readonly VertexPositionColorTexture[] vertices=new VertexPositionColorTexture[SoulMaterialTrail.MaxVertices];
+    private readonly VertexPositionColorTexture[] vertices=new VertexPositionColorTexture[SoulMaterialTrail.MaxLayeredVertices];
 
     private static readonly Color[] woodColors = [new(112,202,78), new(150,219,247), new(74,213,196),
         new(58,174,118), new(193,218,52), new(142,93,213), new(219,78,112), new(237,124,65),

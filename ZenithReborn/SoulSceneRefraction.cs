@@ -21,7 +21,7 @@ public class SoulSceneRefraction : ModSystem
     private static RenderTarget2D materialTransmission;
     private static Effect screenEffect;
     private static GlassScreenData screenData;
-    private static readonly VertexPositionColorTexture[] vertices=new VertexPositionColorTexture[SoulMaterialTrail.MaxVertices];
+    private static readonly VertexPositionColorTexture[] vertices=new VertexPositionColorTexture[SoulMaterialTrail.MaxLayeredVertices];
     private const string FilterKey="ZenithReborn:SwordGlass";
     private static bool maskReady;
     private static ulong preparedTick;

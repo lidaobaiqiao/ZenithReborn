@@ -111,6 +111,9 @@ public class SoulBlade : ModProjectile
     private Vector2[] trailCenters;
     private float[] trailRotations;
     private float[] trailPhases;
+    // 原版会为每个历史点保存 oldSpriteDirection；剑飞行途中会翻转朝向，
+    // 旧剑影必须用它自己那一帧的朝向，否则镜像和旋转偏移都会错。
+    private int[] trailDirections;
     private const int TrailLength = SoulRibbonMesh.HistoryLength;
     private const int HistoryLength = 96;
     private int trailCount;
@@ -127,7 +130,7 @@ public class SoulBlade : ModProjectile
         oreHitConsumed = false;
         Blessings=new();
         Vertical = 60f;
-        trailPoints=new Vector2[HistoryLength];trailCenters=new Vector2[HistoryLength];trailRotations=new float[HistoryLength];trailPhases=new float[HistoryLength];
+        trailPoints=new Vector2[HistoryLength];trailCenters=new Vector2[HistoryLength];trailRotations=new float[HistoryLength];trailPhases=new float[HistoryLength];trailDirections=new int[HistoryLength];
         trailCount=0;
         trailEndingCaptured=false;
     }
@@ -209,9 +212,10 @@ public class SoulBlade : ModProjectile
             int historyLimit=HistoryLength;
             if(trailCount>0 && Vector2.DistanceSquared(Projectile.Center,trailCenters[0])>90000) trailCount=0;
             for(int i=Math.Min(trailCount,historyLimit-1);i>0;i--)
-            { trailPoints[i]=trailPoints[i-1];trailCenters[i]=trailCenters[i-1];trailRotations[i]=trailRotations[i-1];trailPhases[i]=trailPhases[i-1]; }
+            { trailPoints[i]=trailPoints[i-1];trailCenters[i]=trailCenters[i-1];trailRotations[i]=trailRotations[i-1];trailPhases[i]=trailPhases[i-1];trailDirections[i]=trailDirections[i-1]; }
             trailCenters[0]=Projectile.Center;trailRotations[0]=Projectile.rotation;
             trailPhases[0]=phase;
+            trailDirections[0]=Projectile.spriteDirection;
             trailPoints[0]=Projectile.Center+(Projectile.rotation-MathHelper.PiOver4).ToRotationVector2()*26*DisplayScale;
             trailCount=Math.Min(historyLimit,trailCount+1);
             if(!retired)SoulZenithEffects.EmitFlying(this,player);
@@ -350,23 +354,45 @@ public class SoulBlade : ModProjectile
     }
     public override void OnKill(int timeLeft)=>CaptureTrailEnding();
 
+    private int FindTrailSample(float samplePhase)
+    {
+        if(samplePhase<0 || trailCount<=0)return -1;
+        int i=0;
+        while(i+1<trailCount && Math.Abs(trailPhases[i+1]-samplePhase)<Math.Abs(trailPhases[i]-samplePhase))i++;
+        return i;
+    }
     public void DrawRibbonShader(VertexPositionColorTexture[] vertices)
     {
         if(Projectile.hide || trailCount<2 || Main.dedServ||trailEndingCaptured)return;
         int itemType=(int)Projectile.ai[0];
         if(itemType<=0 || itemType>=ItemLoader.ItemCount)return;
-        float visibility=Projectile.Opacity*SoulMaterialTrail.Visibility(MotionPhase,retired,retireAge);
+        float currentVisibility=SoulMaterialTrail.Visibility(MotionPhase,retired,retireAge);
+        float visibility=Projectile.Opacity*currentVisibility;
         if(visibility<=0)return;
         Main.instance.LoadItem(itemType);
         Texture2D texture=TextureAssets.Item[itemType].Value;
         Rectangle frame=Main.itemAnimations[itemType]?.GetFrame(texture)??texture.Frame();
         float halfLength=frame.Size().Length()*.5f*DisplayScale;
         float clock=Main.GlobalTimeWrappedHourly;
-        // 单条带面，尾部亮度和浓度交给着色器按 s 坐标衰减，
-        // 分段拼接会在每段起点重新"渐入"，拼出来是锯齿。
-        int count=SoulMaterialTrail.Build(trailCenters,trailRotations,trailCount,halfLength,
-            Main.screenPosition,vertices,clock);
+        // 原版 FinalFractalHelper.Draw 只有一条带子：PrepareStrip(proj.oldPos, proj.oldRot, ..., 60)，
+        // 吃满全部历史点，半宽恒定，颜色按 progress 线性淡出。
+        // 所以这里也只铺一条整带，不再给每把剑影各挂一小段——分段正是之前"连成一团"的来源。
+        int stripLength=Math.Min(trailCount,SoulMaterialTrail.HistoryLength);
+        if(stripLength<2)return;
+        Span<SoulMaterialTrail.TrailLayer> layers=stackalloc SoulMaterialTrail.TrailLayer[1];
+        layers[0]=new SoulMaterialTrail.TrailLayer(0,stripLength,1f);
+        int count=SoulMaterialTrail.BuildLayered(trailCenters,trailRotations,trailCount,halfLength,
+            Main.screenPosition,vertices,layers,clock);
         if(count<3)return;
+        // 顶点红通道存的是轨迹年龄（0=剑位置，1=最尾端），拿它把尾巴压到 0：
+        // 等效原版 StripColors 的 (1 - progress/0.98)，于是剑影越靠后，身下的带面越短越暗。
+        for(int i=0;i<count;i++)
+        {
+            Color vertex=vertices[i].Color;
+            float age=vertex.R/255f;
+            float fade=Math.Clamp(1f-age/0.98f,0f,1f);
+            vertices[i].Color=new Color(vertex.R,vertex.G,vertex.B,(byte)Math.Round(vertex.A*fade));
+        }
         SoulMaterialTrail.Draw(vertices,count,SoulVisuals.Tint(itemType),visibility*.86f,clock,
             dissolve:SoulMaterialTrail.Dissolve(MotionPhase,retired,retireAge),itemType:itemType);
     }
@@ -381,18 +407,23 @@ public class SoulBlade : ModProjectile
         Vector2 origin = frame.Size() * .5f;
         Color tint=SoulVisuals.Tint(itemType);
         float visibility=BladeOpacity;
-        // 原版933每隔十五阶段单位绘制一份剑影，各自随年龄消散，形成原版返回尾迹。
-        for(int behind=60;behind>=15;behind-=15)
+        float retireFade=retired?1-retireAge/8f:1;
+        // 原版 DrawProjDirect 的天顶分支就是：for(j = 60; j > 0; j -= 15)
+        // → 只画 oldPos[45] / [30] / [15] 三个剑影（j=60 越界被 continue 掉）。
+        // 15 这个间隔在 FinalFractalHelper.FramesPerImportantTrail 里写死。
+        // 亮度 = (60 - j) / 60，即近 0.75、中 0.50、远 0.25，越靠后越暗。
+        // 可见性按 phase - j 判定，所以三个剑影是依次点亮、再依次熄灭，不会同时全亮。
+        for(int j=60;j>0;j-=15)
         {
-            float samplePhase=MotionPhase-behind;
-            if(samplePhase<0)continue;
-            int i=0;
-            while(i+1<trailCount && Math.Abs(trailPhases[i+1]-samplePhase)<Math.Abs(trailPhases[i]-samplePhase))i++;
-            if(i>=trailCount)continue;
-            float opacity=SpriteVisibility(trailPhases[i])*Projectile.Opacity*(1-behind/75f)*(retired?1-retireAge/8f:1);
-            Main.EntitySpriteDraw(texture,trailCenters[i]-Main.screenPosition,frame,
-                Color.Lerp(tint,Color.White,.22f)*(opacity*.5f),
-                trailRotations[i]+MathHelper.PiOver4*(1-Projectile.spriteDirection),origin,DisplayScale,DrawEffects);
+            if(j>=trailCount)continue;
+            float weight=(60-j)/60f;
+            float opacity=weight*Projectile.Opacity*SpriteVisibility(MotionPhase-j)*retireFade;
+            if(opacity<=0.02f)continue;
+            int direction=trailDirections[j]==0?Projectile.spriteDirection:trailDirections[j];
+            Main.EntitySpriteDraw(texture,trailCenters[j]-Main.screenPosition,frame,
+                Color.Lerp(tint,Color.White,.22f)*(opacity*.55f),
+                trailRotations[j]+MathHelper.PiOver4*(1-direction),origin,DisplayScale,
+                direction==1?SpriteEffects.None:SpriteEffects.FlipHorizontally);
         }
         Main.EntitySpriteDraw(texture, Projectile.Center - Main.screenPosition, frame, WoodTypes.SwordTint(itemType)*visibility,
             DrawRotation, origin, DisplayScale, DrawEffects);
