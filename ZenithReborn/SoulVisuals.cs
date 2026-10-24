@@ -6,12 +6,10 @@ using Terraria.ModLoader;
 
 namespace ZenithReborn;
 
-// Draw mesh ribbons once between tile and entity passes. The projectile sprite
-// batch is never interrupted, and sword sprites are drawn on top afterwards.
+// 在物块与实体绘制之间统一画轨迹带面，剑体随后覆盖在上面。
 public class SoulVisuals : ModSystem
 {
-    private BasicEffect ribbonEffect;
-    private readonly VertexPositionColor[] vertices=new VertexPositionColor[SoulRibbonMesh.MaxVertices];
+    private readonly VertexPositionColorTexture[] vertices=new VertexPositionColorTexture[SoulMaterialTrail.MaxVertices];
 
     private static readonly Color[] woodColors = [new(112,202,78), new(150,219,247), new(74,213,196),
         new(58,174,118), new(193,218,52), new(142,93,213), new(219,78,112), new(237,124,65),
@@ -44,8 +42,7 @@ public class SoulVisuals : ModSystem
         if (wood >= 0) return woodColors[wood];
         if (palette.TryGetValue(itemType, out var color)) return color;
         if (fallbackColors.TryGetValue(itemType, out color)) return color;
-        // Stable across processes and mod load orders, unlike GetHashCode or
-        // runtime mod item IDs. Unregistered hosts also get individual colors.
+        // 使用稳定物品身份计算颜色，避免进程或模组加载顺序改变未登记武器的配色。
         string identity = ItemLoader.GetItem(itemType)?.FullName ?? ItemID.Search.GetName(itemType) ?? itemType.ToString();
         uint hash = 2166136261;
         foreach (char c in identity) hash = unchecked((hash ^ c) * 16777619);
@@ -57,46 +54,23 @@ public class SoulVisuals : ModSystem
     public override void PostDrawTiles()
     {
         if(Main.dedServ || Main.gameMenu) return;
-        // Allocate GPU resources only on the drawing thread, never on a server.
-        GraphicsDevice device=Main.graphics.GraphicsDevice;
-        BlendState oldBlend=device.BlendState;
-        DepthStencilState oldDepth=device.DepthStencilState;
-        RasterizerState oldRasterizer=device.RasterizerState;
-        bool drew=false;
-        try
+        // 已准备好原版滤镜合成时，世界中保留干净背景；只在无法安全准备时画普通材质。
+        if(SoulSceneRefraction.CompositingReady)return;
+        // 复用已有的完整状态恢复入口，包含纹理、采样器和顶点绑定。
+        // 材质颜色在实体下方绘制；背景折射交给原版屏幕滤镜的安全合成阶段。
+        bool visible=SoulTrailEnding.HasActive;
+        foreach(var projectile in Main.ActiveProjectiles)
+            if(projectile.ModProjectile is SoulBlade){visible=true;break;}
+        if(!visible)return;
+        MartialSlashRenderer.DrawWithRestoredState(()=>
         {
-            foreach(Projectile projectile in Main.ActiveProjectiles)
-            {
-                if(projectile.ModProjectile is not SoulBlade blade) continue;
-                int count=blade.BuildRibbon(vertices);
-                if(count==0) continue;
-                ribbonEffect??=new BasicEffect(device){VertexColorEnabled=true,TextureEnabled=false,LightingEnabled=false};
-                ribbonEffect.World=Main.GameViewMatrix.TransformationMatrix;
-                ribbonEffect.View=Matrix.Identity;
-                ribbonEffect.Projection=Matrix.CreateOrthographicOffCenter(0,Main.screenWidth,Main.screenHeight,0,-1,1);
-                device.BlendState=BlendState.AlphaBlend;
-                device.DepthStencilState=DepthStencilState.None;
-                device.RasterizerState=RasterizerState.CullNone;
-                drew=true;
-                foreach(EffectPass pass in ribbonEffect.CurrentTechnique.Passes)
-                {
-                    pass.Apply();
-                    device.DrawUserPrimitives(PrimitiveType.TriangleList,vertices,0,count/3);
-                }
-            }
-        }
-        finally
-        {
-            if(drew) Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-            device.BlendState=oldBlend;
-            device.DepthStencilState=oldDepth;
-            device.RasterizerState=oldRasterizer;
-        }
+            foreach(var projectile in Main.ActiveProjectiles)
+                if(projectile.ModProjectile is SoulBlade blade)blade.DrawRibbonShader(vertices);
+            SoulTrailEnding.DrawAll(vertices);
+        });
     }
     public override void Unload()
     {
         fallbackColors.Clear();
-        BasicEffect old=ribbonEffect;ribbonEffect=null;
-        if(old!=null) Main.QueueMainThreadAction(old.Dispose);
     }
 }

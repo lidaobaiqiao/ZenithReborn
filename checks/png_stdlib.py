@@ -105,8 +105,9 @@ def read_png(path):
         elif tag == b'IEND':
             break
         pos += 12 + length
-    assert color_type in (2, 6), 'only RGB/RGBA PNG supported'
-    channels = 3 if color_type == 2 else 4
+    assert color_type in (0, 2, 6), 'only grayscale/RGB/RGBA PNG supported'
+    # 灰度单通道也要认：美术出的色场／磨损图默认是 8 位灰度，不是彩色 PNG
+    channels = {0: 1, 2: 3, 6: 4}[color_type]
     stride = width * channels
     raw = zlib.decompress(bytes(idat))
     assert len(raw) == (stride + 1) * height, 'unexpected PNG payload size'
@@ -136,6 +137,12 @@ def read_png(path):
         else:
             raise ValueError('unknown PNG filter %d' % ftype)
         prev = out[y * stride:(y + 1) * stride]
+    if color_type == 0:
+        # 灰度图统一扩成 RGB，调用方不用为单通道单独写分支
+        rgb = bytearray(width * height * 3)
+        for i, v in enumerate(out):
+            rgb[i * 3] = rgb[i * 3 + 1] = rgb[i * 3 + 2] = v
+        return Image(width, height, bytes(rgb), 'RGB')
     return Image(width, height, bytes(out), 'RGBA' if channels == 4 else 'RGB')
 
 

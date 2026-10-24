@@ -39,11 +39,18 @@
       }
     ]
   },
-  "resources": [
+  "resources": [],
+  "notes": "仅复现M1底色配方；最终每把剑的配色与绑定未指定。",
+  "currentRuntime": {
+    "version": "0.3.60",
+    "enabled": false,
+    "reason": "旧材质外观已撤下，等待自有材质接入；历史配方和导出保留。"
+  },
+  "historicalResources": [
     {
       "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
       "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
     }
   ],
-  "notes": "仅复现M1底色配方；最终每把剑的配色与绑定未指定。"
+  "historicalProvenance": "VfxLibrary/References/Retired/CalamityOverhaul/provenance.json"
 }

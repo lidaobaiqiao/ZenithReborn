@@ -14,37 +14,44 @@
   "channel": "alpha",
   "colorField": "color.SwordBody.IronBroadsword",
   "canvas": [
-    448,
+    640,
     256
   ],
   "pivot": [
-    305,
+    497,
     128
   ],
   "clips": {
     "appear": {
-      "metadata": "R2/clip.json",
-      "atlas": "R2/active.png",
+      "metadata": "H4/clip.json",
+      "atlas": "H4/active.png",
       "phase": "appear"
     },
     "active": {
-      "metadata": "R2/clip.json",
-      "atlas": "R2/active.png",
+      "metadata": "H4/clip.json",
+      "atlas": "H4/active.png",
       "phase": "active"
     },
     "finish": {
-      "metadata": "R2/clip.json",
-      "atlas": "R2/active.png",
+      "metadata": "H4/clip.json",
+      "atlas": "H4/active.png",
       "phase": "finish"
     }
   },
   "resources": [
     {
-      "repoPath": "VfxLibrary/Masks/SwordBody/IronBroadsword/R2/active.png",
-      "provenance": "VfxLibrary/Masks/SwordBody/IronBroadsword/R2/authoring.json"
+      "repoPath": "VfxLibrary/Masks/SwordBody/IronBroadsword/H4/active.png",
+      "provenance": "VfxLibrary/Masks/SwordBody/IronBroadsword/H4/authoring.json"
     }
   ],
-  "revision": "R2",
-  "runtimeIntegrated": false,
-  "finalArtApproved": false
+  "revision": "H4",
+  "runtimeIntegrated": true,
+  "finalArtApproved": false,
+  "colorFieldVariant": "H4",
+  "currentRuntime": {
+    "version": "0.3.61",
+    "enabled": true,
+    "noiseOrigin": "project-authored: ZenithReborn/SwordBodyColorNoise.cs",
+    "reason": "恢复自有动态蒙版和慢底色合成，不恢复第三方材质。"
+  }
 }

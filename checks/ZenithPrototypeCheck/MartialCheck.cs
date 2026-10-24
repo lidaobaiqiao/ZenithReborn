@@ -82,20 +82,39 @@ internal static class MartialCheck
         check(blades.Length==4 && state.Mode==MartialMode.Giant && giant.Tier==2,"Tier two emits four swords using real weapon snapshots then summons the giant");
         for(int i=0;i<42;i++)foreach(var b in blades)b.AI();
         foreach(var b in blades){b.Projectile.Center=n.Center;Hit(b.Projectile,n);}
-        for(int i=0;i<38;i++)giant.AI();
+        for(int i=0;i<MartialMotion.ThunderImpact-1;i++)giant.AI();
+        check(!giant.SwordVisible && giant.CanDamage()==false,"雷光触及角色前巨剑不出现且没有伤害");
+        giant.AI();
+        check(giant.SwordVisible && giant.Projectile.scale==1 && giant.Phase==0,"落雷当帧巨剑立刻完整显现");
+        float chargeStart=giant.Projectile.rotation;
+        for(int i=0;i<MartialMotion.ChargeFrames-1;i++)giant.AI();
+        check(giant.Phase==0 && giant.Projectile.rotation<chargeStart-.6f,"巨剑缓慢后压蓄力，不会提前重斩");
+        for(int i=0;i<8;i++)giant.AI();
         check(giant.Phase==4 && blades.All(b=>b.State==3 && b.Projectile.active),"Giant heavy slash actually flings all embedded swords");
         n.Center=p.Center+giant.Projectile.rotation.ToRotationVector2()*150;int life=n.life;
         Hit(giant.Projectile,n);check(n.life<life-giant.Projectile.damage*4,"Giant heavy slash deals its high multiplier in the actual damage pipeline");
         life=n.life;Hit(giant.Projectile,n);check(n.life==life,"Same heavy slash cannot repeat on the same root each frame");
+        var returning=blades[0];
+        float initialSpin=returning.Projectile.rotation;
+        for(int i=0;i<MartialMotion.FlingSpinFrames;i++)returning.AI();
+        check(returning.State==4 && returning.CanDamage()!=false &&
+            MathF.Abs(returning.Projectile.rotation-initialSpin)>MathHelper.TwoPi*2.9f,
+            "击飞剑确实旋转三圈后进入有伤害的返航阶段");
+        n.Center=returning.Projectile.Center;life=n.life;Hit(returning.Projectile,n);
+        check(n.life<life,"返航阶段经过敌人时进入真实伤害管线");
+        for(int i=0;i<100 && returning.Projectile.active;i++)returning.AI();
+        check(!returning.Projectile.active && Vector2.Distance(returning.Projectile.Center,p.Center)<60,
+            "返航剑移动回角色附近收回，不在远处定时消失");
         for(int i=0;i<40 && giant.Projectile.active;i++)giant.AI();
         check(state.Mode==MartialMode.Normal,"Heavy-slash completion restores native attack mode");
 
         (p,s,state,n)=Setup();s.MartialCharge=300;s.MartialTier=3;state.TryActivate();s.UseAnimation(p);giant=Giant();
         for(int i=0;i<46;i++)foreach(var b in Blades())b.AI();
         foreach(var b in Blades()){b.Projectile.Center=n.Center;Hit(b.Projectile,n);}
-        for(int i=0;i<30;i++)giant.AI();
+        for(int i=0;i<MartialTuning.GiantReadyFrames;i++)giant.AI();
         check(giant.ReadyForCut && !giant.TimeStopped,"Tier-three giant waits for the player's attack before time stop");
         check(giant.StartTimeCut(n.Center) && giant.TimeStopped,"Attack starts time stop against a real nearby enemy");
+        check(!p.GetModPlayer<MartialDashPlayer>().IsLightDash,"化光只发生在实际突进期间，蓄势人物仍可见");
         n.velocity=new Vector2(3,-2);var freeze=n.GetGlobalNPC<MartialFreezeNPC>();
         check(!freeze.PreAI(n) && n.velocity==Vector2.Zero,"Time stop freezes hostile NPC AI and movement");
         var hostile=new Projectile();hostile.SetDefaults(ProjectileID.DeathLaser);hostile.Center=n.Center;hostile.hostile=true;hostile.velocity=new(5,1);
@@ -103,8 +122,11 @@ internal static class MartialCheck
         check(!projFreeze.PreAI(hostile) && !projFreeze.ShouldUpdatePosition(hostile) && !projFreeze.CanHitPlayer(hostile,p),"Time stop freezes hostile projectile AI, movement and contact damage");
         var friendly=new Projectile();friendly.SetDefaults(ProjectileID.WoodenArrowFriendly);friendly.Center=n.Center;friendly.hostile=false;
         check(friendly.GetGlobalProjectile<MartialFreezeProjectile>().PreAI(friendly),"Friendly attacks keep moving during time stop");
-        Vector2 playerStart=p.Center;for(int i=0;i<22;i++)giant.AI();
+        Vector2 playerStart=p.Center;for(int i=0;i<11;i++)giant.AI();
+        check(p.GetModPlayer<MartialDashPlayer>().IsLightDash && p.Center!=playerStart,"实际突进时人物进入流光绘制状态");
+        for(int i=0;i<11;i++)giant.AI();
         check(giant.Phase==3 && p.Center!=playerStart && Vector2.Distance(p.Center,n.Center)<Vector2.Distance(playerStart,n.Center),"Player body really dashes toward the enemy before the embedded giant hold");
+        check(!p.GetModPlayer<MartialDashPlayer>().IsLightDash && giant.DashPath.Count>=2,"突进结束恢复人物，留下实际移动路径供流光绘制");
         Vector2 holdPoint=p.Center;p.position+=new Vector2(5,40);giant.AI();
         check(Vector2.Distance(p.Center,holdPoint)<.01f,"Airborne hold anchors the player instead of letting gravity pull the giant out of the target");
         int firstLife=n.life;giant.AI();Hit(giant.Projectile,n);
@@ -123,7 +145,7 @@ internal static class MartialCheck
         (p,s,state,n)=Setup();s.MartialCharge=300;s.MartialTier=3;state.TryActivate();s.UseAnimation(p);giant=Giant();
         for(int i=0;i<46;i++)foreach(var b in Blades())b.AI();
         foreach(var b in Blades()){b.Projectile.Center=n.Center;Hit(b.Projectile,n);}
-        for(int i=0;i<30;i++)giant.AI();giant.StartTimeCut(n.Center);state.Cancel();
+        for(int i=0;i<MartialTuning.GiantReadyFrames;i++)giant.AI();giant.StartTimeCut(n.Center);state.Cancel();
         check(!MartialTime.Frozen(n.Center) && state.Mode==MartialMode.Normal,"Cancellation removes time stop immediately, including an unfinished dash");
         ModContent.GetInstance<MartialConfig>().EnableAttackPrototype=false;
         check(!state.TryActivate(),"Prototype can be disabled without changing the native sword system");

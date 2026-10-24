@@ -1,4 +1,3 @@
-using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -10,8 +9,7 @@ using Terraria.Graphics.Shaders;
 
 namespace ZenithReborn;
 
-// Only the recent visible sword poses live here. No projectile spawning,
-// damage, collision, saved data, networking or attack clock is involved.
+// 这里只保存近期可见剑姿，不参与弹幕生成、伤害、碰撞、存档、网络或攻击计时。
 public sealed class MartialSlashTrail
 {
     public const int Lifetime=16, MaximumSamples=14;
@@ -19,6 +17,7 @@ public sealed class MartialSlashTrail
     private readonly List<Pose> poses=new(MaximumSamples);
     private readonly List<Vector2> points=new(MaximumSamples);
     private readonly VertexStrip flowingStrip=new();
+    private readonly VertexStrip ribbonStrip=new();
     private readonly Vector2[] flowPoints=new Vector2[64];
     private readonly float[] flowAngles=new float[64];
     public int Count=>poses.Count;
@@ -38,7 +37,7 @@ public sealed class MartialSlashTrail
         {
             var last=poses[^1];
             float turn=MathHelper.WrapAngle(angle-last.Angle);
-            // Never bridge a teleport, a phase reset or a reused projectile.
+            // 瞬移、阶段重置或弹幕复用时不能跨越断点连接轨迹。
             if(Vector2.DistanceSquared(last.Pivot,pivot)>96*96 || MathF.Abs(turn)>.8f)poses.Clear();
             else if(MathF.Abs(turn)<.001f && Vector2.DistanceSquared(last.Pivot,pivot)<.25f)return;
         }
@@ -55,19 +54,16 @@ public sealed class MartialSlashTrail
     }
     private static float Taper(float progress)=>MathF.Pow(Math.Max(0,MathF.Sin(progress*MathHelper.Pi)),.55f);
 
-    // The moving material is the existing vanilla Rainbow Rod / MagicMissile
-    // effect and textures. Luminance still handles the quiet bloom and edge.
+    // 移动材质仍是原版彩虹魔杖 / MagicMissile 的现成 Effect 与贴图。
+    // 光带全部改用原版 VertexStrip 绘制，不再依赖 Luminance 的轨迹渲染和泛光。
     public void DrawPrimitives(int tier,int? projectionWidth=null,int? projectionHeight=null,bool unscaled=false,float? visualTime=null)
     {
-        if(poses.Count<3 || !ShaderManager.HasFinishedLoading)return;
+        if(poses.Count<3)return;   // 原版Shader在进入世界前已就绪，不再需要额外门控
         float clock=visualTime??Main.GlobalTimeWrappedHourly;
         Color head=SoulFlowStyle.Head(tier);
         Color tail=SoulFlowStyle.Tail(tier);
-        float span=0;
-        for(int i=1;i<poses.Count;i++)span+=MathHelper.WrapAngle(poses[i].Angle-poses[i-1].Angle);
+        // 第三方厚月牙主体已删除，目前仅保留原版流光与细刃。
         Ribbon(268,73,.085f,0);
-        MartialCrescentMaterial.Draw(poses[^1].Pivot,poses[0].Angle,span,poses[^1].Age,tier,clock,
-            projectionWidth,projectionHeight,unscaled);
         Flow(265,38,.3f,0);
         Flow(291,14,.38f,1);
         Ribbon(309,2.1f,1.15f,.95f);
@@ -80,8 +76,7 @@ public sealed class MartialSlashTrail
                 float sample=t*(poses.Count-1);int index=(int)sample;
                 var a=poses[index];var b=poses[Math.Min(index+1,poses.Count-1)];float f=sample-index;
                 float angle=a.Angle+MathHelper.WrapAngle(b.Angle-a.Angle)*f;
-                // A small irregular edge separates the travelling filaments;
-                // the weapon's real pose remains the source of the sweep.
+                // 细微的不规则边缘区分流动细丝；扫掠始终跟随武器的真实姿态。
                 float ripple=MathF.Sin(t*21-clock*12+strand*2)*MathF.Sin(t*MathHelper.Pi)*(strand==0?3:5);
                 flowPoints[i]=Vector2.Lerp(a.Pivot,b.Pivot,f)+angle.ToRotationVector2()*(radius+ripple);
             }
@@ -109,13 +104,19 @@ public sealed class MartialSlashTrail
         {
             points.Clear();
             foreach(var pose in poses)points.Add(pose.Pivot+pose.Angle.ToRotationVector2()*radius);
-            PrimitiveRenderer.RenderTrail(points,new(
-                t=>width*Taper(t),
+            // 逐点朝向：由相邻点差分得到，交给原版 VertexStrip 画成一条平滑轨迹
+            for(int i=0;i<points.Count;i++)
+            {
+                Vector2 delta=i==points.Count-1?points[i]-points[i-1]:points[i+1]-points[i];
+                flowAngles[i]=delta.ToRotation();
+            }
+            Vector2 offset=unscaled?Vector2.Zero:-Main.screenPosition;
+            ribbonStrip.PrepareStrip(points.ToArray(),flowAngles,
                 t=>{
                     Color color=Color.Lerp(Color.Lerp(tail,head,t),Color.White,white)*(intensity*Envelope(t));
                     color.A=255;return color;
-                },Smoothen:poses.Count>4,ProjectionAreaWidth:projectionWidth,ProjectionAreaHeight:projectionHeight,
-                UseUnscaledMatrix:unscaled),48);
+                },t=>width*Taper(t),offset,points.Count,true);
+            ribbonStrip.DrawTrail();
         }
     }
 
@@ -148,8 +149,8 @@ public sealed class MartialSlashTrail
     }
 }
 
-// Draw once before entities, so the real blade remains crisp above its arc.
-// Luminance changes the GPU pipeline; restore it for vanilla and other mods.
+// 在实体之前绘制一次，让真正的剑身永远清晰地压在剑弧上面。
+// 这里会切换自定义 Shader 与混合状态，画完必须恢复，避免污染原版和其他模组。
 [Autoload(Side=ModSide.Client)]
 public class MartialSlashRenderer : ModSystem
 {
@@ -160,11 +161,11 @@ public class MartialSlashRenderer : ModSystem
         get
         {
             if(flowShader!=null)return flowShader;
-            // Clone the ready-made native effect so our time/matrix/opacity
-            // never alter another weapon's shared RainbowRod shader settings.
+            // 克隆原版现成的 Effect：这样我们的时间/矩阵/透明度参数
+            // 永远不会改到别的武器共用的 RainbowRod Shader 设置。
             flowEffect=GameShaders.Misc["RainbowRod"].Shader.Clone();
-            // This 1.4.4-only constructor permits ownership of a private Effect
-            // clone. A shared Asset reference would leak our parameters.
+            // 这个仅 1.4.4 可用的构造函数允许我们持有私有 Effect 副本；
+            // 若直接引用共享 Asset，参数会互相串味。
 #pragma warning disable CS0618
             flowShader=new MiscShaderData(new Ref<Effect>(flowEffect),"MagicMissile")
                 .UseProjectionMatrix(true).UseImage0(TextureAssets.Extra[ExtrasID.RainbowRodTrailColorGradient])
@@ -199,7 +200,7 @@ public class MartialSlashRenderer : ModSystem
     }
     public override void PostDrawTiles()
     {
-        if(Main.gameMenu || !ShaderManager.HasFinishedLoading)return;
+        if(Main.gameMenu)return;
         bool visible=false;
         foreach(var projectile in Main.ActiveProjectiles)
             if(projectile.ModProjectile is MartialGiant g && g.SlashTrail.Count>=3){visible=true;break;}
@@ -211,7 +212,6 @@ public class MartialSlashRenderer : ModSystem
     }
     public override void Unload()
     {
-        MartialCrescentMaterial.Unload();
         var effect=flowEffect;flowEffect=null;flowShader=null;
         if(effect!=null)Main.QueueMainThreadAction(effect.Dispose);
     }

@@ -40,12 +40,7 @@
       }
     ]
   },
-  "resources": [
-    {
-      "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
-      "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
-    }
-  ],
+  "resources": [],
   "notes": "按矿石金属性定稿的逐剑底色；配方语言沿用R2家族（暗底+双向噪声流动），运行时未接入。",
   "reference": null,
   "candidateFields": [
@@ -67,5 +62,96 @@
       118,
       30
     ]
-  }
+  },
+  "variants": {
+    "H3": {
+      "description": "气流用低饱和底色；保留原R2配方，最终采用单次柔和加色，避免浅色背景出现黑烟。",
+      "recipe": {
+        "clear": [
+          152,
+          131,
+          79
+        ],
+        "composition": "additive",
+        "layers": [
+          {
+            "tint": [
+              255,
+              225,
+              134
+            ],
+            "opacity": 0.48,
+            "scrollPixelsPerSecond": [
+              6,
+              0
+            ]
+          },
+          {
+            "tint": [
+              194,
+              159,
+              98
+            ],
+            "opacity": 0.42,
+            "scrollPixelsPerSecond": [
+              -4,
+              0
+            ],
+            "initialYOffset": "textureHeight/3"
+          }
+        ]
+      }
+    },
+    "H4": {
+      "description": "保持各剑原有矿物色相，提亮底色；长尾清晰气流，不统一泛白。",
+      "recipe": {
+        "clear": [
+          191,
+          152,
+          54
+        ],
+        "composition": "alpha",
+        "layers": [
+          {
+            "tint": [
+              255,
+              212,
+              82
+            ],
+            "opacity": 0.48,
+            "scrollPixelsPerSecond": [
+              6,
+              0
+            ]
+          },
+          {
+            "tint": [
+              168,
+              118,
+              30
+            ],
+            "opacity": 0.42,
+            "scrollPixelsPerSecond": [
+              -4,
+              0
+            ],
+            "initialYOffset": "textureHeight/3"
+          }
+        ]
+      }
+    }
+  },
+  "currentRuntime": {
+    "version": "0.3.61",
+    "enabled": true,
+    "noiseOrigin": "project-authored: ZenithReborn/SwordBodyColorNoise.cs",
+    "reason": "恢复自有动态蒙版和慢底色合成，不恢复第三方材质。"
+  },
+  "historicalResources": [
+    {
+      "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
+      "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
+    }
+  ],
+  "historicalProvenance": "VfxLibrary/References/Retired/CalamityOverhaul/provenance.json"
 }

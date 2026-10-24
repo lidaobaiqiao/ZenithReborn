@@ -30,8 +30,8 @@ public class OreFlyingSword : ModProjectile
     public bool TraitWindow=>!traitAttempted && SetCount>=8;
     public float FlightDistance=>Mastered?840f:560f;
     public float FormationAge=>age;
-    // Collection ages differ across members. Geometry must share one phase,
-    // including the closing gap, instead of rotating each blade by its own age.
+    // 各成员的收集年龄不同，但几何必须共用同一个相位——闭合缺口也一样，
+    // 不能让每把剑按自己的年龄各转各的。
     public static float FormationAngle(int index,int total)=>-MathHelper.PiOver2+MathHelper.TwoPi*index/Math.Max(1,total);
     public float FormationScale=>BloomScale(FormationAge);
     public float DisplayScale=>1.85f*Projectile.scale*(Launched?1:FormationScale);
@@ -63,7 +63,7 @@ public class OreFlyingSword : ModProjectile
         Projectile.tileCollide=false; Projectile.ignoreWater=true;
         Projectile.penetrate=-1; Projectile.timeLeft=240;
         Projectile.usesLocalNPCImmunity=true; Projectile.localNPCHitCooldown=6;
-        // No custom DrawBehind queue: let the normal projectile pass invoke PreDraw.
+        // 不另开 DrawBehind 队列，交给普通弹幕绘制流程调用 PreDraw。
         Projectile.hide=false;
         trail.Clear();
         age=0;Launched=false;targetIdentity=0;WaitingForVolley=false;readyAge=GrowFrames+ChargeFrames;
@@ -78,7 +78,7 @@ public class OreFlyingSword : ModProjectile
         NPC npc=Main.npc[TargetIndex];
         if(!HardOrePlayer.ValidTarget(npc)) return null;
         long identity=npc.GetGlobalNPC<HardOreTarget>().Id;
-        if(targetIdentity==0) targetIdentity=identity; // Bind to this client's spawn identity.
+        if(targetIdentity==0) targetIdentity=identity; // 绑定本客户端的生成身份。
         return targetIdentity==identity?npc:null;
     }
     private bool SourceValid()
@@ -116,6 +116,21 @@ public class OreFlyingSword : ModProjectile
         SetCount=Math.Clamp(reader.ReadInt32(),1,14);AttackPass=Math.Clamp(reader.ReadInt32(),0,1);traitAttempted=reader.ReadBoolean();
         passAge=Math.Max(0,reader.ReadInt32());
     }
+    // 光照强度必须和画面亮度匹配：之前 0.22 只有视觉亮度的四分之一，
+    // 结果是"看着很亮却不照亮环境"。火把在泰拉里约等于 1.0。
+    private const float LightFlight=0.95f;   // 飞行中（拖尾最亮）
+    private const float LightIdle=0.55f;     // 成型悬停（无拖尾）
+
+    // 泰拉没有真正的阴影，单点光看起来像灯泡。用主光 + 三个偏心辅助光，
+    // 让照亮范围扩散开，读起来才像"光有体积"。
+    private static void AddVolumeLight(Vector2 center,Vector3 tint)
+    {
+        Lighting.AddLight(center,tint);
+        Lighting.AddLight(center+new Vector2(0,26),tint*.45f);
+        Lighting.AddLight(center+new Vector2(-22,10),tint*.30f);
+        Lighting.AddLight(center+new Vector2(22,10),tint*.30f);
+    }
+
     public override void AI()
     {
         if(!SourceValid()) { Projectile.Kill();return; }
@@ -127,7 +142,7 @@ public class OreFlyingSword : ModProjectile
             NPC target=Target();
             if(target!=null){aimPoint=target.Center;aimVelocity=target.velocity;}
             else if(TargetIndex>=0 && TargetIndex<Main.maxNPCs && Main.npc[TargetIndex].active)
-            { Projectile.Kill();return; } // Reused slot or invalid/friendly target.
+            { Projectile.Kill();return; } // 槽位已复用，或目标失效／变成友方。
             float angle=FormationAngle(RingIndex,Total);
             float radius=Math.Clamp(Math.Max(170,(target==null?0:Math.Max(target.width,target.height))*.5f+110),170,360);
             if(!WaitingForVolley)radius+=OreFlightMotion.Pullback(age,GatherFrames);
@@ -138,12 +153,11 @@ public class OreFlyingSword : ModProjectile
             if(!Main.dedServ && FormationAge>0)
             {
                 Color tint=OreFamily.Tints[Math.Clamp(Material,0,13)];
-                Lighting.AddLight(Projectile.Center,tint.ToVector3()*.22f);
+                Lighting.AddLight(Projectile.Center,tint.ToVector3()*LightIdle);
             }
             if(WaitingForVolley){Projectile.timeLeft=Math.Max(Projectile.timeLeft,120);return;}
             if(age<=GatherFrames)return;
-            // Per-member ready ages correspond to one common release tick,
-            // after the final collected blade has finished settling.
+            // 每把剑的就绪年龄对应同一个齐射时刻：等最后一把收集到的剑稳定下来再放。
             Launched=true;Projectile.hide=false;
             passAge=0;
             launchFlashAge=0;
@@ -166,7 +180,7 @@ public class OreFlyingSword : ModProjectile
                 OrePierceFeedback.Launch(Projectile.Center,Projectile.velocity,OreFamily.Tints[Math.Clamp(Material,0,13)]);
             }
             trail.Record(Projectile.Center,Projectile.rotation);
-            Lighting.AddLight(Projectile.Center,OreFamily.Tints[Math.Clamp(Material,0,13)].ToVector3()*.22f);
+            AddVolumeLight(Projectile.Center,OreFamily.Tints[Math.Clamp(Material,0,13)].ToVector3()*LightFlight);
         }
         if(Vector2.Distance(launchedFrom,Projectile.Center)>FlightDistance)
         {
@@ -191,8 +205,7 @@ public class OreFlyingSword : ModProjectile
     }
     public override void ModifyHitNPC(NPC target,ref NPC.HitModifiers modifiers)
     {
-        // Small supplemental hits scale defense proportionally; strong flying
-        // swords never amplify enemy armor beyond the normal 100% calculation.
+        // 小额补充伤害按比例折算防御；强力飞剑不会把敌人护甲放大到正常100%计算之外。
         modifiers.DefenseEffectiveness*=Math.Clamp(DamageShare,0,1);
         Main.player[Projectile.owner].GetModPlayer<HardOrePlayer>().Modify(Projectile,target,ref modifiers);
         if(SetCount>=8 && VisualType==ItemID.CopperShortsword && Vector2.Distance(Main.player[Projectile.owner].Center,target.Center)<180)
@@ -211,8 +224,7 @@ public class OreFlyingSword : ModProjectile
             Main.player[Projectile.owner].GetModPlayer<HardOrePlayer>().Hit(Projectile,target,damageDone);
             traitAttempted=true;Projectile.netUpdate=true;
         }
-        // Native local NPC immunity allows repeated hits every six frames.
-        // Never stop, retarget or consume penetration on contact.
+        // 原版本地NPC免伤计时允许每6帧重复命中；接触时绝不停止、不换目标、不消耗穿透。
     }
     public override bool PreDraw(ref Color lightColor)
     {
@@ -220,20 +232,19 @@ public class OreFlyingSword : ModProjectile
         int type=OreFamily.MaterialOf(VisualType)==Material?VisualType:OreFamily.DefaultType[Material];
         Main.instance.LoadItem(type);
         float alpha=Launched?1:MathHelper.SmoothStep(0,1,Math.Clamp(FormationAge/6,0,1));
+        // 绘制顺序：先画气流（在下面），再画剑本体（在上面），剑永远压住特效。
+        // 物理前提：静止的剑没有相对气流，所以只有真正飞起来（Launched）才画。
+        // 浓度读取真实速度；折返重新加速时也会重新建立气流。
+        if(Launched && VfxSwordMask.Has(type))
+        {
+            float wake=MathHelper.Clamp(Projectile.velocity.Length()/(FlightSpeed*OreFlightMotion.PeakSpeed),0f,1f);
+            float snap=launchFlashAge<4?1-launchFlashAge/4f:0;
+            VfxSwordMask.Draw(type,Projectile.Center,Projectile.rotation,DisplayScale*(1+snap*.12f),
+                Main.GlobalTimeWrappedHourly,alpha*wake);
+        }
         OreSwordEffects.FlyingBlade(TextureAssets.Item[type].Value,Projectile.Center,Projectile.rotation,DisplayScale,
             OreFamily.Tints[Math.Clamp(Material,0,13)],alpha,1,Launched?launchFlashAge:30);
         return false;
-    }
-    public void DrawOrePrimitives()
-    {
-        if(Projectile.hide || !Launched && FormationAge<=0)return;
-        var front=AirFront();float clock=Main.GlobalTimeWrappedHourly;
-        float reach=Vector2.Distance(Projectile.Center,front.Tip);
-        if(Launched && trail.Count>=2)
-            OreVisualRenderer.Flight(trail,front.Tint,14*Projectile.scale,clock,tailOffset:32*Projectile.scale,
-                tipReach:reach,heat:Math.Clamp(1-hitFlashAge/12f,0,1),head:Projectile.Center);
-        else OreVisualRenderer.Sheath(Projectile.Center,Projectile.rotation,reach,DisplayScale,front.Tint,
-            Math.Clamp(FormationAge/6,0,1),clock);
     }
     public OreAirFront AirFront()
     {

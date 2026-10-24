@@ -11,8 +11,7 @@ using Terraria.UI;
 
 namespace ZenithReborn;
 
-// Attack prototype only. Race grants/collection are deliberately not inferred
-// from the abandoned WJ1 design. Disable this switch to restore normal combat.
+// 仅供攻击试作；不从已废弃的WJ1推导种族奖励，关闭后恢复普通战斗。
 public class MartialConfig : ModConfig
 {
     public override ConfigScope Mode=>ConfigScope.ServerSide;
@@ -22,8 +21,8 @@ public class MartialConfig : ModConfig
 public static class MartialTuning
 {
     public const int PerTier=100,MaxCharge=300,ChargePerBlade=30;
-    public const int FirstFormFrames=360,OrbitFrames=30,MaxPins=24;
-    public const int GiantReadyFrames=30,DashFrames=12,HoldFrames=120,SlashFrames=22;
+    public const int FirstFormFrames=360,OrbitFrames=28,MaxPins=24;
+    public const int GiantReadyFrames=MartialMotion.ThunderImpact+MartialMotion.ChargeFrames,DashFrames=12,HoldFrames=120,SlashFrames=22;
     public const float FreezeRadius=1600,GiantLength=330;
     public static bool Enabled=>ModContent.GetInstance<MartialConfig>().EnableAttackPrototype;
     public static int Cost(int tier)=>Math.Clamp(tier,1,3)*PerTier;
@@ -41,8 +40,7 @@ public static class MartialTuning
 
 public static class MartialInput
 {
-    // Existing tML input profiles can leave newly registered mod binds empty.
-    // Use defaults only while unassigned; explicit player bindings win.
+    // 旧输入档可能没有新增按键；仅未绑定时回退默认键，玩家自设优先。
     public static bool Pressed(ModKeybind bind,Keys fallback)=>bind?.JustPressed==true ||
         (bind==null || bind.GetAssignedKeys().Count==0) && Main.keyState.IsKeyDown(fallback) && !Main.oldKeyState.IsKeyDown(fallback);
     public static string Name(ModKeybind bind,string fallback)=>bind?.GetAssignedKeys().FirstOrDefault()??fallback;
@@ -157,8 +155,7 @@ public class MartialPlayer : ModPlayer
     public override void OnEnterWorld()=>Complete();
 }
 
-// Freeze only the combat bubble, never world time, allies, input or friendly
-// swords. Deriving the bubble from the synced giant also works on remote peers.
+// 只冻结战斗范围的敌人，不停止世界时钟、友军或输入；远端从同步巨剑推导范围。
 public static class MartialTime
 {
     public static bool Frozen(Vector2 point)

@@ -40,23 +40,35 @@ public static class SoulCurses
         return (soul.LegacyReleased&(1<<(int)curse))!=0 && actual<CurseStage.Released?CurseStage.Released:actual;
     }
     public static string StageName(CurseStage stage)=>stage switch{CurseStage.Cursed=>"诅咒中",CurseStage.Weakened=>"已削弱",CurseStage.Released=>"已解除",_=>"已祝福"};
+    // 屏幕尺度（世界单位）：人物到左右边界的距离。射程按它分档，而不是按进度累加。
+    // factor 用于祝福等更远的参考距离；无图形环境退回960像素，避免在专用服务器上归零。
+    public static float ScreenEdge(Player player,float factor=1)
+    {
+        // 无头检查或菜单早期可能还没有视图矩阵，缺失时按1倍视野处理。
+        float zoom=Main.GameViewMatrix?.Zoom.X??1;
+        if(zoom<=0||!float.IsFinite(zoom))zoom=1;
+        float edge=Main.screenWidth>0?Main.screenWidth*.5f/zoom:960f;
+        return edge*factor;
+    }
+    // 独行：初始2把，削弱3把（走原生发射点，与原版节奏一致），解除4把起走均匀分布。
     public static int Blades(SoulItem soul)=>Stage(soul,SoulCurse.Solitude) switch{
-        CurseStage.Cursed=>1,CurseStage.Weakened=>2,CurseStage.Released=>3,
+        CurseStage.Cursed=>2,CurseStage.Weakened=>3,CurseStage.Released=>4,
         _=> (soul.Seals&Moon)!=0?10:(soul.Seals&Cultist)!=0?8:(soul.Seals&Temple)!=0?7:(soul.Seals&Flower)!=0?6:4};
-    public static int HitLimit(SoulItem soul)=>Stage(soul,SoulCurse.Bluntness) switch{CurseStage.Cursed=>1,CurseStage.Weakened=>2,_=>int.MaxValue};
-    public static int TerrainAllowance(SoulItem soul)=>Stage(soul,SoulCurse.Barrier) switch{CurseStage.Cursed=>0,CurseStage.Weakened=>32,_=>int.MaxValue};
+    public static int HitLimit(SoulItem soul)=>Stage(soul,SoulCurse.Bluntness) switch{CurseStage.Cursed=>3,CurseStage.Weakened=>5,_=>int.MaxValue};
+    // 阻隔：诅咒态允许穿过约2格厚的实体地形，削弱态约4格，解除后不再阻断。
+    public static int TerrainAllowance(SoulItem soul)=>Stage(soul,SoulCurse.Barrier) switch{CurseStage.Cursed=>32,CurseStage.Weakened=>64,_=>int.MaxValue};
     public static string Description(SoulItem soul,SoulCurse curse)
     {
         var stage=Stage(soul,curse);bool free=stage>=CurseStage.Released;
         string effect=curse switch{
-            SoulCurse.Binding=>free?"御剑射程惩罚已解除，保留正常鼠标选点。":"御剑距离降为65%，至少160像素；仍可鼠标自由选点。",
+            SoulCurse.Binding=>stage==CurseStage.Blessed?"御剑距离不再设上限，仍可鼠标自由选点。":free?"御剑距离最少到屏幕左右边界，保留正常鼠标选点。":"御剑距离最少能打到屏幕左右边界的中点；仍可鼠标自由选点。",
             SoulCurse.Switching=>free?"所有有效寄宿武器的特性正常生效，全部有效主剑可参与百炼飞剑。":"普通特性仅首把主剑生效；百炼飞剑例外允许前4把有效主剑计入矿材并各自首击积攒，其余主剑仍保留独立伤害。支援仍受普通特性限制。",
             SoulCurse.Sheathing=>free?"新轮不打断旧轮，主剑各自完成攻击。":"开始新轮时，旧轮主剑提前停止攻击并淡出；不锁攻击键。",
-            SoulCurse.Barrier=>free?"主剑正常穿越实体地形。":stage==CurseStage.Weakened?"每段连续实体地形可穿过32像素，超出则退出攻击。":"实体地形阻断主剑攻击；背景墙、平台不阻断。",
+            SoulCurse.Barrier=>free?"主剑正常穿越实体地形。":$"每段连续实体地形可穿过{TerrainAllowance(soul)}像素，超出则退出攻击；背景墙、平台不阻断。",
             SoulCurse.Solitude=>$"每轮最多{Blades(soul)}把主剑，不足留空。",
             _=>free?"同剑按正常8帧间隔重复命中。":$"同剑本趟对同目标最多{HitLimit(soul)}次直接命中，不限制沿途其他敌人。"};
         if(stage==CurseStage.Blessed)effect+=" "+(curse switch{
-            SoulCurse.Binding=>"战斗约15秒蓄满御剑条，满条保留；按独立御剑键（默认O）手动开启10秒，视野与操控距离翻倍，按命中距离最高独立增伤50%。",
+            SoulCurse.Binding=>"战斗约15秒蓄满御剑条，满条保留；按独立御剑键（默认O）手动开启10秒，视野翻倍，按命中距离最高独立增伤50%。",
             SoulCurse.Switching=>"百刃接力：不同寄宿主剑首击同一敌人接力，每层强化后续首击特性10%，最多5层；3秒断连清空，同剑帧伤不叠层。",
             SoulCurse.Sheathing=>"归鞘留锋：主剑完整往返后为自身存1次强化，下次登场首击释放50%自身伤害的短距离斩痕。",
             SoulCurse.Barrier=>"破障：每把主剑穿过实体后，下次命中附加4秒破甲（15护甲穿透），每剑只触发一次。",

@@ -10,7 +10,7 @@ using Terraria.ModLoader;
 
 namespace ZenithPrototypeCheck;
 
-// Isolated architecture preview only. It never replaces the weapon renderer.
+// 仅隔离结构预览；色场使用项目数学噪声，不替换生产武器绘制。
 public class MaskCompositionPreview : ModSystem
 {
     private bool ran;
@@ -34,8 +34,7 @@ public class MaskCompositionPreview : ModSystem
                 if(field==null)continue;
                 int id=Convert.ToInt32(field.GetValue(null));
                 var atlas=ModContent.Request<Texture2D>("Terraria/Images/Projectile_"+id,AssetRequestMode.ImmediateLoad).Value;
-                // These native flamethrower atlases use manually selected rows;
-                // their Projectile.projFrames metadata is intentionally one.
+                // 原版喷火器图集需要手选有效帧，其弹幕帧数元数据固定为一。
                 int rows=Main.projFrames[id];
                 if((name=="Flames" || name=="DD2BetsyFlameBreath") && atlas.Width==98 && atlas.Height==686)rows=7;
                 candidates.Add((name,id,rows,atlas));
@@ -56,7 +55,7 @@ public class MaskCompositionPreview : ModSystem
             var pixels=new Color[source.texture.Width*source.texture.Height];source.texture.GetData(pixels);
             for(int i=0;i<pixels.Length;i++)pixels[i]=new(pixels[i].A,pixels[i].A,pixels[i].A,pixels[i].A);
             maskAtlas.SetData(pixels);
-            var noise=ModContent.Request<Texture2D>("ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01",AssetRequestMode.ImmediateLoad).Value;
+            using var noise=PreviewColorNoise.Create(Main.graphics.GraphicsDevice);
             using var addMask=new BlendState{ColorSourceBlend=Blend.One,ColorDestinationBlend=Blend.One,
                 AlphaSourceBlend=Blend.One,AlphaDestinationBlend=Blend.One};
             using var applyMask=new BlendState{ColorSourceBlend=Blend.Zero,ColorDestinationBlend=Blend.SourceAlpha,
@@ -71,8 +70,7 @@ public class MaskCompositionPreview : ModSystem
                 Main.spriteBatch.Draw(noise,new Rectangle(0,0,w,h),new Rectangle((int)(-time*5),noise.Height/3,noise.Width,noise.Height),new Color(132,60,205)*.28f);
                 Main.spriteBatch.End();
                 device.SetRenderTarget(mask);device.Clear(Color.Transparent);
-                // Use the three coherent flame shapes, not the atlas's later
-                // particle breakup rows. Crossfade alpha, not the color field.
+                // 只选前三个连续火焰形状，跳过后续散粒帧；交叉插值只作用于蒙版透明度。
                 int usedFrames=Math.Min(3,source.frames),cycle=usedFrames*2-2;
                 int Frame(int n){int f=n%cycle;return f<usedFrames?f:cycle-f;}
                 float phase=time*6;int a=Frame((int)phase),b=Frame((int)phase+1);float mix=phase-MathF.Floor(phase);

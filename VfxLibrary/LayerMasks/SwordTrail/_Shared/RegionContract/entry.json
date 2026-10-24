@@ -1,0 +1,16 @@
+{
+  "id": "layermask.SwordTrail.RegionContract",
+  "origin": "project-authored",
+  "status": "runtime-and-lab-validated-artwork-per-sword-pending",
+  "runtimeInput": "SurfaceMaterialDefinition.Assets.LayerMask",
+  "runtimeFormat": "ZRDT version 1; RGBA8; .zrdata",
+  "channels": {"R": "DetailLayers[0]", "G": "DetailLayers[1]", "B": "DetailLayers[2]", "A": "DetailLayers[3]"},
+  "colorSpace": "linear-data",
+  "premultiplied": false,
+  "sampling": "LinearClamp; UV与当前带面一致，区域数据本身不随底色滚动",
+  "meaning": "控制颜色混合、局部粗糙度/金属度/自发光；不是第二份动态轮廓",
+  "authoring": "四张灰度PNG -> 明确分配RGBA -> prepare_material_maps.py data -> 原始数据载荷",
+  "classification": "LayerMasks / SwordTrail / 实际剑名；共用资源引用而非重复复制",
+  "mipRuntimeEnabled": false,
+  "report": "docs/0.3.69-成熟模组拆解与材质分区.md"
+}

@@ -1,0 +1,42 @@
+{
+  "id": "reference.MatureVfx.20261024",
+  "status": "shipped-samples-inspected-own-region-pipeline-implemented",
+  "scope": "参考实现与制作管线，非整包复刻或第三方材质导入",
+  "report": "docs/0.3.69-成熟模组拆解与材质分区.md",
+  "tools": [
+    "checks/review_mod_vfx.py",
+    "checks/audit_material_assets.py",
+    "checks/prepare_material_maps.py"
+  ],
+  "targets": [
+    {
+      "name": "CalamityOverhaul",
+      "version": "0.9209",
+      "packageSha256": "a9a6b28acd83420ed8c08928b8a21691f5c44b7114cc721e853c5f27b1207223",
+      "sourcePaths": ["Assets/Effects/OniCrimsonSlash.fx", "Content/LegendWeapon/OnikiriLegend/CrimsonRendSlashs/CrimsonSlashRenderer.cs"],
+      "textureRoles": ["SlashBrush01：方向笔触；256×128", "NoiseSoft01：多尺度扭曲与侵蚀；512×512"],
+      "productionAssetsCopied": false
+    },
+    {
+      "name": "CalamityMod",
+      "version": "2.2.2",
+      "packageSha256": "1ec82bf05229f20dbc26b598c40c2b429d329533a8cba5e0c6b554e458ecd79f",
+      "sourcePaths": ["Effects/ExobladeSlashShader.fx"],
+      "callerSource": "https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/Projectiles/Melee/ExobladeProj.cs",
+      "sourceBoundary": "调用方是固定提交的公开源码，不冒充与本机程序集逐字匹配",
+      "productionAssetsCopied": false
+    },
+    {
+      "name": "Luminance",
+      "version": "1.0.14",
+      "packageSha256": "47a1ce462a4b407efcb1f043419d58bb750cc60addffcb4e3e442612c0495cad",
+      "sourcePaths": ["Core/Graphics/Primitives/PrimitiveRenderer.cs", "Core/Graphics/Shaders/ManagedShader.cs"],
+      "productionAssetsCopied": false
+    }
+  ],
+  "notes": [
+    "参考区只登记来源和结论；提取样本位于忽略提交的artifacts研究目录。",
+    "公开可读不等于许可相同；引用和再分发分别核对作者许可证。",
+    "保留自有设计语言；开源基础设施与来源透明的技术学习符合项目方向。"
+  ]
+}

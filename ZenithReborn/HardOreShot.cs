@@ -80,14 +80,6 @@ public class HardOreShot : ModProjectile
         }
         if(!Main.dedServ)visualTrail.Record(Projectile.Center,Projectile.rotation);
     }
-    public void DrawOrePrimitives()
-    {
-        var kind=(HardOreKind)Math.Clamp((int)Projectile.ai[1],0,5);
-        float rotation=kind==HardOreKind.Titanium?Projectile.rotation:Projectile.velocity.ToRotation();
-        float clock=Main.GlobalTimeWrappedHourly;
-        if(visualTrail.Count>=2)OreVisualRenderer.Flight(visualTrail,OreFamily.Tints[8+(int)kind],kind==HardOreKind.Titanium?6:8,clock,tipReach:12,head:Projectile.Center);
-        else OreVisualRenderer.Shard(Projectile.Center,rotation,kind,Projectile.localAI[0],clock);
-    }
     public override bool PreDraw(ref Color lightColor)
     {
         Color tint=OreFamily.Tints[8+Math.Clamp((int)Projectile.ai[1],0,5)];

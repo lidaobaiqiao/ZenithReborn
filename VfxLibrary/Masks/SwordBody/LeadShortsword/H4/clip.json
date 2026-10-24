@@ -1,0 +1,78 @@
+{
+  "revision": "H4",
+  "status": "review-candidate",
+  "grid": [
+    4,
+    4
+  ],
+  "frameSize": [
+    640,
+    256
+  ],
+  "canvas": [
+    640,
+    256
+  ],
+  "pivot": [
+    497,
+    128
+  ],
+  "tip": [
+    550,
+    128
+  ],
+  "frames": 16,
+  "fps": 14.545454545454545,
+  "loop": true,
+  "loopSeconds": 1.1,
+  "interpolation": "alpha-linear",
+  "channel": "alpha",
+  "encoding": "RGBA premultiplied white, use Alpha only",
+  "atlasSha256": "09a0a5165d3030fe4f1c2906e7bcf2cff1e646544beee10153b77cbc4eb2d3ff",
+  "authoring": "authoring.json",
+  "sourceMethod": "Native SpriteBatch vector recipe; GPU Alpha output packed unchanged",
+  "sourceCode": "checks/ZenithPrototypeCheck/SwordBodyVectorMask.cs",
+  "sourceCodeSha256": "f14f4d6f7c41478d62842615dfbcb72a1f5263da9388550746aebfe4cdff3cdd",
+  "sourceDependencies": {
+    "checks\\ZenithPrototypeCheck\\SwordAirflowMask.cs": "57b81ddd5384308f00459fa9e2f69fcf93faac046d937eb1e2fdc26218fe24f3"
+  },
+  "crestPositions": [],
+  "motionModel": "native silhouette distance field, downstream edge waves, coherent fading wake",
+  "adjacentAlphaMeanChanges": [
+    0.284259033203125,
+    0.292510986328125,
+    0.298736572265625,
+    0.300885009765625,
+    0.29268798828125,
+    0.280291748046875,
+    0.27762451171875,
+    0.2810546875,
+    0.28861083984375,
+    0.292266845703125,
+    0.29346923828125,
+    0.289154052734375,
+    0.2793212890625,
+    0.273541259765625,
+    0.27215576171875,
+    0.27608642578125
+  ],
+  "phases": {
+    "appear": {
+      "driver": "actual flight speed",
+      "activeMaskContinues": true
+    },
+    "active": {
+      "activeMaskContinues": true
+    },
+    "finish": {
+      "frames": 20,
+      "driver": "cohesive backward drift and fade",
+      "activeMaskContinues": true
+    }
+  },
+  "contextBlend": "premultiplied additive",
+  "colorField": "color.SwordBody.LeadShortsword",
+  "colorFieldVariant": "H4",
+  "runtimeIntegrated": true,
+  "finalArtApproved": false
+}

@@ -11,7 +11,7 @@ using ZenithReborn;
 
 namespace ZenithPrototypeCheck;
 
-// Review-only GPU composition. No production render hook or player/world use.
+// 制作端隔离 GPU 合成预览；不读取人物或世界，不替换正式包。
 public class SwordBodyMaskPreview : ModSystem
 {
     private bool ran;
@@ -39,7 +39,7 @@ public class SwordBodyMaskPreview : ModSystem
             using var atlas=string.IsNullOrEmpty(authoring)?LoadAtlas():new Texture2D(d,1792,1024);
             Main.instance.LoadItem(itemId);var blade=TextureAssets.Item[itemId].Value;
             using var vector=string.IsNullOrEmpty(authoring)?null:new SwordBodyVectorMask(d,authoring,blade);
-            var noise=ModContent.Request<Texture2D>("ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01",AssetRequestMode.ImmediateLoad).Value;
+            using var noise=PreviewColorNoise.Create(Main.graphics.GraphicsDevice);
             Color baseColor=new(15,18,47),cyan=new(65,205,235),purple=new(132,60,205);
             float cyanOpacity=.75f,purpleOpacity=.28f,cyanSpeed=8,purpleSpeed=-5;string colorRecipe="color._Shared.SlowFlowM1";
             bool colorAdditive=false;
@@ -47,6 +47,7 @@ public class SwordBodyMaskPreview : ModSystem
             if(!string.IsNullOrEmpty(colorPath))
             {
                 using var field=JsonDocument.Parse(File.ReadAllText(colorPath));var recipe=field.RootElement.GetProperty("recipe");
+                if(revision=="H3"&&field.RootElement.TryGetProperty("variants",out var variants))recipe=variants.GetProperty("H3").GetProperty("recipe");
                 Color ReadColor(JsonElement array)=>new(array[0].GetInt32(),array[1].GetInt32(),array[2].GetInt32());
                 baseColor=ReadColor(recipe.GetProperty("clear"));var layers=recipe.GetProperty("layers");
                 cyan=ReadColor(layers[0].GetProperty("tint"));purple=ReadColor(layers[1].GetProperty("tint"));
@@ -217,11 +218,7 @@ public class SwordBodyMaskPreview : ModSystem
                 d.SetRenderTarget(scene);d.Clear(new Color(12,17,29));Begin(BlendState.AlphaBlend);
                 Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,new Rectangle(0,300,960,300),new Rectangle(0,0,1,1),new Color(158,172,164));
                 Label(revision+" / "+phase+" / one mask / "+(emissive?"additive":"alpha"),new(18,18),.75f);
-                for(int row=0;row<2;row++)
-                {
-                    Vector2 pivot=new(560+move,155+row*300);
-                    Main.spriteBatch.Draw(blade,pivot,null,Color.White*bodyOpacity,MathHelper.PiOver4,blade.Size()*.5f,1.85f,SpriteEffects.None,0);
-                }
+
                 Main.spriteBatch.End();Begin(emissive?add:BlendState.AlphaBlend);
                 for(int row=0;row<2;row++)
                 {
@@ -229,6 +226,13 @@ public class SwordBodyMaskPreview : ModSystem
                     Main.spriteBatch.Draw(result,pivot-new Vector2(305,128)*normalScale,null,Color.White,0,Vector2.Zero,normalScale,SpriteEffects.None,0);
                 }
                 Main.spriteBatch.End();Begin(BlendState.AlphaBlend);
+                // 制作端遮挡参考：气流在下，原版剑体在上；当前生产气流已撤下。
+                for(int row=0;row<2;row++)
+                {
+                    Vector2 at=new(560+move,155+row*300);
+                    Main.spriteBatch.Draw(blade,at,null,Color.White*bodyOpacity,MathHelper.PiOver4,
+                        blade.Size()*.5f,1.85f,SpriteEffects.None,0);
+                }
                 Label("Native flying-sword size / fixed pose / isolated GPU preview, not world combat",new(18,568),.65f);
                 Main.spriteBatch.End();d.SetRenderTarget(null);
             }

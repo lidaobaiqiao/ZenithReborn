@@ -1,0 +1,97 @@
+{
+  "SchemaVersion": 1,
+  "Name": "\u81EA\u6709\u73BB\u7483",
+  "UseWeaponColor": false,
+  "BaseColor": {
+    "X": 1,
+    "Y": 1,
+    "Z": 1
+  },
+  "Metallic": 0,
+  "Roughness": 0.08,
+  "Ior": 1.5,
+  "Opacity": 1,
+  "Transmission": 0.55,
+  "Thickness": 72,
+  "AbsorptionColor": {
+    "X": 0.92,
+    "Y": 0.98,
+    "Z": 1
+  },
+  "AbsorptionDensity": 0.12,
+  "NormalStrength": 1,
+  "BumpStrength": 0,
+  "Displacement": 0,
+  "Specular": 1,
+  "Anisotropy": 0,
+  "AnisotropyRotation": 0,
+  "EnvironmentStrength": 0.65,
+  "LightStrength": 1,
+  "LightColor": {
+    "X": 1,
+    "Y": 1,
+    "Z": 1
+  },
+  "LightAzimuth": -35,
+  "LightElevation": 45,
+  "AmbientColor": {
+    "X": 0.1,
+    "Y": 0.12,
+    "Z": 0.16
+  },
+  "ClearCoat": 0,
+  "CoatRoughness": 0.1,
+  "CoatIor": 1.5,
+  "Sheen": 0,
+  "SheenRoughness": 0.35,
+  "SheenColor": {
+    "X": 0.8,
+    "Y": 0.9,
+    "Z": 1
+  },
+  "FilmWeight": 0,
+  "FilmThickness": 400,
+  "FilmIor": 1.4,
+  "EmissionColor": {
+    "X": 0.25,
+    "Y": 0.55,
+    "Z": 1
+  },
+  "EmissionStrength": 0,
+  "WorldLightStrength": 0,
+  "Subsurface": 0,
+  "SubsurfaceColor": {
+    "X": 1,
+    "Y": 0.35,
+    "Z": 0.18
+  },
+  "SubsurfaceRadius": 0.5,
+  "VolumeDensity": 0,
+  "VolumeColor": {
+    "X": 0.45,
+    "Y": 0.65,
+    "Z": 0.85
+  },
+  "VolumeAnisotropy": 0,
+  "VolumeEmission": 0,
+  "CrossCurvature": 1.7,
+  "AlongTilt": 0.8,
+  "Dispersion": 0,
+  "SsrStrength": 0,
+  "Assets": {
+    "ColorField": "",
+    "MotionMask": "",
+    "NormalMap": "",
+    "SurfaceMap": "",
+    "HeightMap": "",
+    "EmissionMap": "",
+    "EnvironmentMap": "environment.png",
+    "Brush": "",
+    "Noise": "",
+    "LayerMask": "",
+    "Frames": 1,
+    "Columns": 1,
+    "LoopSeconds": 1
+  },
+  "DetailLayers": []
+}

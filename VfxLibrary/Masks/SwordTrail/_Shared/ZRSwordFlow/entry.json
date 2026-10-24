@@ -1,0 +1,11 @@
+{
+  "id": "mask.SwordTrail._Shared.ZRSwordFlow",
+  "origin": "project-authored",
+  "status": "runtime-candidate",
+  "shader": "shader.SwordFlow.ZR1",
+  "shape": "实际剑迹连续带面＋动态暗侧边界＋旧尾细缕＋返回侵蚀",
+  "defaultSource": "程序生成，不使用外部笔刷或蒙版",
+  "replaceableInput": "每把剑独立的RGBA动态蒙版图集；Alpha决定覆盖，替代默认程序形状",
+  "coordinateContract": "横向从剑头到旧尾，纵向从亮刃到暗侧",
+  "instructions": "VfxLibrary/Shaders/SwordFlow/美术接入与替换计划.md"
+}

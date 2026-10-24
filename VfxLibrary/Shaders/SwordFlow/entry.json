@@ -1,0 +1,28 @@
+{
+  "id": "shader.SwordFlow.ZR1",
+  "origin": "project-authored",
+  "status": "runtime-candidate",
+  "source": "ZenithReborn/Assets/Effects/ZRSwordFlow.fx",
+  "compiled": "ZenithReborn/Assets/Effects/ZRSwordFlow.fxc",
+  "buildManifest": "ZenithReborn/Assets/Effects/build-manifest.json",
+  "compiler": "checks/compile_effects.py",
+  "runtime": "ZenithReborn/SwordFlowMaterial.cs",
+  "geometry": "ZenithReborn/SoulMaterialTrail.cs",
+  "bindings": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/bindings.json",
+  "defaultArtwork": "程序色场和格点噪声，无第三方贴图输入",
+  "scope": "默认保留0.3.64自有剑迹材质，新增逐剑统一表面材质接口；矿石H4独立保持。",
+  "artReview": "待用户判断",
+  "appearance": "0.3.64 稳定双轴弧面，玻璃内部不混回完整原图；同帧树干轮廓实际横移20.5屏幕像素，视觉待用户判断。",
+  "screenComposite": "ZenithReborn/Assets/Effects/ZRGlassScreen.fx",
+  "preset": "VfxLibrary/Materials/SwordTrail/Glass/preset.json",
+  "playerEditor": false,
+  "advancedMaterial": "VfxLibrary/Materials/Surface/entry.json",
+  "lifecycleEnding": {
+    "poseCache": "ZenithReborn/SoulTrailEnding.cs",
+    "normalMaximumFrames": 36,
+    "retiredMaximumFrames": 24,
+    "parentIndependent": true,
+    "sceneCopiesAdded": false,
+    "report": "docs/0.3.71-飞剑真实点击与沿迹收尾.md"
+  }
+}

@@ -64,17 +64,17 @@ public class SoulSource : GlobalProjectile
 
 public class SoulBlade : ModProjectile
 {
+    private bool trailEndingCaptured;
     public Vector2 TargetOffset;
     public float SwordScale = 1;
-    // Enlarge the model, ghosts, ribbon and particles together. Keep the
-    // original Projectile.scale for damage collision and source-size rules.
+    // 剑体、剑影、拖尾与粒子统一放大；碰撞和来源尺寸仍读取原始 Projectile.scale。
     public float DisplayScale => Projectile.scale * 1.6f;
-    // Same phase increment and two updates/frame as native projectile 933.
+    // 与原版933保持相同阶段增量，每游戏帧更新两次。
     public float MotionPhase => Projectile.localAI[0];
     public static float SpriteVisibility(float phase) => Utils.GetLerpValue(0,20,phase,true)*Utils.GetLerpValue(68,60,phase,true);
     public float BladeOpacity => SpriteVisibility(MotionPhase)*Projectile.Opacity*(retired?1-retireAge/8f:1);
-    // Native rotation is axis + Pi/2; item art adds -Pi/4*spriteDirection.
-    // Our collision/ribbon rotation remains axis + Pi/4.
+    // 原版旋转为轴角加半周的一半，物品贴图再按朝向偏转；
+    // 碰撞与拖尾仍以轴角加四分之一半周保存。
     public float DrawRotation => Projectile.rotation+MathHelper.PiOver4*(1-Projectile.spriteDirection);
     public SpriteEffects DrawEffects => Projectile.spriteDirection==1?SpriteEffects.None:SpriteEffects.FlipHorizontally;
     public int SpecialDamage;
@@ -83,11 +83,10 @@ public class SoulBlade : ModProjectile
     public void ConfigureReborn(bool reborn)
     {
         Reborn = reborn;
-        // Retain eight game frames of hit immunity at two updates/frame.
+        // 每帧两次更新，16次更新对应八游戏帧命中免疫。
         Projectile.localNPCHitCooldown = 16;
     }
-    // Vanilla Zenith projectile 933 uses ai[0] = Random.Next(-100, 101) as
-    // the ellipse's vertical radius / lean. One sword = one ellipse.
+    // 原版天顶933以随机值控制椭圆纵向半径与倾斜，每把剑各有一条椭圆轨迹。
     public float Vertical = 60f;
     private int age;
     private bool released;
@@ -101,8 +100,7 @@ public class SoulBlade : ModProjectile
         WoodCombat.FindSoul(Main.player[Projectile.owner],Projectile.GetGlobalProjectile<SoulSource>().SoulId):null;
     public bool Retired=>retired;
     public void Retire(){if(retired)return;retired=true;retireAge=0;Projectile.netUpdate=true;}
-    // This is per emitted primary blade, not per target or damage tick.
-    // Consume before cooldown checks so a blocked first hit cannot retry later.
+    // 每把主飞剑只消耗一次首击资格；先消耗再查冷却，受阻首击不能随后重试。
     public bool TryConsumeOreHit()
     {
         if (oreHitConsumed) return false;
@@ -131,6 +129,7 @@ public class SoulBlade : ModProjectile
         Vertical = 60f;
         trailPoints=new Vector2[HistoryLength];trailCenters=new Vector2[HistoryLength];trailRotations=new float[HistoryLength];trailPhases=new float[HistoryLength];
         trailCount=0;
+        trailEndingCaptured=false;
     }
     public override bool ShouldUpdatePosition() => false;
     public override bool? CanDamage() => retired || MotionPhase>=60 || age <= Projectile.ai[2] ? false : null;
@@ -161,8 +160,7 @@ public class SoulBlade : ModProjectile
         float phase=MotionPhase;
         if(phase>=60 && !retired)Blessings.CompleteReturn(Projectile);
         if(phase>=120){Projectile.Kill();return;}
-        // Reserve the native trail lifetime even for slow hosts. No appended
-        // player-core movement, model shrinking or separate player draw layer.
+        // 慢速宿主也保留原版尾迹寿命，沿用原版返回动作与剑体尺寸。
         Projectile.timeLeft=Math.Max(Projectile.timeLeft,2+(int)Math.Ceiling((120-phase)/step));
         float lerp = Utils.GetLerpValue(0,1,phase/60f,true);
         float num3 = Vertical;
@@ -194,7 +192,20 @@ public class SoulBlade : ModProjectile
         Projectile.scale = Math.Clamp(SwordScale, .6f, 2f);
         if(!Main.dedServ)
         {
+            if(retired||phase>=60)CaptureTrailEnding();
             if(Projectile.localAI[1]==0){Projectile.localAI[1]=1;SoundEngine.PlaySound(SoundID.Item169,Projectile.Center);}
+            // 沿旧刃缘少量脱落碎光，使用共用粒子入口；每四次更新最多一粒。
+            // 普通返回由带面本身侵蚀收尾；提前收回才补少量碎光，保留原版飞行粒子。
+            if(retired && retireAge<8 && age%4==0 && trailCount>=4)
+            {
+                int itemType=(int)Projectile.ai[0];
+                Color tint=SoulVisuals.Tint(itemType);
+                int idx=Main.rand.Next(2,Math.Min(trailCount,SoulMaterialTrail.HistoryLength));
+                Vector2 axis=(trailRotations[idx]-MathHelper.PiOver4).ToRotationVector2();
+                Vector2 at=trailCenters[idx]+axis*26*DisplayScale;
+                Vector2 drift=Vector2.Clamp(trailCenters[idx-1]-trailCenters[idx],new Vector2(-8),new Vector2(8))*.16f;
+                SoulFlowSpark.Spawn(new FlowSparkSpawn(at,drift+new Vector2(0,-.6f),tint,.55f,18,true));
+            }
             int historyLimit=HistoryLength;
             if(trailCount>0 && Vector2.DistanceSquared(Projectile.Center,trailCenters[0])>90000) trailCount=0;
             for(int i=Math.Min(trailCount,historyLimit-1);i>0;i--)
@@ -218,8 +229,7 @@ public class SoulBlade : ModProjectile
         var soul = WoodCombat.FindSoul(Main.player[Projectile.owner], Projectile.GetGlobalProjectile<SoulSource>().SoulId);
         bool solid = soul!=null && (soul.TraitEnabled((int)Projectile.ai[0]) && WeaponFamilies.Of((int)Projectile.ai[0]) == BladeFamily.Solid ||
             soul.TraitSupports.Any(i=>WeaponFamilies.Of(i.type)==BladeFamily.Solid));
-        // The line helper can miss a short blade wholly inside a large target.
-        // The blade segment passes through its center, so containment is a hit.
+        // 短刃完全位于大目标内部时线段助手可能漏判；包含剑体中心也视为命中。
         return targetHitbox.Contains(Projectile.Center.ToPoint()) || Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(),
             Projectile.Center - length, Projectile.Center + length, 20 * Projectile.scale *
             (solid?1.15f:1), ref point);
@@ -326,6 +336,40 @@ public class SoulBlade : ModProjectile
         return SoulRibbonMesh.Build(trailCenters,trailRotations,Math.Min(trailCount,TrailLength),halfLength,
             SoulVisuals.Tint(itemType),Projectile.Opacity*(retired?1-retireAge/8f:1),Main.screenPosition,vertices);
     }
+    // 按实际记录的剑身位置和朝向铺材质；不再由玩家中心重新猜一条圆弧。
+    private void CaptureTrailEnding()
+    {
+        if(trailEndingCaptured||Projectile.hide||trailCount<2||Main.dedServ||Main.gameMenu||Main.graphics?.GraphicsDevice==null)return;
+        int itemType=(int)Projectile.ai[0];
+        if(itemType<=0||itemType>=ItemLoader.ItemCount)return;
+        Main.instance.LoadItem(itemType);var texture=TextureAssets.Item[itemType].Value;
+        var frame=Main.itemAnimations[itemType]?.GetFrame(texture)??texture.Frame();
+        float formation=MathHelper.SmoothStep(0,1,Math.Clamp(MotionPhase/12f,0,1));
+        trailEndingCaptured=SoulTrailEnding.Capture(trailCenters,trailRotations,trailCount,frame.Size().Length()*.5f*DisplayScale,
+            itemType,SoulVisuals.Tint(itemType),Projectile.Opacity*formation*.86f,retired);
+    }
+    public override void OnKill(int timeLeft)=>CaptureTrailEnding();
+
+    public void DrawRibbonShader(VertexPositionColorTexture[] vertices)
+    {
+        if(Projectile.hide || trailCount<2 || Main.dedServ||trailEndingCaptured)return;
+        int itemType=(int)Projectile.ai[0];
+        if(itemType<=0 || itemType>=ItemLoader.ItemCount)return;
+        float visibility=Projectile.Opacity*SoulMaterialTrail.Visibility(MotionPhase,retired,retireAge);
+        if(visibility<=0)return;
+        Main.instance.LoadItem(itemType);
+        Texture2D texture=TextureAssets.Item[itemType].Value;
+        Rectangle frame=Main.itemAnimations[itemType]?.GetFrame(texture)??texture.Frame();
+        float halfLength=frame.Size().Length()*.5f*DisplayScale;
+        float clock=Main.GlobalTimeWrappedHourly;
+        // 单条带面，尾部亮度和浓度交给着色器按 s 坐标衰减，
+        // 分段拼接会在每段起点重新"渐入"，拼出来是锯齿。
+        int count=SoulMaterialTrail.Build(trailCenters,trailRotations,trailCount,halfLength,
+            Main.screenPosition,vertices,clock);
+        if(count<3)return;
+        SoulMaterialTrail.Draw(vertices,count,SoulVisuals.Tint(itemType),visibility*.86f,clock,
+            dissolve:SoulMaterialTrail.Dissolve(MotionPhase,retired,retireAge),itemType:itemType);
+    }
     public override bool PreDraw(ref Color lightColor)
     {
         if (Projectile.hide) return false;
@@ -337,8 +381,7 @@ public class SoulBlade : ModProjectile
         Vector2 origin = frame.Size() * .5f;
         Color tint=SoulVisuals.Tint(itemType);
         float visibility=BladeOpacity;
-        // Native 933 draws sword samples fifteen phase units apart. Each sample
-        // fades by its own age, so the return unwinds rather than being sucked in.
+        // 原版933每隔十五阶段单位绘制一份剑影，各自随年龄消散，形成原版返回尾迹。
         for(int behind=60;behind>=15;behind-=15)
         {
             float samplePhase=MotionPhase-behind;
@@ -348,13 +391,11 @@ public class SoulBlade : ModProjectile
             if(i>=trailCount)continue;
             float opacity=SpriteVisibility(trailPhases[i])*Projectile.Opacity*(1-behind/75f)*(retired?1-retireAge/8f:1);
             Main.EntitySpriteDraw(texture,trailCenters[i]-Main.screenPosition,frame,
-                Color.Lerp(tint,Color.White,.22f)*opacity,
+                Color.Lerp(tint,Color.White,.22f)*(opacity*.5f),
                 trailRotations[i]+MathHelper.PiOver4*(1-Projectile.spriteDirection),origin,DisplayScale,DrawEffects);
         }
         Main.EntitySpriteDraw(texture, Projectile.Center - Main.screenPosition, frame, WoodTypes.SwordTint(itemType)*visibility,
             DrawRotation, origin, DisplayScale, DrawEffects);
-        Main.EntitySpriteDraw(texture,Projectile.Center-Main.screenPosition,frame,new Color(255,255,255,127)*visibility,
-            DrawRotation,origin,DisplayScale*1.25f,DrawEffects);
         SoulZenithEffects.DrawTip(this);
         return false;
     }

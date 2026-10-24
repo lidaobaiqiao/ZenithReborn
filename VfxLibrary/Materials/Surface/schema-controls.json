@@ -1,0 +1,422 @@
+[
+  {
+    "Key": "BaseColor.X",
+    "Label": "\u57FA\u7840\u8272 \u7EA2",
+    "Group": "\u8868\u9762",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "BaseColor.Y",
+    "Label": "\u57FA\u7840\u8272 \u7EFF",
+    "Group": "\u8868\u9762",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "BaseColor.Z",
+    "Label": "\u57FA\u7840\u8272 \u84DD",
+    "Group": "\u8868\u9762",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "Metallic",
+    "Label": "\u91D1\u5C5E\u5EA6",
+    "Group": "\u8868\u9762",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "Roughness",
+    "Label": "\u7C97\u7CD9\u5EA6",
+    "Group": "\u8868\u9762",
+    "Min": 0.02,
+    "Max": 1
+  },
+  {
+    "Key": "Ior",
+    "Label": "\u6298\u5C04\u7387",
+    "Group": "\u8868\u9762",
+    "Min": 1,
+    "Max": 2.5
+  },
+  {
+    "Key": "Opacity",
+    "Label": "\u8986\u76D6\u5EA6",
+    "Group": "\u8868\u9762",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "Specular",
+    "Label": "\u53CD\u5C04\u5F3A\u5EA6",
+    "Group": "\u8868\u9762",
+    "Min": 0,
+    "Max": 2
+  },
+  {
+    "Key": "Anisotropy",
+    "Label": "\u5404\u5411\u5F02\u6027",
+    "Group": "\u8868\u9762",
+    "Min": -0.9,
+    "Max": 0.9
+  },
+  {
+    "Key": "AnisotropyRotation",
+    "Label": "\u7EB9\u7406\u65B9\u5411",
+    "Group": "\u8868\u9762",
+    "Min": 0,
+    "Max": 360
+  },
+  {
+    "Key": "Transmission",
+    "Label": "\u900F\u5C04",
+    "Group": "\u900F\u5C04",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "Thickness",
+    "Label": "\u865A\u62DF\u539A\u5EA6",
+    "Group": "\u900F\u5C04",
+    "Min": 0,
+    "Max": 128
+  },
+  {
+    "Key": "AbsorptionColor.X",
+    "Label": "\u900F\u5C04\u989C\u8272 \u7EA2",
+    "Group": "\u900F\u5C04",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "AbsorptionColor.Y",
+    "Label": "\u900F\u5C04\u989C\u8272 \u7EFF",
+    "Group": "\u900F\u5C04",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "AbsorptionColor.Z",
+    "Label": "\u900F\u5C04\u989C\u8272 \u84DD",
+    "Group": "\u900F\u5C04",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "AbsorptionDensity",
+    "Label": "\u5438\u6536\u5BC6\u5EA6",
+    "Group": "\u900F\u5C04",
+    "Min": 0,
+    "Max": 4
+  },
+  {
+    "Key": "SsrStrength",
+    "Label": "\u5C4F\u5E55\u53CD\u5C04",
+    "Group": "\u8868\u9762",
+    "Min": 0,
+    "Max": 2
+  },
+  {
+    "Key": "Dispersion",
+    "Label": "\u8272\u6563",
+    "Group": "\u8868\u9762",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "NormalStrength",
+    "Label": "\u6CD5\u7EBF\u5F3A\u5EA6",
+    "Group": "\u5F62\u72B6",
+    "Min": 0,
+    "Max": 3
+  },
+  {
+    "Key": "BumpStrength",
+    "Label": "\u51F9\u51F8\u5F3A\u5EA6",
+    "Group": "\u5F62\u72B6",
+    "Min": 0,
+    "Max": 3
+  },
+  {
+    "Key": "Displacement",
+    "Label": "\u51E0\u4F55\u7F6E\u6362\u50CF\u7D20",
+    "Group": "\u5F62\u72B6",
+    "Min": -32,
+    "Max": 32
+  },
+  {
+    "Key": "CrossCurvature",
+    "Label": "\u6A2A\u5411\u66F2\u7387",
+    "Group": "\u5F62\u72B6",
+    "Min": 0,
+    "Max": 4
+  },
+  {
+    "Key": "AlongTilt",
+    "Label": "\u6CBF\u8FF9\u503E\u89D2",
+    "Group": "\u5F62\u72B6",
+    "Min": -2,
+    "Max": 2
+  },
+  {
+    "Key": "EnvironmentStrength",
+    "Label": "\u73AF\u5883\u53CD\u5C04",
+    "Group": "\u7167\u660E",
+    "Min": 0,
+    "Max": 3
+  },
+  {
+    "Key": "LightStrength",
+    "Label": "\u4E3B\u5149\u5F3A\u5EA6",
+    "Group": "\u7167\u660E",
+    "Min": 0,
+    "Max": 8
+  },
+  {
+    "Key": "LightAzimuth",
+    "Label": "\u4E3B\u5149\u65B9\u4F4D",
+    "Group": "\u7167\u660E",
+    "Min": -180,
+    "Max": 180
+  },
+  {
+    "Key": "LightElevation",
+    "Label": "\u4E3B\u5149\u9AD8\u5EA6",
+    "Group": "\u7167\u660E",
+    "Min": 5,
+    "Max": 90
+  },
+  {
+    "Key": "LightColor.X",
+    "Label": "\u4E3B\u5149\u8272 \u7EA2",
+    "Group": "\u7167\u660E",
+    "Min": 0,
+    "Max": 4
+  },
+  {
+    "Key": "LightColor.Y",
+    "Label": "\u4E3B\u5149\u8272 \u7EFF",
+    "Group": "\u7167\u660E",
+    "Min": 0,
+    "Max": 4
+  },
+  {
+    "Key": "LightColor.Z",
+    "Label": "\u4E3B\u5149\u8272 \u84DD",
+    "Group": "\u7167\u660E",
+    "Min": 0,
+    "Max": 4
+  },
+  {
+    "Key": "AmbientColor.X",
+    "Label": "\u73AF\u5883\u8272 \u7EA2",
+    "Group": "\u7167\u660E",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "AmbientColor.Y",
+    "Label": "\u73AF\u5883\u8272 \u7EFF",
+    "Group": "\u7167\u660E",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "AmbientColor.Z",
+    "Label": "\u73AF\u5883\u8272 \u84DD",
+    "Group": "\u7167\u660E",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "ClearCoat",
+    "Label": "\u6D82\u5C42\u6743\u91CD",
+    "Group": "\u6D82\u5C42",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "CoatRoughness",
+    "Label": "\u6D82\u5C42\u7C97\u7CD9\u5EA6",
+    "Group": "\u6D82\u5C42",
+    "Min": 0.02,
+    "Max": 1
+  },
+  {
+    "Key": "CoatIor",
+    "Label": "\u6D82\u5C42\u6298\u5C04\u7387",
+    "Group": "\u6D82\u5C42",
+    "Min": 1,
+    "Max": 2.5
+  },
+  {
+    "Key": "Sheen",
+    "Label": "\u8FB9\u7F18\u5149\u6CFD",
+    "Group": "\u5149\u6CFD",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "SheenRoughness",
+    "Label": "\u5149\u6CFD\u7C97\u7CD9\u5EA6",
+    "Group": "\u5149\u6CFD",
+    "Min": 0.02,
+    "Max": 1
+  },
+  {
+    "Key": "SheenColor.X",
+    "Label": "\u5149\u6CFD\u8272 \u7EA2",
+    "Group": "\u5149\u6CFD",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "SheenColor.Y",
+    "Label": "\u5149\u6CFD\u8272 \u7EFF",
+    "Group": "\u5149\u6CFD",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "SheenColor.Z",
+    "Label": "\u5149\u6CFD\u8272 \u84DD",
+    "Group": "\u5149\u6CFD",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "FilmWeight",
+    "Label": "\u8584\u819C\u6743\u91CD",
+    "Group": "\u8584\u819C",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "FilmThickness",
+    "Label": "\u8584\u819C\u539A\u5EA6\u7EB3\u7C73",
+    "Group": "\u8584\u819C",
+    "Min": 0,
+    "Max": 1200
+  },
+  {
+    "Key": "FilmIor",
+    "Label": "\u8584\u819C\u6298\u5C04\u7387",
+    "Group": "\u8584\u819C",
+    "Min": 1,
+    "Max": 2.5
+  },
+  {
+    "Key": "EmissionColor.X",
+    "Label": "\u81EA\u53D1\u5149\u8272 \u7EA2",
+    "Group": "\u81EA\u53D1\u5149",
+    "Min": 0,
+    "Max": 8
+  },
+  {
+    "Key": "EmissionColor.Y",
+    "Label": "\u81EA\u53D1\u5149\u8272 \u7EFF",
+    "Group": "\u81EA\u53D1\u5149",
+    "Min": 0,
+    "Max": 8
+  },
+  {
+    "Key": "EmissionColor.Z",
+    "Label": "\u81EA\u53D1\u5149\u8272 \u84DD",
+    "Group": "\u81EA\u53D1\u5149",
+    "Min": 0,
+    "Max": 8
+  },
+  {
+    "Key": "EmissionStrength",
+    "Label": "\u81EA\u53D1\u5149\u5F3A\u5EA6",
+    "Group": "\u81EA\u53D1\u5149",
+    "Min": 0,
+    "Max": 8
+  },
+  {
+    "Key": "WorldLightStrength",
+    "Label": "\u4E16\u754C\u7167\u660E\u5F3A\u5EA6",
+    "Group": "\u81EA\u53D1\u5149",
+    "Min": 0,
+    "Max": 2
+  },
+  {
+    "Key": "Subsurface",
+    "Label": "\u6B21\u8868\u9762\u8FD1\u4F3C",
+    "Group": "\u6563\u5C04",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "SubsurfaceColor.X",
+    "Label": "\u6563\u5C04\u8272 \u7EA2",
+    "Group": "\u6563\u5C04",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "SubsurfaceColor.Y",
+    "Label": "\u6563\u5C04\u8272 \u7EFF",
+    "Group": "\u6563\u5C04",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "SubsurfaceColor.Z",
+    "Label": "\u6563\u5C04\u8272 \u84DD",
+    "Group": "\u6563\u5C04",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "SubsurfaceRadius",
+    "Label": "\u6563\u5C04\u8303\u56F4",
+    "Group": "\u6563\u5C04",
+    "Min": 0.05,
+    "Max": 2
+  },
+  {
+    "Key": "VolumeDensity",
+    "Label": "\u8584\u5C42\u4F53\u79EF\u5BC6\u5EA6",
+    "Group": "\u4F53\u79EF",
+    "Min": 0,
+    "Max": 4
+  },
+  {
+    "Key": "VolumeColor.X",
+    "Label": "\u4F53\u79EF\u6563\u5C04\u8272 \u7EA2",
+    "Group": "\u4F53\u79EF",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "VolumeColor.Y",
+    "Label": "\u4F53\u79EF\u6563\u5C04\u8272 \u7EFF",
+    "Group": "\u4F53\u79EF",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "VolumeColor.Z",
+    "Label": "\u4F53\u79EF\u6563\u5C04\u8272 \u84DD",
+    "Group": "\u4F53\u79EF",
+    "Min": 0,
+    "Max": 1
+  },
+  {
+    "Key": "VolumeAnisotropy",
+    "Label": "\u4F53\u79EF\u6563\u5C04\u65B9\u5411",
+    "Group": "\u4F53\u79EF",
+    "Min": -0.8,
+    "Max": 0.8
+  },
+  {
+    "Key": "VolumeEmission",
+    "Label": "\u4F53\u79EF\u81EA\u53D1\u5149",
+    "Group": "\u4F53\u79EF",
+    "Min": 0,
+    "Max": 4
+  }
+]

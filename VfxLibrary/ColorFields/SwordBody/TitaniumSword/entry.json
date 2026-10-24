@@ -11,5 +11,10 @@
     "color._Shared.SlowFlowM1"
   ],
   "palette": null,
-  "notes": "用户当前偏好R2整体视觉；保持原比例配色，不接入正式包。"
+  "notes": "用户当前偏好R2整体视觉；保持原比例配色，不接入正式包。",
+  "currentRuntime": {
+    "version": "0.3.60",
+    "enabled": false,
+    "reason": "旧材质外观已撤下，等待自有材质接入；历史配方和导出保留。"
+  }
 }

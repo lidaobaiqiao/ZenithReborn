@@ -1,0 +1,39 @@
+{
+  "revision": "H2",
+  "family": "R2",
+  "autoFit": true,
+  "shape": "turbulence",
+  "bloomScale": 1.18,
+  "breath": 0.02,
+  "canvas": [
+    448,
+    256
+  ],
+  "frames": 16,
+  "fps": 20,
+  "loopSeconds": 0.8,
+  "centerAlpha": 0.0,
+  "edgeAlpha": 0.75,
+  "leadingExtensionPixels": 6,
+  "wave": {
+    "topPhase": 0,
+    "bottomPhase": 0.45,
+    "height": 18,
+    "leadingWidth": 10,
+    "trailingWidth": 35,
+    "startX": 377,
+    "endX": 48
+  },
+  "artApproved": false,
+  "runtimeIntegrated": false,
+  "colorField": "color.SwordBody.OrichalcumSword",
+  "pivot": [
+    305,
+    128
+  ],
+  "tip": [
+    395,
+    128
+  ],
+  "bladeCanvasPx": 90.98334
+}

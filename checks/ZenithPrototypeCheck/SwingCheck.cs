@@ -21,6 +21,10 @@ internal static class SwingCheck
         Main.player[0]=player;player.ResetEffects();
         var soul=(SoulItem)new Item(ModContent.ItemType<SoulItem>()).ModItem;
         soul.Attached=true;soul.Kills=SoulProgress.All;soul.Cores=63;
+        // 独行解除态为4把、走PostItemCheck均匀分布，不再与原版每挥3把重合。
+        // 本套检查验证的是原生时钟契约，统一固定到削弱档（3把），让发射经过原版ItemCheck发射点。
+        soul.LegacyReleased&=~(1<<(int)SoulCurse.Solitude);
+        soul.Seals|=SoulCurses.Destroyer;
         for(int i=0;i<count;i++)soul.Hosts[i]=new Item(SoulProgress.ZenithWeapons[i]);
         soul.RefreshStats();player.inventory[0]=soul.Item;
         return(player,soul);

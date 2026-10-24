@@ -99,13 +99,22 @@ internal static class WoodCheck
         player.statLife=50;float healBudget=105;Main.myPlayer=255;
         check(woodPlayer.HealFromSoul(soul,100,ref healBudget)==105 && player.statLife==155 && healBudget==0,"Blood fragrance direct-heal entry spends original budget and actually heals");
         Main.myPlayer=0;
+        // 每轮主剑数由独行诅咒决定（解除态现在为4把），不能写死3把。
+        // 超过3把时发射由 PostItemCheck 按动画进度均匀分布，这里按真实 ItemCheck 节奏驱动。
+        int perSwing=SoulCurses.Blades(soul);
         for(int gesture=0;gesture<4;gesture++)
         {
             soul.UseAnimation(player); player.itemAnimationMax=30;
-            foreach(int time in new[]{30,20,10}){player.itemAnimation=time;player.GetModPlayer<SoulSwingPlayer>().FireHost();}
+            var swing=player.GetModPlayer<SoulSwingPlayer>();
+            for(int frame=0;frame<30;frame++)
+            {
+                player.itemAnimation=30-frame;
+                if(frame%10==0)swing.FireHost();
+                swing.PostItemCheck();
+            }
         }
         var shots=Main.projectile.Where(p=>p.active && p.ModProjectile is SoulBlade).ToArray();
-        check(shots.Length==12 && shots.Any(p=>(int)p.ai[0]==ItemID.TerraBlade) && shots.Any(p=>(int)p.ai[0]==ItemID.StarWrath) &&
+        check(shots.Length==4*perSwing && shots.Any(p=>(int)p.ai[0]==ItemID.TerraBlade) && shots.Any(p=>(int)p.ai[0]==ItemID.StarWrath) &&
             shots.All(p=>soul.Active.Any(h=>h.type==(int)p.ai[0])),"Sequential swings reach both real-slot blades, support slots spawn none");
         var terra=shots.First(p=>(int)p.ai[0]==ItemID.TerraBlade);
         int expectedBase=Math.Max(1,(int)(player.GetWeaponDamage(soul.ForestHosts[0])*soul.Potency));

@@ -1,0 +1,5012 @@
+{
+  "status": "inventory-only",
+  "project": "CalamityOverhaul",
+  "version": "0.9209",
+  "loader": "2026.7.3.0",
+  "packageSha256": "a9a6b28acd83420ed8c08928b8a21691f5c44b7114cc721e853c5f27b1207223",
+  "archiveIntegrityVerified": true,
+  "resourcesCopied": false,
+  "gpuTested": false,
+  "entries": [
+    {
+      "path": "Assets/Effects/RadialBlur.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/RebelSlashTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/RebelSlashTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishPrincessRibbon.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/RevelationPlague.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishPrincessSymbol.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/RevelationPlague.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishPrincessSymbol.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SandevistanScreen.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishPrismWave.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SandevistanScreen.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScrapBeamLine.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishPrismWave.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScrapBeamLine.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishRockCrack.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScrapForm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScrapForm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishRockCrack.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScrapHeavyBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronBubble.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScrapHeavyBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronBubble.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScrapMagnetField.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronGrabVeil.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScrapMagnetField.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronGrabVeil.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScrapSiegeFilter.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScrapSiegeFilter.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronStormSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScreenColorMess.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronStormSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronTelegraph.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ScreenColorMess.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronTelegraph.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SeaDialogueBox.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronTornado.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronTornado.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SeaDialogueBox.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronTsunami.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishronTsunami.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SeaDomainField.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishScorpioNado.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishScorpioNado.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SeaDomainField.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SeaShrimpAbyssFilter.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SeaShrimpAbyssFilter.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishSlimeBlob.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SeaShrimpCavitation.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishSlimeBlob.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SeaShrimpCavitation.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishSwarmWake.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SeaShrimpJet.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishSwarmWake.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishTunaRibbon.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SeaShrimpJet.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishTunaRibbon.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SerpentTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishVoodooDoll.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishVoodooDoll.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishWyverntailBody.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SerpentTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishWyverntailBody.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShenyoMenuGhost.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FlattenedDisk.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FloodGalleryAmbience.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FloodGalleryAmbience.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FluidPipeFlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FluidPipeFlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShenyoMenuGhost.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FluidPour.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShenyoMenuInk.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FluidPour.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ForestPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ForestPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShenyoMenuInk.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FrostAurora.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FrostAurora.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShenyoMenuLake.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FrostJudgment.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FrostJudgment.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FssCorruptSkin.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FssCorruptSkin.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GameModeBanner.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShenyoMenuLake.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GameModeBanner.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShenyoMenuWet.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GameModeTab.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GameModeTab.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShenyoMenuWet.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GaolRoom.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShenyoRainForm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GaolRoom.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GaolWraithChain.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShenyoRainForm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShepelGlitch.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GaolWraithChain.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GaolWraithEcto.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShepelGlitch.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GaolWraithEcto.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShieldDome.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GaolWraithFire.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GaolWraithFire.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GaolWraithVeil.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShieldDome.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShockRing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GaolWraithVeil.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GatlinImpactBurst.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ShockRing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GatlinImpactBurst.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCCoreOrb.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GatlinTracer.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GatlinTracer.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCCoreOrb.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCHoloLattice.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GhostHandSheath.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCHoloLattice.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GhostHandSheath.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCItemPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GhostRain.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCItemPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GhostRain.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCJudgmentRay.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GlacierSpike.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GlacierSpike.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCJudgmentRay.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GlitchHead.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModBrace.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModBrace.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModCapacitorBank.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GlitchHead.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GolemMagmaVein.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModCapacitorBank.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GolemMagmaVein.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModCoralFlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModCoralFlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GolemSolarFlare.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModErgoEcho.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModErgoEcho.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GolemSolarFlare.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GolemSunTelegraph.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GolemSunTelegraph.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModExtenderCleave.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GolemThruster.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GolemThruster.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModExtenderCleave.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GolemTrapWork.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModFrostfern.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GolemTrapWork.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModFrostfern.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GradientTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModHeavyMaul.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GradientTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GraniteArc.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModHeavyMaul.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/GraniteArc.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackContagion.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModHexCell.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackContagion.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackCyberpsychosis.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModHexCell.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackCyberpsychosis.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModMagma.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackDeckPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackDeckPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackMemoryWipe.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackMemoryWipe.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackOpticOverload.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackOpticOverload.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModMagma.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModMossVine.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModMossVine.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackRamArc.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackRamArc.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModRecycleCell.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackShortCircuit.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackShortCircuit.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModRecycleCell.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackSynapseBurn.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModRedline.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackSynapseBurn.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackSystemReset.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModRedline.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackSystemReset.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModResonanceRing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackTimeNPCHighlight.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModResonanceRing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModResonanceWave.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackTimeNPCHighlight.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModResonanceWave.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackTimeScreen.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModShardburst.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModShardburst.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackTimeScreen.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModSniperLock.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackTurretCircuitFault.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModSniperLock.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HackTurretCircuitFault.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModSteadyVolt.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HadalSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModSteadyVolt.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HadalSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HadalWater.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HadalWater.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModStormBolt.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HadalworldLoading.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModStormBolt.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModStormField.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModStormField.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HadalworldLoading.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModThermal.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutAtlasBg.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModThermal.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModVolatile.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutAtlasBg.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutHudEye.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCModVolatile.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutHudEye.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCPlasmaSun.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutHudGauge.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCPlasmaSun.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCSonicBoom.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutHudGauge.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCSonicBoom.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutItemPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCVoltArc.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SHPCVoltArc.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SignalTowerElectrified.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutItemPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SignalTowerElectrified.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SignalTowerHoverOutline.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SignalTowerHoverOutline.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SignalTowerLightning.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SignalTowerLightning.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutRestartTide.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SignalTowerVirusBroadcast.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SignalTowerVirusBroadcast.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronBoneMatter.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HalibutRestartTide.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronBoneMatter.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeadlessShadeBody.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronCurseFlame.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronCurseFlame.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeadlessShadeBody.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronCurseVeil.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeadlessShadeCut.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronCurseVeil.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronEyeFlame.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeadlessShadeCut.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeartcarverImpact.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronEyeFlame.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeartcarverImpact.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronGhostArm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronGhostArm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeartcarverLance.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronSpecterRibbon.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeartcarverLance.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeartcarverOrgan.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeartcarverOrgan.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronSpecterRibbon.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeartcarverRibbon.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronSpinBlur.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HeartcarverRibbon.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HimayoInkStroke.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronSpinBlur.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronSpinStorm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SkeletronSpinStorm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HimayoInkStroke.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/StitcherBoneDress.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HimayoPanorama.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HimayoPanorama.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/StitcherBoneDress.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HimayoPortraitAssembly.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/StitcherThread.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/StitcherThread.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HimayoPortraitAssembly.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/StormSlashTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HorsemanForm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/StormSlashTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SulfseaPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HorsemanForm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SulfseaPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HotwindPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SulfurSeaSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SulfurSeaSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HotwindPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SvcTeleport.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HyperionBlast.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HyperionBlast.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/SvcTeleport.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TBUGCorruptRift.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HyperionExhaust.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TBUGCorruptRift.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/HyperionExhaust.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/IndustrialTerminal.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TerraBlade.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/IndustrialTerminal.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiameWater.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TerraBlade.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TeslaGuardRing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiameWater.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TeslaGuardRing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ThermalBar.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ThermalBar.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ThermalBatteryCore.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ThermalBatteryCore.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ThermalHeatHaze.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ThermalHeatHaze.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaBloodRain.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ThermalPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ThermalPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TiroFinaleFX.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaBloodRain.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TiroFinaleFX.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaDeerclopsFrost.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ToriiDissolve.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ToriiDissolve.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaDeerclopsFrost.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TurnkeyBody.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaDream.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TurnkeyBody.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaDream.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TurnkeyRipple.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaDreamFog.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaDreamFog.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TurnkeyRipple.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaDreamSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TwinsChargeVortex.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaDreamSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaEaterRift.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaEaterRift.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TwinsChargeVortex.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaFlip.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaFlip.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TwinsDeathRayBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TwinsDeathRayBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaGrade.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TwinsEyeOverlay.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TwinsEyeOverlay.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TzeentchPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TzeentchPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaGrade.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaHand.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TzeentchSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaHand.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaHound.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaHound.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaHourglass.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/TzeentchSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaHourglass.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UEPipelineFlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaInkDrop.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaInkDrop.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UEPipelineFlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaInkSplash.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedBody.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedBody.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedBreachVeil.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedBreachVeil.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedFloodFlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaInkSplash.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaInkSplat.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedFloodFlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaInkSplat.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedMineGlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedMineGlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedTideWall.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedTideWall.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaItemForm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedWhirl.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaItemForm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UndrownedWhirl.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UnsungheroChess.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaItemPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/UnsungheroChess.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VictorCyberPortal.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaItemPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VictorCyberPortal.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaMoonRay.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VictorEyelidTransition.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaMoonRay.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VictorEyelidTransition.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaNarrativePanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidArrival.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidArrival.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaNarrativePanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidColonyLoading.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaPanorama.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaPanorama.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidColonyLoading.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaReset.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaReset.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidColonySky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaScene.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaScene.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaServantGhost.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaServantGhost.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidColonySky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidFog.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidFog.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaSunkEffigy.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidLaserCannon.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidLaserCannon.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaSunkEffigy.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaTalisman.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidPortal.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaTalisman.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaThrallForm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidPortal.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaThrallForm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidSuction.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaUmbrella.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidSuction.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaUmbrella.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidTimeShift.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaUmbrellaTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaUmbrellaTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/VoidTimeShift.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaVaultPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WarpShader.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WarpShader.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaVaultPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WeaverMaterialize.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaWispFire.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WeaverMaterialize.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WeaverSlashTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WeaverSlashTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WeaverSoulVortex.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KikasaWispFire.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WeaverSoulVortex.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KingSlimeBloodWing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WeaverWraith.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KingSlimeBloodWing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WeaverWraith.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KingSlimeRoyalAura.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WitchBrimstoneDomain.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KingSlimeRoyalAura.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KingSlimeRoyalBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WitchBrimstoneDomain.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KingSlimeRoyalBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KingSlimeShockwave.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WofBloodCurtain.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WofBloodCurtain.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KingSlimeShockwave.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WofBloodSea.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiteSinew.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WofBloodSea.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiteSinew.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WofFleshWall.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WofFleshWall.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiyumeFog.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WofMawVortex.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WofMawVortex.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiyumeFog.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WofRetinaBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiyumeGroundFog.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WofRetinaBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WraithLantern.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiyumeGroundFog.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WraithLantern.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiyumeKaidan.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiyumeKaidan.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiyumeSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WraithRevivalHud.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/KiyumeSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LampeaterVeil.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WraithRevivalHud.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WraithScapeArm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LampeaterVeil.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LampeaterWisp.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/WraithScapeArm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LampeaterWisp.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LanternWardenCone.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LanternWardenCone.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LanternWardenLamp.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LanternWardenLamp.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusATField.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusATField.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusCharge.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusCharge.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusCross.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusCross.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusHalo.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusHalo.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusHelix.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusHelix.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusImpact.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusImpact.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusWing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/LonginusWing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MarbleSlash.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MarbleSlash.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MechSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MechSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordBlackFlash.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordBlackFlash.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordBlackFlashScreen.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordBlackFlashScreen.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordCelestial.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordCelestial.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordDeathray.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordDeathray.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordEclipseSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordEclipseSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordOrb.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/MLordOrb.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/NeutronGravityWell.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/NeutronGravityWell.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/NeutronPulsar.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/NeutronPulsar.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/NeutronPulseBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/NeutronPulseBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/NeutronWarp.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/NeutronWarp.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/NotifBadge.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/NotifBadge.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OceanCurrentTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OceanCurrentTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OceanWaterBlob.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OceanWaterBlob.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetGrade.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetGrade.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetHud.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetHud.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetNode.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetNode.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetTerminal.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetTerminal.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetVault.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetVault.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetWarden.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OldNetWarden.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniAnnihilateArc.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniAnnihilateArc.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniBellWave.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniBellWave.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniCrimsonBloom.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniCrimsonBloom.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniCrimsonImpactPost.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniCrimsonImpactPost.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniCrimsonSlash.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniCrimsonSlash.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniCrimsonSweep.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniCrimsonSweep.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniDismember.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniDismember.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniDomainDeco.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniDomainDeco.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniEye.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniEye.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniFinaleBlade.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniFinaleBlade.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniFinalePost.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniFinalePost.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniFinaleWound.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniFinaleWound.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniGateRift.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniGateRift.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniGhostScroll.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniGhostScroll.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniGhostShadow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniGhostShadow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniInkThread.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniInkThread.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniInkWipe.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniInkWipe.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AbandonedPortalPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniItemPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniItemPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AbandonedPortalPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniKamuiFlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/Abyssrend.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniKamuiFlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMacheteComet.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/Abyssrend.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMacheteComet.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMacheteCrack.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AccretionDisk.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMacheteCrack.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMacheteFlame.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AccretionDisk.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AckBackdrop.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMacheteFlame.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMacheteGrip.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AckBackdrop.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMacheteGrip.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AckFinale.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMacheteSlash.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AckFinale.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMacheteSlash.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AckGlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AckGlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AmbientFogBody.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMeiStand.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AmbientFogBody.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ArbiterHellfire.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMeiStand.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMoon.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ArbiterHellfire.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ArcaneHighDimension.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ArcaneHighDimension.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ArcaneRealityTremor.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniMoon.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ArcaneRealityTremor.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniNarrativePanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ArcaneRift.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ArcaneRift.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ArchitectureWarp.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniNarrativePanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ArchitectureWarp.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniOmokage.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AriaBlackHole.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniOmokage.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniPaperBurn.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AriaBlackHole.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AriaGammaRay.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AriaGammaRay.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AriaStarRing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniPaperBurn.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AriaStarRing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AsuraBlessFlame.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AsuraBlessFlame.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AsuraBlessWheel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/AsuraBlessWheel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BarrenPulse.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BarrenPulse.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniPaperMirror.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniPaperMirror.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniPaperPeel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BKSCrownFX.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniPaperPeel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BloodAltarRite.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrainHeartbeatPulse.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BKSCrownFX.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrainHeartbeatPulse.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniPuddleMirror.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrainMirrorImage.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniPuddleMirror.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrainMirrorImage.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrainRift.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BKSGelPool.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrainRift.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BreachMatrixAxisHighlight.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniRaikiri.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BKSGelPool.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicIonArm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BKSGelSurge.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BreachMatrixAxisHighlight.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniRaikiri.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicIrisBlob.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BKSGelSurge.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicAuroraWing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniRainDescent.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicIrisBlob.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicAuroraWing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicIrisMark.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniRainDescent.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicBeeVortex.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniRainSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BlackHole.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicTwinBurst.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicIrisMark.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicBeeVortex.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicTwinTether.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicBlackFlash.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/Blackwall.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicIrisSheet.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniRainSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicIrisSheet.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicTwinTether.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniRainWorld.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicBlackFlash.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CelestialDomain.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/Blackwall.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicWaxShell.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicIonArm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicMawEtch.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniRainWorld.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BlessingLantern.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicWaxShell.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSakuraFlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberBanishNPC.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicMawEtch.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CelestialStar.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistPhaseSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicWhiteoutVeil.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicRetinaLock.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberBossBar.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BlessingLantern.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicWhiteoutVeil.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistPlanet.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrideCurtain.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSakuraFlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BloodAltarRite.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CelestialStar.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberBossBar.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSandGarden.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicRetinaLock.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CommandersBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberFreezeCage.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberBoundaryRing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicStoneGuard.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSandGarden.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrideCurtain.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CommandersBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberFreezeEntity.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSenjuArm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrimstoneBlastWave.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberBoundaryRing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicStoneGuard.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberDataArc.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CosmicCrescent.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicThroatTongue.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrimstoneBlastWave.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberDataArc.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberFreezeEntity.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistPlanet.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrimstoneDialogueBox.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSenjuArm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicThroatTongue.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberDetonation.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistRuneSigil.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberFreezeWave.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSewage.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BRelicTwinBurst.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CosmicCrescent.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrimstoneDialogueBox.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistRuneSigil.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CreativePipelineFlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSewage.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberFreezeWave.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistVeil.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CreativePipelineFlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberDetonation.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberRiftSlash.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSigilBoard.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistBoundary.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrimstoneDomain.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberShockwave.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberGlitchBolt.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistVeil.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberDomainPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistBoundary.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberShockwave.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistCloudVortex.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CybCourseBoot.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSigilBoard.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistCloudVortex.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberGlitchBolt.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/BrimstoneDomain.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberDomainPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberspaceField.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CybCourseBoot.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CelestialDomain.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberDomainSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CybCourseEntryReveal.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistOrrery.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DecryptionPanelBackground.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CybCourseEntryReveal.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberDomainSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DeductDraw.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberspaceField.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerTelegraph.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CybCourseLoading.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberEnergyOrb.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniStanceBlade.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DeductDraw.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerThermalOutline.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberTraceBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DeerBlizzardVeil.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CybCourseLoading.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DeerBlizzardVeil.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberpunkItemFilter.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberEnergyOrb.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerThermalOutline.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistOrrery.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DeerFrostFissure.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberFreezeCage.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberpunkItemFilter.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CybCourseSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DiscipleForm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniStanceBlade.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DeerFrostFissure.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberTraceBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CultistPhaseSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberReform.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniVigorInk.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DiscipleForm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DungeonworldEntryReveal.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberwareBulletTime.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DraedonPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DivineSourceArc.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DungeonworldFog.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DragonSlashTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CybCourseSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberReform.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberwareBulletTime.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DivineSourceArc.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DungeonworldFog.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberBanishNPC.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerEXSlash.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DivineSourceBladeGlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DragonSlashTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberwarePanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberRestartField.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EmpressBeamMarker.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniVigorInk.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DivineSourceBladeGlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DragonSoulSerpent.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DungeonworldLoading.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerEXSlash.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DivineSourceCrescent.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EmpressLanceBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberwarePanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniWorldGrade.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerHeatWake.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DivineSourceCrescent.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EmpressLanceBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberRestartField.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DivineSourceImpact.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerHeatWake.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EmpressScreenPrism.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberRiftSlash.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DungeonworldLoading.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OniWorldGrade.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DivineSourceImpact.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerSlash.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DungeonworldSky.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OverseerBreakFrame.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EocBloodTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DivineSourceTechArc.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DragonSoulSerpent.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EocTelegraph.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerSlash.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EmpressScreenPrism.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OverseerBreakFrame.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DestroyerTelegraph.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DungeonworldSky.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DivineSourceTechArc.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EmpressSunbeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OverseerIronCast.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EocTelegraph.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EbnShader.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DragonSporeBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EowAcid.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DraedonPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberwareRadialPanel.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OverseerIronCast.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EmpressSunbeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EbnShader.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OverseerPendArc.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishFallenStarComet.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishCloudPuff.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EncyclopediaKnowledge.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DragonSporeBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OverseerPendArc.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishFrostMinnowFern.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishCrimsonTigerWake.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ElysiumHalo.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EowAcid.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OverseerPressBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishCrimsonTigerWake.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EncyclopediaKnowledge.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishFrostMinnowFern.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OverseerPressBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DragonsWordFX.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EowGeyser.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishCthuluRibbon.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/CyberwareRadialPanel.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EnergySlashTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishHoneyCore.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OverseerSlagFlow.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DawnshatterSlash.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishCthuluRibbon.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ElysiumHalo.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EnergySlashTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishCursedFlame.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishHoneyCore.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EntrustGuideCard.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/OverseerSlagFlow.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ElysiumStaff.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DawnshatterSlash.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishIchornJet.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishCursedFlame.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EowGeyser.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PallbearerSeal.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EntrustGuideCard.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishIchornJet.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishDemonicHellComet.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DecryptionPanelBackground.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EverdeepRing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DragonsWordFX.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EocBloodFog.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishJewelTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PallbearerSeal.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DropPodFlame.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishNeonTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishJewelTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishDemonicHellComet.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PallbearerTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishObsidianGloss.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EverdeepRing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishLardBlob.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DropPodFlame.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PallbearerTrail.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EocBloodFog.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishAmanitaMist.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ElysiumStaff.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishObsidianGloss.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishDemonicHellRing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DropPodHeatHaze.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EocBloodTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PlanteraBloom.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EmpressAurora.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DropPodHeatHaze.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishPlanktonWorm.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishAmanitaMist.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EmpressAurora.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DropPodShockwave.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeAfterimage.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishPlanktonWorm.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/EmpressBeamMarker.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeArcChain.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DropPodShockwave.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishPrincessRibbon.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeTelegraph.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/DungeonworldEntryReveal.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeArcChain.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishLardBlob.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeChargeVortex.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ProofingHallMelt.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishDemonicHellRing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeChargeVortex.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenPrismCrystal.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishDoubleCodWake.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishMudGlob.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ProofingHallMelt.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeHalo.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishBarracudaJet.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeHalo.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishDoubleCodWake.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenPrismGem.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PlanteraBloom.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishMudGlob.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ProverbsGhostDomain.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeHeatWake.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishDrizzleFlame.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishMudMound.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishBarracudaJet.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeHeatWake.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishBloodyManowarBell.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeImpactFrame.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishMudMound.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/ProverbsGhostDomain.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishDrizzleFlame.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenPrismGem.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishNeonTrail.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishBloodyManowarBell.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenBeeTelegraph.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeImpactFrame.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishFallenStarComet.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QuestChronicleBg.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeShockRing.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenBeeTelegraph.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/FishCloudPuff.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PlanteraSporeFog.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenCrystalSkin.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeShockRing.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PlanteraSporeFog.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeSkullBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenCrystalSkin.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PlanteraVine.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QuestChronicleBg.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenGaleField.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/RadialBlur.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeSkullBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PlanteraVine.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenGaleField.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeTelegraph.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PowerSFShader.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenHoneyPool.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PowerSFShader.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/PrimeAfterimage.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenHoneyPool.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenPrismBeam.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenPrismBeam.fxc",
+      "kind": "compiled",
+      "status": "inventory-only"
+    },
+    {
+      "path": "Assets/Effects/QueenPrismCrystal.fx",
+      "kind": "source",
+      "status": "inventory-only"
+    }
+  ]
+}

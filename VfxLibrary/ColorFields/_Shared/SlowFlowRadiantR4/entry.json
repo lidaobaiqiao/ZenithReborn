@@ -82,11 +82,18 @@
       }
     ]
   },
-  "resources": [
+  "resources": [],
+  "notes": "历史研究，不作为当前视觉基准；用户选择R2。",
+  "currentRuntime": {
+    "version": "0.3.60",
+    "enabled": false,
+    "reason": "旧材质外观已撤下，等待自有材质接入；历史配方和导出保留。"
+  },
+  "historicalResources": [
     {
       "repoPath": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/NoiseSoft01.rawimg",
       "provenance": "ZenithReborn/Assets/ThirdParty/CalamityOverhaul/provenance.json"
     }
   ],
-  "notes": "历史研究，不作为当前视觉基准；用户选择R2。"
+  "historicalProvenance": "VfxLibrary/References/Retired/CalamityOverhaul/provenance.json"
 }

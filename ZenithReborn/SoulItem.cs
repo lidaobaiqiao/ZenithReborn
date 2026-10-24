@@ -380,12 +380,20 @@ public partial class SoulItem : ModItem
     public float Reach(Player player)
     {
         if(!Attached) return 0;
+        // 原成长公式保留（魂芯进度、觉醒、武器Range特性），诅咒只做"保底"而不是"封顶"。
         float range = 192 + Stage * 45 + (Awakened ? 150 : 0);
         if(Active.Any() && !TraitSupports.Any(i=>WeaponFamilies.Of(i.type)==BladeFamily.Swift))
             range*=(float)Active.Average(i=>TraitEnabled(i.type)?WeaponFamilies.Range(i.type):1);
         if(TraitSupports.Any(i=>WeaponFamilies.Of(i.type)==BladeFamily.Swift))range*=.85f;
-        range=Curse(SoulCurse.Binding)<CurseStage.Released?Math.Max(160,range*.65f):range;
-        return range*(player.GetModPlayer<BlessingPlayer>().BurstFor(this)?2:1)*(1+player.GetModPlayer<EnvironmentPlayer>().Stat("Reach"));
+        // 缚身：最少打到屏幕左右中点；解除后最少到屏幕边界；祝福不设上限。
+        const float Unbounded=1e6f;
+        range=Curse(SoulCurse.Binding) switch{
+            CurseStage.Cursed or CurseStage.Weakened=>Math.Max(range,SoulCurses.ScreenEdge(player)*.5f),
+            CurseStage.Released=>Math.Max(range,SoulCurses.ScreenEdge(player)),
+            _=>Unbounded};
+        // 御剑主动技再翻倍；祝福已无上限时不再放大。
+        if(range<Unbounded && player.GetModPlayer<BlessingPlayer>().BurstFor(this))range*=2;
+        return range*(1+player.GetModPlayer<EnvironmentPlayer>().Stat("Reach"));
     }
     public override void UseAnimation(Player player)
     {if(!player.GetModPlayer<MartialPlayer>().BeginAttack(this))player.GetModPlayer<SoulSwingPlayer>().Begin(this);}

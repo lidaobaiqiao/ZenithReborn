@@ -1,0 +1,56 @@
+{
+  "id": "material.Surface.TerraBlade.EnergyBladeA1",
+  "status": "review-candidate-gpu-validated",
+  "origin": "project-recipe-with-user-supplied-Doubao-artwork",
+  "assetReferences": {
+    "Brush": {
+      "file": "VfxLibrary/Brushes/SwordTrail/_Shared/EnergyBladeA1/brush.png",
+      "sha256": "579965147eb356469bc6aea88a07e26d39f9ebdd3f45b70ef045b3c7db23ce43"
+    },
+    "Noise": {
+      "file": "VfxLibrary/NoiseMaps/SwordTrail/_Shared/EnergyBladeA1/noise.png",
+      "sha256": "ab7e16d4b5d5b0828d6159682064c7e26e1f31a944682c37cb040f08569cd019"
+    },
+    "HeightMap": {
+      "file": "VfxLibrary/HeightMaps/SwordTrail/_Shared/EnergyBladeA1/height.png",
+      "sha256": "84c9214b58a987b900ee6ab939a9f963a9af4eb6f8b32ec9281e719be7d175a1"
+    },
+    "RoughnessSource": {
+      "file": "VfxLibrary/SurfaceMaps/SwordTrail/TerraBlade/EnergyBladeA1/roughness.png",
+      "sha256": "9259f36e6ad320f7942794d1bd916ffbac4260b24dbb2ab8286da57cc775510f"
+    },
+    "NormalMap": {
+      "file": "VfxLibrary/NormalMaps/SwordTrail/_Shared/EnergyBladeA1/normal.png",
+      "sha256": "15f63ace6b6e09a103ef00676b08419b488fc59bcaea949d22d400e3aef866c1"
+    },
+    "SurfaceMap": {
+      "file": "VfxLibrary/SurfaceMaps/SwordTrail/TerraBlade/EnergyBladeA1/surface.png",
+      "sha256": "924e479b9cd8b9be9ca4b2aeb12fb7660bebf6d5891731f8c60668d9791692d0"
+    },
+    "LayerMask": {
+      "file": "VfxLibrary/LayerMasks/SwordTrail/TerraBlade/EnergyBladeA1/regions.zrdata",
+      "sha256": "7be59d731b836e7ea7fbd6a0f823554e80b7368fd6cc38a0c6896d77d7263ba4"
+    },
+    "region_edge": {
+      "file": "VfxLibrary/LayerMasks/SwordTrail/TerraBlade/EnergyBladeA1/region_edge.png",
+      "sha256": "4f661e5422b489c58770c29a9e16d9c372fcc8580429cee3776fd6839a009750"
+    },
+    "region_body": {
+      "file": "VfxLibrary/LayerMasks/SwordTrail/TerraBlade/EnergyBladeA1/region_body.png",
+      "sha256": "283e01ae24fc3716005401c0b3fc018c2c8c03a7ffb44ed3dfa40b2dfb33e9b9"
+    },
+    "region_dark": {
+      "file": "VfxLibrary/LayerMasks/SwordTrail/TerraBlade/EnergyBladeA1/region_dark.png",
+      "sha256": "8481a863d3c702690251e2c4fe76b0ddfa5a4e33b352272139433d703c756ac9"
+    },
+    "region_filament": {
+      "file": "VfxLibrary/LayerMasks/SwordTrail/TerraBlade/EnergyBladeA1/region_filament.png",
+      "sha256": "211e6df322c2fe64bcac693161469156fab7b069e2139097b41ce564f51fa7b3"
+    }
+  },
+  "productionBound": false,
+  "usesWeaponTint": true,
+  "evidence": "artifacts/energy-blade-a1/gpu/artwork.json",
+  "testedPackageSha256": "bb27043f0815b220e17f10c71a59facef68bc7a8238d50c2d99bee9fe04b1bd9",
+  "authoringPaths": "authoring.material.json的素材名对应独立项目Input目录，不是正式模组资源路径"
+}

@@ -1,0 +1,28 @@
+{
+  "revision": "H1",
+  "family": "R2",
+  "autoFit": true,
+  "shape": "bladeHalo",
+  "bloomScale": 1.18,
+  "breath": 0.03,
+  "canvas": [
+    448,
+    256
+  ],
+  "frames": 16,
+  "fps": 20,
+  "loopSeconds": 0.8,
+  "centerAlpha": 0.0,
+  "edgeAlpha": 0.64,
+  "leadingExtensionPixels": 6,
+  "wave": {
+    "topPhase": 0,
+    "bottomPhase": 0.45,
+    "height": 18,
+    "leadingWidth": 10,
+    "trailingWidth": 35
+  },
+  "artApproved": false,
+  "runtimeIntegrated": false,
+  "colorField": "color.SwordBody.SilverBroadsword"
+}

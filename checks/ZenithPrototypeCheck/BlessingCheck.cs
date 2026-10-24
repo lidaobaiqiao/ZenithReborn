@@ -53,7 +53,8 @@ internal static class BlessingCheck
                 check(loaded.YujianCharge==900 && stream.Position==stream.Length,"Item network preserves charge with exact payload consumption");}
             SoulUI.Open(s);check(!state.TryActivate() && s.YujianCharge==900,"Soul editing cannot accidentally spend a full meter");SoulUI.Toggle(s);
             float normal=s.Reach(p);check(state.TryActivate() && state.BurstLeft==600 && s.YujianCharge==0,"Manual activation alone spends the meter and starts ten seconds");
-            check(Math.Abs(s.Reach(p)-normal*2)<.01f && !state.TryActivate(),"Burst doubles controllable distance and cannot be restarted while active");
+            // 祝福态的射程本身已不设上限，主动技不再叠加距离倍率，只负责视野/增伤与计时。
+            check(s.Reach(p)>=normal && !state.TryActivate(),"Burst never shrinks the already unbounded blessed reach and cannot be restarted while active");
             n.Center=p.Center;check(state.DistanceMultiplier(s,n)==1,"Distance multiplier starts at one next to the player");
             n.Center=p.Center+new Vector2(normal*2,0);check(Math.Abs(state.DistanceMultiplier(s,n)-1.5f)<.0001,"Far end of expanded reach gains exactly fifty percent");
             n.Center=p.Center+new Vector2(9999,0);check(state.DistanceMultiplier(s,n)==1.5f,"Distance damage cannot exceed its fifty-percent cap");

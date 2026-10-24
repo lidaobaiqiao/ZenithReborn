@@ -38,8 +38,8 @@ public static class MartialVisual
     }
 }
 
-// ai: weapon, state (orbit/thrust/embedded/flung), age. Embedded blades stay
-// visible and feed a real owned DoT instead of vanishing on contact.
+// ai依次保存武器、阶段（弹出旋转／突刺／嵌入／击飞旋转／返航）、阶段年龄。
+// 嵌剑提供独立持续减益；击飞后旋转再回到角色，沿途仍可命中。
 public class MartialBlade : ModProjectile
 {
     public override string Texture=>"Terraria/Images/Item_"+ItemID.Zenith;
@@ -48,9 +48,10 @@ public class MartialBlade : ModProjectile
     public int VisualType=>(int)Projectile.ai[0];
     private int order,count=3,target=-1,anchor=-1;
     private long anchorId;
-    private Vector2 aim,offset;
+    private Vector2 aim,offset,previousCenter;
     private readonly Dictionary<long,int> hits=[];
     private readonly List<Vector2> trail=[];
+    private readonly List<(Vector2 At,float Angle)> ghosts=[];
     public override void SetDefaults()
     {
         Projectile.width=Projectile.height=30;Projectile.friendly=true;Projectile.DamageType=DamageClass.Melee;
@@ -82,9 +83,9 @@ public class MartialBlade : ModProjectile
     {
         if(State!=2)return;
         Projectile.ai[1]=3;Projectile.ai[2]=0;Projectile.velocity=direction.SafeNormalize(Vector2.UnitX)*22;
-        Projectile.damage=Math.Max(1,(int)(Projectile.damage*1.5f));Projectile.timeLeft=65;hits.Clear();Projectile.netUpdate=true;
+        Projectile.damage=Math.Max(1,(int)(Projectile.damage*1.5f));Projectile.timeLeft=150;hits.Clear();Projectile.netUpdate=true;
     }
-    public override bool? CanDamage()=>State is 1 or 3?null:false;
+    public override bool? CanDamage()=>State is 1 or 3 or 4?null:false;
     public override bool? CanHitNPC(NPC n)
     {
         if(!MartialTuning.Target(n))return false;
@@ -94,6 +95,8 @@ public class MartialBlade : ModProjectile
     public override bool? Colliding(Rectangle own,Rectangle box)
     {
         float collision=0;Vector2 axis=(Projectile.rotation-MathHelper.PiOver4).ToRotationVector2()*34;
+        if(State is 1 or 3 or 4 && Vector2.DistanceSquared(previousCenter,Projectile.Center)<120*120 &&
+            Collision.CheckAABBvLineCollision(box.TopLeft(),box.Size(),previousCenter,Projectile.Center,30,ref collision))return true;
         return box.Contains(Projectile.Center.ToPoint()) || Collision.CheckAABBvLineCollision(box.TopLeft(),box.Size(),Projectile.Center-axis,Projectile.Center+axis,17,ref collision);
     }
     public override void OnHitNPC(NPC npc,NPC.HitInfo hit,int damageDone)
@@ -117,26 +120,39 @@ public class MartialBlade : ModProjectile
         var p=Main.player[Projectile.owner];var source=Projectile.GetGlobalProjectile<SoulSource>();
         if(!p.active || p.dead || p.HeldItem.ModItem is not SoulItem s || s.SoulId!=source.SoulId || !MartialTuning.Enabled)
         {Projectile.Kill();return;}
-        Projectile.ai[2]++;int age=Age;
+        previousCenter=Projectile.Center;Projectile.ai[2]++;int age=Age;
         if(State==0)
         {
-            float t=Math.Clamp(age/(float)(MartialTuning.OrbitFrames+order*3),0,1);
-            float turn=MathHelper.TwoPi*(1-t)+MathHelper.TwoPi*order/count;
-            Vector2 center=p.Center+new Vector2(-p.direction*82,-28);
-            Projectile.Center=center+new Vector2(MathF.Cos(turn)*30,MathF.Sin(turn)*52);
+            var pose=MartialMotion.Formation(age,order,count,p.Center,p.direction,Target?.Center??aim);
+            Projectile.Center=pose.Center;Projectile.rotation=pose.Rotation;Projectile.scale=pose.Scale;
             Vector2 direction=((Target?.Center??aim)-Projectile.Center).SafeNormalize(Vector2.UnitX*p.direction);
-            Projectile.rotation=direction.ToRotation()+MathHelper.PiOver4+(1-t)*MathHelper.TwoPi;
-            Projectile.scale=.6f+MathF.Sin(t*MathHelper.Pi)*.6f+t*.6f;
-            if(t>=1)
-            {Projectile.ai[1]=1;Projectile.ai[2]=0;Projectile.velocity=direction*18;Projectile.netUpdate=true;
+            if(age>=MartialTuning.OrbitFrames+order*2)
+            {Projectile.ai[1]=1;Projectile.ai[2]=0;Projectile.velocity=direction*MartialMotion.ThrustSpeed(0);Projectile.netUpdate=true;
                 if(!Main.dedServ)SoundEngine.PlaySound(SoundID.Item1 with {Volume=.35f},Projectile.Center);}
         }
-        else if(State==1 || State==3)
+        else if(State==1)
         {
-            if(State==1 && Target!=null && age<25)
-                Projectile.velocity=Vector2.Lerp(Projectile.velocity,(Target.Center-Projectile.Center).SafeNormalize(Vector2.UnitX)*18,.045f);
+            var direction=Projectile.velocity.SafeNormalize(Vector2.UnitX*p.direction);
+            if(Target!=null && age<12)direction=Vector2.Lerp(direction,(Target.Center-Projectile.Center).SafeNormalize(direction),.055f).SafeNormalize(direction);
+            Projectile.velocity=direction*MartialMotion.ThrustSpeed(age);
             Projectile.Center+=Projectile.velocity;Projectile.rotation=Projectile.velocity.ToRotation()+MathHelper.PiOver4;Projectile.scale=1.2f;
-            if(age>(State==1?75:50))Projectile.Kill();
+            if(age>45)Projectile.Kill();
+        }
+        else if(State==3)
+        {
+            Projectile.velocity=Projectile.velocity.RotatedBy(.035f*(order%2==0?1:-1))*.95f;
+            Projectile.Center+=Projectile.velocity;Projectile.rotation+=MathHelper.TwoPi*3/MartialMotion.FlingSpinFrames;
+            if(age>=MartialMotion.FlingSpinFrames)
+            {Projectile.ai[1]=4;Projectile.ai[2]=0;hits.Clear();Projectile.netUpdate=true;}
+        }
+        else if(State==4)
+        {
+            Vector2 home=p.Center-Projectile.Center;
+            float speed=Math.Min(44,14+age*1.5f);
+            if(home.Length()<speed+12){Projectile.Kill();return;}
+            Projectile.velocity=home.SafeNormalize(Vector2.UnitX)*speed;
+            Projectile.Center+=Projectile.velocity;Projectile.rotation=Projectile.velocity.ToRotation()+MathHelper.PiOver4;
+            if(age>100){Projectile.Kill();return;}
         }
         else if(State==2)
         {
@@ -146,14 +162,17 @@ public class MartialBlade : ModProjectile
             if(age>=330){Projectile.Kill();return;}
         }
         if(Main.dedServ)return;
+        if(State!=2){ghosts.Insert(0,(Projectile.Center,Projectile.rotation));if(ghosts.Count>7)ghosts.RemoveAt(ghosts.Count-1);}else ghosts.Clear();
         if(State!=2){trail.Insert(0,Projectile.Center);if(trail.Count>10)trail.RemoveAt(trail.Count-1);}
         else trail.Clear();
         if(age%3==0)MartialVisual.Spark(Projectile.Center,State==2?new(0,-.4f):-Projectile.velocity*.08f,MartialVisual.Cyan,.65f);
-        Lighting.AddLight(Projectile.Center,MartialVisual.Cyan.ToVector3()*.35f);
+        // 巨剑斩击的画面亮度远高于 0.35 的光照，比例失调会让它像"发光的贴纸"
+        Lighting.AddLight(Projectile.Center,MartialVisual.Cyan.ToVector3()*1.15f);
     }
     public override bool PreDraw(ref Color lightColor)
     {
         Color tint=State==2?MartialVisual.Violet:MartialVisual.Cyan;
+        for(int i=ghosts.Count-1;i>0;i-=2)MartialVisual.Sword(VisualType,ghosts[i].At,ghosts[i].Angle,66*Projectile.scale,tint,(1-i/(float)ghosts.Count)*.16f);
         for(int i=trail.Count-1;i>0;i--)MartialVisual.Line(trail[i],trail[i-1],tint*((1-i/(float)trail.Count)*.35f),Math.Max(1,7-i*.5f));
         float opacity=State==2?Math.Min(1,(330-Age)/20f):1;
         MartialVisual.Sword(VisualType,Projectile.Center,Projectile.rotation,66*Projectile.scale,tint,opacity);
@@ -162,7 +181,7 @@ public class MartialBlade : ModProjectile
     }
 }
 
-// ai: tier, phase (ready/windup/dash/hold/slash/fade), age in phase.
+// ai依次为档位、阶段（雷临蓄力／起势／化光突进／顿挫／斩击／消散）、阶段年龄。
 public class MartialGiant : ModProjectile
 {
     public override string Texture=>"Terraria/Images/Item_"+ItemID.Zenith;
@@ -173,6 +192,9 @@ public class MartialGiant : ModProjectile
         q.ModProjectile is MartialBlade b && b.State<=maxState && q.GetGlobalProjectile<SoulSource>().SoulId==Projectile.GetGlobalProjectile<SoulSource>().SoulId);
     public bool ReadyForCut=>Tier==3 && Phase==0 && Age>=MartialTuning.GiantReadyFrames && !FormationPending(1);
     public bool TimeStopped=>Tier==3 && Phase is >=1 and <=3;
+    public bool SwordVisible=>Phase!=0 || Age>=MartialMotion.ThunderImpact;
+    public IReadOnlyList<Vector2> DashPath=>dashPath;
+    private readonly List<Vector2> dashPath=[];
     private Vector2 aim=Vector2.UnitX,dashStart,dashEnd;
     private int target=-1,clock;
     private bool flung,wave,readyNotified;
@@ -212,7 +234,7 @@ public class MartialGiant : ModProjectile
         if(Vector2.DistanceSquared(dashStart,dashEnd)>MartialTuning.FreezeRadius*MartialTuning.FreezeRadius)return false;
         Transition(1);return true;
     }
-    public override bool? CanDamage()=>Phase is 2 or 3 or 4?null:false;
+    public override bool? CanDamage()=>Phase is 2 or 3 || Phase==4 && Age>=2 && Age<=14?null:false;
     public override bool? CanHitNPC(NPC n)
     {
         if(!MartialTuning.Target(n))return false;
@@ -241,22 +263,23 @@ public class MartialGiant : ModProjectile
             q.GetGlobalProjectile<SoulSource>().SoulId==id).ToArray();
         for(int i=0;i<pins.Length;i++)((MartialBlade)pins[i].ModProjectile).Fling(aim.RotatedBy((i-(pins.Length-1)*.5f)*.045f));
     }
-    // When the slash finishes, fine circular motels peel off the whole outline
-    // of the arc and drift upward, shrinking as if the light is boiling dry.
-    // This pairs with the shader's irregular erosion (uErode) eating inward
-    // from every edge at once during Phase 5.
+    // 挥砍结束的瞬间，沿整个月牙扫过的轮廓撒一圈小圆圈：角度覆盖整段挥砍
+    // （aim-1.35 到 aim+1.45），半径沿剑身分布，圆圈向上飘并缩小，像光被
+    // 烧干一样。配合 Phase 5 月牙 shader 的 uErode 从四边同时不规则侵蚀。
+    private Vector2 EvapRimPoint(float rMin,float rMax)
+    {
+        float ang=aim.ToRotation()+Main.rand.NextFloat(-1.35f,1.45f);
+        float radius=Main.rand.NextFloat(rMin,rMax);
+        return Owner.Center+ang.ToRotationVector2()*radius;
+    }
     private void SpawnEvaporationBurst()
     {
         if(Main.dedServ)return;
-        Vector2 dir=Projectile.rotation.ToRotationVector2();
-        for(int i=0;i<10;i++)
+        for(int i=0;i<16;i++)
         {
-            float along=Main.rand.NextFloat(0f,1f);
-            Vector2 at=Owner.Center+dir*(30+280*along);
-            var d=Dust.NewDustPerfect(at,DustID.Cloud,
-                new Vector2(Main.rand.NextFloat(-.2f,.2f),Main.rand.NextFloat(-1.4f,-.6f)),
-                0,new Color(235,242,255,140),Main.rand.NextFloat(.15f,.3f));
-            d.noGravity=true;d.fadeIn=0;
+            EvapCircle.Spawn(new EvapCircleSpawn(EvapRimPoint(120,300),
+                new Vector2(Main.rand.NextFloat(-.25f,.25f),Main.rand.NextFloat(-1.6f,-.7f)),
+                new Color(235,242,255,180),Main.rand.NextFloat(.45f,.85f),26));
         }
     }
     public override void AI()
@@ -268,17 +291,23 @@ public class MartialGiant : ModProjectile
         clock++;Projectile.ai[2]++;int age=Age;float direction=aim.ToRotation();
         if(Phase==0)
         {
-            // Summoning is a sequence, not a race between two independent AIs:
-            // first release the orbiting weapons, then form the giant and wait
-            // for the incoming swords to embed (or finish their missed flight).
+            // 先放完背剑，再由雷临起势；不能在飞剑仍旋转时提前重斩。
             if(FormationPending(0)){Projectile.ai[2]=0;age=0;}
-            Projectile.rotation=direction-.8f;Projectile.scale=Math.Min(1,age/30f);
+            float charge=Math.Clamp((age-MartialMotion.ThunderImpact)/(float)MartialMotion.ChargeFrames,0,1);
+            Projectile.rotation=direction-MathHelper.Lerp(.75f,1.55f,charge*charge);
+            Projectile.scale=SwordVisible?1:0;
+            if(age==MartialMotion.ThunderImpact && !Main.dedServ)
+            {
+                SoundEngine.PlaySound(SoundID.Item122 with {Volume=.8f},Owner.Center);
+                for(int i=0;i<18;i++)MartialVisual.Spark(Owner.Center,Main.rand.NextVector2Circular(7,7),MartialVisual.Cyan,1.1f);
+            }
             if(Tier==2 && age>=MartialTuning.GiantReadyFrames && !FormationPending(1))Transition(4);
             if(ReadyForCut && !readyNotified && Local){readyNotified=true;Owner.GetModPlayer<MartialPlayer>().Tell("巨剑就绪 · 瞄准敌人，攻击发动时停突进");}
         }
         else if(Phase==1)
         {
             Projectile.rotation=direction;Projectile.scale=1;
+            dashPath.Clear();dashPath.Add(Owner.Center);
             if(Local){Owner.Center=dashStart;Owner.velocity=Vector2.Zero;}
             if(age>=10)Transition(2);
         }
@@ -287,16 +316,17 @@ public class MartialGiant : ModProjectile
             Projectile.rotation=direction;
             if(Local)
             {
-                Vector2 desired=Vector2.Lerp(dashStart,dashEnd,MathHelper.SmoothStep(0,1,Math.Min(1,age/(float)MartialTuning.DashFrames)));
+                Vector2 desired=Vector2.Lerp(dashStart,dashEnd,MartialMotion.Ease(age/(float)MartialTuning.DashFrames));
                 Vector2 step=desired-Owner.Center;
                 Owner.position+=Collision.TileCollision(Owner.position,step,Owner.width,Owner.height,true,true);
                 Owner.velocity=Vector2.Zero;Owner.fallStart=(int)(Owner.position.Y/16);Owner.immune=true;Owner.immuneTime=Math.Max(Owner.immuneTime,4);
             }
+            dashPath.Add(Owner.Center);if(dashPath.Count>18)dashPath.RemoveAt(0);
             if(age>=MartialTuning.DashFrames){if(Local)dashEnd=Owner.Center;Transition(3);}
         }
         else if(Phase==3)
         {
-            Projectile.rotation=direction;
+            Projectile.rotation=direction-.07f*MathF.Sin(Math.Clamp(age/(float)MartialTuning.HoldFrames,0,1)*MathHelper.PiOver2);
             if(Local)
             {
                 Owner.Center=dashEnd;Owner.velocity=Vector2.Zero;Owner.fallStart=(int)(Owner.position.Y/16);
@@ -306,8 +336,8 @@ public class MartialGiant : ModProjectile
         }
         else if(Phase==4)
         {
-            Projectile.rotation=direction+MathHelper.Lerp(-1.35f,1.45f,MathHelper.SmoothStep(0,1,Math.Min(1,age/18f)));
-            if(age>=6)
+            Projectile.rotation=direction+MartialMotion.SlashTurn(age);
+            if(age>=MartialMotion.SlashRelease)
             {
                 FlingPins();
                 if(Tier==3 && !wave && Local){wave=true;MartialWave.Spawn(Projectile,Owner.Center+aim*160,aim);}
@@ -320,19 +350,15 @@ public class MartialGiant : ModProjectile
         if(Main.dedServ)return;
         SlashTrail.Update(Owner.Center,Projectile.rotation,Phase==4 && Age>0,Phase==5);
         slashSparks.Update(Owner.Center,Projectile.rotation,Tier,Age,Phase==4 && Age>0,spawn=>SoulFlowSpark.Spawn(spawn));
-        // Evaporation motes: small circles peel off the arc outline and drift
-        // upward while the shader erodes the blade from every edge at once.
-        if(Phase==5 && !Main.dedServ)
+        // 蒸发小圆圈：月牙弧面被四边不规则蚕食的同时，小圆圈持续从弧面轮廓
+        // 脱离、向上飘并缩小，直到弧面消失（Phase 5 前 16 帧）。
+        if(Phase==5 && Age<16 && !Main.dedServ)
         {
-            Vector2 dir=Projectile.rotation.ToRotationVector2();
-            for(int i=0;i<2;i++)
+            for(int i=0;i<3;i++)
             {
-                float along=Main.rand.NextFloat(0f,1f);
-                Vector2 at=Owner.Center+dir*(30+280*along);
-                var d=Dust.NewDustPerfect(at,DustID.Cloud,
-                    new Vector2(Main.rand.NextFloat(-.15f,.15f),Main.rand.NextFloat(-1.2f,-.5f)),
-                    0,new Color(235,242,255,120),Main.rand.NextFloat(.12f,.25f));
-                d.noGravity=true;d.fadeIn=0;
+                EvapCircle.Spawn(new EvapCircleSpawn(EvapRimPoint(120,300),
+                    new Vector2(Main.rand.NextFloat(-.2f,.2f),Main.rand.NextFloat(-1.4f,-.6f)),
+                    new Color(235,242,255,160),Main.rand.NextFloat(.35f,.7f),22));
             }
         }
         if(clock%3==0)MartialVisual.Spark(Owner.Center+Projectile.rotation.ToRotationVector2()*Main.rand.NextFloat(100,330),Main.rand.NextVector2Circular(1,1),Tier==3?MartialVisual.Violet:MartialVisual.Cyan);
@@ -348,9 +374,8 @@ public class MartialGiant : ModProjectile
         if(Phase==5)
         {
             float t=Math.Clamp(Age/16f,0,1);
-            // Fade the blade out in step with the arc's erosion; warm toward
-            // white as if the light is evaporating. The real irregular outline
-            // eating inward is done by the crescent shader, not this sprite.
+            // 剑身随弧面侵蚀同步淡出，并向暖白过渡，像光被烧干；真正的不规则
+            // 边缘向内蚕食由月牙 shader 完成，不在这里处理。
             opacity=MathF.Pow(1-t,.7f);
             tint=Color.Lerp(Tier==3?MartialVisual.Violet:MartialVisual.Cyan,new Color(235,242,255),t);
         }
@@ -360,8 +385,9 @@ public class MartialGiant : ModProjectile
             opacity=1f;
         }
         SlashTrail.DrawSwordGhosts(Tier);
+        MartialActionVisuals.Draw(this,Owner);
         var direction=Projectile.rotation.ToRotationVector2();
-        MartialVisual.Sword(ItemID.Zenith,Owner.Center+direction*145,Projectile.rotation+MathHelper.PiOver4,300*Projectile.scale,tint,opacity);
+        if(SwordVisible)MartialVisual.Sword(ItemID.Zenith,Owner.Center+direction*145,Projectile.rotation+MathHelper.PiOver4,300*Projectile.scale,tint,opacity);
         if(TimeStopped)
         {
             Vector2 tip=Owner.Center+direction*280;

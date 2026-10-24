@@ -1,0 +1,15 @@
+{
+  "id": "SwordTrail/_Shared/OniTrajectory",
+  "status": "historical-reference",
+  "version": "0.3.58",
+  "shapeSource": "ZenithReborn/SoulMaterialTrail.cs：实际剑中心与旋转历史生成的连续带面",
+  "materialReference": "VfxLibrary/References/Retired/CalamityOverhaul/provenance.json",
+  "compiledMaterial": "OniCrimsonSlash.fxc",
+  "materialModified": false,
+  "paletteSource": "ZenithReborn/SoulVisuals.cs：Tint(itemType)，逐剑配色",
+  "composition": "单个连续带面，坐标映射复用现成材质；无渲染目标累积、无逐段月牙拼接",
+  "validation": "实际GPU渐入／运动／结束和隔离世界三剑真实AI受控发射命中；未做本轮手动游玩或多人验证，待用户美术评价",
+  "shapeAnimation": "剑尖累计路程坐标；短程展开；暗侧低频波动；亮刃固定真实剑尖；返回渐进侵蚀",
+  "replacedBy": "mask.SwordTrail._Shared.ZRSwordFlow",
+  "migrationNote": "0.3.60全部旧生产材质调用已撤下；本条仅保留历史描述，没有可加载资源。"
+}

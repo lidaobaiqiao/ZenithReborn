@@ -1,0 +1,41 @@
+{
+  "revision": "H4",
+  "family": "R2",
+  "autoFit": true,
+  "shape": "airflow",
+  "bloomScale": 1.18,
+  "breath": 0.02,
+  "canvas": [
+    640,
+    256
+  ],
+  "frames": 16,
+  "fps": 20,
+  "loopSeconds": 1.1,
+  "centerAlpha": 0.0,
+  "edgeAlpha": 0.75,
+  "leadingExtensionPixels": 6,
+  "wave": {
+    "topPhase": 0,
+    "bottomPhase": 0.45,
+    "height": 18,
+    "leadingWidth": 10,
+    "trailingWidth": 35,
+    "startX": 353,
+    "endX": 48
+  },
+  "artApproved": false,
+  "runtimeIntegrated": false,
+  "colorField": "color.SwordBody.GoldBroadsword",
+  "pivot": [
+    497,
+    128
+  ],
+  "tip": [
+    563,
+    128
+  ],
+  "bladeCanvasPx": 66.95001,
+  "colorFieldVariant": "H4",
+  "viscosity": 0.55
+}

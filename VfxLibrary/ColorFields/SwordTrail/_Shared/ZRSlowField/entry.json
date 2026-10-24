@@ -1,0 +1,9 @@
+{
+  "id": "color.SwordTrail._Shared.ZRSlowField",
+  "origin": "project-authored",
+  "status": "runtime-candidate",
+  "shader": "shader.SwordFlow.ZR1",
+  "defaultSource": "程序化慢色场，逐剑Tint着色；不读取第三方噪声",
+  "replaceableInput": "每剑独立RGB底色，Alpha不承担形状动画",
+  "instructions": "VfxLibrary/Shaders/SwordFlow/美术接入与替换计划.md"
+}

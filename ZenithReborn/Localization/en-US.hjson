@@ -65,6 +65,11 @@ Mods: {
 				DisplayName: Celestial Soul Core
 				Tooltip: Restores hosting capacity up to ten slots.
 			}
+
+			SlashZenithTest: {
+				DisplayName: Slash Zenith Test
+				Tooltip: ""
+			}
 		}
 
 		Buffs: {

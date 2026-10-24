@@ -120,8 +120,9 @@ public class BlessingPlayer : ModPlayer
     { if(ValidSource(p,out var soul) && BlessingTuning.Blessed(soul,SoulCurse.Sheathing))returns.Add(Host(p)); }
     public bool ConsumeReturn(Projectile p)=>ValidSource(p,out var soul) &&
         BlessingTuning.Blessed(soul,SoulCurse.Sheathing) && returns.Remove(Host(p));
+    // 祝福后射程已无上限，距离增伤改用屏幕边界作参考，否则除以无限大后恒为基础值。
     public float DistanceMultiplier(SoulItem soul,NPC target)=>BurstFor(soul)?
-        1+.5f*Math.Clamp(Vector2.Distance(Player.Center,target.Center)/Math.Max(1,soul.Reach(Player)),0,1):1;
+        1+.5f*Math.Clamp(Vector2.Distance(Player.Center,target.Center)/Math.Max(1,SoulCurses.ScreenEdge(Player)),0,1):1;
     private void ClearRuntime()
     {BurstSoul="";BurstLeft=0;ZoomBlend=0;clock=0;lastCombat=-1000;combatSoul="";relays.Clear();returns.Clear();}
     public override void OnEnterWorld()=>ClearRuntime();

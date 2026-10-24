@@ -65,6 +65,11 @@ Mods: {
 				DisplayName: 天界魂芯
 				Tooltip: 月亮领主的封印碎片，恢复最后槽位的承载能力
 			}
+
+			SlashZenithTest: {
+				// DisplayName: Slash Zenith Test
+				// Tooltip: ""
+			}
 		}
 
 		Buffs: {

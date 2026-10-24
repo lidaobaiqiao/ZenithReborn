@@ -104,29 +104,20 @@ public class OreSkyfall : ModProjectile
     {
         int type=OreFamily.IsOre(VisualType)?VisualType:ItemID.TitaniumSword;Main.instance.LoadItem(type);
         OreSwordEffects.Blade(TextureAssets.Item[type].Value,Projectile.Center,MathHelper.PiOver2,5.6f,
-            OreVisualRenderer.ForgeGold,Falling?1:Math.Clamp(age/18f,0,1)*.55f,1);
+            OreSwordEffects.ForgeGold,Falling?1:Math.Clamp(age/18f,0,1)*.55f,1);
         return false;
-    }
-    public void DrawOrePrimitives()
-    {
-        float clock=Main.GlobalTimeWrappedHourly;
-        float reach=Vector2.Distance(Projectile.Center,AirFront().Tip);
-        if(Falling && trail.Count>=2)
-            OreVisualRenderer.Flight(trail,OreVisualRenderer.ForgeGold,43,clock,tailOffset:140,tipReach:reach,head:Projectile.Center);
-        else OreVisualRenderer.Sheath(Projectile.Center,MathHelper.PiOver2,reach,5.6f,
-            OreVisualRenderer.ForgeGold,Math.Clamp(age/18f,0,1)*.55f,clock);
     }
     public OreAirFront AirFront()
     {
         int type=OreFamily.IsOre(VisualType)?VisualType:ItemID.TitaniumSword;Main.instance.LoadItem(type);
         return new(Projectile.Center+Vector2.UnitY*OreSwordEffects.BladeReach(TextureAssets.Item[type].Value,5.6f),
-            Vector2.UnitY,OreVisualRenderer.ForgeGold,2.5f);
+            Vector2.UnitY,OreSwordEffects.ForgeGold,2.5f);
     }
     public override void OnKill(int timeLeft)
     {
         if(Main.dedServ || age<=0 && struck.Count==0)return;
         int type=OreFamily.IsOre(VisualType)?VisualType:ItemID.TitaniumSword;
         OrePierceFeedback.EndWeapon(new(Projectile.Center,struck.Count>0?impactAt:Projectile.Center,Vector2.UnitY,
-            OreVisualRenderer.ForgeGold,type,5.6f,Falling||struck.Count>0));
+            OreSwordEffects.ForgeGold,type,5.6f,Falling||struck.Count>0));
     }
 }

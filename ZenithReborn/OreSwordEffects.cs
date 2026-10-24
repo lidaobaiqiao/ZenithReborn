@@ -7,15 +7,16 @@ using Terraria.ModLoader;
 
 namespace ZenithReborn;
 
-// Client-only drawing helpers. No extra projectiles, combat state or blend-state changes.
+// 仅客户端使用的绘制辅助函数。不产生额外弹幕、不改战斗状态、不改混合状态。
 public static class OreSwordEffects
 {
+    public static readonly Color ForgeGold=new(255,213,125);
     private static readonly Dictionary<Texture2D,Texture2D> spectralTextures=new();
     private static readonly Dictionary<Texture2D,float> bladeReach=new();
     public static float BladeReach(Texture2D texture,float scale)
     {SpectralTexture(texture);return bladeReach[texture]*scale;}
-    // Preserve the vanilla silhouette, alpha and relief. Remove the source
-    // sprite's competing hue once, then light it with the blade's own palette.
+    // 保留原版轮廓、透明度和明暗层次；先把原贴图自带的杂色去掉，
+    // 再用这把剑自己的配色重新照亮。
     public static Texture2D SpectralTexture(Texture2D source)
     {
         if(spectralTextures.TryGetValue(source,out var cached))return cached;
@@ -85,16 +86,18 @@ public static class OreSwordEffects
             Vector2 a=trail.Point(i),b=trail.Point(i-1);
             if(Vector2.DistanceSquared(a,b)>96*96)continue;
             float strength=SwordFlightTrail.Strength(i-1,trail.Count);
-            Line(a,b,tint,width*strength,.12f*strength);
-            Line(a,b,tint,width*.38f*strength,.3f*strength);
-            Line(a,b,Color.Lerp(tint,Color.White,.7f),Math.Max(.65f,width*.08f*strength),.48f*strength);
+            // 只画两层而不是三层：一条主体加一条细亮芯。
+            // 之前那层宽光晕正是把拖尾糊成一片的原因。
+            Line(a,b,tint,width*.34f*strength,.22f*strength);
+            Line(a,b,Color.Lerp(tint,Color.White,.55f),Math.Max(.5f,width*.06f*strength),.3f*strength);
         }
     }
 
     public static void Blade(Texture2D texture,Vector2 at,float rotation,float scale,Color tint,float alpha,float pulse)
     {
-        texture=SpectralTexture(texture);
-        Main.spriteBatch.Draw(texture,at-Main.screenPosition,null,Color.Lerp(tint,Color.White,.12f)*(alpha*.6f),
+        // 剑身保留自己的原版像素、完全不透明。剑才是主角，特效只在它背后；
+        // 不重新染色，也不再盖一层60%透明度的灰。
+        Main.spriteBatch.Draw(texture,at-Main.screenPosition,null,Color.White*alpha,
             rotation+MathHelper.PiOver4,texture.Size()*.5f,scale,SpriteEffects.None,0);
     }
 
@@ -102,21 +105,20 @@ public static class OreSwordEffects
     {
         if(Main.dedServ)return;
         Vector2 axis=direction.SafeNormalize(-Vector2.UnitY);
-        int count=giant?18:5;
+        int count=giant?9:3;
         for(int i=0;i<count;i++)
         {
-            Vector2 velocity=axis.RotatedBy(Main.rand.NextFloat(-1.15f,1.15f))*Main.rand.NextFloat(1.5f,giant?7:3.5f);
-            Ember(at+Main.rand.NextVector2Circular(5,5),velocity*(giant?1.8f:1.5f),tint,giant?1.25f:.8f,i%3==0);
+            Vector2 velocity=axis.RotatedBy(Main.rand.NextFloat(-.95f,.95f))*Main.rand.NextFloat(1.2f,giant?5.2f:2.6f);
+            Ember(at+Main.rand.NextVector2Circular(4,4),velocity*(giant?1.6f:1.3f),tint,giant?1.1f:.7f,i%3==0);
         }
     }
     public static void FlyingBlade(Texture2D texture,Vector2 at,float rotation,float scale,Color tint,
         float alpha,float pulse,int launchAge,float preparation=0)
     {
-        texture=SpectralTexture(texture);
         Vector2 axis=rotation.ToRotationVector2();
         float snap=launchAge<4?1-launchAge/4f:0;
-        // Anticipation is display-only while CanDamage is false. The launched
-        // blade stays centered on its real projectile/collision position.
+        // 蓄势阶段只是视觉表现（此时 CanDamage 为 false）；
+        // 出剑后的剑身始终对准真实的弹幕/碰撞位置。
         at-=axis*(preparation*9);
         Blade(texture,at,rotation,scale*(1+snap*.12f-preparation*.06f),tint,alpha,pulse);
     }

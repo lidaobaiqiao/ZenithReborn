@@ -48,24 +48,20 @@ public static class OreWeaponEnding
                 end.Giant?1.1f:.7f,mote?36:25,mote);
         }
     }
-    public static void DrawEnd(OreWeaponEnd end,float clock,int? width=null,int? height=null,bool unscaled=false)
-    {
-        if(end.Age<0||end.Age>=end.Lifetime)return;
-        float t=end.Age/(float)end.Lifetime,fade=MathF.Pow(1-t,1.2f);
-        float length=end.Giant?280:100,halfWidth=end.Giant?65:22;
-        MartialCrescentMaterial.OreFlame(end.Anchor-end.Axis*length*.75f,end.Anchor+end.Axis*length*.25f,
-            halfWidth,end.Tint,fade*.78f,t,clock,width,height,unscaled);
-    }
     public static void DrawEndGhost(OreWeaponEnd end)
     {
         if(end.Age<0||end.Age>=end.Lifetime)return;
         float fade=MathF.Pow(1-end.Age/(float)end.Lifetime,2);
+        // 飞剑消失后，统一气流继续向后漂移并衰减，不突然截断，也不另加一片月牙。
+        if(!end.Giant&&VfxSwordMask.Has(end.VisualType))
+            VfxSwordMask.Draw(end.VisualType,end.BladeAt-end.Axis*end.Age*.8f,end.Axis.ToRotation(),
+                end.Scale,Main.GlobalTimeWrappedHourly,MathF.Pow(1-end.Age/(float)end.Lifetime,.85f));
         Texture2D texture;
         if(end.VisualType>0)
         {Main.instance.LoadItem(end.VisualType);texture=TextureAssets.Item[end.VisualType].Value;}
         else texture=TextureAssets.Projectile[-end.VisualType].Value;
         texture=OreSwordEffects.SpectralTexture(texture);
-        Main.spriteBatch.Draw(texture,end.BladeAt-Main.screenPosition,null,end.Tint*(fade*.26f),
+        Main.spriteBatch.Draw(texture,end.BladeAt-Main.screenPosition,null,end.Tint*(fade*.16f),
             end.Axis.ToRotation()+(end.VisualType>0?MathHelper.PiOver4:MathHelper.PiOver2),texture.Size()*.5f,
             end.Scale,SpriteEffects.None,0);
     }

@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 
 namespace ZenithReborn;
 
-// Shared palette for the approved flowing material and its detached sparks.
+// 已认可的流动材质与它甩出的碎光共用的配色表。
 public static class SoulFlowStyle
 {
     public static Color Head(int tier)=>tier==3?new(113,237,255):new(97,255,225);
@@ -16,8 +16,8 @@ public static class SoulFlowStyle
 
 public readonly record struct FlowSparkSpawn(Vector2 Position,Vector2 Velocity,Color Tint,float Size,int Lifetime,bool Mote);
 
-// A small emitter, not a particle framework: vanilla Dust owns allocation,
-// update, drawing and eviction. Only visual poses are sampled here.
+// 一个小型发射器，不是粒子框架：分配、更新、绘制和回收全部交给原版 Dust，
+// 这里只负责采样视觉姿态。
 public sealed class SlashSparkEmitter
 {
     public const int MaximumPerSlash=96;
@@ -49,7 +49,7 @@ public sealed class SlashSparkEmitter
             Add(Vector2.Lerp(previousPivot,pivot,t)+axis*Range(257,290),
                 tangent*Range(mote?1.4f:5,mote?3.5f:10)+axis*Range(.4f,2.8f),mote);
         }
-        // One small terminal accent, synchronized to the existing visual sweep.
+        // 一次小型的收尾强调，与现有挥砍视觉同步。
         if(!finished && slashAge>=17 && count>0)
         {
             finished=true;
@@ -69,8 +69,8 @@ public sealed class SlashSparkEmitter
     }
 }
 
-// Reuses the game's Dust pool and vanilla SharpTears sprite. No extra mod,
-// texture, shader, projectile, network packet or custom render pass is needed.
+// 复用游戏的 Dust 池和原版 SharpTears 贴图：不需要额外模组、贴图、Shader、
+// 弹幕、网络包或自定义渲染流程。
 public class SoulFlowSpark : ModDust
 {
     public override string Texture=>"ZenithReborn/SwordSpark";

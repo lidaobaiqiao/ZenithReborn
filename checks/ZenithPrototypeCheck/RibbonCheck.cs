@@ -9,6 +9,7 @@ internal static class RibbonCheck
 {
     internal static void Run(Action<bool,string> check)
     {
+        MaterialTrailCheck.Run(check);
         const int length=SoulRibbonMesh.HistoryLength;
         var centers=new Vector2[length];var rotations=new float[length];
         for(int i=0;i<length;i++)

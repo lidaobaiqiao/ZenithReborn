@@ -33,26 +33,13 @@ public class OrePierceFeedback : ModSystem
         foreach(var spark in OreWeaponEnding.Sparks(end))SoulFlowSpark.Spawn(spark);
     }
     public override void Load()=>On_Main.DrawDust+=DrawOverEntities;
-    public override void Unload(){On_Main.DrawDust-=DrawOverEntities;Reset();}
+    public override void Unload(){On_Main.DrawDust-=DrawOverEntities;Reset();OreSwordEffects.Unload();}
     public override void OnWorldUnload()=>Reset();
     private static void Reset(){Endings.Clear();launchSound=hitSound=null;}
     public override void PostUpdateDusts(){if(!Main.gamePaused)Endings.Update();}
     private static void DrawOverEntities(On_Main.orig_DrawDust orig,Main self)
     {
         orig(self);if(Main.gameMenu)return;
-        bool any=Endings.Ends.Count>0;
-        foreach(var p in Main.ActiveProjectiles)
-            if(p.ModProjectile is OreFlyingSword or OreSkyfall or HardOreShot){any=true;break;}
-        if(!any)return;
-        MartialSlashRenderer.DrawWithRestoredState(()=>{
-            foreach(var p in Main.ActiveProjectiles)
-            {
-                if(p.ModProjectile is OreFlyingSword f)f.DrawOrePrimitives();
-                else if(p.ModProjectile is OreSkyfall g)g.DrawOrePrimitives();
-                else if(p.ModProjectile is HardOreShot s)s.DrawOrePrimitives();
-            }
-            foreach(var end in Endings.Ends)OreWeaponEnding.DrawEnd(end,Main.GlobalTimeWrappedHourly);
-        });
         if(Endings.Ends.Count==0)return;
         Main.spriteBatch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,Main.DefaultSamplerState,
             DepthStencilState.None,Main.Rasterizer,null,Main.GameViewMatrix.TransformationMatrix);

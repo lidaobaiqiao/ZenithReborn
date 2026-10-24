@@ -68,8 +68,13 @@ internal static class CurseCheck
         s.Seals|=SoulCurses.Spazmatism;check(s.Curse(SoulCurse.Solitude)==CurseStage.Weakened,"Both twins count exactly one king");
         s.Seals=SoulCurses.Duke|SoulCurses.Deer;
         check(Enum.GetValues<SoulCurse>().All(c=>s.Curse(c)==CurseStage.Cursed),"Outer bosses only record separate victory and never break a curse");
-        s.Seals=0;float bound=s.Reach(p);s.Seals=SoulCurses.Eye;
-        check(bound>=160 && s.Reach(p)>bound && s.Curse(SoulCurse.Binding)==CurseStage.Released,"First two-boss-group member fully restores normal range without blessing");
+        s.Seals=SoulCurses.Eye;
+        check(s.Curse(SoulCurse.Binding)==CurseStage.Released,"Killing the eye alone releases binding");
+        float freeReach=s.Reach(p);s.Seals=0;float bound=s.Reach(p);
+        float midpoint=SoulCurses.ScreenEdge(p)*.5f;
+        check(bound>=midpoint-.01f && bound<=freeReach+.01f,
+            "Binding guarantees at least the screen midpoint without exceeding the released reach");
+        check(s.Curse(SoulCurse.Binding)==CurseStage.Cursed,"Empty seals are still cursed");
         s.Seals=0;check(s.TraitItems.Count()==1 && s.TraitEnabled(s.Hosts[0].type) && !s.TraitEnabled(s.Hosts[1].type),"Switching actually filters all trait sources to the first effective primary");
         int damage=s.BladeDamage(p,s.Hosts[1]);s.Seals=SoulCurses.Brain;
         check(s.TraitItems.Count()==4 && s.BladeDamage(p,s.Hosts[1])==damage,"Brain restores all traits without changing independent damage or requiring Cultist");
@@ -82,7 +87,7 @@ internal static class CurseCheck
         foreach(int count in new[]{0,1,2,3})
         {
             (p,s)=Setup(10);int[] kings=SoulCurses.Groups[(int)SoulCurse.Solitude];foreach(int k in kings.Take(count))s.Seals|=k;
-            check(SoulCurses.Blades(s)==new[]{1,2,3,4}[count],"Solitude blade budget follows 1/2/normal3/blessed4 progression");
+            check(SoulCurses.Blades(s)==new[]{2,3,4,4}[count],"Solitude blade budget follows 2/3/normal4/blessed4 progression");
             var swing=p.GetModPlayer<SoulSwingPlayer>();p.itemAnimation=p.itemAnimationMax=30;s.UseAnimation(p);
             for(int frame=0;frame<30;frame++)
             {p.itemAnimation=30-frame;if(frame%10==0)swing.FireHost();swing.PostItemCheck();}
@@ -99,8 +104,8 @@ internal static class CurseCheck
         {
             (p,s)=Setup();s.Seals=records;s.LegacyReleased=(1<<(int)SoulCurse.Barrier)|(1<<(int)SoulCurse.Sheathing);
             var blade=Blade(p,s,ItemID.CopperShortsword);blade.AI();var n=Target(p);int hits=0;
-            for(int attempt=0;attempt<4;attempt++){int hp=n.life;Hit(blade,n);if(n.life<hp)hits++;}
-            check(hits==(records==0?1:records==SoulCurses.Flesh?2:4),"Real damage path enforces 1/2/released repeated hits per primary and target");
+            for(int attempt=0;attempt<6;attempt++){int hp=n.life;Hit(blade,n);if(n.life<hp)hits++;}
+            check(hits==(records==0?3:records==SoulCurses.Flesh?5:6),"Real damage path enforces 3/5/released repeated hits per primary and target");
             var n2=Target(p,21);int before=n2.life;Hit(blade,n2);check(n2.life<before,"Same blade can still hit a different enemy");
             var separate=Blade(p,s,ItemID.CopperShortsword);separate.AI();before=n.life;Hit(separate,n);
             check(n.life<before,"Each newly spawned primary owns an independent target-hit dictionary");
@@ -136,8 +141,12 @@ internal static class CurseCheck
         Main.tileSolid[TileID.Stone]=true;Main.tileSolidTop[TileID.Platforms]=true;
         for(int x=70;x<75;x++){var t=Main.tile[x,70];t.ClearEverything();t.HasTile=true;t.TileType=TileID.Stone;}
         float depth=0;
+        var(p0,s0)=Setup();
+        check(SoulCurses.TerrainAllowance(s0)==32,"Cursed barrier digs through about two tiles");
+        s0.Seals=SoulCurses.Bee;check(SoulCurses.TerrainAllowance(s0)==64,"Weakened barrier widens to about four tiles");
         check(SoulTerrain.Sweep(new(1100,1128),new(1210,1128),0,ref depth),"Swept terrain path cannot tunnel through a solid wall");
-        depth=0;check(SoulTerrain.Sweep(new(1100,1128),new(1210,1128),32,ref depth),"Weakened barrier still blocks a thick wall");
+        depth=0;check(SoulTerrain.Sweep(new(1100,1128),new(1210,1128),32,ref depth),"Cursed barrier still blocks a wall thicker than its allowance");
+        depth=0;check(SoulTerrain.Sweep(new(1100,1128),new(1210,1128),64,ref depth),"Weakened barrier still blocks a wall thicker than 64 pixels");
         depth=0;check(!SoulTerrain.Sweep(new(1100,1128),new(1210,1128),int.MaxValue,ref depth),"Released barrier restores full native terrain passage");
         for(int x=70;x<75;x++)Main.tile[x,70].TileType=TileID.Platforms;
         depth=0;check(!SoulTerrain.Sweep(new(1100,1128),new(1210,1128),0,ref depth),"Platforms do not silently block sword flight");
@@ -150,8 +159,9 @@ internal static class CurseCheck
             for(int k=0;k<4;k++)blade.AI();
             for(int x=55;x<90;x++)for(int y=55;y<80;y++)
             {var t=Main.tile[x,y];t.HasTile=true;t.TileType=TileID.Stone;}
-            blade.AI();
-            check(blade.Retired!=released && (released || blade.CanDamage()==false),"Real native curve is stopped by terrain only before barrier release");
+            // 阻隔诅咒允许先啃掉约2格厚度；连续推进直到累积穿透超过上限。
+            for(int k=0;k<8 && !blade.Retired;k++)blade.AI();
+            check(blade.Retired!=released && (released || blade.CanDamage()==false),"Real native curve is stopped once terrain penetration exceeds the cursed allowance");
             for(int x=55;x<90;x++)for(int y=55;y<80;y++)Main.tile[x,y].ClearEverything();
         }
     }
