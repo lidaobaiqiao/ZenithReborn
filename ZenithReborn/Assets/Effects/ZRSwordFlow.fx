@@ -194,8 +194,6 @@ float4 Shade(PixelInput input):COLOR0
         layerColor=lerp(layerColor,uBodyColor*0.55,zone.a*0.40);
     }
 
-    float3 baseColor=layerColor*(0.20+field*0.55+0.18*pow(1-depth,0.85));
-
     // 质感细节层：整片刀身上叠加（拉丝／磨砂／微光斑），不是按位置分区。
     // 每层是程序化噪声：换频率/滚动就能从拉丝变磨砂，不需要额外贴图。
     [unroll]
@@ -215,9 +213,10 @@ float4 Shade(PixelInput input):COLOR0
         float3 multiplied=layerColor*(1.0-weight*0.55+weight*n*1.15);
         layerColor=lerp(added,multiplied,saturate(uDetailA[di].y));
     }
-    baseColor=layerColor*(0.30+field*0.28+0.20*pow(1-depth,0.85));
+    // 色场必须写回 layerColor：后面的高光染色与最终颜色都从它取值。
+    // 之前写进 baseColor，而 baseColor 之后再无任何引用，等于色场从未生效过。
     float3 artworkColor=tex2D(colorSampler,float2(s-slowTime,depth)).rgb;
-    baseColor=lerp(baseColor,artworkColor,uUseColorField);
+    layerColor=lerp(layerColor,artworkColor,uUseColorField);
 
     // 连续的流线横向弯曲，沿尾部缓慢奔流；不是一张固定形状整体平移。
     float bend=sin(s*8.0-maskTime*0.8)*0.028+sin(s*15.0+maskTime*0.4)*0.009;
@@ -291,6 +290,19 @@ float4 Shade(PixelInput input):COLOR0
         float3 nrm=tex2D(uNormalTexSampler,float2(s*2.2,mapDepth*1.6)).rgb*2.0-1.0;
         normal=normalize(normal+float3(nrm.xy*0.55,0));
     }
+    // 高度图：用相邻采样的梯度再加一层更细的起伏。与法线贴图分工——
+    // 法线是美术画的凹凸朝向，高度是真实起伏的斜率，两者可叠加。
+    // 此前 uUseHeight 声明后从未被读取，这张图一直是死资产。
+    if(uUseHeight>0.5)
+    {
+        float2 hUv=float2(s*2.2,mapDepth*1.6);
+        float texel=1.0/512.0;
+        float hx=tex2D(uHeightTexSampler,hUv+float2(texel,0)).r
+               -tex2D(uHeightTexSampler,hUv-float2(texel,0)).r;
+        float hy=tex2D(uHeightTexSampler,hUv+float2(0,texel)).r
+               -tex2D(uHeightTexSampler,hUv-float2(0,texel)).r;
+        normal=normalize(normal+float3(-hx,-hy,0)*1.5);
+    }
     // 色散：红绿蓝用略微不同的折射率，法线越斜（越靠带面边缘）分色越明显
     float disp=uDispersion*0.055;
     float3 tr=refract(float3(0,0,-1),normal,1.0/(layerIor*(1.0-disp)));
@@ -351,10 +363,23 @@ float4 Shade(PixelInput input):COLOR0
     float highlight=(softLobe+lightCore*0.65)*highlightMap;
     float3 highlightTint=saturate(layerColor);
     float3 reflected=highlightTint*highlight;
-    reflected+=lerp(highlightTint,float3(1,1,1),0.62)*lightCore*0.40;
+    // 向白色的偏移从 0.62 降到 0.35：原来剑色被洗掉六成，所有剑都读作同一种白。
+    reflected+=lerp(highlightTint,float3(1,1,1),0.35)*lightCore*0.40;
     // 保留79的薄亮刃，光晕只从刃核向内衰减；撤掉横穿主体的两条坐标白线。
     reflected+=neutralHighlight*(razorCore*0.70+razorHalo*0.10+razorMist*0.018);
     reflected+=lerp(uBodyColor,uEdgeColor,0.32)*rim*uDissolve*0.10;
+    // 反射：nearScene（屏幕空间反射叠环境图）此前算完即丢弃，从未进入画面。
+    // 按菲涅耳加权——正对视角弱、掠射角强，这才是玻璃的读法。
+    reflected+=nearScene*fresnel*uSsrStrength;
+    // 自发光：玻璃只靠透射与反光会读作一层灰膜，带面必须自己发光。
+    // 用剑色染色，沿剑迹缓慢流动；强度由制作端预设给出，不给玩家开口。
+    if(uUseEmission>0.5)
+    {
+        float emission=tex2D(uEmissionTexSampler,float2(s*1.3-uTime*0.06,depth*0.9)).r;
+        reflected+=layerColor*emission*uEmissionStrength;
+    }
+    // 沿迹条纹：给连续带面分段间隔感，避免整片读作均匀的灰膜。
+    reflected+=layerColor*smoothstep(0.45,0.78,streak)*(1-depth*0.5)*uStripeStrength;
     float throughput=exp(-(1-layerTrans)*0.015)*(1-fresnel);
     float3 color=pow(saturate(reflected+pow(max(scene,0),2.2)*throughput*uHasScene),1/2.2);
     // 主体恢复可见覆盖度，透射通过真实背景采样体现，不再靠大幅降低透明度代替。

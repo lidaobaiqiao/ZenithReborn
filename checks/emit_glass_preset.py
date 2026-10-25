@@ -8,7 +8,7 @@ source=root/'VfxLibrary/Materials/SwordTrail/Glass/preset.json'
 data=json.loads(source.read_text(encoding='utf-8'))
 values=data['parameters']
 bounds={'Ior':(1,2.5),'Roughness':(.02,1),'Transmission':(0,1),'Opacity':(0,1),'Thickness':(0,128),
-        'Dispersion':(0,1),'SsrStrength':(0,2),'EmissionStrength':(0,2)}
+        'Dispersion':(0,1),'SsrStrength':(0,2),'EmissionStrength':(0,2),'StripeStrength':(0,2)}
 assert data['scope']=='developer-authoring-only' and set(values)==set(bounds)
 lines=['namespace ZenithReborn;','','// 由 checks/emit_glass_preset.py 从制作端预设生成，不提供玩家调参入口。',
        'public static class GlassMaterialPreset','{']

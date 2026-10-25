@@ -250,6 +250,7 @@ public class SwordFlowMaterial : ModSystem
         parameters["uDispersion"]?.SetValue(Math.Clamp(GlassMaterialPreset.Dispersion,0,1));
         parameters["uSsrStrength"]?.SetValue(Math.Clamp(GlassMaterialPreset.SsrStrength,0,2));
         parameters["uEmissionStrength"]?.SetValue(Math.Clamp(GlassMaterialPreset.EmissionStrength,0,2));
+        parameters["uStripeStrength"]?.SetValue(Math.Clamp(GlassMaterialPreset.StripeStrength,0,2));
         // 贴图宽长比修正倍率：1 = 着色器按实际几何自动算，方形贴图不再被压成横条
         parameters["uMapAspectScale"]?.SetValue(1f);
         // 常量路径也要吃笔刷/噪声：这是生产环境实际走的路径

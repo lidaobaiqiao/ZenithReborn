@@ -11,4 +11,5 @@ public static class GlassMaterialPreset
     public const float Dispersion=0.35f;
     public const float SsrStrength=0.6f;
     public const float EmissionStrength=0.55f;
+    public const float StripeStrength=0.3f;
 }

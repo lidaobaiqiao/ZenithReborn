@@ -10,7 +10,8 @@
     "Thickness": 72.0,
     "Dispersion": 0.35,
     "SsrStrength": 0.6,
-    "EmissionStrength": 0.55
+    "EmissionStrength": 0.55,
+    "StripeStrength": 0.3
   },
-  "notes": "只供制作端编辑；构建时生成运行常量，不生成玩家配置界面。Thickness为屏幕折射的虚拟厚度，不是现实物理长度。Dispersion按波长偏移折射率，边缘出彩边；SsrStrength反射近处场景。 EmissionStrength为带面自发光：玻璃只靠透射和反光会读作\"灰膜\"，需要自身发光才有能量感。"
+  "notes": "只供制作端编辑；构建时生成运行常量，不生成玩家配置界面。Thickness为屏幕折射的虚拟厚度，不是现实物理长度。Dispersion按波长偏移折射率，边缘出彩边；SsrStrength反射近处场景。 EmissionStrength为带面自发光：玻璃只靠透射和反光会读作\"灰膜\"，需要自身发光才有能量感。StripeStrength为沿迹条纹：给连续带面分段间隔感，避免整片读作均匀灰膜，取值过大会显斑驳。"
 }

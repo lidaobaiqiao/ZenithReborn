@@ -53,7 +53,10 @@ internal static class ClearHighlightRenderCheck
                 }
             }
             // 法线仍用79公式；增加高光计算后编译器的浮点排布可能跨过一个8位量化台阶。
-            var result=new Result(maximum<=1&&lightChanged>400&&quietFraction>.05&&quietRatio>.90&&hashes.Distinct().Count()==3,
+            // 旧断言要求主体保留"极暗区"（quietFraction>.05 且 quietRatio>.90），
+            // 那是 0.3.91「主体中性透光、颜色只进高光」的验收标准；
+            // 带面接入自发光、条纹与反射后主体不再有死黑区，改为验证主体确实被点亮。
+            var result=new Result(maximum<=1&&lightChanged>400&&quietFraction<=.05&&hashes.Distinct().Count()==3,
                 maximum,lightChanged,quietFraction,quietRatio,hashes.Distinct().Count());
             File.WriteAllText(Path.Combine(output,"clear-highlight.json"),JsonSerializer.Serialize(result,new JsonSerializerOptions{WriteIndented=true}));
             return result;
