@@ -11,8 +11,8 @@ public sealed class SoulTrailEnding : ModSystem
 {
     public const int NormalFrames=36;
     public const int RetiredFrames=24;
-    private const int Capacity=64;
-    private static readonly List<Ending> endings=new();
+    private const int Capacity=256;
+    private static readonly List<Handle> endings=new();
     public static int Created {get;private set;}
     public static int ActiveCount=>Main.gameMenu?0:endings.Count(e=>Age(e)<e.Frames);
     public static bool HasActive=>ActiveCount>0;
@@ -22,16 +22,38 @@ public sealed class SoulTrailEnding : ModSystem
         private readonly Vector2[] centers;
         private readonly float[] rotations;
         private readonly float halfLength;
+        private readonly bool unit;
         public Pose(Vector2[] sourceCenters,float[] sourceRotations,int count,float length)
         {
             count=Math.Min(count,Math.Min(SoulMaterialTrail.HistoryLength,Math.Min(sourceCenters.Length,sourceRotations.Length)));
             centers=sourceCenters.Take(count).ToArray();rotations=sourceRotations.Take(count).ToArray();halfLength=length;
         }
         public int Build(Vector2 camera,VertexPositionColorTexture[] vertices,float clock)
-            =>SoulMaterialTrail.Build(centers,rotations,centers.Length,halfLength,camera,vertices,clock);
+        {
+            if(!unit)return SoulMaterialTrail.Build(centers,rotations,centers.Length,halfLength,camera,vertices,clock);
+            Span<SoulMaterialTrail.TrailLayer> layers=stackalloc SoulMaterialTrail.TrailLayer[1];
+            layers[0]=new(0,centers.Length,1,true);
+            return SoulMaterialTrail.BuildLayered(centers,rotations,centers.Length,halfLength,camera,vertices,layers,clock);
+        }
+        internal Pose(Vector2[] sourceCenters,float[] sourceRotations,int start,int count,float length)
+        {
+            count=Math.Min(count,Math.Min(sourceCenters.Length,sourceRotations.Length)-start);
+            centers=sourceCenters.AsSpan(start,count).ToArray();rotations=sourceRotations.AsSpan(start,count).ToArray();
+            halfLength=length;unit=true;
+        }
+        internal void Follow(Vector2[] sourceCenters,float[] sourceRotations,int start)
+        {
+            int count=Math.Min(centers.Length,Math.Min(sourceCenters.Length,sourceRotations.Length)-start);
+            sourceCenters.AsSpan(start,count).CopyTo(centers);sourceRotations.AsSpan(start,count).CopyTo(rotations);
+        }
     }
-    private sealed record Ending(Pose Pose,int ItemType,Color Tint,float Opacity,ulong Born,int Frames);
-    private static int Age(Ending ending)=>(int)Math.Min(int.MaxValue,Main.GameUpdateCount-ending.Born);
+    public sealed record Handle(Pose Pose,int ItemType,Color Tint,float Opacity,ulong Born,int Frames)
+    {
+        // 剑影仍可见时短尾跟随同一个历史头点；剑影熄灭后才停留在最后位置收尽。
+        public void Follow(Vector2[] centers,float[] rotations,int start)
+        {if(Age(this)<Frames)Pose.Follow(centers,rotations,start);}
+    }
+    private static int Age(Handle ending)=>(int)Math.Min(int.MaxValue,Main.GameUpdateCount-ending.Born);
     public static float Dissolve(int age,int frames)=>MathHelper.SmoothStep(0,1,Math.Clamp(age/(float)frames,0,1));
     public static float Opacity(int age,int frames)
         =>1-MathHelper.SmoothStep(0,1,Math.Clamp((age/(float)frames-.94f)/.06f,0,1));
@@ -43,6 +65,18 @@ public sealed class SoulTrailEnding : ModSystem
         if(endings.Count>=Capacity)endings.RemoveAt(0);
         endings.Add(new(new Pose(centers,rotations,count,halfLength),itemType,tint,opacity,Main.GameUpdateCount,retired?RetiredFrames:NormalFrames));
         Created++;return true;
+    }
+    public static Handle CaptureUnit(Vector2[] centers,float[] rotations,int available,SoulTrailUnits.Unit unit,
+        float halfLength,int itemType,Color tint,float opacity,bool retired)
+    {
+        if(Main.dedServ||Main.gameMenu||Main.graphics?.GraphicsDevice==null||unit.Samples<2||unit.Start+unit.Samples>available||opacity<=0)return null;
+        endings.RemoveAll(e=>Age(e)>=e.Frames);
+        if(endings.Count>=Capacity)endings.RemoveAt(0);
+        // 旧剑影的短尾也更早收尽，避免几个不同时刻的冻结片段在归鞘处重新积成一团。
+        int frames=retired?Math.Max(8,RetiredFrames-unit.Index*4):Math.Max(9,NormalFrames/(unit.Index+1));
+        var handle=new Handle(new Pose(centers,rotations,unit.Start,unit.Samples,halfLength),itemType,tint,opacity,
+            Main.GameUpdateCount,frames);
+        endings.Add(handle);Created++;return handle;
     }
     public static void DrawAll(VertexPositionColorTexture[] vertices)
     {

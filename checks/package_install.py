@@ -28,7 +28,12 @@ expected_version = next(line.split('=', 1)[1].strip() for line in (source/'build
 assert name == 'ZenithReborn' and version == expected_version
 packed = {e['name']: contents(e) for e in entries}
 vfx_ownership = verify_vfx_ownership(built)
-assert packed['ZenithReborn.dll'] == (source / 'bin/Release/net8.0/ZenithReborn.dll').read_bytes()
+native_path=out/'native-build-check.json'
+native=json.loads(native_path.read_text(encoding='utf-8-sig')) if native_path.exists() else {}
+if native.get('passed') and native.get('packages',{}).get(name,{}).get('sha256')==hashlib.sha256(built.read_bytes()).hexdigest():
+    assert (root/'wood-check-profile/Mods/ZenithReborn.tmod').read_bytes()==built.read_bytes()
+else:
+    assert packed['ZenithReborn.dll'] == (source / 'bin/Release/net8.0/ZenithReborn.dll').read_bytes()
 own_manifest=source/'Assets/Effects/build-manifest.json'
 own_effects=json.loads(own_manifest.read_text(encoding='utf-8'))['effects']
 for entry in own_effects:
@@ -50,7 +55,9 @@ for path in sourcefiles:
     if path.suffix in ('.cs', '.hjson') or path.name == 'description.txt':
         assert packed[relative] == path.read_bytes(), relative
 
-shutil.copy2(built, out / 'ZenithReborn.tmod')
+package_only=os.environ.get('ZENITH_PACKAGE_ONLY')=='1'
+package_artifact=out/(f'ZenithReborn-{version}.tmod' if package_only else 'ZenithReborn.tmod')
+shutil.copy2(built, package_artifact)
 with zipfile.ZipFile(out / f'ZenithReborn-{version}-source.zip', 'w', zipfile.ZIP_DEFLATED) as z:
     for path in sourcefiles:
         z.write(path, 'ZenithReborn/' + path.relative_to(source).as_posix())
@@ -58,20 +65,24 @@ with zipfile.ZipFile(out / f'ZenithReborn-{version}-source.zip', 'w', zipfile.ZI
     z.write(root / 'AGENTS.md', 'AGENTS.md')
     for folder in ('docs', 'checks', 'VfxLibrary','tools'):
         for path in (root/folder).rglob('*'):
-            if path.is_file() and not any(s in ('bin', 'obj', '__pycache__') for s in path.relative_to(root).parts):
+            relative=path.relative_to(root)
+            if folder=='tools' and (relative.parts[1] in ('decomp','ilspy') or path.suffix.lower() in ('.dll','.exe','.pdb','.zip','.tmod')):
+                continue
+            if path.is_file() and not any(s in ('bin', 'obj', '__pycache__') for s in relative.parts):
                 z.write(path, path.relative_to(root).as_posix())
 with zipfile.ZipFile(out / f'ZenithReborn-{version}-source.zip') as z:
     assert z.testzip() is None
     assert not any(path.endswith(('OniCrimsonSlash.fx','OniCrimsonSlash.fxc','NoiseSoft01.rawimg','SlashBrush01.rawimg'))
         for path in z.namelist()), '新源码包不能夹带已撤下的第三方材质'
 
-if os.environ.get('ZENITH_PACKAGE_ONLY') == '1':
+if package_only:
     result = dict(name=name, version=version, installed=False, enabled=False, package_only=True,
-        target=str(out / 'ZenithReborn.tmod'),
-        sha256=hashlib.sha256((out / 'ZenithReborn.tmod').read_bytes()).hexdigest(),
+        target=str(package_artifact),
+        sha256=hashlib.sha256(package_artifact.read_bytes()).hexdigest(),
         loader=loader, focused_checks=checks,
         source_archive=f'ZenithReborn-{version}-source.zip', dependencies=dependencies)
-    (out / 'install-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
+    # 待测候选不能覆盖正式安装记录或正式包的稳定别名。
+    (out / f'package-result-{version}.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(result, ensure_ascii=False, indent=2))
     raise SystemExit(0)
 
@@ -140,6 +151,10 @@ world_verified=matching_report(f'airflow-world-{version}/world.json')
 soul_trail_verified=matching_report(f'soul-trail-gpu-{version}/gpu.json')
 own_shader_independent=matching_report(f'soul-trail-gpu-{version}/independence.json')
 soul_flight_world_verified=matching_report(f'soul-flight-world-{version}/world.json')
+echo_damage_path=out/f'soul-flight-world-{version}-echo-damage/world.json'
+echo_damage=json.loads(echo_damage_path.read_text(encoding='utf-8')) if echo_damage_path.exists() else {}
+echo_damage_verified=(matching_report(f'soul-flight-world-{version}-echo-damage/world.json') and
+    echo_damage.get('echoDamageTested') is True and set(echo_damage.get('echoDamageUnits',[]))=={1,2,3})
 refraction_gpu=out/f'soul-trail-gpu-{version}/gpu.json'
 refraction_report=json.loads(refraction_gpu.read_text(encoding='utf-8')) if soul_trail_verified else {}
 native_refraction_verified=matching_report(f'soul-flight-world-{version}/native-probe.json')
@@ -179,7 +194,22 @@ input_path=out/f'soul-input-{version}/validation.json'
 input_report=json.loads(input_path.read_text(encoding='utf-8')) if input_path.exists() else {}
 input_verified=(input_report.get('passed') is True and input_report.get('actualMouseAttack') is True
     and input_report.get('testedPackageSha256')==hashlib.sha256(built.read_bytes()).hexdigest())
+unit_tail_path=out/f'unit-trails-{version}/validation.json'
+unit_tail=json.loads(unit_tail_path.read_text(encoding='utf-8')) if unit_tail_path.exists() else {}
+unit_tail_verified=unit_tail.get('passed') is True and unit_tail.get('testedPackageSha256')==hashlib.sha256(built.read_bytes()).hexdigest()
+martial_motion_path=out / f'martial-motion-{version}/motion-gpu.json'
+martial_world_path=out / f'martial-playtest-{version}/martial-gui.json'
+martial_motion=json.loads(martial_motion_path.read_text(encoding='utf-8')) if martial_motion_path.exists() else {}
+martial_world=json.loads(martial_world_path.read_text(encoding='utf-8')) if martial_world_path.exists() else {}
+martial_hash=hashlib.sha256(built.read_bytes()).hexdigest()
+martial_motion_verified=martial_motion.get('passed') is True and martial_motion.get('actualGpu') is True and martial_motion.get('tested_package_sha256')==martial_hash
+martial_world_verified=(martial_world.get('actualWorld') is True and martial_world.get('step')==5 and
+    martial_world.get('tested_package_sha256')==martial_hash and martial_world.get('samples',{}).get('restored',{}).get('returned') is True)
 result = dict(name=name, version=version, installed=True, enabled=True,
+    graphics_martial_motion_tested=martial_motion_verified,
+    graphics_martial_motion_report=str(martial_motion_path.relative_to(out)) if martial_motion_verified else None,
+    martial_world_fixture_tested=martial_world_verified,
+    martial_world_fixture_report=str(martial_world_path.relative_to(out)) if martial_world_verified else None,
     target=str(target), sha256=hashlib.sha256(target.read_bytes()).hexdigest(),
     loader=loader, focused_checks=checks, source_archive=f'ZenithReborn-{version}-source.zip',
     existing_addon_preserved=True, config_preserved=True,
@@ -222,6 +252,10 @@ result = dict(name=name, version=version, installed=True, enabled=True,
     graphics_soul_flight_world_fixture_report=f'soul-flight-world-{version}/world.json' if soul_flight_world_verified else None,
     isolated_manual_attack_observed=manual_attack_verified,
     isolated_mouse_soul_flight_tested=input_verified,
+    echo_damage_world_fixture_tested=echo_damage_verified,
+    echo_damage_world_fixture_report=str(echo_damage_path.relative_to(out)) if echo_damage_verified else None,
+    independent_echo_short_trails_tested=unit_tail_verified,
+    independent_echo_short_trails_report=str(unit_tail_path.relative_to(out)) if unit_tail_verified else None,
     isolated_mouse_soul_flight_report=str(input_path.relative_to(out)) if input_verified else None,
     isolated_mouse_soul_flight_full_mod_set=input_verified and set(enabled_original)<=set(input_report.get('loadedMods',[])),
     isolated_manual_attack_report=f'manual-{version}/validation.json' if manual_attack_verified else None,

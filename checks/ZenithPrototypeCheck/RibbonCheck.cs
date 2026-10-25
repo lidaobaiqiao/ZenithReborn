@@ -21,8 +21,10 @@ internal static class RibbonCheck
         var vertices=new VertexPositionColor[SoulRibbonMesh.MaxVertices];
         int count=SoulRibbonMesh.Build(centers,rotations,length,32,new Color(150,230,75),1,Vector2.Zero,vertices);
         check(count>0 && count%3==0 && count<=vertices.Length,"Ribbon emits bounded triangle geometry");
+        // 几何必须留在输入剑迹附近；适配当前历史长度，不写死旧24帧的坐标框。
         check(vertices.Take(count).All(v=>float.IsFinite(v.Position.X) && float.IsFinite(v.Position.Y) &&
-            v.Position.X>100 && v.Position.X<880 && v.Position.Y>80 && v.Position.Y<480),
+            v.Position.X>centers.Min(p=>p.X)-80 && v.Position.X<centers.Max(p=>p.X)+80 &&
+            v.Position.Y>centers.Min(p=>p.Y)-80 && v.Position.Y<centers.Max(p=>p.Y)+80),
             "Ribbon remains near the weapon path rather than stretching across the screen");
         check(vertices[0].Color.A==0 && vertices[7].Color.A>120,"Ribbon fades across blade width with a clear outer edge");
         check(vertices[count-1].Color.A==0 && vertices[count-2].Color.A==0,"Ribbon tail ends transparent");

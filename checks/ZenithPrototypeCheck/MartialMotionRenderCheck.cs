@@ -72,13 +72,13 @@ public class MartialMotionRenderCheck : ModSystem
                     if(tick%2!=0)continue;
                     device.SetRenderTarget(target);device.Clear(new Color(12,17,29));
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend);
-                    for(int x=0;x<1280;x+=80)EnvironmentEffect.Line(Main.spriteBatch,new(x,0),new(x,800),new Color(22,31,45),1);
-                    for(int y=0;y<800;y+=80)EnvironmentEffect.Line(Main.spriteBatch,new(0,y),new(1280,y),new Color(22,31,45),1);
+                    for(int x=0;x<1280;x+=80)MartialVisual.Line(new(x,0),new(x,800),new Color(22,31,45),1);
+                    for(int y=0;y<800;y+=80)MartialVisual.Line(new(0,y),new(1280,y),new Color(22,31,45),1);
                     var rect=npc.Hitbox;
-                    EnvironmentEffect.Line(Main.spriteBatch,rect.TopLeft(),rect.TopRight(),Color.Gray,1);
-                    EnvironmentEffect.Line(Main.spriteBatch,rect.TopRight(),rect.BottomRight(),Color.Gray,1);
-                    EnvironmentEffect.Line(Main.spriteBatch,rect.BottomRight(),rect.BottomLeft(),Color.Gray,1);
-                    EnvironmentEffect.Line(Main.spriteBatch,rect.BottomLeft(),rect.TopLeft(),Color.Gray,1);
+                    MartialVisual.Line(rect.TopLeft(),rect.TopRight(),Color.Gray,1);
+                    MartialVisual.Line(rect.TopRight(),rect.BottomRight(),Color.Gray,1);
+                    MartialVisual.Line(rect.BottomRight(),rect.BottomLeft(),Color.Gray,1);
+                    MartialVisual.Line(rect.BottomLeft(),rect.TopLeft(),Color.Gray,1);
                     if(!p.GetModPlayer<MartialDashPlayer>().IsLightDash)
                     {
                         MartialVisual.Line(p.Center-new Vector2(8,0),p.Center+new Vector2(8,0),Color.White*.7f,2);

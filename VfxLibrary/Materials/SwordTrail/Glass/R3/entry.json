@@ -1,0 +1,20 @@
+{
+  "id": "material.SwordTrail.Glass.R3",
+  "status": "runtime-candidate-pending-gpu-and-art-review",
+  "scope": "普通剑魂主飞剑的方向反射/透射；保持剑影与短尾形态及0.3.79伤害",
+  "origin": "项目自有Shader与内置imagegen原稿，同源数据转换",
+  "inputs": {
+    "EnvironmentMap": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/EnvironmentMap.png",
+    "NormalMap": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/NormalMap.png",
+    "SurfaceMap": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/SurfaceMap.png",
+    "HeightMap": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/HeightMap.png"
+  },
+  "provenance": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/provenance.json",
+  "generationPrompts": "generation-prompts.json",
+  "sourceAuthoring": "artifacts/vfx-textures/{EnvironmentMap,HeightMap,NormalMap,SurfaceMap}/GlassR3/",
+  "processing": "checks/prepare_glass_r3.py",
+  "reuse": "同一组中性环境和标量数据供逐剑调色复用，不携带固定剑色或月牙轮廓",
+  "limitations": "LDR方向环境与二维薄面/屏幕反射近似，不是HDR全景测量或完整三维光线追踪",
+  "thirdPartyShadersOrTextures": false,
+  "oldAssetsRetained": true
+}

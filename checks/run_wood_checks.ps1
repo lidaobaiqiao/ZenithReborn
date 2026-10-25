@@ -1,8 +1,9 @@
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot -Parent
 $loaderRoot = 'E:/SteamLibrary/steamapps/common/tModLoader'
-$dotnet = 'C:/Program Files/dotnet/dotnet.exe'
+$dotnet = Join-Path $loaderRoot 'dotnet/dotnet.exe'
 $testProfile = Join-Path $taskRoot 'wood-check-profile'
+$nativePackages=@{}
 New-Item -ItemType Directory -Force -Path "$testProfile/Mods", "$taskRoot/artifacts" | Out-Null
 # 只编译项目自有着色器；微软编译器只在开发时使用，不新增玩家依赖。
 $python=Join-Path $env:USERPROFILE '.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe'
@@ -13,14 +14,14 @@ if($LASTEXITCODE -ne 0){Get-Content "$taskRoot/artifacts/glass-preset-build.log"
 if($LASTEXITCODE -ne 0){Get-Content "$taskRoot/artifacts/own-effect-build.log";throw '自有着色器编译失败'}
 foreach ($name in @('ZenithReborn', 'ZenithPrototypeCheck')) {
     $source = if ($name -eq 'ZenithReborn') { "$taskRoot/ZenithReborn" } else { "$taskRoot/checks/ZenithPrototypeCheck" }
-    & $dotnet build "$source/$name.csproj" -c Release --nologo *> "$taskRoot/artifacts/$name-wood-build.log"
-    if ($LASTEXITCODE -ne 0) { Get-Content "$taskRoot/artifacts/$name-wood-build.log"; throw "Build failed: $name" }
     Push-Location $loaderRoot
     try {
-        & $dotnet ./tModLoader.dll -server -build $source -eac "$source/bin/Release/net8.0/$name.dll" -tmlsavedirectory "$taskRoot/build-profile" *> "$taskRoot/artifacts/$name-wood-pack.log"
+        # 直接使用游戏自带编译器，避开本机已损坏的独立NuGet还原；不复用旧DLL。
+        & $dotnet ./tModLoader.dll -server -build $source -tmlsavedirectory "$taskRoot/build-profile" *> "$taskRoot/artifacts/$name-wood-pack.log"
         if ($LASTEXITCODE -ne 0) { Get-Content "$taskRoot/artifacts/$name-wood-pack.log"; throw "Packaging failed: $name" }
     } finally { Pop-Location }
     Copy-Item -LiteralPath "$taskRoot/build-profile/Mods/$name.tmod" -Destination "$testProfile/Mods/$name.tmod"
+    $nativePackages[$name]=@{sha256=(Get-FileHash "$testProfile/Mods/$name.tmod" -Algorithm SHA256).Hash.ToLowerInvariant()}
 }
 '["ZenithReborn","ZenithPrototypeCheck"]' | Set-Content -Encoding utf8 -LiteralPath "$testProfile/Mods/enabled.json"
 $env:ZENITH_WOOD = '1'
@@ -32,3 +33,6 @@ try {
 } finally { Pop-Location }
 Get-Content "$taskRoot/artifacts/wood-check.txt"
 if ($result -ne 0) { throw 'Isolated wood checks failed; see artifacts/wood-load.log' }
+# 回归结果绑定实际加载的包；不能把旧bin目录里的DLL当成本次原生编译产物。
+@{compiler='tModLoader native';packages=$nativePackages;passed=$true} | ConvertTo-Json -Depth 5 |
+    Set-Content -Encoding utf8 "$taskRoot/artifacts/native-build-check.json"

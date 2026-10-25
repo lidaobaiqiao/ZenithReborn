@@ -8,6 +8,11 @@ float uSeed;
 float3 uBodyColor;
 float3 uEdgeColor;
 float uUseColorField;
+float uColorFieldIsPalette;
+float3 uLightDirection;
+float uEnvironmentRotation;
+float2 uHeightTexel;
+float uMaterialOutputMode;
 float uUseMotionMask;
 float4 uMaskFrame;
 float uDispersion;   // 色散：不同波长折射率略有差异，边缘出彩边
@@ -203,7 +208,8 @@ float4 Shade(PixelInput input):COLOR0
     }
     baseColor=layerColor*(0.30+field*0.28+0.20*pow(1-depth,0.85));
     float3 artworkColor=tex2D(colorSampler,float2(s-slowTime,depth)).rgb;
-    baseColor=lerp(baseColor,artworkColor,uUseColorField);
+    // 默认色场只调制亮度，不能把所有剑染成同一颜色；逐剑显式调色板仍保留原接口。
+    layerColor=lerp(layerColor,artworkColor,uUseColorField*uColorFieldIsPalette);
 
     // 连续的流线横向弯曲，沿尾部缓慢奔流；不是一张固定形状整体平移。
     float bend=sin(s*8.0-maskTime*0.8)*0.028+sin(s*15.0+maskTime*0.4)*0.009;
@@ -237,107 +243,90 @@ float4 Shade(PixelInput input):COLOR0
     float alive=uDissolve>0?endingAlive:smoothstep(s*s*0.16-0.05,s*s*0.16+0.10,originalResistance);
     float rim=4*endingAlive*(1-endingAlive)*step(0.0001,uDissolve);
 
-    // 低粗糙度控制反光宽度，折射率同时参与折射方向与菲涅耳反射。
-    float highlightWidth=0.008+layerRough*0.14;
-    // 刃线分三层：窄核心负责"锐"，中层光晕往外化，最外层弥散融进主体。
-    // 单层硬线会和带面割裂，看起来像贴上去的一条白边。
-    float razorCore=(1.0-smoothstep(0.004,0.018,abs(h)))*sharpBoundary;
-    float razorHalo=(1.0-smoothstep(0.016,0.085,abs(h)))*sharpBoundary;
-    float razorMist=(1.0-smoothstep(0.045,0.200,abs(h)))*sharpBoundary;
-    float razor=razorCore;
-    // 中间白边同样拆三层，和主体的过渡才不会一刀切
-    float innerRimCore=1-smoothstep(0.004,0.016,abs(h-innerBoundary+0.025));
-    float innerRimHalo=1-smoothstep(0.014,0.055,abs(h-innerBoundary+0.025));
-    float innerRimMist=1-smoothstep(0.040,0.140,abs(h-innerBoundary+0.025));
-    float innerRim=innerRimCore;
-    float reflectionAt=0.18+s*0.20+sin(uTime*0.38)*0.16;
-    float reflection=1-smoothstep(0.004,highlightWidth,abs(depth-reflectionAt));
-    reflection*=0.55+0.45*pow(saturate(1-s),0.45);
-    float fineReflection=(1-smoothstep(0.004,0.014,abs(depth-0.57+s*0.12)))*0.22;
-    float filaments=smoothstep(0.42,0.78,streak)*(1-depth)*0.13;
-    float3 neutralHighlight=lerp(uEdgeColor,float3(1.15,1.18,1.22),0.55);
-    // 用宽度坐标的屏幕梯度确定局部表面朝向，曲线转弯时折射方向也随之旋转。
+    // 曲面法线沿真实轨迹的屏幕基底展开；边缘采用小倒角，不再画三条坐标白线。
     float2 gradient=float2(ddx(h),ddy(h));
     float2 crossAxis=gradient/max(length(gradient),0.00001);
     float2 tangent=float2(-crossAxis.y,crossAxis.x);
     float2 alongGradient=float2(ddx(s),ddy(s));
     tangent*=dot(tangent,alongGradient)<0?-1:1;
-    // 稳定的双轴弧面：沿宽度弯曲，沿剑迹保持倾角；不使用滚动噪声扭曲背景。
-    // 只有横向曲率会顺着竖直树干挪图，沿迹倾角让树干也出现可辨的横向偏折。
-    float slope=(depth-0.46)*1.7;
+    float bevel=-2.1*pow(1-saturate(depth/0.18),3)+2.2*pow(saturate((depth-0.73)/0.20),3);
+    float slope=(depth-0.46)*1.7+bevel;
     float alongSlope=0.65+0.25*cos((s-0.35)*3.14159265);
-    float3 normal=normalize(float3(crossAxis*slope+tangent*alongSlope,1));
-    // 法线贴图：把美术的微观凹凸加到表面法线上（只改方向，不改强度上限）
+    float2 materialUV=float2(s*1.5-slowTime*0.15,depth);
+    float2 micro=float2(0,0);
     if(uUseNormal>0.5)
     {
-        float3 nrm=tex2D(uNormalTexSampler,float2(s*2.2,depth*1.6)).rgb*2.0-1.0;
-        normal=normalize(normal+float3(nrm.xy*0.55,0));
+        // 法线与高度来自同一张标量源图；切线方向必须随剑迹旋转，不能直接当屏幕方向。
+        float3 mapNormal=tex2D(uNormalTexSampler,materialUV).rgb*2-1;
+        micro+=mapNormal.xy*0.38;
     }
-    // 色散：红绿蓝用略微不同的折射率，法线越斜（越靠带面边缘）分色越明显
-    float disp=uDispersion*0.055;
-    float3 tr=refract(float3(0,0,-1),normal,1.0/(layerIor*(1.0-disp)));
-    float3 tg=refract(float3(0,0,-1),normal,1.0/layerIor);
-    float3 tb=refract(float3(0,0,-1),normal,1.0/(layerIor*(1.0+disp)));
-    float2 ur=tr.xy/max(abs(tr.z),0.1)*uThickness*uSceneTexel;
-    float2 ug=tg.xy/max(abs(tg.z),0.1)*uThickness*uSceneTexel;
-    float2 ub=tb.xy/max(abs(tb.z),0.1)*uThickness*uSceneTexel;
-    float2 sceneUV=clamp(input.SceneUV+ug,uSceneTexel*0.5,1-uSceneTexel*0.5);
-    float3 scene=float3(
-        tex2D(sceneSampler,clamp(input.SceneUV+ur,uSceneTexel*0.5,1-uSceneTexel*0.5)).r,
-        tex2D(sceneSampler,sceneUV).g,
-        tex2D(sceneSampler,clamp(input.SceneUV+ub,uSceneTexel*0.5,1-uSceneTexel*0.5)).b);
-    float2 blurAxis=crossAxis*uSceneTexel*layerRough*2.0;
-    scene=lerp(scene,(tex2D(sceneSampler,sceneUV+blurAxis).rgb+tex2D(sceneSampler,sceneUV-blurAxis).rgb)*0.5,layerRough);
+    float heightValue=0.5;
+    if(uUseHeight>0.5)
+    {
+        heightValue=tex2D(uHeightTexSampler,materialUV).r;
+        float hu=tex2D(uHeightTexSampler,materialUV+float2(uHeightTexel.x,0)).r;
+        float hv=tex2D(uHeightTexSampler,materialUV+float2(0,uHeightTexel.y)).r;
+        micro+=clamp(float2((hu-heightValue)/uHeightTexel.x,(hv-heightValue)/uHeightTexel.y)*0.022,-0.16,0.16);
+    }
+    float3 normal=normalize(float3(crossAxis*(slope+micro.y)+tangent*(alongSlope+micro.x),1));
+    float3 view=float3(0,0,1);
+    float3 light=normalize(uLightDirection);
+    float3 halfway=normalize(view+light);
+    float nv=max(0.025,dot(normal,view)),nl=saturate(dot(normal,light));
+    float nh=saturate(dot(normal,halfway)),vh=saturate(dot(view,halfway));
     float f0=pow((layerIor-1)/(layerIor+1),2);
-    float fresnel=f0+(1-f0)*pow(1-saturate(normal.z),5);
-    // 屏幕空间反射：带面是平面，用反射向量的屏幕分量取一次近处场景即可，
-    // 比环境图更有"映出周围"的感觉（树、敌人、其他剑）
-    float3 reflectDir=reflect(float3(0,0,-1),normal);
-    float2 ssrUv=clamp(input.SceneUV+reflectDir.xy*uSceneTexel*34.0,
-        uSceneTexel*0.5,1-uSceneTexel*0.5);
-    float3 nearScene=tex2D(sceneSampler,ssrUv).rgb;
-    // 环境图：远方冷色/暖色，补上 SSR 采不到的方向
-    if(uUseEnvironment>0.5)
-    {
-        float2 envUv=float2(atan2(reflectDir.y,reflectDir.x)/6.2831853+0.5,depth*0.6);
-        float3 env=tex2D(uEnvironmentTexSampler,envUv).rgb;
-        nearScene=lerp(nearScene,env,0.45*uUseEnvironment);
-    }
-    float3 surface=baseColor+layerColor*filaments+nearScene*fresnel*uSsrStrength*0.55;
-    float3 absorption=lerp(float3(1,1,1),saturate(layerColor),0.14);
-    float3 color=lerp(surface,scene*absorption,uHasScene*layerTrans*(1-fresnel));
-    // 笔刷调制高光：扫光带出现断丝、刃线粗细不均——这才是肉眼能看见的手工痕迹
-    float brushGain=lerp(1.0,0.35+brushSample*1.30,uUseBrush);
-    color+=neutralHighlight*(
-          razorCore*1.15*brushGain+razorHalo*0.50+razorMist*0.18
-        + innerRimCore*0.38+innerRimHalo*0.20+innerRimMist*0.09
-        +reflection*(0.9+fresnel*3)*(lerp(1.0,0.45+brushSample*1.10,uUseBrush))
-        +fineReflection);
-    color+=lerp(uBodyColor,uEdgeColor,0.32)*rim*0.35;
-    // 自发光：内部光丝透出来
-    if(uUseEmission>0.5)
-    {
-        float glow=tex2D(uEmissionTexSampler,float2(s*1.3-slowTime*0.6,depth*1.0)).r;
-        color+=lerp(uBodyColor,uEdgeColor,0.5)*glow*0.85;
-    }
-    // 带面自发光：不是反光、不是透射，是它自己在发光。
-    // 这一项决定"特效本身有没有亮度"——只靠玻璃的折射和反光会显得暗沉。
-    color+=lerp(uBodyColor,float3(1.10,1.16,1.26),0.45)*uEmissionStrength;
-    // 主体恢复可见覆盖度，透射通过真实背景采样体现，不再靠大幅降低透明度代替。
-    float glassAlpha=0.66+field*0.12+(1-depth)*0.06+razor*0.18+reflection*0.12+innerRim*0.08;
+    float fresnel=f0+(1-f0)*pow(1-nv,5);
+    float lightF=f0+(1-f0)*pow(1-vh,5);
+    // 有限像素下给微表面分布一个最小面积，避免锐高光落在亚像素上闪烁。
+    float rough=clamp(layerRough,0.025,1);
+    float alpha=max(0.025,rough*rough),a2=alpha*alpha;
+    float denominator=nh*nh*(a2-1)+1;
+    float distribution=a2/max(0.00001,3.14159265*denominator*denominator);
+    float k=(rough+1)*(rough+1)*0.125;
+    float visibility=nv/(nv*(1-k)+k)*nl/(nl*(1-k)+k);
+    float specular=distribution*visibility*lightF/max(0.001,4*nv*max(nl,0.001))*nl;
+    float3 reflectedDirection=reflect(-view,normal);
+    float2 envUV=float2(atan2(reflectedDirection.y,reflectedDirection.x)/6.2831853+0.5+uEnvironmentRotation,
+                        acos(clamp(reflectedDirection.z,-1,1))/3.14159265);
+    float2 envSpread=float2(rough*0.12,rough*0.08);
+    float3 env=tex2D(uEnvironmentTexSampler,envUV).rgb;
+    env=lerp(env,(tex2D(uEnvironmentTexSampler,envUV+envSpread).rgb+tex2D(uEnvironmentTexSampler,envUV-envSpread).rgb)*0.5,rough);
+    env=lerp(float3(0.18,0.22,0.28),pow(max(env,0),2.2)*1.8,uUseEnvironment);
+    float3 reflectionTint=lerp(float3(1,1,1),saturate(layerColor),0.22);
+    float3 reflected=(env*fresnel+float3(1.0,0.98,0.93)*specular*2.2)*reflectionTint;
+    // 少量内部流丝维持能量色；不再让整片自发光压过玻璃的背景对比。
+    float filaments=smoothstep(0.42,0.78,streak)*(1-depth);
+    float emission=tex2D(uEmissionTexSampler,materialUV).r*uUseEmission;
+    reflected+=layerColor*(0.012+filaments*0.018+emission*0.025)*uEmissionStrength;
+    reflected+=lerp(uBodyColor,uEdgeColor,0.32)*rim*uDissolve*0.06;
+    reflected=reflected/(1+reflected);
+    float localThickness=uThickness*clamp(1+(heightValue-0.5)*2,0.85,1.15);
+    float3 absorption=exp(-(1-saturate(layerColor))*0.26*(1-layerTrans)*localThickness/72);
+    float3 throughput=absorption*exp(-(1-layerTrans)*0.35)*(1-fresnel);
+    // 覆盖度维持实体带面；通透来自被偏折的背景，不是把整个效果变透明。
+    float glassAlpha=0.66+field*0.12+(1-depth)*0.05+pow(1-depth,6)*0.10;
     float opacity=shape*alive*uOpacity*input.Color.a*saturate(glassAlpha);
-    // 在此统一预乘；透明处不留下独立白光，绘制使用AlphaBlend。
-    float4 shaded=float4(color*opacity,opacity);
-    // 保存表面法线而非已算好的偏移，最终合成中的IOR直接决定背景弯折。
-    float4 refractionMask=float4((normal.xy*0.5+0.5)*opacity,uRoughness*opacity,opacity);
-    // 表面只有有色吸收与窄反光；透射的背景在最终阶段加入，覆盖度与透射互不冒充。
-    float3 coating=surface*(1-uTransmission)*0.50;
-    coating+=neutralHighlight*(razor*1.20+innerRim*0.40+reflection*(0.9+fresnel*3)+fineReflection);
-    // 原生滤镜也保留侵蚀边缘的短暂反光，和法线共用同一份存活区域。
-    coating+=lerp(uBodyColor,uEdgeColor,.32)*rim*uDissolve*.6;
-    float absorptionAlpha=saturate((1-uTransmission)*0.32+razor*0.8+innerRim*0.3+reflection*0.5);
-    float4 surfaceMask=float4(coating*opacity,absorptionAlpha*opacity);
-    return lerp(lerp(shaded,refractionMask,uOutputRefractionMask),surfaceMask,uOutputSurface);
+    float4 normalOutput=float4((normal.xy*0.5+0.5)*opacity,rough*opacity,opacity);
+    if(uOutputRefractionMask>0.5)return normalOutput;
+    if(uOutputSurface>0.5)return float4(reflected*opacity,fresnel*opacity);
+    // 蓝通道低区间标识剑流，并携带屏幕反射强度；高区间属于通用表面材质。
+    if(uMaterialOutputMode>2.5&&uMaterialOutputMode<3.5)
+        return float4(float3((layerIor-1)/1.5,localThickness/128,uSsrStrength*0.20)*opacity,opacity);
+    if(uMaterialOutputMode>3.5)return float4(throughput*opacity,opacity);
+    // 安全备用与离线预览也使用同一法线、反射及透射数据。
+    float dispersion=uDispersion*0.022;
+    float3 rayR=refract(-view,normal,1/(layerIor*(1-dispersion)));
+    float3 rayG=refract(-view,normal,1/layerIor);
+    float3 rayB=refract(-view,normal,1/(layerIor*(1+dispersion)));
+    float2 offsetR=rayR.xy/max(abs(rayR.z),0.1)*localThickness*uSceneTexel;
+    float2 offsetG=rayG.xy/max(abs(rayG.z),0.1)*localThickness*uSceneTexel;
+    float2 offsetB=rayB.xy/max(abs(rayB.z),0.1)*localThickness*uSceneTexel;
+    float2 low=uSceneTexel*0.5,high=1-low;
+    float3 scene=float3(tex2D(sceneSampler,clamp(input.SceneUV+offsetR,low,high)).r,
+                        tex2D(sceneSampler,clamp(input.SceneUV+offsetG,low,high)).g,
+                        tex2D(sceneSampler,clamp(input.SceneUV+offsetB,low,high)).b);
+    float3 color=pow(saturate(reflected+pow(max(scene,0),2.2)*throughput*uHasScene),1/2.2);
+    return float4(color*opacity,opacity);
 }
 
 technique SwordFlow

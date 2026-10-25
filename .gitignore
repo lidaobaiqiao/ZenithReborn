@@ -19,3 +19,8 @@ artifacts/
 .env.*
 *.pem
 *.key
+
+# 反编译工具与其输出：体积大（约 22MB），可由 tModLoader.dll 重新生成，不入库
+tools/ilspy/
+tools/decomp/
+.workbuddy/

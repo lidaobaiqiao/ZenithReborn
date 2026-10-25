@@ -1,10 +1,11 @@
-param([int]$TimeoutSec=180,[switch]$Surface)
+param([int]$TimeoutSec=180,[switch]$Surface,[switch]$EchoDamage)
 $ErrorActionPreference='Stop'
 $taskRoot=Split-Path $PSScriptRoot -Parent
-$profile=Join-Path $taskRoot 'artifacts/soul-flight-world-profile'
 $version=((Get-Content "$taskRoot/ZenithReborn/build.txt" | Where-Object {$_ -match '^version\s*='}) -split '=',2)[1].Trim()
+$profile=Join-Path $taskRoot "artifacts/soul-flight-world-profile-$version"
 $output=Join-Path $taskRoot "artifacts/soul-flight-world-$version"
 if($Surface){$profile+='-surface';$output+='-surface'}
+if($EchoDamage){$profile+='-echo-damage';$output+='-echo-damage'}
 New-Item -ItemType Directory -Force -Path "$profile/Mods","$profile/Players","$profile/Worlds",$output | Out-Null
 # 只读复制旧隔离档，不读取或改写正式人物／世界。
 foreach($kind in @('Players','Worlds')){
@@ -22,6 +23,7 @@ foreach($name in @('ZenithReborn','ZenithPrototypeCheck')){
     ConvertTo-Json | Set-Content -Encoding utf8 "$profile/config.json"
 $env:ZENITH_SOUL_FLIGHT_WORLD=$output
 $env:ZENITH_SURFACE_WORLD=if($Surface){'1'}else{''}
+$env:ZENITH_ECHO_DAMAGE_CHECK=if($EchoDamage){'1'}else{''}
 $env:SDL_WINDOW_ACTIVATE_WHEN_SHOWN='0'
 $startedAt=[DateTime]::UtcNow
 $process=Start-Process -FilePath 'C:/Program Files/dotnet/dotnet.exe' -ArgumentList @('tModLoader.dll','-nosteam','-tmlsavedirectory',('"{0}"' -f $profile)) `

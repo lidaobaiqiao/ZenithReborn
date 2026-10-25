@@ -57,14 +57,16 @@ public class SoulTrailRenderCheck : ModSystem
             Frame("mask-fully-dissolved.png",.2f,36,1,false,dissolve:1);int maskExpired=lastPixels;
             var glass=GlassSurface();
             var refraction=RefractionRenderCheck.Run(output);
+            var response=GlassResponseRenderCheck.Run(output);
             byte[] package=File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod"));
             File.WriteAllText(Path.Combine(output,"gpu.json"),JsonSerializer.Serialize(new{
                 passed=fixedA!=fixedB && hashes.Distinct().Count()==4 && restored && expired==0 && maskExpired==0 &&
-                    endingStart>endingMiddle && endingMiddle>0 && endingFinal==0 && formationStart==0 && formationFinal>1000 && glass.passed && refraction.Passed,
+                    endingStart>endingMiddle && endingMiddle>0 && endingFinal==0 && formationStart==0 && formationFinal>1000 && glass.passed && refraction.Passed&&response.Passed,
                 testedPackageSha256=Convert.ToHexString(SHA256.HashData(package)).ToLowerInvariant(),
                 actualGpu=true,productionRenderer=true,noncircularPath=true,
                 fixedPoseMaterialAnimated=fixedA!=fixedB,paletteImagesDistinct=hashes.Distinct().Count(),
                 materialEffect=SwordFlowMaterial.EffectPath,artworkInputs=SwordFlowMaterial.LoadedArtworkPaths,
+                defaultMaterialMaps=SwordFlowMaterial.DefaultMapPaths,
                 thirdPartyAssetsPresent=ModContent.GetInstance<global::ZenithReborn.ZenithReborn>().FileExists("Assets/ThirdParty/CalamityOverhaul/OniCrimsonSlash.fxc"),
                 graphicsStateRestored=restored,expiredPixels=expired,previewFrames=96,
                 fullyDissolvedPixelsAtFullOpacity=maskExpired,
@@ -74,6 +76,7 @@ public class SoulTrailRenderCheck : ModSystem
                 independentEndingLifetimeFrames=SoulTrailEnding.NormalFrames,
                 glassSurface=new{glass.passed,glass.bodyMeanAlpha,glass.edgeMeanAlpha},
                 refraction,
+                glassResponse=response,
                 actualMouseGameplayTested=false,liveMultiplayerTested=false},new JsonSerializerOptions{WriteIndented=true}));
         }
         catch(Exception ex){File.WriteAllText(Path.Combine(output,"error.txt"),ex.ToString());}

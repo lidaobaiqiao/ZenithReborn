@@ -8,7 +8,7 @@ namespace ZenithReborn;
 public static class SoulMaterialTrail
 {
     public const int HistoryLength=60;   // 与原版 TrailCacheLength 一致
-    public const int EchoLayers=10;
+    public const int EchoLayers=SoulTrailUnits.Count;
     private const int Steps=3;
     private const int Rows=4;
     public const int MaxVertices=(HistoryLength-1)*Steps*Rows*6;
@@ -17,7 +17,7 @@ public static class SoulMaterialTrail
     public const float MaterialThickness=.34f;
 
     // 一条独立短带面的历史窗口；Start 对应剑影，Count 随剑影年龄缩短。
-    public readonly record struct TrailLayer(int Start,int Count,float Opacity);
+    public readonly record struct TrailLayer(int Start,int Count,float Opacity,bool FullyFormed=false);
 
     public static void Draw(VertexPositionColorTexture[] vertices,int count,Color tint,float opacity,
         float clock,int? width=null,int? height=null,bool unscaled=false,float dissolve=0,int itemType=0)
@@ -49,7 +49,7 @@ public static class SoulMaterialTrail
             if(!float.IsFinite(layer.Opacity))return 0;
             int offset=written;
             int strip=BuildStrip(centers,rotations,count,layer.Start,layer.Count,halfLength,
-                screenPosition,vertices,offset,clock,layer.Start!=0);
+                screenPosition,vertices,offset,clock,layer.FullyFormed||layer.Start!=0);
             if(strip<0)return 0;
             if(strip==0)continue;
             if(layer.Opacity<1)

@@ -23,6 +23,10 @@
     "retiredMaximumFrames": 24,
     "parentIndependent": true,
     "sceneCopiesAdded": false,
-    "report": "docs/0.3.71-飞剑真实点击与沿迹收尾.md"
+    "unitHistoryStarts": [0,15,30,45],
+    "unitHistoryCounts": [13,11,9,7],
+    "normalUnitFrames": [36,18,12,9],
+    "retiredUnitFrames": [24,20,16,12],
+    "report": "docs/0.3.78-逐剑影独立短尾.md"
   }
 }

@@ -9,6 +9,7 @@ internal static class MaterialTrailCheck
     internal static void Run(Action<bool,string> check)
     {
         SwordColorNoiseCheck.Run(check);
+        CheckUnits(check);
         var centers=new Vector2[SoulMaterialTrail.HistoryLength];
         var rotations=new float[centers.Length];
         for(int i=0;i<centers.Length;i++)
@@ -20,8 +21,10 @@ internal static class MaterialTrailCheck
         var shifted=new VertexPositionColorTexture[vertices.Length];
         int count=SoulMaterialTrail.Build(centers,rotations,centers.Length,32,Vector2.Zero,vertices);
         check(count>0 && count%3==0 && count<=vertices.Length,"Material trail bounded triangle geometry");
+        // 历史长度可由其他开发调整，边界应跟随实际输入轨迹，而非假定永远32帧。
         check(vertices.Take(count).All(v=>float.IsFinite(v.Position.X) && float.IsFinite(v.TextureCoordinate.X)
-            && v.Position.X>250 && v.Position.X<850 && v.Position.Y>90 && v.Position.Y<350),
+            && v.Position.X>centers.Min(p=>p.X)-64 && v.Position.X<centers.Max(p=>p.X)+64
+            && v.Position.Y>centers.Min(p=>p.Y)-64 && v.Position.Y<centers.Max(p=>p.Y)+64),
             "Material trail follows the actual noncircular path");
         int moved=SoulMaterialTrail.Build(centers,rotations,centers.Length,32,new Vector2(150,90),shifted);
         check(count==moved && Enumerable.Range(0,count).All(i=>Vector2.Distance(
@@ -73,5 +76,33 @@ internal static class MaterialTrailCheck
         check(SoulMaterialTrail.Build(centers,rotations,centers.Length,32,Vector2.Zero,vertices)==0,"Material trail rejects teleport discontinuity");
         centers[4]-=new Vector2(2000,0);rotations[4]=float.NaN;
         check(SoulMaterialTrail.Build(centers,rotations,centers.Length,32,Vector2.Zero,vertices)==0,"Material trail rejects invalid rotations");
+    }
+    private static void CheckUnits(Action<bool,string> check)
+    {
+        var units=Enumerable.Range(0,SoulTrailUnits.Count).Select(i=>SoulTrailUnits.At(i,60,55)).ToArray();
+        check(units.Select(u=>u.Start).SequenceEqual(new[]{0,15,30,45}),"剑影保持原版三个历史采样位置");
+        check(units.Select(u=>u.Samples).SequenceEqual(new[]{13,11,9,7})&&
+            units.Take(3).All(u=>u.Start+u.Samples-1<units[u.Index+1].Start),"四个剑尾窗口递减且留有严格空隙");
+        check(units[0].Opacity==1&&units[1].Opacity==.75f&&units[2].Opacity==.5f&&units[3].Opacity==.125f,
+            "短尾与剑影共享亮度及最后一把的渐入窗口");
+        var centers=Enumerable.Range(0,60).Select(i=>new Vector2(1000-i*16,200)).ToArray();
+        var rotations=Enumerable.Repeat(MathHelper.PiOver4,60).ToArray();
+        var vertices=new VertexPositionColorTexture[SoulMaterialTrail.MaxLayeredVertices];
+        var layers=units.Select(u=>u.Layer).ToArray();
+        int count=SoulMaterialTrail.BuildLayered(centers,rotations,60,32,Vector2.Zero,vertices,layers);
+        check(count==(12+10+8+6)*3*4*6,"每个独立窗口都有自己的三角形且不连接窗口");
+        int offset=0;bool anchored=true;var ranges=new List<(float Low,float High)>();
+        foreach(var unit in units)
+        {
+            int size=(unit.Samples-1)*3*4*6;
+            anchored&=Vector3.Distance(vertices[offset+18].Position,new Vector3(centers[unit.Start]+new Vector2(32,0),0))<.001f;
+            // 直接比较完整网格的空间范围，包括亮刃外扩；不假设顶点都落在剑尖连线上。
+            ranges.Add((vertices.Skip(offset).Take(size).Min(v=>v.Position.X),vertices.Skip(offset).Take(size).Max(v=>v.Position.X)));
+            offset+=size;
+        }
+        check(anchored&&Enumerable.Range(0,3).All(i=>ranges[i].Low>ranges[i+1].High),
+            "四个短尾头点与本体剑影一致且完整网格之间存在空间留白");
+        check(SoulTrailUnits.At(3,45,55).Samples==0&&SoulTrailUnits.At(2,31,55).Samples==1,
+            "历史不足时不伪造旧剑影或越界读取");
     }
 }

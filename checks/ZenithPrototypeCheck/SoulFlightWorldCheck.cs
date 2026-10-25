@@ -32,6 +32,12 @@ public class SoulFlightWorldCheck : ModSystem
     private readonly HashSet<int> returned=new();
     private readonly List<object> poses=new();
     private readonly Dictionary<int,int> weapons=new();
+    private readonly Dictionary<int,int> echoTargets=new();
+    private readonly HashSet<int> echoHits=new();
+    private readonly List<object> echoHitRecords=new();
+    private bool EchoDamage=>Enabled&&Environment.GetEnvironmentVariable("ZENITH_ECHO_DAMAGE_CHECK")=="1";
+    private bool echoProbesCreated;
+    private int echoProbeBlade=-1;
     private bool Enabled=>!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ZENITH_SOUL_FLIGHT_WORLD")) &&
         Main.SavePath.Contains("soul-flight-world-profile",StringComparison.OrdinalIgnoreCase);
     internal bool Isolated=>Enabled;
@@ -128,6 +134,32 @@ public class SoulFlightWorldCheck : ModSystem
             }
         }
         // 隔离夹具额外检查提前收回后父弹幕立即消失，材质仍可正常收尽。
+        if(EchoDamage&&!echoProbesCreated)
+        {
+            foreach(var projectile in Main.ActiveProjectiles)
+            {
+                if(projectile.ModProjectile is not SoulBlade blade||blade.MotionPhase<73||blade.MotionPhase>79)continue;
+                echoProbesCreated=true;
+                echoProbeBlade=projectile.whoAmI;
+                for(int echo=1;echo<SoulTrailUnits.Count;echo++)
+                {
+                    if(!blade.TryGetEchoPose(echo,out var center,out _,out _))continue;
+                    int id=NPC.NewNPC(player.GetSource_Misc("EchoDamageCheck"),(int)center.X,(int)center.Y,NPCID.Zombie);
+                    if(id>=Main.maxNPCs)continue;
+                    var npc=Main.npc[id];npc.width=npc.height=40;npc.Center=center;npc.life=npc.lifeMax=100000;
+                    npc.noGravity=npc.noTileCollide=true;npc.knockBackResist=0;npc.defense=0;npc.velocity=Vector2.Zero;
+                    echoTargets[id]=echo;
+                }
+                break;
+            }
+        }
+        // 使用常见敌人体量并跟随未命中的历史姿态，避免高速相邻更新跨过微小夹具目标。
+        // 这里只安排NPC的位置，扣血仍必须由下一次生产Projectile.Update触发。
+        if(EchoDamage&&echoProbeBlade>=0&&Main.projectile[echoProbeBlade].active&&Main.projectile[echoProbeBlade].ModProjectile is SoulBlade probeBlade)
+            foreach(var pair in echoTargets)
+                if(!echoHits.Contains(pair.Value)&&Main.npc[pair.Key].active&&probeBlade.TryGetEchoPose(pair.Value,out var at,out _,out _))
+                {Main.npc[pair.Key].Center=at;Main.npc[pair.Key].velocity=Vector2.Zero;}
+        if(tick==100)foreach(int id in echoTargets.Keys)Main.npc[id].active=false;
         if(forcedEndingId>=0&&tick==350&&Main.projectile[forcedEndingId].active)
             ((SoulBlade)Main.projectile[forcedEndingId].ModProjectile).Retire();
         if(forcedEndingId>=0&&tick==353&&Main.projectile[forcedEndingId].active)Main.projectile[forcedEndingId].Kill();
@@ -144,15 +176,17 @@ public class SoulFlightWorldCheck : ModSystem
         {
             finished=true;
             File.WriteAllText(Path.Combine(output,"world.json"),JsonSerializer.Serialize(new{
-                passed=damaged.Count==3 && returned.Count==3 && SoulSceneRefraction.CapturedFrames>0 && refractionMaskPixels>0&&(!Advanced||materialLightCalls>0)&&endingAfterParentKill&&SoulTrailEnding.Created>=4&&!SoulTrailEnding.HasActive,
+                passed=damaged.Count==3 && returned.Count==3 && SoulSceneRefraction.CapturedFrames>0 && refractionMaskPixels>0&&(!Advanced||materialLightCalls>0)&&endingAfterParentKill&&SoulTrailEnding.Created>=4&&!SoulTrailEnding.HasActive&&(!EchoDamage||echoHits.Count==3),
                 testedPackageSha256=Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod"))))
                     .ToLowerInvariant(),
                 actualWorld=true,productionAI=true,productionRenderer=true,isolatedSaves=true,
                 refractionFrames=SoulSceneRefraction.CapturedFrames,refractionDeferredFrames=SoulSceneRefraction.DeferredFrames,
                 refractionSource=SoulSceneRefraction.LastSource,
                 refractionMaskPixels,
+                defaultMaterialMaps=SwordFlowMaterial.DefaultMapPaths,
                 advancedSurfaceMaterial=Advanced,materialRegionsActive=Advanced&&regionMask!=null,materialLightCalls,
                 endingAfterParentKill,endingsCreated=SoulTrailEnding.Created,remainingEndings=SoulTrailEnding.ActiveCount,
+                echoDamageTested=EchoDamage,echoDamageUnits=echoHits,echoHitRecords,echoTargetsFollowPoses=EchoDamage,
                 generatedFixtureAttack=true,actualMouseAttack=false,superDummyPlacementTested=false,
                 damageEvidence="原版命中回调中确认目标受到SoulBlade直接命中，不计衍生攻击",
                 damagedItems=damaged,completedReturnItems=returned,frames=tick,poses,
@@ -162,6 +196,13 @@ public class SoulFlightWorldCheck : ModSystem
     }
     internal void ObserveHit(NPC npc,Projectile projectile,int damage)
     {
+        if(EchoDamage&&ready&&!finished&&damage>0&&projectile.ModProjectile is SoulBlade blade&&echoTargets.TryGetValue(npc.whoAmI,out int echo)
+            &&!blade.BodyCollides(npc.Hitbox)&&blade.TryGetEchoPose(echo,out var center,out _,out _))
+        {
+            echoHits.Add(echo);
+            echoHitRecords.Add(new{tick,echo,damage,phase=blade.MotionPhase,bodyCanDamage=blade.BodyCanDamage,
+                bodyDistance=Vector2.Distance(projectile.Center,npc.Center),echoDistance=Vector2.Distance(center,npc.Center)});
+        }
         if(Enabled && ready && !finished && npc.whoAmI==npcId && damage>0 &&
             projectile.ModProjectile is SoulBlade && weapons.TryGetValue(projectile.whoAmI,out int type))
             damaged.Add(type);
@@ -176,11 +217,11 @@ public class SoulFlightWorldCheck : ModSystem
         using var image=new Texture2D(device,pp.BackBufferWidth,pp.BackBufferHeight);image.SetData(pixels);
         string path=Path.Combine(output,$"frames/frame-{tick:000}.png");Directory.CreateDirectory(Path.GetDirectoryName(path));
         using var stream=File.Create(path);image.SaveAsPng(stream,image.Width,image.Height);
-        if(tick==42&&SoulSceneRefraction.NormalMask is Texture2D normal)
+        if(tick is 24 or 27 or 30 or 42 or 48 or 54 or 60 && SoulSceneRefraction.NormalMask is Texture2D normal)
         {
             var maskPixels=new Color[normal.Width*normal.Height];normal.GetData(maskPixels);
-            refractionMaskPixels=maskPixels.Count(color=>color.A>8);
-            using var png=File.Create(Path.Combine(output,"refraction-mask.png"));normal.SaveAsPng(png,normal.Width,normal.Height);
+            if(tick==42)refractionMaskPixels=maskPixels.Count(color=>color.A>8);
+            using var png=File.Create(Path.Combine(output,$"refraction-mask-{tick:000}.png"));normal.SaveAsPng(png,normal.Width,normal.Height);
         }
     }
     public override void ModifyScreenPosition()

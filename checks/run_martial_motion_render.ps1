@@ -1,7 +1,8 @@
 $ErrorActionPreference='Stop'
 $taskRoot=Split-Path $PSScriptRoot -Parent
 $profile=Join-Path $taskRoot 'artifacts/martial-render-profile'
-$output=Join-Path $taskRoot 'artifacts/martial-motion-0.3.72'
+$version=((Get-Content "$taskRoot/ZenithReborn/build.txt" | Where-Object {$_ -match '^version\s*='}) -split '=',2)[1].Trim()
+$output=Join-Path $taskRoot "artifacts/martial-motion-$version"
 New-Item -ItemType Directory -Force -Path "$profile/Mods",$output | Out-Null
 foreach($name in @('ZenithReborn','ZenithPrototypeCheck')){
     Copy-Item -LiteralPath "$taskRoot/build-profile/Mods/$name.tmod" -Destination "$profile/Mods/$name.tmod"

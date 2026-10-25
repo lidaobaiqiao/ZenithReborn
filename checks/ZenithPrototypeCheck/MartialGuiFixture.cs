@@ -8,21 +8,38 @@ using ZenithReborn;
 
 namespace ZenithPrototypeCheck;
 
-// Disposable cloned world only. Checkpoints pause for an actual window capture;
-// Escape resumes the next phase. Never runs in production or headless profiles.
+// 仅运行隔离副本世界，检查点可暂停查看；自动模式正常退出，不碰正式存档。
 public class MartialGuiFixture : ModSystem
 {
     private int ticks,step;
     private int pauseDraws;
-    private bool waiting;
+    private bool waiting,entering,seenReturning;
     private SoulItem soul;
     private NPC target;
     private Projectile hostile;
     private Vector2 stopNpc,stopShot,initialPlayer;
     private readonly Dictionary<string,object> samples=[];
+    public override void Load(){if(!Main.dedServ)Main.OnPreDraw+=Enter;}
+    public override void Unload()=>Main.OnPreDraw-=Enter;
+    private void Enter(GameTime time)
+    {
+        if(entering || !Main.gameMenu || Main.menuMode!=0 || Environment.GetEnvironmentVariable("ZENITH_MARTIAL_AUTORUN")!="1" ||
+            Environment.GetEnvironmentVariable("ZENITH_MARTIAL_GUI")!="1" || !Main.SavePath.Contains("martial-playtest",StringComparison.OrdinalIgnoreCase))return;
+        entering=true;
+        try
+        {
+            Main.LoadPlayers();Main.LoadWorlds();
+            var pf=Main.PlayerList.Find(p=>p.Name=="测试" && !p.IsCloudSave);
+            var wf=Main.WorldList.Find(w=>Path.GetFileNameWithoutExtension(w.Path)=="测试" && !w.IsCloudSave);
+            if(pf==null || wf==null || !Path.GetFullPath(pf.Path).StartsWith(Main.SavePath,StringComparison.OrdinalIgnoreCase) ||
+                !Path.GetFullPath(wf.Path).StartsWith(Main.SavePath,StringComparison.OrdinalIgnoreCase))throw new Exception("只能运行专用隔离测试副本");
+            pf.SetAsActive();wf.SetAsActive();Main.autoSave=false;Main.netMode=NetmodeID.SinglePlayer;Main.menuMode=10;WorldGen.playWorld();
+        }
+        catch(Exception ex){File.WriteAllText(Path.Combine(Main.SavePath,"martial-error.txt"),ex.ToString());Main.instance.Exit();}
+    }
     private bool Enabled=>!Main.dedServ && !Main.gameMenu && Environment.GetEnvironmentVariable("ZENITH_MARTIAL_GUI")=="1" &&
         Main.SavePath.Contains("martial-playtest",StringComparison.OrdinalIgnoreCase);
-    public override void OnWorldLoad(){ticks=step=0;waiting=false;soul=null;samples.Clear();}
+    public override void OnWorldLoad(){ticks=step=0;waiting=seenReturning=false;soul=null;samples.Clear();}
     private void Start(int tier)
     {
         var p=Main.LocalPlayer;var mp=p.GetModPlayer<MartialPlayer>();mp.Cancel();
@@ -33,7 +50,9 @@ public class MartialGuiFixture : ModSystem
     private void Checkpoint(string name,object value)
     {
         samples[name]=value;
-        File.WriteAllText(Path.Combine(Main.SavePath,"martial-gui.json"),JsonSerializer.Serialize(new{version="0.3.43",step,samples},new JsonSerializerOptions{WriteIndented=true}));
+        string hash=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod")))).ToLowerInvariant();
+        File.WriteAllText(Path.Combine(Main.SavePath,"martial-gui.json"),JsonSerializer.Serialize(new{version=ModLoader.GetMod("ZenithReborn").Version.ToString(),
+            tested_package_sha256=hash,step,samples,seenReturning,actualWorld=true,liveMultiplayerTested=false},new JsonSerializerOptions{WriteIndented=true}));
         waiting=true;pauseDraws=0;Main.autoPause=true;Main.playerInventory=true;
     }
     public override void PostDrawInterface(SpriteBatch spriteBatch)
@@ -70,6 +89,7 @@ public class MartialGuiFixture : ModSystem
             return;
         }
         var blades=Main.projectile.Where(q=>q.active && q.ModProjectile is MartialBlade).ToArray();
+        seenReturning|=blades.Any(q=>((MartialBlade)q.ModProjectile).State==4);
         var g=Main.projectile.FirstOrDefault(q=>q.active && q.ModProjectile is MartialGiant)?.ModProjectile as MartialGiant;
         if(step==1 && blades.Count(q=>((MartialBlade)q.ModProjectile).State==2)>=3)
         {
@@ -92,7 +112,7 @@ public class MartialGuiFixture : ModSystem
         else if(step==4 && g?.Phase==4 && g.Age>=8)
             Checkpoint("finishing-wave",new{tick=ticks,phase=g.Phase,waves=Main.projectile.Count(q=>q.active && q.ModProjectile is MartialWave),
                 npcResumed=target.velocity.X!=0,bulletResumed=hostile!=null && hostile.velocity.Length()>0,target.life});
-        else if(step==5 && p.GetModPlayer<MartialPlayer>().Mode==MartialMode.Normal && !Main.projectile.Any(q=>q.active && q.ModProjectile is MartialGiant or MartialWave))
-            Checkpoint("restored",new{tick=ticks,nativeRestored=true,frozen=MartialTime.Frozen(target.Center),target.life});
+        else if(step==5 && p.GetModPlayer<MartialPlayer>().Mode==MartialMode.Normal && blades.Length==0 && !Main.projectile.Any(q=>q.active && q.ModProjectile is MartialGiant or MartialWave))
+            Checkpoint("restored",new{tick=ticks,nativeRestored=true,returned=seenReturning,frozen=MartialTime.Frozen(target.Center),target.life});
     }
 }

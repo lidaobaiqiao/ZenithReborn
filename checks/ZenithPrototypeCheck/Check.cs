@@ -14,16 +14,15 @@ public class Check : ModSystem
     private bool ran;
     private void Assert(bool ok, string message)
     { if (!ok) throw new Exception(message); checks++; }
-    // Run on the main thread after the menu is up. PostAddRecipes runs on a
-    // loader worker, where Main.mouseX/Y and Main.UIScale can be overwritten
-    // by the client's update loop between setting them and clicking a slot.
+    // 菜单出现后在主线程运行；PostAddRecipes使用加载线程，设置鼠标后再点槽位时，
+    // 客户端更新可能已覆盖Main.mouseX/Y或Main.UIScale，导致夹具结果不稳定。
     public override void PostUpdateEverything()
     {
         if (ran) return;
         ran = true;
         RunChecks();
     }
-    // Headless server run: no game window and no PostUpdateEverything menu loop.
+    // 无窗口服务端没有菜单更新循环，从独立服务端入口执行检查。
     public override void PostAddRecipes()
     {
         if (!Main.dedServ || ran) return;
@@ -50,6 +49,12 @@ public class Check : ModSystem
                 File.WriteAllText(path,$"PASS: {checks} focused checks; ore family, fourteen-material count, generic support and ordinary expansion, save/load and network. No graphical client or live multiplayer validation.\n");
                 Console.WriteLine("ZENITH_ORE_PASS "+checks); Environment.Exit(0); return;
             }
+            // 只测量不判定：把剑影相位一致性的实测数据写出，供人工判断。
+            if(Environment.GetEnvironmentVariable("ZENITH_ECHO_PHASE")=="1")
+            {
+                File.WriteAllText(path,EchoPhaseProbe.Run()+"\n");
+                Console.WriteLine("ZENITH_ECHO_PHASE_DONE"); Environment.Exit(0); return;
+            }
             if(Environment.GetEnvironmentVariable("ZENITH_WOOD")=="1")
             {
                 CurseFixture.NeutralDefaults=true;
@@ -61,6 +66,7 @@ public class Check : ModSystem
                 SwingCheck.Run(Assert);
                 DamageBalanceCheck.Run(Assert);
                 VanillaReturnCheck.Run(Assert);
+                EchoDamageCheck.Run(Assert);
                 SparkCheck.Run(Assert);
                 NativeParticleCheck.Run(Assert);
                 HardOreCheck.Run(Assert);
@@ -110,17 +116,13 @@ public class Check : ModSystem
             int corruptionLure = ModContent.ItemType<CorruptionLure>();
             Assert(crimsonSigil > 0 && corruptionLure > 0,"Cross-biome summon items registered");
             Assert(new Item(crimsonSigil).Name == "猩红之脊" && new Item(corruptionLure).Name == "腐化之饵","Cross-biome summon names localize");
-            // Reset cursor/input state so this focused UI check does not inherit
-            // mouse state from an earlier assertion or a previous run.
+            // 重置鼠标与光标物品，避免继承此前断言或上一轮的输入状态。
             Main.mouseLeft=false; Main.mouseLeftRelease=false; Main.mouseItem=new Item();
-            // Use the engine's real UI coordinate transform, including the user's
-            // 1.6296296 scaling, then click the same handler used by the drawn panel.
+            // 使用引擎真实界面坐标变换，包括用户的1.6296296缩放，再调用面板实际点击入口。
             foreach (float scale in new[]{1f,1.25f,1.6296296f,2f})
             {
-                // GameInterfaceLayer.Draw already called PlayerInput.SetZoom_UI
-                // before the panel draws, so SoulUI sees UI-space mouse
-                // coordinates. Feed those same coordinates here. Keeping UIScale
-                // non-1 still catches a regression that divides by UIScale twice.
+                // GameInterfaceLayer.Draw在面板前已调用PlayerInput.SetZoom_UI，因此传入界面空间鼠标坐标。
+                // 保持非一倍UIScale，仍能检测重复除以界面缩放的回归。
                 Main.UIScale=scale; Main.screenWidth=2560; Main.screenHeight=1600;
                 Point center=SoulUI.SlotBounds(0).Center;
                 Main.mouseX=center.X; Main.mouseY=center.Y;

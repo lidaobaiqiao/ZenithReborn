@@ -41,7 +41,7 @@ internal static class VanillaReturnCheck
                     (blade.DrawEffects==SpriteEffects.FlipHorizontally)==(native.spriteDirection==-1),"Native item-art rotation and flip are preserved");
                 float visibility=Utils.GetLerpValue(0,20,native.localAI[0],true)*Utils.GetLerpValue(68,60,native.localAI[0],true)*native.Opacity;
                 check(Math.Abs(blade.BladeOpacity-visibility)<.0001f && Math.Abs(blade.DisplayScale-1.6f)<.0001f,"Native fade retains constant model scale without absorption");
-                if(blade.MotionPhase>=60)check(blade.CanDamage()==false,"Visual tail does not append extra hits");
+                if(blade.MotionPhase>=60)check(!blade.BodyCanDamage,"本体阶段六十后保持停伤，仅可见剑影另行判定");
             }
             check(!projectile.active && !native.active,"Both complete the native lifetime");
         }

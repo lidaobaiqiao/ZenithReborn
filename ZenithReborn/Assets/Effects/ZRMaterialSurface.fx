@@ -189,7 +189,8 @@ float4 Shade(PixelInput input):COLOR0
     float4 normalOutput=float4((n.xy*.5+.5)*coverage,rough*coverage,coverage);
     if(uMode>.5&&uMode<1.5)return normalOutput;
     if(uMode>1.5&&uMode<2.5)return float4(reflected*coverage,coverage);
-    if(uMode>2.5&&uMode<3.5)return float4(float3((uOptics.z-1)/1.5,uShape.w/128,uOptics.w)*coverage,coverage);
+    // 蓝通道高区间标识通用材质；低区间留给默认剑流的屏幕反射强度，IOR和厚度编码保持。
+    if(uMode>2.5&&uMode<3.5)return float4(float3((uOptics.z-1)/1.5,uShape.w/128,.6+uOptics.w*.4)*coverage,coverage);
     if(uMode>3.5)return float4(throughput*coverage,coverage);
     float3 ray=refract(-v,n,1/uOptics.z);
     float2 sampleUV=clamp(input.SceneUV+ray.xy/max(abs(ray.z),.1)*uShape.w*uSceneTexel,uSceneTexel*.5,1-uSceneTexel*.5);

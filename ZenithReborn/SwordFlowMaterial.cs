@@ -32,6 +32,8 @@ public class SwordFlowMaterial : ModSystem
     private static Texture2D defaultNoise;   // 无缝噪声（程序生成）
     // 美术出的 PBR 贴图：法线、色场、粗糙度、高度、自发光、环境
     private static readonly Dictionary<string,Texture2D> maps=new();
+    private static readonly Dictionary<string,string> defaultMapPaths=new();
+    public static IReadOnlyDictionary<string,string> DefaultMapPaths=>defaultMapPaths;
     // 自己创建、需要自己释放的贴图（原始数据上传的那几张）
     private static readonly List<Texture2D> ownedData=new();
     public static string EffectPath=>"ZenithReborn/Assets/Effects/ZRSwordFlow";
@@ -69,14 +71,22 @@ public class SwordFlowMaterial : ModSystem
         defaultNoise=TryLoad("ZenithReborn/Assets/Vfx/Materials/SwordFlow/NoiseSeamless.png");
         // 四区遮罩必须走原始数据上传：这张图的 A 通道本身就是磨损区数据，
         // 常规贴图加载会清空 Alpha=0 处的 RGB，刃口/脊线/腹部三区会整片读成黑色。
-        var zone=TryLoadRaw("Assets/Vfx/Materials/SwordFlow/ZoneMask.zrdata");
-        if(zone!=null)maps["ZoneMask"]=zone;
+        var loadingOwner=owner;
+        Main.QueueMainThreadAction(()=>{
+            // 原始数据上传直接创建显卡纹理，必须在绘制线程执行；卸载后的旧任务不能重新挂回资源。
+            if(!ReferenceEquals(owner,loadingOwner))return;
+            var zone=TryLoadRaw("Assets/Vfx/Materials/SwordFlow/ZoneMask.zrdata");
+            if(zone!=null)maps["ZoneMask"]=zone;
+            ValidateLoaded(loadingOwner);
+        });
         foreach(string name in new[]{"NormalMap","ColorField","SurfaceMap","HeightMap","EmissionMap","EnvironmentMap"})
         {
-            var texture=TryLoad("ZenithReborn/Assets/Vfx/Materials/SwordFlow/"+name+".png");
-            if(texture!=null)maps[name]=texture;
+            // R3同源玻璃数据优先，旧素材保留作为缺失时的兼容回退。
+            string path="ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/"+name+".png";
+            var texture=TryLoad(path);
+            if(texture==null){path="ZenithReborn/Assets/Vfx/Materials/SwordFlow/"+name+".png";texture=TryLoad(path);}
+            if(texture!=null){maps[name]=texture;defaultMapPaths[name]=path;}
         }
-        ValidateLoaded(Mod);
     }
 
     // 把一张可选贴图绑到对应的开关与 sampler
@@ -92,11 +102,14 @@ public class SwordFlowMaterial : ModSystem
     {
         try
         {
-            if(owner is null||!owner.HasAsset(path))return null;
-            return ModContent.Request<Texture2D>(path,AssetRequestMode.ImmediateLoad).Value;
+            string assetPath=AssetName(path);
+            if(owner is null||!ModContent.HasAsset(assetPath))return null;
+            return ModContent.Request<Texture2D>(assetPath,AssetRequestMode.ImmediateLoad).Value;
         }
         catch{return null;}
     }
+    // 文件清单使用.png，资源仓库使用带模组名但不带扩展名的逻辑键，不能直接混用。
+    private static string AssetName(string path)=>path.EndsWith(".png",StringComparison.OrdinalIgnoreCase)?path[..^4]:path;
 
     // 直接上传原始 RGBA，绕开图像解码对透明像素颜色的处理。
     // 文件格式：魔数 ZRDT、版本 1、宽、高、宽*高*4 字节 RGBA。
@@ -159,7 +172,7 @@ public class SwordFlowMaterial : ModSystem
             {
                 if(string.IsNullOrWhiteSpace(path))continue;
                 bool exists=path.EndsWith(".zrdata",StringComparison.OrdinalIgnoreCase)
-                    ?owner.FileExists(path.StartsWith(owner.Name+"/")?path[(owner.Name.Length+1)..]:path):owner.HasAsset(path);
+                    ?owner.FileExists(path.StartsWith(owner.Name+"/")?path[(owner.Name.Length+1)..]:path):ModContent.HasAsset(AssetName(path));
                 if(!exists){owner.Logger.Warn($"[材质] {name} 贴图不存在：{path}");issues++;}
             }
         }
@@ -174,12 +187,13 @@ public class SwordFlowMaterial : ModSystem
         effect=null;white=null;owner=null;defaultBrush=null;defaultNoise=null;
         artwork.Clear();textures.Clear();surfaceMaterials.Clear();runtimeMaterials.Clear();degraded.Clear();
         maps.Clear();
+        defaultMapPaths.Clear();
         Main.QueueMainThreadAction(()=>{oldEffect?.Dispose();oldWhite?.Dispose();foreach(var texture in rawData)texture.Dispose();});
     }
     private static Texture2D Texture(string path)
     {
         if(string.IsNullOrWhiteSpace(path))return white;
-        if(!textures.TryGetValue(path,out var value))textures[path]=value=ModContent.Request<Texture2D>(path,AssetRequestMode.ImmediateLoad).Value;
+        if(!textures.TryGetValue(path,out var value))textures[path]=value=ModContent.Request<Texture2D>(AssetName(path),AssetRequestMode.ImmediateLoad).Value;
         return value;
     }
     // 降级副本：同一份材质 + 同一档位只构造一次，缓存复用，不做每帧分配
@@ -201,7 +215,8 @@ public class SwordFlowMaterial : ModSystem
     }
 
     public static void Draw(VertexPositionColorTexture[] vertices,int count,Color tint,float opacity,float clock,
-        int? width=null,int? height=null,bool unscaled=false,float dissolve=0,int itemType=0,GlassOptics? optics=null)
+        int? width=null,int? height=null,bool unscaled=false,float dissolve=0,int itemType=0,GlassOptics? optics=null,
+        Vector3? lighting=null,float environmentRotation=0)
     {
         if(Main.dedServ || count<3 || !float.IsFinite(opacity) || !float.IsFinite(clock) || !float.IsFinite(dissolve) || opacity<=0)return;
         var device=Main.graphics.GraphicsDevice;
@@ -223,11 +238,15 @@ public class SwordFlowMaterial : ModSystem
                 width??Main.screenWidth,height??Main.screenHeight,unscaled,dissolve,SoulSceneRefraction.MaterialOutputMode);
             return;
         }
-        if(SoulSceneRefraction.MaterialOutputMode>=3)return;
         var parameters=effect.Parameters;
         parameters["transformMatrix"].SetValue((unscaled?Matrix.Identity:Main.GameViewMatrix.TransformationMatrix)*
             Matrix.CreateOrthographicOffCenter(0,width??Main.screenWidth,height??Main.screenHeight,0,-1,1));
         parameters["uTime"].SetValue(clock);
+        float daylight=Math.Clamp((float)Main.time/(Main.dayTime?54000f:32400f),0,1);
+        float lightAngle=MathHelper.Pi*(.18f+.64f*daylight);
+        parameters["uLightDirection"].SetValue(lighting??Vector3.Normalize(new Vector3(-MathF.Cos(lightAngle)*.75f,-MathF.Sin(lightAngle)*.72f,.65f)));
+        parameters["uEnvironmentRotation"].SetValue(environmentRotation);
+        parameters["uMaterialOutputMode"].SetValue((float)SoulSceneRefraction.MaterialOutputMode);
         parameters["uOpacity"].SetValue(Math.Clamp(opacity*GlassMaterialPreset.Opacity,0,1));
         parameters["uThickness"].SetValue(GlassMaterialPreset.Thickness*MaterialQuality.ThicknessScale);
         parameters["uDissolve"].SetValue(Math.Clamp(dissolve,0,1));
@@ -249,6 +268,8 @@ public class SwordFlowMaterial : ModSystem
         BindMap(parameters,"uUseColorField","uColorField","ColorField");
         BindMap(parameters,"uUseSurface","uSurfaceTex","SurfaceMap");
         BindMap(parameters,"uUseHeight","uHeightTex","HeightMap");
+        maps.TryGetValue("HeightMap",out var heightMap);
+        parameters["uHeightTexel"].SetValue(heightMap==null?Vector2.One:new Vector2(1f/heightMap.Width,1f/heightMap.Height));
         BindMap(parameters,"uUseEmission","uEmissionTex","EmissionMap");
         BindMap(parameters,"uUseEnvironment","uEnvironmentTex","EnvironmentMap");
         BindMap(parameters,"uUseZoneMask","uZoneMaskTex","ZoneMask");
@@ -262,10 +283,12 @@ public class SwordFlowMaterial : ModSystem
         parameters["uSeed"].SetValue(tint.R*.007f+tint.B*.003f);
         parameters["uBodyColor"].SetValue(tint.ToVector3()*1.25f);
         parameters["uEdgeColor"].SetValue(Vector3.Lerp(tint.ToVector3(),Vector3.One,.64f)*1.22f);
-        parameters["uColorField"].SetValue(Texture(art?.ColorField));
+        maps.TryGetValue("ColorField",out var defaultColorField);
+        parameters["uColorField"].SetValue(string.IsNullOrWhiteSpace(art?.ColorField)?defaultColorField??white:Texture(art.ColorField));
         var mask=Texture(art?.MotionMask);
         parameters["uMotionMask"].SetValue(mask);
-        parameters["uUseColorField"].SetValue(string.IsNullOrWhiteSpace(art?.ColorField)?0f:1f);
+        parameters["uUseColorField"].SetValue(!string.IsNullOrWhiteSpace(art?.ColorField)||defaultColorField!=null?1f:0f);
+        parameters["uColorFieldIsPalette"].SetValue(string.IsNullOrWhiteSpace(art?.ColorField)?0f:1f);
         parameters["uUseMotionMask"].SetValue(string.IsNullOrWhiteSpace(art?.MotionMask)?0f:1f);
         int frames=art?.Frames??1,columns=art?.Columns??1,rows=(frames+columns-1)/columns;
         int frame=(int)(clock/(art?.LoopSeconds??1)*frames)%frames;

@@ -1,9 +1,11 @@
 $ErrorActionPreference='Stop'
 $taskRoot=Split-Path $PSScriptRoot -Parent
-$profile=Join-Path $taskRoot 'artifacts/soul-flight-world-profile-input'
 $version=((Get-Content "$taskRoot/ZenithReborn/build.txt" | Where-Object {$_ -match '^version\s*='}) -split '=',2)[1].Trim()
+$profile=Join-Path $taskRoot "artifacts/soul-flight-world-profile-input-$version"
 $output=Join-Path $taskRoot "artifacts/soul-input-$version"
 New-Item -ItemType Directory -Force -Path "$profile/Mods","$profile/Players","$profile/Worlds",$output | Out-Null
+# 上轮正常退出标记不能让新客户端刚启动就退出。
+if(Test-Path -LiteralPath "$output/exit"){Remove-Item -LiteralPath "$output/exit"}
 # 只复制旧隔离档，实际攻击必须来自鼠标，不由夹具发射。
 foreach($kind in @('Players','Worlds')){
     Get-ChildItem -LiteralPath "$taskRoot/stage-one-playtest/tModLoader/$kind" -File |
