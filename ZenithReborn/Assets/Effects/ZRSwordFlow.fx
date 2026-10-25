@@ -286,12 +286,14 @@ float4 Shade(PixelInput input):COLOR0
     float visibility=nv/(nv*(1-k)+k)*nl/(nl*(1-k)+k);
     float specular=distribution*visibility*lightF/max(0.001,4*nv*max(nl,0.001))*nl;
     float3 reflectedDirection=reflect(-view,normal);
-    float2 envUV=float2(atan2(reflectedDirection.y,reflectedDirection.x)/6.2831853+0.5+uEnvironmentRotation,
-                        acos(clamp(reflectedDirection.z,-1,1))/3.14159265);
+    // 全景上半部是天空，纬度必须按竖直轴读取；不能把视线深度当作天空高度。
+    float2 envUV=float2(atan2(reflectedDirection.z,reflectedDirection.x)/6.2831853+0.5+uEnvironmentRotation,
+                        acos(clamp(-reflectedDirection.y,-1,1))/3.14159265);
     float2 envSpread=float2(rough*0.12,rough*0.08);
     float3 env=tex2D(uEnvironmentTexSampler,envUV).rgb;
     env=lerp(env,(tex2D(uEnvironmentTexSampler,envUV+envSpread).rgb+tex2D(uEnvironmentTexSampler,envUV-envSpread).rgb)*0.5,rough);
-    env=lerp(float3(0.18,0.22,0.28),pow(max(env,0),2.2)*1.8,uUseEnvironment);
+    // PNG记录相对环境亮度，制作端曝光将其还原到可读的反射光能；不把贴图当实测HDR。
+    env=lerp(float3(0.18,0.22,0.28),pow(max(env,0),2.2)*6,uUseEnvironment);
     float3 reflectionTint=lerp(float3(1,1,1),saturate(layerColor),0.22);
     float3 reflected=(env*fresnel+float3(1.0,0.98,0.93)*specular*2.2)*reflectionTint;
     // 少量内部流丝维持能量色；不再让整片自发光压过玻璃的背景对比。
