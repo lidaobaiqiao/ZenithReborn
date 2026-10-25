@@ -21,11 +21,16 @@ public class SoulFlightWorldCheck : ModSystem
     private string output;
     private int refractionMaskPixels;
     private int materialLightCalls;
+    private string LightPreset=>Environment.GetEnvironmentVariable("ZENITH_WORLD_LIGHT_PRESET")??"day";
+    private readonly List<object> ambientSamples=new();
     private int forcedEndingId=-1;
     private bool endingAfterParentKill;
     private Texture2D regionMask;
     private bool Advanced=>Environment.GetEnvironmentVariable("ZENITH_SURFACE_WORLD")=="1";
     internal bool RealInput=>Enabled&&Environment.GetEnvironmentVariable("ZENITH_SOUL_INPUT_CHECK")=="1";
+    // 真实输入核对先等待观察窗口完成，再由外部放置准备标记；避免启动时遗留按键被误记为本轮攻击。
+    internal bool InputArmed=>Environment.GetEnvironmentVariable("ZENITH_REQUIRE_INPUT_ARM")!="1"||
+        output!=null&&File.Exists(Path.Combine(output,"input-arm"));
     private int inputTick=-1;
     private readonly List<object> inputTrace=new();
     private readonly HashSet<int> damaged=new();
@@ -96,6 +101,10 @@ public class SoulFlightWorldCheck : ModSystem
             }
         }
         player.Center=anchor;player.velocity=Vector2.Zero;player.immune=true;player.immuneTime=60;
+        // 同一隔离档与攻击姿态只切换世界照明；局部光源用原版照明接口注入，不给材质伪造亮度。
+        Main.dayTime=LightPreset is "day" or "dusk";
+        Main.time=LightPreset=="dusk"?51840:Main.dayTime?27000:16200;
+        if(LightPreset=="torch")Lighting.AddLight(anchor+new Vector2(180,0),1.8f,1.4f,.9f);
         // 天顶椭圆在前端折返，目标放在真实端点；椭圆内部不等于剑体经过的位置。
         var target=Main.npc[npcId];target.Center=anchor+new Vector2(360,0);target.velocity=Vector2.Zero;
         target.noGravity=true;target.noTileCollide=true;target.knockBackResist=0;target.defense=0;
@@ -180,10 +189,10 @@ public class SoulFlightWorldCheck : ModSystem
                 testedPackageSha256=Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod"))))
                     .ToLowerInvariant(),
                 actualWorld=true,productionAI=true,productionRenderer=true,isolatedSaves=true,
+                lightPreset=LightPreset,ambientSamples,
                 refractionFrames=SoulSceneRefraction.CapturedFrames,refractionDeferredFrames=SoulSceneRefraction.DeferredFrames,
                 refractionSource=SoulSceneRefraction.LastSource,
                 refractionMaskPixels,
-                defaultMaterialMaps=SwordFlowMaterial.DefaultMapPaths,
                 advancedSurfaceMaterial=Advanced,materialRegionsActive=Advanced&&regionMask!=null,materialLightCalls,
                 endingAfterParentKill,endingsCreated=SoulTrailEnding.Created,remainingEndings=SoulTrailEnding.ActiveCount,
                 echoDamageTested=EchoDamage,echoDamageUnits=echoHits,echoHitRecords,echoTargetsFollowPoses=EchoDamage,
@@ -213,6 +222,7 @@ public class SoulFlightWorldCheck : ModSystem
             endingAfterParentKill=true;
         if(!Enabled || !ready || finished || Main.gameMenu || (RealInput?inputTick<0:tick%3!=0) || captured==tick)return;
         captured=tick;var device=Main.graphics.GraphicsDevice;var pp=device.PresentationParameters;
+        // 79基底没有89的照明采样诊断接口；世界昼夜预设继续保留。
         var pixels=new Color[pp.BackBufferWidth*pp.BackBufferHeight];device.GetBackBufferData(pixels);
         using var image=new Texture2D(device,pp.BackBufferWidth,pp.BackBufferHeight);image.SetData(pixels);
         string path=Path.Combine(output,$"frames/frame-{tick:000}.png");Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -245,7 +255,7 @@ public class SoulFlightFixtureInput : ModPlayer
     public override void SetControls()
     {
         var check=ModContent.GetInstance<SoulFlightWorldCheck>();
-        if(!check.Isolated || check.RealInput || Main.gameMenu)return;
+        if(!check.Isolated || check.RealInput&&check.InputArmed || Main.gameMenu)return;
         Player.controlUseItem=false;Player.controlUseTile=false;Player.releaseUseItem=true;
     }
 }

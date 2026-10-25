@@ -1,0 +1,39 @@
+{
+  "id": "material.SwordTrail.Glass.R3",
+  "origin": "builtin-imagegen-with-project-authored-data-derivation",
+  "sourceImages": {
+    "environment": {
+      "name": "exec-031aded8-024d-47e2-a15b-61aa6b8c99e9.png",
+      "sha256": "c5ee3863e347ae2a4b766685e7c136ada06769e9ad733f4e5705439e0695a039"
+    },
+    "height": {
+      "name": "exec-ed1f30f9-12c6-48b9-b357-fe38a6dfb42b.png",
+      "sha256": "0c6bd2c226ca7886323d5de9702405a8a9d0c77560ae6d7817abc19e4b43dd21"
+    }
+  },
+  "images": {
+    "EnvironmentMap.png": "983196b8b5ea41f3edec58940ec2fd5c34686dac3f128a2ad11f1fa1d5a6ca77",
+    "HeightMap.png": "e3c6b4cda74d8022be5560b2ecefede72b5ccdd6fc2dd9c8d346cd8036a55dc7",
+    "NormalMap.png": "b3346ad0072277f7afe990e78010928e5b57c3c3f8824ee3edf6d00c2436bc67",
+    "SurfaceMap.png": "c740c28f53817f4092e72d77d508933c2e2e59ee2bd19f0192729e3dfdc19010"
+  },
+  "channels": {
+    "EnvironmentMap": "RGB环境反射；U环绕",
+    "HeightMap": "RGB同值；中灰基准，低振幅高度",
+    "NormalMap": "RGB切线空间单位法线；由同一高度中心差分得到",
+    "SurfaceMap": "RGB同值；粗糙度调制"
+  },
+  "seamlessHeightError": 0.0,
+  "seamlessEnvironmentError": 0.0,
+  "normalUnitError": 2.220446049250313e-16,
+  "heightRange": [
+    0.4819496741241627,
+    0.5204952676289694
+  ],
+  "roughnessRange": [
+    0.30000540655368807,
+    0.62
+  ],
+  "thirdPartyImages": false,
+  "oldInputsOverwritten": false
+}

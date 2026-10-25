@@ -1,0 +1,32 @@
+{
+  "id": "material.SwordTrail.Glass.HybridR1",
+  "status": "runtime-verified-pending-user-art-review",
+  "version": "0.3.88",
+  "origin": "project-authored",
+  "userDirection": "融合0.3.79光效与0.3.80玻璃质感",
+  "baseAppearance": "0.3.80",
+  "edgeLightReference": "0.3.79",
+  "scope": "默认主飞剑；实际剑色，既有真实轨迹、短尾和剑影伤害保持",
+  "shader": "ZenithReborn/Assets/Effects/ZRSwordFlow.fx",
+  "maps": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/",
+  "preservedOpticalOutputs": [
+    "normalMask",
+    "optics",
+    "transmission",
+    "alpha"
+  ],
+  "opticalMaximumPixelDifference": 0,
+  "verification": [
+    "artifacts/visible-colors-0.3.88.json",
+    "artifacts/hybrid-optics-0.3.88/hybrid.json",
+    "artifacts/soul-trail-gpu-0.3.88/gpu.json"
+  ],
+  "worldPreview": "artifacts/visible-colors-0.3.88/three-swords-original-speed.mp4",
+  "limitations": "二维薄面近似；固定颜色输入光学数据与80一致。完整正式组合只测隔离受控攻击；自然鼠标游玩/真实多人未测，美术待用户判断。",
+  "artApproved": false,
+  "colorBaseline": "actual-item-sprite",
+  "colorPolicy": "实际剑身帧主色；流纹、扫光和反射保色，79式薄白亮刃参考保留",
+  "runtimeActive": false,
+  "savedCollection": "artifacts/vfx-presets/0.3.88/ZenithReborn-0.3.88-VFX-独立收藏.zip",
+  "installationNote": "用户保存88后临时试用原始80，开发源码仍保留88"
+}

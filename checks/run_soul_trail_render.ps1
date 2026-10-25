@@ -1,10 +1,11 @@
-param([switch]$WithoutThirdParty)
+param([switch]$WithoutThirdParty,[switch]$TextureAblation)
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot -Parent
 $profile = Join-Path $taskRoot 'artifacts/soul-trail-render-profile'
 $version = ((Get-Content "$taskRoot/ZenithReborn/build.txt" | Where-Object {$_ -match '^version\s*='}) -split '=',2)[1].Trim()
 $output = Join-Path $taskRoot "artifacts/soul-trail-gpu-$version"
 if($WithoutThirdParty){$profile+='-no-thirdparty';$output+='-no-thirdparty'}
+if($TextureAblation){$profile+='-texture-ablation';$output+='-texture-ablation'}
 $loaderRoot = 'E:/SteamLibrary/steamapps/common/tModLoader'
 New-Item -ItemType Directory -Force -Path "$profile/Mods", $output | Out-Null
 foreach ($name in @('ZenithReborn', 'ZenithPrototypeCheck')) {
@@ -35,6 +36,7 @@ if($WithoutThirdParty){
 $config = @{Language='en-US';Fullscreen=$false;WindowBorderless=$false;DisplayWidth=1280;DisplayHeight=720;VolumeMusic=0;VolumeSound=0;VolumeAmbient=0;AutoSave=$false;LastLaunchedVersion=279;LastLaunchedTModLoaderVersion='2026.8.3.0';SeenFirstLaunchModderWelcomeMessage=$true}
 $config | ConvertTo-Json | Set-Content -Encoding utf8 -LiteralPath "$profile/config.json"
 $env:ZENITH_SOUL_TRAIL_RENDER = $output
+$env:ZENITH_TEXTURE_ABLATION = if($TextureAblation){'1'}else{''}
 $env:SDL_WINDOW_ACTIVATE_WHEN_SHOWN = '0'
 $process = Start-Process -FilePath 'C:/Program Files/dotnet/dotnet.exe' -ArgumentList @('tModLoader.dll','-nosteam','-tmlsavedirectory',('"{0}"' -f $profile)) -WorkingDirectory $loaderRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput "$output/client-stdout.log" -RedirectStandardError "$output/client-stderr.log"
 Write-Output "Menu-only GPU render client started: PID $($process.Id); output: $output"

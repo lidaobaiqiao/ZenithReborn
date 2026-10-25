@@ -1,0 +1,22 @@
+{
+  "id": "material.SwordTrail.Glass.NightCleanR1",
+  "status": "archived-per-user-baseline-change",
+  "runtimeActive": false,
+  "supersededBy": "0.3.90原始79开发基线",
+  "baseline": "0.3.80",
+  "sourceVersion": "0.3.89",
+  "runtimeShader": "ZenithReborn/Assets/Effects/ZRSwordFlow.fx",
+  "originalEnvironment": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/EnvironmentMap.png",
+  "softEnvironment": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/EnvironmentSoftMap.png",
+  "derivation": "checks/prepare_glass_reflection_lowpass.py",
+  "derivationMetadata": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/EnvironmentSoftMap.json",
+  "behavior": "暗处同源低频环境反射及线性照明响应；明亮输入完整沿用80",
+  "colorBaseline": "0.3.80，不混入88取色增强",
+  "unchanged": "全部旧贴图、法线/高度输入、IOR/透射/Alpha、剑迹/短尾/攻击",
+  "validation": "artifacts/day-night-delivery-0.3.89.json",
+  "notes": "本夹具杂纹主要指向环境图，尚未精确复现用户录像的全部格子；美术待用户确认",
+  "originalAssetsRetained": true,
+  "artApproved": false,
+  "actualMouseGameplayTested": false,
+  "liveMultiplayerTested": false
+}

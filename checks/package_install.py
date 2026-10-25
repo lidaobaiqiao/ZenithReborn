@@ -152,8 +152,12 @@ soul_trail_verified=matching_report(f'soul-trail-gpu-{version}/gpu.json')
 own_shader_independent=matching_report(f'soul-trail-gpu-{version}/independence.json')
 soul_flight_world_verified=matching_report(f'soul-flight-world-{version}/world.json')
 echo_damage_path=out/f'soul-flight-world-{version}-echo-damage/world.json'
+if not matching_report(str(echo_damage_path.relative_to(out))):
+    full_echo_path=out/f'soul-flight-world-{version}-echo-damage-full/world.json'
+    if matching_report(str(full_echo_path.relative_to(out))):
+        echo_damage_path=full_echo_path
 echo_damage=json.loads(echo_damage_path.read_text(encoding='utf-8')) if echo_damage_path.exists() else {}
-echo_damage_verified=(matching_report(f'soul-flight-world-{version}-echo-damage/world.json') and
+echo_damage_verified=(matching_report(str(echo_damage_path.relative_to(out))) and
     echo_damage.get('echoDamageTested') is True and set(echo_damage.get('echoDamageUnits',[]))=={1,2,3})
 refraction_gpu=out/f'soul-trail-gpu-{version}/gpu.json'
 refraction_report=json.loads(refraction_gpu.read_text(encoding='utf-8')) if soul_trail_verified else {}
@@ -269,5 +273,13 @@ result = dict(name=name, version=version, installed=True, enabled=True,
     graphics_combat_tested=combat_verified, graphics_combat_report=combat_report_path.name if combat_verified else None,
     live_multiplayer_tested=False,
     full_existing_modpack_load_tested=full_pack_verified)
+visible_colors_path=out/f'visible-colors-{version}.json'
+if matching_report(str(visible_colors_path.relative_to(out))):
+    visible_colors=json.loads(visible_colors_path.read_text(encoding='utf-8'))
+    result.update(weapon_texture_colors_gpu_tested=True,
+        weapon_texture_colors_report=str(visible_colors_path.relative_to(out)),
+        full_existing_modpack_load_tested=full_pack_verified or visible_colors['fullModSetWorldVerified'],
+        full_mod_set_controlled_world_tested=visible_colors['fullModSetWorldVerified'],
+        full_mod_set_controlled_world_report=visible_colors['fullModSetWorldReport'])
 (out / 'install-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
 print(json.dumps(result, ensure_ascii=False, indent=2))

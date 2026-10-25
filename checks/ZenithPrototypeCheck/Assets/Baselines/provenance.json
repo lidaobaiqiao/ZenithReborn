@@ -1,0 +1,7 @@
+{
+  "origin": "project-authored",
+  "sourceArchive": "artifacts/ZenithReborn-0.3.80-source.zip",
+  "sourceEntry": "ZenithReborn/Assets/Effects/ZRSwordFlow.fxc",
+  "sha256": "79c3b8118e07d037db1f04bd36e7153ca78f97d84c26c07a1039dfaf3ec99b82",
+  "scope": "仅隔离GPU对照，不进入生产模组"
+}

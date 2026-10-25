@@ -95,7 +95,7 @@ public class SoulSceneRefraction : ModSystem
                 SoulTrailEnding.DrawAll(vertices);
             });
             BuildingSurface=false;
-            // 默认剑流与通用材质共用已有的光学属性/透射缓冲，不再把默认路径当纯彩色覆盖层。
+            if(SwordFlowMaterial.HasSurfaceMaterials)
             {
                 if(materialProperties==null||materialProperties.IsDisposed||materialProperties.Width!=Main.screenWidth||materialProperties.Height!=Main.screenHeight)
                 {
@@ -138,7 +138,7 @@ public class SoulSceneRefraction : ModSystem
             Shader.Parameters["uGlassThickness"].SetValue(GlassMaterialPreset.Thickness);
             Shader.Parameters["uGlassIor"].SetValue(SwordFlowMaterial.DefaultOptics.Ior);
             Shader.Parameters["uMaskReady"].SetValue(maskReady?1f:0f);
-            Shader.Parameters["uHasMaterialProperties"].SetValue(materialProperties!=null&&maskReady?1f:0f);
+            Shader.Parameters["uHasMaterialProperties"].SetValue(SwordFlowMaterial.HasSurfaceMaterials?1f:0f);
             Shader.Parameters["uMaterialProperties"].SetValue(materialProperties??normalMask);
             Shader.Parameters["uMaterialTransmission"].SetValue(materialTransmission??normalMask);
             if(maskReady){CapturedFrames++;LastSource="native-screen-filter-current-frame";}

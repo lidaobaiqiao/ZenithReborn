@@ -8,6 +8,7 @@ if($FullModSet){$profile+='-full';$output+='-full'}
 New-Item -ItemType Directory -Force -Path "$profile/Mods","$profile/Players","$profile/Worlds",$output | Out-Null
 # 上轮正常退出标记不能让新客户端刚启动就退出。
 if(Test-Path -LiteralPath "$output/exit"){Remove-Item -LiteralPath "$output/exit"}
+if(Test-Path -LiteralPath "$output/input-arm"){Remove-Item -LiteralPath "$output/input-arm"}
 # 只复制旧隔离档，实际攻击必须来自鼠标，不由夹具发射。
 foreach($kind in @('Players','Worlds')){
     Get-ChildItem -LiteralPath "$taskRoot/stage-one-playtest/tModLoader/$kind" -File |
@@ -43,6 +44,7 @@ if($FormalSettings){
 }
 $env:ZENITH_SOUL_FLIGHT_WORLD=$output
 $env:ZENITH_SOUL_INPUT_CHECK='1'
+$env:ZENITH_REQUIRE_INPUT_ARM='1'
 $env:ZENITH_SURFACE_WORLD=''
 $env:SDL_WINDOW_ACTIVATE_WHEN_SHOWN='0'
 $process=Start-Process -FilePath 'C:/Program Files/dotnet/dotnet.exe' -ArgumentList @('tModLoader.dll','-nosteam','-tmlsavedirectory',('"{0}"' -f $profile)) `

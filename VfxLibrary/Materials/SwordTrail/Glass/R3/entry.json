@@ -1,15 +1,15 @@
 {
   "id": "material.SwordTrail.Glass.R3",
-  "status": "runtime-verified-pending-user-art-review",
-  "scope": "普通剑魂主飞剑的方向反射/透射；保持剑影与短尾形态及0.3.79伤害",
+  "status": "archived-per-user",
+  "scope": "0.3.80至0.3.84玻璃R3历史制作配方；0.3.85已退出生产路径",
   "origin": "项目自有Shader与内置imagegen原稿，同源数据转换",
   "inputs": {
-    "EnvironmentMap": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/EnvironmentMap.png",
-    "NormalMap": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/NormalMap.png",
-    "SurfaceMap": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/SurfaceMap.png",
-    "HeightMap": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/HeightMap.png"
+    "EnvironmentMap": "VfxLibrary/Materials/SwordTrail/Glass/R3/ArchivedAssets/EnvironmentMap.png",
+    "NormalMap": "VfxLibrary/Materials/SwordTrail/Glass/R3/ArchivedAssets/NormalMap.png",
+    "SurfaceMap": "VfxLibrary/Materials/SwordTrail/Glass/R3/ArchivedAssets/SurfaceMap.png",
+    "HeightMap": "VfxLibrary/Materials/SwordTrail/Glass/R3/ArchivedAssets/HeightMap.png"
   },
-  "provenance": "ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/provenance.json",
+  "provenance": "VfxLibrary/Materials/SwordTrail/Glass/R3/ArchivedAssets/provenance.json",
   "generationPrompts": "generation-prompts.json",
   "sourceAuthoring": "artifacts/vfx-textures/{EnvironmentMap,HeightMap,NormalMap,SurfaceMap}/GlassR3/",
   "processing": "checks/prepare_glass_r3.py",
@@ -17,9 +17,25 @@
   "limitations": "LDR方向环境与二维薄面/屏幕反射近似，不是HDR全景测量或完整三维光线追踪",
   "thirdPartyShadersOrTextures": false,
   "oldAssetsRetained": true,
-  "verification": "artifacts/color-glass-restoration-0.3.83.json",
-  "userFeedback": "用户认可0.3.82颜色，否定其质感；玻璃质感以0.3.81为基准。0.3.83保留颜色，撤回面状强发光及统一压缩，待用户判断",
+  "verification": "artifacts/glass-reference-restore-0.3.84.json",
+  "userFeedback": "用户要求当前恢复0.3.79，同时表示0.3.80特效也不错并单独收藏；0.3.81至0.3.84仍为停用备份。",
   "colorSource": "当前物品贴图的当前帧，刃身加权主色；中性色剑保留中性色，物品/帧/纹理缓存",
   "acceptedColorBaseline": "0.3.82",
-  "glassAppearanceBaseline": "0.3.81"
+  "glassAppearanceBaseline": "0.3.81原Shader及原反光参数",
+  "userTarget": "artifacts/glass-user-reference-20261025/reference.json",
+  "fixedInputGpuMatchesOldVersionExactly": true,
+  "runtimeActive": false,
+  "backup": "artifacts/backups/20261025-191746-before-vfx-rollback-0.3.79",
+  "savedVersionChoices": {
+    "0.3.80": {
+      "status": "user-selected-archive",
+      "runtimeActive": false,
+      "manifest": "VfxLibrary/Materials/SwordTrail/Glass/R3/Snapshots/0.3.80/manifest.json",
+      "download": "artifacts/vfx-presets/0.3.80/ZenithReborn-0.3.80-VFX-独立收藏.zip"
+    }
+  },
+  "latestUserComparison": "用户明确要求融合0.3.79光效和0.3.80质感，当前实现见HybridR1；原始0.3.80快照和收藏包保持原样。",
+  "versionComparison": "docs/0.3.79与0.3.80-独立客户端画面对比.md",
+  "originalRecipeRuntimeActive": false,
+  "mapsReusedBy": "material.SwordTrail.Glass.HybridR1"
 }

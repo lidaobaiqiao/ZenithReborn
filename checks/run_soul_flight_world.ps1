@@ -1,11 +1,15 @@
-param([int]$TimeoutSec=180,[switch]$Surface,[switch]$EchoDamage)
+param([int]$TimeoutSec=180,[switch]$Surface,[switch]$EchoDamage,[switch]$FullModSet,[switch]$FormalSettings,[switch]$Original79,
+    [ValidateSet('day','dusk','night','torch')][string]$LightPreset='day')
 $ErrorActionPreference='Stop'
 $taskRoot=Split-Path $PSScriptRoot -Parent
 $version=((Get-Content "$taskRoot/ZenithReborn/build.txt" | Where-Object {$_ -match '^version\s*='}) -split '=',2)[1].Trim()
+if($Original79){$version='0.3.79-original'}
 $profile=Join-Path $taskRoot "artifacts/soul-flight-world-profile-$version"
 $output=Join-Path $taskRoot "artifacts/soul-flight-world-$version"
 if($Surface){$profile+='-surface';$output+='-surface'}
 if($EchoDamage){$profile+='-echo-damage';$output+='-echo-damage'}
+if($FullModSet){$profile+='-full';$output+='-full'}
+if($LightPreset -ne 'day'){$profile+="-$LightPreset";$output+="-$LightPreset"}
 New-Item -ItemType Directory -Force -Path "$profile/Mods","$profile/Players","$profile/Worlds",$output | Out-Null
 # 只读复制旧隔离档，不读取或改写正式人物／世界。
 foreach($kind in @('Players','Worlds')){
@@ -14,14 +18,43 @@ foreach($kind in @('Players','Worlds')){
         Copy-Item -Destination "$profile/$kind"
 }
 foreach($name in @('ZenithReborn','ZenithPrototypeCheck')){
-    Copy-Item -LiteralPath "$taskRoot/build-profile/Mods/$name.tmod" -Destination "$profile/Mods/$name.tmod"
+    $package=if($Original79 -and $name -eq 'ZenithReborn'){
+        # 当前夹具按恢复的79接口编译；被测生产包直接使用收藏原件。
+        "$taskRoot/artifacts/backups/20261025-131530/ZenithReborn.tmod"
+    }else{"$taskRoot/build-profile/Mods/$name.tmod"}
+    if($Original79 -and $name -eq 'ZenithReborn' -and
+        (Get-FileHash -LiteralPath $package -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'c7b88428525a192e5764de000e180be73184933a41a86bf61a3832bd1fecdad1'){
+        throw '原始79收藏包哈希不符'
+    }
+    Copy-Item -LiteralPath $package -Destination "$profile/Mods/$name.tmod"
 }
 '["ZenithReborn","ZenithPrototypeCheck"]' | Set-Content -Encoding utf8 "$profile/Mods/enabled.json"
+if($FullModSet){
+    # 与正式启用组合相同，但只在隔离档发射受控攻击，不读取正式人物与世界。
+    $workshop='E:/SteamLibrary/steamapps/workshop/content/1281930'
+    foreach($relative in @('2564645933/2026.7/HEROsMod.tmod','2797518634/2026.3/ImproveGame.tmod',
+        '3403460014/2026.3/SilkyUIFramework.tmod','3339387093/2025.7/UpgradableZenith.tmod')){
+        Copy-Item -LiteralPath "$workshop/$relative" -Destination "$profile/Mods/"
+    }
+    '["ZenithReborn","ZenithPrototypeCheck","HEROsMod","ImproveGame","SilkyUIFramework","UpgradableZenith"]' |
+        Set-Content -Encoding utf8 "$profile/Mods/enabled.json"
+}
 @{Language='zh-Hans';Fullscreen=$false;WindowBorderless=$false;DisplayWidth=1280;DisplayHeight=720;
   AutoSave=$false;VolumeMusic=0;VolumeSound=0;VolumeAmbient=0;LightingMode=3;
   LastLaunchedVersion=279;LastLaunchedTModLoaderVersion='2026.8.3.0';SeenFirstLaunchModderWelcomeMessage=$true} |
     ConvertTo-Json | Set-Content -Encoding utf8 "$profile/config.json"
+if($FormalSettings){
+    # 只读复制正式画面设置与模组配置，隔离档保持静音、窗口化与禁止自动保存。
+    $formalProfile=Join-Path $env:USERPROFILE 'Documents/My Games/Terraria/tModLoader'
+    $settings=Get-Content "$formalProfile/config.json" -Raw | ConvertFrom-Json
+    $settings.Fullscreen=$false;$settings.WindowBorderless=$false;$settings.AutoSave=$false
+    $settings.VolumeMusic=0;$settings.VolumeSound=0;$settings.VolumeAmbient=0
+    $settings | ConvertTo-Json -Depth 30 | Set-Content -Encoding utf8 "$profile/config.json"
+    New-Item -ItemType Directory -Force -Path "$profile/ModConfigs" | Out-Null
+    Get-ChildItem "$formalProfile/ModConfigs" -Filter '*.json' -File | Copy-Item -Destination "$profile/ModConfigs"
+}
 $env:ZENITH_SOUL_FLIGHT_WORLD=$output
+$env:ZENITH_WORLD_LIGHT_PRESET=$LightPreset
 $env:ZENITH_SURFACE_WORLD=if($Surface){'1'}else{''}
 $env:ZENITH_ECHO_DAMAGE_CHECK=if($EchoDamage){'1'}else{''}
 $env:SDL_WINDOW_ACTIVATE_WHEN_SHOWN='0'

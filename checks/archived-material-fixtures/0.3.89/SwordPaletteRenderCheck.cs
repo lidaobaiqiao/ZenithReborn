@@ -36,14 +36,18 @@ internal static class SwordPaletteRenderCheck
                 Color shown=new((int)mean.X,(int)mean.Y,(int)mean.Z);
                 Vector3 sourceHsl=Main.rgbToHsl(source),shownHsl=Main.rgbToHsl(shown);
                 float distance=Math.Abs(sourceHsl.X-shownHsl.X);distance=Math.Min(distance,1-distance);
-                bool match=sourceHsl.Y<.15f||distance<.09f;
-                passed&=match&&shownHsl.Z>.22f;
+                // 色相正确但灰到看不出来也算失败；直接约束最终输出的彩度。
+                bool match=sourceHsl.Y<.15f?shownHsl.Y<.25f:distance<.09f&&shownHsl.Y>.25f;
+                // HSL明度取最亮与最暗通道的均值，会把保色误判为变暗；用实际最亮通道检查是否仍可见。
+                float outputPeak=Math.Max(mean.X,Math.Max(mean.Y,mean.Z))/255f;
+                passed&=match&&outputPeak>.30f;
                 if(hues.Count<3)hues.Add(shownHsl.X);
                 using(var file=File.Create(Path.Combine(folder,$"material-{item}.png")))target.SaveAsPng(file,640,300);
                 var texture=TextureAssets.Item[item].Value;
                 using(var file=File.Create(Path.Combine(folder,$"sprite-{item}.png")))texture.SaveAsPng(file,texture.Width,texture.Height);
                 results.Add(new{item,name=ItemID.Search.GetName(item),sourceColor=new[]{(int)source.R,(int)source.G,(int)source.B},
-                    outputMean=new[]{mean.X,mean.Y,mean.Z},sourceHue=sourceHsl.X,outputHue=shownHsl.X,hueError=distance,matched=match});
+                    outputMean=new[]{mean.X,mean.Y,mean.Z},sourceHue=sourceHsl.X,outputHue=shownHsl.X,
+                    outputSaturation=shownHsl.Y,outputLightness=shownHsl.Z,outputPeak,hueError=distance,matched=match});
             }
             for(int i=0;i<3;i++)for(int j=i+1;j<3;j++)
             {float d=Math.Abs(hues[i]-hues[j]);passed&=Math.Min(d,1-d)>.10f;}

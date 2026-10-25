@@ -56,18 +56,16 @@ public class SoulTrailRenderCheck : ModSystem
             Frame("expired.png",.2f,36,0,false);int expired=lastPixels;
             Frame("mask-fully-dissolved.png",.2f,36,1,false,dissolve:1);int maskExpired=lastPixels;
             var glass=GlassSurface();
+            var clearHighlight=ClearHighlightRenderCheck.Run(output);
             var refraction=RefractionRenderCheck.Run(output);
-            var response=GlassResponseRenderCheck.Run(output);
-            bool swordPalette=SwordPaletteRenderCheck.Run(output);
             byte[] package=File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod"));
             File.WriteAllText(Path.Combine(output,"gpu.json"),JsonSerializer.Serialize(new{
                 passed=fixedA!=fixedB && hashes.Distinct().Count()==4 && restored && expired==0 && maskExpired==0 &&
-                    endingStart>endingMiddle && endingMiddle>0 && endingFinal==0 && formationStart==0 && formationFinal>1000 && glass.passed && refraction.Passed&&response.Passed&&swordPalette,
+                    endingStart>endingMiddle && endingMiddle>0 && endingFinal==0 && formationStart==0 && formationFinal>1000 && clearHighlight.Passed && refraction.Passed,
                 testedPackageSha256=Convert.ToHexString(SHA256.HashData(package)).ToLowerInvariant(),
                 actualGpu=true,productionRenderer=true,noncircularPath=true,
                 fixedPoseMaterialAnimated=fixedA!=fixedB,paletteImagesDistinct=hashes.Distinct().Count(),
                 materialEffect=SwordFlowMaterial.EffectPath,artworkInputs=SwordFlowMaterial.LoadedArtworkPaths,
-                defaultMaterialMaps=SwordFlowMaterial.DefaultMapPaths,
                 thirdPartyAssetsPresent=ModContent.GetInstance<global::ZenithReborn.ZenithReborn>().FileExists("Assets/ThirdParty/CalamityOverhaul/OniCrimsonSlash.fxc"),
                 graphicsStateRestored=restored,expiredPixels=expired,previewFrames=96,
                 fullyDissolvedPixelsAtFullOpacity=maskExpired,
@@ -75,10 +73,9 @@ public class SoulTrailRenderCheck : ModSystem
                 formationStartPixels=formationStart,formationFinalPixels=formationFinal,
                 endingFrames=SoulTrailEnding.NormalFrames+1,formationFrames=18,
                 independentEndingLifetimeFrames=SoulTrailEnding.NormalFrames,
-                glassSurface=new{glass.passed,glass.bodyMeanAlpha,glass.edgeMeanAlpha},
+                glassSurface=new{glass.bodyMeanAlpha,glass.edgeMeanAlpha},
+                clearHighlight,
                 refraction,
-                glassResponse=response,
-                swordPaletteVerified=swordPalette,
                 actualMouseGameplayTested=false,liveMultiplayerTested=false},new JsonSerializerOptions{WriteIndented=true}));
         }
         catch(Exception ex){File.WriteAllText(Path.Combine(output,"error.txt"),ex.ToString());}
@@ -88,7 +85,7 @@ public class SoulTrailRenderCheck : ModSystem
             Main.instance.Exit();
         }
 
-        (bool passed,double bodyMeanAlpha,double edgeMeanAlpha) GlassSurface()
+        (double bodyMeanAlpha,double edgeMeanAlpha) GlassSurface()
         {
             const int width=960,height=540;
             using var target=new RenderTarget2D(device,width,height);
@@ -122,8 +119,8 @@ public class SoulTrailRenderCheck : ModSystem
                 using var png=File.Create(Path.Combine(output,scene==0?"glass-alpha.png":"glass-checker.png"));
                 target.SaveAsPng(png,width,height);
             }
-            // 实际读取生产材质输出透明度，确认主体透光而刃缘反光仍清楚。
-            return (body>140&&body<230&&edge>body+10,body,edge);
+            // 透明度作为实测数据记录；恢复是否准确由收藏79的严格像素对照决定。
+            return (body,edge);
         }
 
         string Frame(string filename,float clock,int age,float opacity,bool sprite,int selected=-1,

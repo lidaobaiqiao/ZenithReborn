@@ -37,7 +37,7 @@ internal static class RefractionRenderCheck
             bool skipped=!SoulSceneRefraction.Capture();
             var pixels=new Color[256];discard.GetData(pixels);
             discardPreserved=skipped&&pixels.All(p=>p==marker);
-            // 物理高光变粗糙后峰值会降低，不能要求“白像素更多”；粗糙度响应由固定覆盖度的材质对照另测。
+            // 曲面高光变粗糙后峰值可能降低，白像素计数仅记录，不作为折射是否正常的门槛。
             return new(preserved&&discardPreserved&&patterned>solid*2+10000,
                 preserved,discardPreserved,patterned,solid,sharp,rough,1.5f,.08f,.55f);
         }

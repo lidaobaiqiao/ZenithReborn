@@ -11,7 +11,7 @@ import imageio_ffmpeg
 root=Path(__file__).resolve().parent.parent
 version=next(s.split('=',1)[1].strip() for s in (root/'ZenithReborn/build.txt').read_text(encoding='utf-8').splitlines() if s.startswith('version'))
 output=root/f'artifacts/soul-input-{version}'
-parser=argparse.ArgumentParser();parser.add_argument('--full',action='store_true');args=parser.parse_args()
+parser=argparse.ArgumentParser();parser.add_argument('--full',action='store_true');parser.add_argument('--capture-only',action='store_true');args=parser.parse_args()
 if args.full:output=output.with_name(output.name+'-full')
 record=json.loads((output/'input.json').read_text(encoding='utf-8'))
 trace=record['trace']
@@ -29,8 +29,16 @@ result=dict(passed=passed,testedPackageSha256=sha,actualMouseAttack=True,mouseRe
 result['playbackScope']='逐游戏帧读取后按60次更新/秒重放，采集会拖慢客户端，不是实时帧率证明'
 formal_mods=json.loads((Path.home()/'Documents/My Games/Terraria/tModLoader/Mods/enabled.json').read_text(encoding='utf-8-sig'))
 result['fullFormalModSet']=set(formal_mods)<=set(mods)
-(output/'validation.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
-assert passed,result
+if args.capture_only:
+    # 多次真实点击可作为材质画面记录，但不能冒充单次攻击完整返回/收尾回归。
+    result['singleAttackRegressionPassed']=passed
+    result['passed']=record['testedPackageSha256']==sha and trace[0]['mouseLeft'] is True and released
+    result['scope']='实际鼠标触发的画面记录；没有据此认定完整攻击/结束回归通过'
+    result['mousePressTicks']=[t['tick'] for i,t in enumerate(trace) if t['mouseLeft'] and (i==0 or not trace[i-1]['mouseLeft'])]
+    (output/'capture-only.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+else:
+    (output/'validation.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+assert result['passed'],result
 font=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',18)
 crop=(300,175,950,540)
 if args.full:

@@ -1,0 +1,17 @@
+{
+  "id": "material.SwordTrail.Glass.ClearHighlightR1",
+  "status": "review-candidate-with-known-visual-issues",
+  "sourceVersion": "0.3.91",
+  "baseline": "0.3.79",
+  "sourceActive": true,
+  "formallyInstalled": false,
+  "artApproved": false,
+  "structure": "中性透明折射主体＋曲面光向驱动的有色高光＋79薄亮刃",
+  "newTextures": false,
+  "palette": "79原配色，尚未接入88实际剑身取色",
+  "shader": "ZenithReborn/Assets/Effects/ZRSwordFlow.fx",
+  "composition": "ZenithReborn/Assets/Effects/ZRGlassScreen.fx",
+  "verification": "artifacts/clear-highlight-0.3.91/validation.json",
+  "knownVisualIssues": "部分姿态仍可见扇形分段和剑体重复轮廓，未认定来源或修复",
+  "notes": "仅候选结构预览，不自动安装，不将技术通过视为用户美术认可"
+}
