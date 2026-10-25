@@ -293,14 +293,15 @@ float4 Shade(PixelInput input):COLOR0
     float3 env=tex2D(uEnvironmentTexSampler,envUV).rgb;
     env=lerp(env,(tex2D(uEnvironmentTexSampler,envUV+envSpread).rgb+tex2D(uEnvironmentTexSampler,envUV-envSpread).rgb)*0.5,rough);
     // PNG记录相对环境亮度，制作端曝光将其还原到可读的反射光能；不把贴图当实测HDR。
-    env=lerp(float3(0.18,0.22,0.28),pow(max(env,0),2.2)*6,uUseEnvironment);
-    float3 reflectionTint=lerp(float3(1,1,1),saturate(layerColor),0.22);
-    float3 reflected=(env*fresnel+float3(1.0,0.98,0.93)*specular*2.2)*reflectionTint;
-    // 少量内部流丝维持能量色；不再让整片自发光压过玻璃的背景对比。
+    env=lerp(float3(0.18,0.22,0.28),pow(max(env,0),2.2)*10,uUseEnvironment);
+    float3 reflectionTint=lerp(float3(1,1,1),saturate(layerColor),0.55);
+    float3 reflected=(env*fresnel+float3(1.0,0.98,0.93)*specular*3.0)*reflectionTint;
+    // 保留剑身主色，但退回R3的克制内部流丝，避免大面积发光盖住法线反光和透射细节。
     float filaments=smoothstep(0.42,0.78,streak)*(1-depth);
     float emission=tex2D(uEmissionTexSampler,materialUV).r*uUseEmission;
-    reflected+=layerColor*(0.012+filaments*0.018+emission*0.025)*uEmissionStrength;
+    reflected+=layerColor*(0.050+filaments*0.070+emission*0.085)*uEmissionStrength;
     reflected+=lerp(uBodyColor,uEdgeColor,0.32)*rim*uDissolve*0.06;
+    // 恢复R3逐通道光能压缩，让镜面亮峰和暗部重新分开，不让有色底光统一压平反差。
     reflected=reflected/(1+reflected);
     float localThickness=uThickness*clamp(1+(heightValue-0.5)*2,0.85,1.15);
     float3 absorption=exp(-(1-saturate(layerColor))*0.26*(1-layerTrans)*localThickness/72);

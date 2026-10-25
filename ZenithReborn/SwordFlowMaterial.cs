@@ -281,8 +281,10 @@ public class SwordFlowMaterial : ModSystem
         parameters["uSceneTexel"].SetValue(scene==null?Vector2.One:new Vector2(1f/scene.Width,1f/scene.Height));
         parameters["uSceneUvTransform"].SetValue(SoulSceneRefraction.UvTransform);
         parameters["uSeed"].SetValue(tint.R*.007f+tint.B*.003f);
+        // 默认主飞剑按当前剑身贴图取主色；形态种子仍沿用原输入，不因换色扰动已有动态蒙版。
+        tint=SwordSpritePalette.Resolve(itemType,tint);
         parameters["uBodyColor"].SetValue(tint.ToVector3()*1.25f);
-        parameters["uEdgeColor"].SetValue(Vector3.Lerp(tint.ToVector3(),Vector3.One,.64f)*1.22f);
+        parameters["uEdgeColor"].SetValue(Vector3.Lerp(tint.ToVector3(),Vector3.One,.30f)*1.22f);
         maps.TryGetValue("ColorField",out var defaultColorField);
         parameters["uColorField"].SetValue(string.IsNullOrWhiteSpace(art?.ColorField)?defaultColorField??white:Texture(art.ColorField));
         var mask=Texture(art?.MotionMask);

@@ -1,6 +1,6 @@
 {
   "id": "material.SwordTrail.Glass.R3",
-  "status": "runtime-candidate-pending-gpu-and-art-review",
+  "status": "runtime-verified-pending-user-art-review",
   "scope": "普通剑魂主飞剑的方向反射/透射；保持剑影与短尾形态及0.3.79伤害",
   "origin": "项目自有Shader与内置imagegen原稿，同源数据转换",
   "inputs": {
@@ -16,5 +16,10 @@
   "reuse": "同一组中性环境和标量数据供逐剑调色复用，不携带固定剑色或月牙轮廓",
   "limitations": "LDR方向环境与二维薄面/屏幕反射近似，不是HDR全景测量或完整三维光线追踪",
   "thirdPartyShadersOrTextures": false,
-  "oldAssetsRetained": true
+  "oldAssetsRetained": true,
+  "verification": "artifacts/color-glass-restoration-0.3.83.json",
+  "userFeedback": "用户认可0.3.82颜色，否定其质感；玻璃质感以0.3.81为基准。0.3.83保留颜色，撤回面状强发光及统一压缩，待用户判断",
+  "colorSource": "当前物品贴图的当前帧，刃身加权主色；中性色剑保留中性色，物品/帧/纹理缓存",
+  "acceptedColorBaseline": "0.3.82",
+  "glassAppearanceBaseline": "0.3.81"
 }

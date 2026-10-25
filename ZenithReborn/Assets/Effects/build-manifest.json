@@ -20,9 +20,9 @@
     },
     {
       "source": "ZRSwordFlow.fx",
-      "sourceSha256": "ec96717d6f4373b344b826a44f279f954cc2b037a30c2395980ea72db2691827",
+      "sourceSha256": "69d890706ffe06cb73793b27b264302c5903b389bd0d5fd1b5f92d912b40141c",
       "compiled": "ZRSwordFlow.fxc",
-      "compiledSha256": "79c3b8118e07d037db1f04bd36e7153ca78f97d84c26c07a1039dfaf3ec99b82",
+      "compiledSha256": "672e85e4692a6d08e7ba968d12e59e0e0c6c3bc38e5bb43dfb487bf8c535b904",
       "origin": "project-authored",
       "compiler": "Microsoft D3DCompile / d3dcompiler_43 / fx_2_0",
       "thirdPartySourceIncludes": []

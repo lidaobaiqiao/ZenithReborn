@@ -58,10 +58,11 @@ public class SoulTrailRenderCheck : ModSystem
             var glass=GlassSurface();
             var refraction=RefractionRenderCheck.Run(output);
             var response=GlassResponseRenderCheck.Run(output);
+            bool swordPalette=SwordPaletteRenderCheck.Run(output);
             byte[] package=File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod"));
             File.WriteAllText(Path.Combine(output,"gpu.json"),JsonSerializer.Serialize(new{
                 passed=fixedA!=fixedB && hashes.Distinct().Count()==4 && restored && expired==0 && maskExpired==0 &&
-                    endingStart>endingMiddle && endingMiddle>0 && endingFinal==0 && formationStart==0 && formationFinal>1000 && glass.passed && refraction.Passed&&response.Passed,
+                    endingStart>endingMiddle && endingMiddle>0 && endingFinal==0 && formationStart==0 && formationFinal>1000 && glass.passed && refraction.Passed&&response.Passed&&swordPalette,
                 testedPackageSha256=Convert.ToHexString(SHA256.HashData(package)).ToLowerInvariant(),
                 actualGpu=true,productionRenderer=true,noncircularPath=true,
                 fixedPoseMaterialAnimated=fixedA!=fixedB,paletteImagesDistinct=hashes.Distinct().Count(),
@@ -77,6 +78,7 @@ public class SoulTrailRenderCheck : ModSystem
                 glassSurface=new{glass.passed,glass.bodyMeanAlpha,glass.edgeMeanAlpha},
                 refraction,
                 glassResponse=response,
+                swordPaletteVerified=swordPalette,
                 actualMouseGameplayTested=false,liveMultiplayerTested=false},new JsonSerializerOptions{WriteIndented=true}));
         }
         catch(Exception ex){File.WriteAllText(Path.Combine(output,"error.txt"),ex.ToString());}
