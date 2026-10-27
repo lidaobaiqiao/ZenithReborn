@@ -28,9 +28,12 @@ internal static class DomainCheck
                 Main.UIScale=scale;Main.screenWidth=(int)(size.Item1/scale);Main.screenHeight=(int)(size.Item2/scale);
                 var panel=SoulUI.PanelBounds();var library=SoulUI.LibraryBounds();var work=SoulUI.ContentBounds();
                 check(panel==new Rectangle(0,0,Main.screenWidth,Main.screenHeight),"Independent scene covers the complete UI viewport");
-                check(panel.Contains(library) && panel.Contains(work) && !library.Intersects(work),"Sword library and main workspace stay separate and on-screen");
+                var layout=SoulUI.ArmoryLayout;
+                check(panel.Contains(library)&&panel.Contains(work)&&work.Contains(layout.Stage)&&work.Contains(layout.Detail)&&
+                    (layout.Compact?library==layout.Stage:!library.Intersects(layout.Stage)&&!layout.Detail.Intersects(layout.Stage)),
+                    "配阵主页宽屏三区分开；窄屏同一区域切换，全部位于视口内");
                 check(panel.Contains(SoulUI.CloseBounds()) && panel.Contains(SoulUI.DifficultyBounds()),"World difficulty and exit controls remain reachable");
-                check(Enumerable.Range(0,4).All(i=>!SoulUI.TabBounds(i).Intersects(library) && !SoulUI.TabBounds(i).Intersects(SoulUI.DifficultyBounds())),"Fragment navigation does not collide with inventory or difficulty controls");
+                check(SoulUI.NavigationPages.All(i=>!SoulUI.TabBounds(i).Intersects(library) && !SoulUI.TabBounds(i).Intersects(SoulUI.DifficultyBounds())),"Fragment navigation does not collide with inventory or difficulty controls");
             }
             Main.screenWidth=1280;Main.screenHeight=720;Main.UIScale=1;SoulUI.SelectPage(0);SoulUI.SelectSlot(0);
             Main.hideUI=Main.mapFullscreen=false;

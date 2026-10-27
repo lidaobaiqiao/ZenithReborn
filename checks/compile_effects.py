@@ -2,6 +2,7 @@
 import ctypes
 import hashlib
 import json
+import re
 from pathlib import Path
 
 root=Path(__file__).resolve().parent.parent
@@ -27,11 +28,20 @@ def blob(pointer):
 records=[]
 for source in sorted(folder.glob('*.fx')):
     data=source.read_bytes()
-    # 输入只限这个独立源文件，不隐式引入其他材质的实现。
-    if b'#include' in data:
-        raise RuntimeError(f'{source.name}: 本构建入口不允许未登记的包含文件')
+    # 只展开明确登记的自有模块；依赖哈希随包记录，不允许目录穿越或第三方包含。
+    inputs=[]
+    def include(match):
+        name=match.group(1).decode('ascii')
+        if name not in {'ZRSwordSpaceWarp.fxh'}:
+            raise RuntimeError(f'{source.name}: 未登记的着色器模块 {name}')
+        part=(folder/name).read_bytes()
+        if b'#include' in part:raise RuntimeError(f'{name}: 不允许间接包含')
+        inputs.append({'source':name,'sourceSha256':hashlib.sha256(part).hexdigest()})
+        return part
+    expanded=re.sub(rb'^[ \t]*#include\s+"([^"]+)"[ \t]*\r?$',include,data,flags=re.MULTILINE)
+    if b'#include' in expanded:raise RuntimeError(f'{source.name}: 无效包含指令')
     code=ctypes.c_void_p();errors=ctypes.c_void_p()
-    result=compile_effect(data,len(data),source.name.encode('utf-8'),None,None,None,
+    result=compile_effect(expanded,len(expanded),source.name.encode('utf-8'),None,None,None,
         b'fx_2_0',1<<15,0,ctypes.byref(code),ctypes.byref(errors))
     diagnostics=blob(errors).decode('utf-8',errors='replace').strip('\0\r\n')
     compiled=blob(code)
@@ -44,6 +54,6 @@ for source in sorted(folder.glob('*.fx')):
     records.append({'source':source.name,'sourceSha256':hashlib.sha256(data).hexdigest(),
         'compiled':target.name,'compiledSha256':hashlib.sha256(compiled).hexdigest(),
         'origin':'project-authored','compiler':'Microsoft D3DCompile / d3dcompiler_43 / fx_2_0',
-        'thirdPartySourceIncludes':[]})
+        'thirdPartySourceIncludes':[],'projectSourceIncludes':inputs})
     print(f'{source.name} -> {target.name}: {len(compiled)} bytes')
 (folder/'build-manifest.json').write_text(json.dumps({'effects':records},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')

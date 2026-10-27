@@ -1,3 +1,4 @@
+param([switch]$EchoOre,[switch]$InformationUi)
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot -Parent
 $loaderRoot = 'E:/SteamLibrary/steamapps/common/tModLoader'
@@ -25,6 +26,8 @@ foreach ($name in @('ZenithReborn', 'ZenithPrototypeCheck')) {
 }
 '["ZenithReborn","ZenithPrototypeCheck"]' | Set-Content -Encoding utf8 -LiteralPath "$testProfile/Mods/enabled.json"
 $env:ZENITH_WOOD = '1'
+$env:ZENITH_ECHO_ORE = if($EchoOre){'1'}else{'0'}
+$env:ZENITH_INFORMATION_UI = if($InformationUi){'1'}else{'0'}
 $env:ZENITH_CHECK_REPORT = "$taskRoot/artifacts/wood-check.txt"
 Push-Location $loaderRoot
 try {

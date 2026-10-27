@@ -35,6 +35,23 @@ public class Check : ModSystem
         if (string.IsNullOrEmpty(path)) return;
         try
         {
+            if(Environment.GetEnvironmentVariable("ZENITH_INFORMATION_UI")=="1")
+            {
+                CurseFixture.NeutralDefaults=true;SoulUI.DomainMode=false;
+                UiCheck.Run(Assert);UiInputCheck.Run(Assert);WindowDragCheck.Run(Assert);
+                TraitCheck.Run(Assert);DomainCheck.Run(Assert);InformationUiCheck.Run(Assert);ArmoryUiCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} focused checks; information layouts, narrow viewport, catalogue filters and read-only browsing, UI input shields, hidden-slot rejection, exact inventory exchange and recovery, existing domain controls. Graphical capture recorded separately; no live multiplayer validation.\n");
+                Console.WriteLine("ZENITH_INFORMATION_UI_PASS "+checks);Environment.Exit(0);return;
+            }
+            if(Environment.GetEnvironmentVariable("ZENITH_ECHO_ORE")=="1")
+            {
+                CurseFixture.NeutralDefaults=true;
+                EchoDamageCheck.Run(Assert);OreStackCheck.Run(Assert);OreCheck.Run(Assert);
+                CurseFixture.NeutralDefaults=false;
+                CurseCheck.Run(Assert);BlessingCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} focused checks; native body/three-echo damage across four curse stages, copper per-unit ore eligibility, tin per-formation damage and smooth brightness, independent volleys, network snapshots; existing ore, six curse progress and other blessing paths. No graphical client or live multiplayer validation.\n");
+                Console.WriteLine("ZENITH_ECHO_ORE_PASS "+checks);Environment.Exit(0);return;
+            }
             if(Environment.GetEnvironmentVariable("ZENITH_LEGENDARY")=="1")
             {
                 LegendaryCheck.Run(Assert);
@@ -67,6 +84,7 @@ public class Check : ModSystem
                 DamageBalanceCheck.Run(Assert);
                 VanillaReturnCheck.Run(Assert);
                 EchoDamageCheck.Run(Assert);
+                OreStackCheck.Run(Assert);
                 SparkCheck.Run(Assert);
                 NativeParticleCheck.Run(Assert);
                 HardOreCheck.Run(Assert);

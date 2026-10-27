@@ -11,12 +11,12 @@ using Terraria.UI;
 
 namespace ZenithReborn;
 
-// First-pass tuning lives here; these values are not personal progression flags.
+// 祝福的运行参数集中在此处，不作为个人进度标记保存。
 public static class BlessingTuning
 {
     public const int ChargeFrames=900, BurstFrames=600, CombatGrace=45;
-    public const int RelayTimeout=180, RelayMax=5, MarkHits=3, MarkTimeout=120;
-    public const float RelayStep=.10f, ReturnDamage=.50f, MarkDamage=.60f;
+    public const int RelayTimeout=180, RelayMax=5;
+    public const float RelayStep=.10f, ReturnDamage=.50f;
     public const int BreachArmor=15, BreachFrames=240;
     public static bool Blessed(SoulItem soul,SoulCurse curse)=>soul?.Attached==true && soul.Curse(curse)==CurseStage.Blessed;
 }
@@ -92,8 +92,7 @@ public class BlessingPlayer : ModPlayer
             if(soul.YujianCharge==BlessingTuning.ChargeFrames)
             {SyncCharge(soul);if(!Main.dedServ)CombatText.NewText(Player.Hitbox,new Color(180,235,255),"御剑已就绪");}
         }
-        // Opening the soul editor pauses the spent burst; changing weapons does
-        // not erase an unspent meter, nor activate it implicitly.
+        // 打开魂域暂停已经消耗的爆发时间；换武器不会清空未消耗的蓄力，也不会自动启动。
         if(BurstLeft>0 && !editing && --BurstLeft==0){BurstSoul="";if(Owner)SyncBurst();}
         if(Owner && BurstLeft>0 && clock%60==0)SyncBurst();
         bool wide=soul!=null && BurstFor(soul) && !editing && !Main.mapFullscreen;
@@ -126,16 +125,13 @@ public class BlessingPlayer : ModPlayer
     private void ClearRuntime()
     {BurstSoul="";BurstLeft=0;ZoomBlend=0;clock=0;lastCombat=-1000;combatSoul="";relays.Clear();returns.Clear();}
     public override void OnEnterWorld()=>ClearRuntime();
-    public override void UpdateDead(){ClearRuntime();} // SoulItem owns and retains the unspent meter.
+    public override void UpdateDead(){ClearRuntime();} // 未消耗的御剑蓄力由剑魂自身保留。
 }
 
-// Per-emitted-blade state: frame hits cannot advance relay more than once,
-// every root has its own mark count, and a blade can store one return only.
+// 每把已发射主剑独立记录首击接力、穿障和归鞘；帧伤不能重复积累首击收益。
 public sealed class BladeBlessings
 {
     private readonly HashSet<long> firstTargets=[];
-    private readonly Dictionary<long,(int Count,uint Last)> marks=[];
-    private readonly HashSet<long> exploded=[];
     private bool returned,breachPending,breachSpent;
     public bool ReturnArmed;
     public float TraitPower { get; private set; }=1;
@@ -169,12 +165,6 @@ public sealed class BladeBlessings
             if(BlessingTuning.Blessed(soul,SoulCurse.Barrier))
             {root.AddBuff(ModContent.BuffType<SoulBreach>(),BlessingTuning.BreachFrames);root.netUpdate=true;}
         }
-        if(!BlessingTuning.Blessed(soul,SoulCurse.Bluntness) || exploded.Contains(id))return;
-        var previous=marks.GetValueOrDefault(id);
-        int count=Main.GameUpdateCount-previous.Last>BlessingTuning.MarkTimeout?1:previous.Count+1;
-        marks[id]=(count,Main.GameUpdateCount);
-        if(count>=BlessingTuning.MarkHits)
-        {exploded.Add(id);BlessingStrike.Spawn(p,target,BlessingTuning.MarkDamage,1);}
     }
 }
 
@@ -189,8 +179,7 @@ public class BlessingTarget : GlobalNPC
     {if(WoodCombat.Root(npc).HasBuff(ModContent.BuffType<SoulBreach>()))modifiers.ArmorPenetration+=BlessingTuning.BreachArmor;}
 }
 
-// These effects never call primary hit/proc code. Damage is the source sword's
-// snapshot, with one distance multiplier applied by SoulSource at collision.
+// 祝福斩击不调用主剑命中或触发逻辑；伤害取来源快照，距离倍率由来源模块结算一次。
 public class BlessingStrike : ModProjectile
 {
     private HashSet<long> struck=[];

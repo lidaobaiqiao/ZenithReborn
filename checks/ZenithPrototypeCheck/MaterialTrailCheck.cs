@@ -9,6 +9,10 @@ internal static class MaterialTrailCheck
     internal static void Run(Action<bool,string> check)
     {
         SwordColorNoiseCheck.Run(check);
+        SwordFlowPaletteCheck.Run(check);
+        SwordSpaceDistortionCheck.Run(check);
+        SwordFlowMeshBasisCheck.Run(check);
+        SwordTrailInnerContourCheck.Run(check);
         CheckUnits(check);
         var centers=new Vector2[SoulMaterialTrail.HistoryLength];
         var rotations=new float[centers.Length];

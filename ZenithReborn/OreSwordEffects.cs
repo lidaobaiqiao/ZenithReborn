@@ -53,6 +53,8 @@ public static class OreSwordEffects
 
     public static void Halo(Vector2 at,Color tint,float radius,float strength)
     {
+        // 自有光斑图片也受纯代码排查限制；不拿别的纹理替代，以免掩盖来源。
+        if(VfxIsolation.PureCodeOnly)return;
         var texture=ModContent.Request<Texture2D>("ZenithReborn/SwordSpark").Value;
         Main.spriteBatch.Draw(texture,at-Main.screenPosition,null,Glow(tint,strength),0,
             texture.Size()*.5f,radius/8,SpriteEffects.None,0);

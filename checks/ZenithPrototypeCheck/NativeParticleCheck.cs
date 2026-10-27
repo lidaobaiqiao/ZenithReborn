@@ -16,12 +16,14 @@ internal static class NativeParticleCheck
     private static void Clear(){foreach(var d in Main.dust)d.active=false;}
     internal static void Run(Action<bool,string> check)
     {
+        // 入口可能仅开启代码光照；贴图粒子关闭时不执行原版粒子逐子更新对齐检查。
+        if(!VfxIsolation.FlyingParticles||!VfxIsolation.FlyingDust||VfxIsolation.PureCodeOnly)return;
         var nativeAI=typeof(Projectile).GetMethod("AI_182_FinalFractal",BindingFlags.Instance|BindingFlags.NonPublic);
         bool oldServer=Main.dedServ,oldMenu=Main.gameMenu,oldPause=Main.gamePaused;
         var oldRandom=Main.rand;int particles=0;
         try
         {
-            // CPU-only dust generation. No SpriteBatch, window or GPU drawing.
+            // 只在CPU生成粒子，不创建窗口或执行GPU绘制。
             Main.dedServ=false;Main.gameMenu=false;Main.gamePaused=false;
             Main.screenPosition=new(500,500);Main.screenWidth=1920;Main.screenHeight=1080;
             var player=new Player{active=true,whoAmI=0,position=new(1000,1000),velocity=new(3,-1)};
@@ -34,8 +36,7 @@ internal static class NativeParticleCheck
                     "Original sword uses its actual installed vanilla particle delegate, color and width");
                 var p=new Projectile();p.SetDefaults(ModContent.ProjectileType<SoulBlade>());p.active=true;p.owner=0;p.ai[0]=type;p.localAI[1]=1;
                 var blade=(SoulBlade)p.ModProjectile;blade.TargetOffset=new(400,40);blade.Vertical=60;
-                // Equalize model display scale for a strict native dust comparison.
-                // In normal play particle placement scales with the larger sword.
+                // 对齐模型倍率以严格比较原版粒子，正常游玩时粒子位置随放大后的剑身缩放。
                 blade.SwordScale=.625f;
                 var native=new Projectile();native.SetDefaults(ProjectileID.FinalFractal);native.active=true;native.owner=0;
                 native.velocity=blade.TargetOffset*.5f;native.ai[0]=blade.Vertical;native.ai[1]=type;native.localAI[1]=1;

@@ -56,28 +56,33 @@ internal static class TraitCheck
         full.Hosts[6].TurnToAir();tips.Clear();full.ModifyTooltips(tips);
         check(!tips.Any(t=>t.Name=="Trait-forest" || t.Name=="Trait-wood-6") && tips.Any(t=>t.Name=="TraitCodex"),"Removing a wood hides its effect and Forest Power in the real tooltip while retaining codex link");
         Main.player[0].inventory[0]=full.Item;SoulUI.Open(full);
-        byte[] before=Snapshot(full);
+        byte[] before=Snapshot(full);SoulUI.SelectTraitScope(false);
         for(int filter=0;filter<5;filter++)
         {
-            SoulUI.SelectCatalogFilter(filter);
-            var entries=SoulUI.CatalogEntries(full).ToArray();
+            SoulUI.SelectTraitCategory(filter);
+            var entries=SoulUI.TraitEntries(full).ToArray();
             check(entries.Length>0 && (filter==0 || entries.All(t=>(int)t.Category==filter-1)),"Codex category filter returns correct implemented entries: "+filter);
         }
+        SoulUI.SelectTraitCategory(0);SoulUI.SelectTraitScope(true);
+        check(SoulUI.TraitEntries(full).All(t=>t.Active)&&SoulUI.TraitEntries(full).Count()==SoulTraits.Active(full).Count(),"生效筛选只显示当前实际生效的条目");
+        SoulUI.SelectTraitScope(false);
+        check(SoulUI.TraitEntries(full).Count()==SoulTraits.All(full).Count(),"同一工作区可恢复全部特性及激活条件");
         check(before.SequenceEqual(Snapshot(full)),"Browsing and filtering codex never changes stored items or progression");
         Main.screenWidth=1280;Main.screenHeight=900;
-        SoulUI.SelectPage(SoulUI.CatalogPage);Point point=SoulUI.SlotBounds(0).Center;
+        SoulUI.SelectPage(SoulUI.TraitsPage);Point point=SoulUI.SlotBounds(0).Center;
         Main.mouseX=point.X;Main.mouseY=point.Y;Main.mouseItem=new Item(ItemID.CopperShortsword);Main.mouseLeft=Main.mouseLeftRelease=true;
         check(!SoulUI.TryClickHost(full,out _) && Main.mouseLeftRelease && Main.mouseItem.type==ItemID.CopperShortsword,"Catalog cannot consume slot clicks or deposit cursor item");
         full.Hosts[10]=new Item(ItemID.TerraBlade);
+        check(SoulUI.TabBounds(SoulUI.RecoveryPage)==Rectangle.Empty,"有旧物时也不增加主导航，回收由配剑区提示进入");
         SoulUI.SelectPage(SoulUI.RecoveryPage);point=SoulUI.ExtendedSlotBounds(0).Center;
         Main.mouseX=point.X;Main.mouseY=point.Y;Main.mouseItem=new Item();Main.mouseLeftRelease=true;
-        check(SoulUI.TryClickHost(full,out _) && Main.mouseItem.type==ItemID.TerraBlade && !full.HasLegacyExpansion,"Separate recovery page still returns legacy item after adding codex tab");
+        check(SoulUI.TryClickHost(full,out _) && Main.mouseItem.type==ItemID.TerraBlade && !full.HasLegacyExpansion,"配剑区回收视图保留旧物原引用，取空后不再有旧物");
         full.Attached=false;full.AwakeningMemory=true;
         check(!SoulTraits.Active(full).Any(),"Detached stored progress never advertises usable powers");
         tips.Clear();full.ModifyTooltips(tips);
         check(tips.Count==4 && tips.All(t=>t.Text.Length<=28 && !t.Text.Contains('\n')) && tips.Any(t=>t.Name=="Unstable"),
             "Unattached tooltip adds only one short next-action hint");
-        SoulUI.Toggle(full);SoulUI.SelectCatalogFilter(0);SoulUI.SelectPage(0);
+        SoulUI.Toggle(full);SoulUI.SelectTraitCategory(0);SoulUI.SelectPage(0);
         Main.mouseItem=new Item();Main.mouseLeft=false;Main.mouseLeftRelease=false;
     }
 }

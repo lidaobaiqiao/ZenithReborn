@@ -42,6 +42,10 @@ for entry in own_effects:
         data=(source/relative).read_bytes()
         assert packed[relative]==data and hashlib.sha256(data).hexdigest()==entry[hash_field],relative
     assert entry['origin']=='project-authored' and not entry['thirdPartySourceIncludes']
+    for dependency in entry.get('projectSourceIncludes',[]):
+        relative='Assets/Effects/'+dependency['source']
+        assert packed[relative]==(source/relative).read_bytes()
+        assert hashlib.sha256(packed[relative]).hexdigest()==dependency['sourceSha256']
 sourcefiles = [p for p in source.rglob('*') if p.is_file() and not any(s in ('bin', 'obj') for s in p.relative_to(source).parts)]
 for manifest_path in (source / 'Assets/ThirdParty').glob('*/provenance.json'):
     manifest = json.loads(manifest_path.read_text(encoding='utf-8'))

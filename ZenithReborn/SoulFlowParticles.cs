@@ -73,10 +73,11 @@ public sealed class SlashSparkEmitter
 // 弹幕、网络包或自定义渲染流程。
 public class SoulFlowSpark : ModDust
 {
-    public override string Texture=>"ZenithReborn/SwordSpark";
+    // 保留粒子类型登记，但纯代码档不加载自有光斑，发射入口另行禁用。
+    public override string Texture=>VfxIsolation.PureCodeOnly?"Terraria/Images/MagicPixel":"ZenithReborn/SwordSpark";
     public static Dust Spawn(FlowSparkSpawn spawn)
     {
-        if(Main.dedServ)return null;
+        if(Main.dedServ||VfxIsolation.PureCodeOnly)return null;
         Dust dust=Dust.NewDustPerfect(spawn.Position,ModContent.DustType<SoulFlowSpark>(),spawn.Velocity,0,spawn.Tint,spawn.Size);
         if(dust.active)Configure(dust,spawn);
         return dust;
@@ -110,10 +111,12 @@ public class SoulFlowSpark : ModDust
         float length=state.Mote?17:Math.Clamp(dust.velocity.Length()*5.5f,18,64);
         Vector2 size=new((state.Mote?10f:7.5f)*state.Size/texture.Width,length*state.Size/texture.Height);
         Color color=state.Tint*(fade*(1-t*.2f));color.A=0;
-        batch.Draw(texture,at,null,color,dust.rotation,center,size,SpriteEffects.None,0);
+        if(VfxIsolation.SparkBody)
+            batch.Draw(texture,at,null,color,dust.rotation,center,size,SpriteEffects.None,0);
         Color core=Color.Lerp(state.Tint,Color.White,.75f)*(fade*.8f);core.A=0;
-        batch.Draw(texture,at,null,core,dust.rotation,center,size*new Vector2(.42f,.85f),SpriteEffects.None,0);
-        if(state.Mote)
+        if(VfxIsolation.SparkCore)
+            batch.Draw(texture,at,null,core,dust.rotation,center,size*new Vector2(.42f,.85f),SpriteEffects.None,0);
+        if(state.Mote && VfxIsolation.SparkMote)
             batch.Draw(texture,at,null,color*.6f,dust.rotation+MathHelper.PiOver2,center,size*.7f,SpriteEffects.None,0);
     }
     public override bool PreDraw(Dust dust){DrawSpark(Main.spriteBatch,dust);return false;}

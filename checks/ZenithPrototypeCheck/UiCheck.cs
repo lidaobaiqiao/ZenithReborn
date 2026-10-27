@@ -20,7 +20,7 @@ internal static class UiCheck
             foreach(float scale in new[]{1f,1.25f,1.6296296f,2f})
             {
                 Main.UIScale=scale;
-                // Simulate the UI layer's already-scaled viewport, not raw pixels.
+                // 模拟界面层已换算的视口，不再次应用物理像素缩放。
                 Main.screenWidth=(int)(resolution.Item1/scale);Main.screenHeight=(int)(resolution.Item2/scale);
                 SoulUI.SelectPage(0);
                 var panel=SoulUI.PanelBounds(); var body=SoulUI.ContentBounds();
@@ -36,7 +36,7 @@ internal static class UiCheck
                 check(slots.Take(10).All(r=>Math.Abs(Vector2.Distance(r.Center.ToVector2(),SoulUI.RingCenter)-SoulUI.RingRadius)<2),"Ten main slots share one circular orbit");
                 check(slots.Skip(15).All(r=>r.Center.X<SoulUI.RingCenter.X && r.Center.Y<SoulUI.RingCenter.Y),"Forest bonus slots occupy the upper-left arc");
                 check(slots.Skip(10).Take(5).All(r=>r.Center.X>SoulUI.RingCenter.X && r.Center.Y>SoulUI.RingCenter.Y),"Support slots occupy the lower-right arc");
-                var fragments=Enumerable.Range(0,4).Select(SoulUI.TabBounds).ToArray();
+                var fragments=SoulUI.NavigationPages.Select(SoulUI.TabBounds).ToArray();
                 check(fragments.All(r=>!slots.Any(r.Intersects)) && !fragments.Where((r,i)=>fragments.Skip(i+1).Any(r.Intersects)).Any(),"Fragment navigation does not overlap any weapon or fragment target");
                 var soul=(SoulItem)new Item(ModContent.ItemType<SoulItem>()).ModItem;
                 Main.player[0].inventory[0]=soul.Item;
@@ -48,7 +48,7 @@ internal static class UiCheck
                 check(SoulUI.TryClickHost(soul,out _) && soul.Hosts[0].IsAir && Main.mouseItem.type==ItemID.CopperShortsword,"Real handler returns preview weapon");
                 Main.mouseItem=new Item(ItemID.WoodenBow);Main.mouseLeftRelease=true;
                 check(!SoulUI.TryClickHost(soul,out var error) && error.Length>0 && Main.mouseItem.type==ItemID.WoodenBow,"Rejected item stays on cursor");
-                foreach(int page in new[]{1,2,SoulUI.CatalogPage})
+                foreach(int page in new[]{SoulUI.TraitsPage,2,SoulUI.EnvironmentPage})
                 {
                     SoulUI.SelectPage(page); Main.mouseLeftRelease=true;
                     check(!SoulUI.TryClickHost(soul,out _) && Main.mouseItem.type==ItemID.WoodenBow && Main.mouseLeftRelease,"Hidden slots cannot consume clicks on other pages");
@@ -60,8 +60,7 @@ internal static class UiCheck
             for(int slot=0;slot<17;slot++)
             {
                 var soul=(SoulItem)new Item(ModContent.ItemType<SoulItem>()).ModItem;
-                // Every stored slot, including now-locked support/forest slots,
-                // must retain an escape route. Do not silently destroy paused items.
+                // 所有已保存剑位都保留取回路径，包括暂停的支援和奖励槽。
                 if(slot<10) soul.Hosts[slot]=new Item(ItemID.CopperShortsword);
                 else if(slot<15) soul.SupportHosts[slot-10]=new Item(ItemID.CopperShortsword);
                 else soul.ForestHosts[slot-15]=new Item(ItemID.CopperShortsword);

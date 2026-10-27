@@ -64,9 +64,10 @@ public class SoulVisuals : ModSystem
         if(!visible)return;
         MartialSlashRenderer.DrawWithRestoredState(()=>
         {
-            foreach(var projectile in Main.ActiveProjectiles)
-                if(projectile.ModProjectile is SoulBlade blade)blade.DrawRibbonShader(vertices);
-            SoulTrailEnding.DrawAll(vertices);
+            if(VfxIsolation.SwordTrail)
+                foreach(var projectile in Main.ActiveProjectiles)
+                    if(projectile.ModProjectile is SoulBlade blade)blade.DrawRibbonShader(vertices);
+            if(VfxIsolation.TrailEnding)SoulTrailEnding.DrawAll(vertices);
         });
     }
     public override void Unload()

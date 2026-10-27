@@ -25,6 +25,8 @@ public class VfxSwordMask : ModSystem
 
     public override void Load()
     {
+        // 纯代码排查不登记或加载矿石剑身图集，避免其他飞剑路径偷偷带入素材。
+        if(VfxIsolation.PureCodeOnly)return;
         foreach(var row in VfxMaskData.Rows)
         {
             string path="ZenithReborn/Assets/Vfx/SwordBody/"+Terraria.ID.ItemID.Search.GetName(row.ItemId);
@@ -48,7 +50,7 @@ public class VfxSwordMask : ModSystem
         targets.Clear();atlases.Clear();atlasPaths.Clear();rows.Clear();disabled.Clear();
         mask=null;batch=null;multiply=null;add=null;noise=null;
     }
-    public static bool Has(int itemType)=>atlasPaths.ContainsKey(itemType)&&!disabled.Contains(itemType);
+    public static bool Has(int itemType)=>!VfxIsolation.PureCodeOnly&&atlasPaths.ContainsKey(itemType)&&!disabled.Contains(itemType);
     private static void PrepareFrame(GameTime gameTime)
     {
         if(Main.gameMenu||Main.dedServ)return;

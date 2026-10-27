@@ -5,7 +5,7 @@ using Terraria.GameContent;
 
 namespace ZenithReborn;
 
-// Render-only state: never serialized into the soul or used for combat/capacity.
+// 仅用于绘制的状态，不写入剑魂存档，也不参与战斗或容量计算。
 public partial class SoulUI
 {
     private static Texture2D glowTexture,shardTexture;
@@ -16,8 +16,7 @@ public partial class SoulUI
     private static double UiTime => System.Diagnostics.Stopwatch.GetTimestamp()/(double)System.Diagnostics.Stopwatch.Frequency;
     private static float Ease(float t) { t=MathHelper.Clamp(t,0,1);return t*t*(3-2*t); }
     private static float PageFade => Ease((float)(UiTime-pageStarted)/.24f);
-    // A short viewport scrolls one intact constellation instead of shrinking the
-    // slots to unusable targets. Normal-size viewports show the complete ring.
+    // 短视口滚动完整剑环，不把剑位缩到难以点击；正常视口显示完整圆环。
     private static int BaseRingCanvasHeight=>Math.Clamp(ContentBounds().Height,402,DomainMode?580:498);
     private static int RingCanvasHeight => BaseRingCanvasHeight+((Math.Max(0,(editing?.VisibleSupportCount??5)-5)+
         Math.Max(1,Math.Min(5,(RingViewport.Width-12)/58))-1)/Math.Max(1,Math.Min(5,(RingViewport.Width-12)/58)))*58+
@@ -25,8 +24,6 @@ public partial class SoulUI
     public static float RingRadius => Math.Max(104,Math.Min((BaseRingCanvasHeight-188)*.5f,(RingViewport.Width-80)*.5f-62));
     public static Vector2 RingCenter => new(RingViewport.Center.X,ContentBounds().Y+BaseRingCanvasHeight*.5f-scroll);
     public static Vector2 OrbitPoint(float degrees,float radius) => RingCenter+MathHelper.ToRadians(degrees).ToRotationVector2()*radius;
-    private static readonly string[] PageNames=["武器寄宿","生效特性","成长记忆","特性图鉴","旧物取回","环境之力"];
-    private static readonly Color[] PageColors=[new(116,224,244),new(194,160,250),new(252,207,113),new(139,232,188),new(227,170,148),new(126,222,151)];
 
     private static void EnsureEffects()
     {
@@ -40,8 +37,7 @@ public partial class SoulUI
             pixels[y*n+x]=Color.White*MathF.Pow(Math.Max(0,1-d),2.4f);
         }
         glowTexture=new Texture2D(device,n,n);glowTexture.SetData(pixels);
-        // A split crystal silhouette, shaded by facets. Generated once; not a
-        // stretched MagicPixel, and not a full sword masquerading as a tab.
+        // 一次生成按切面着色的碎晶轮廓，用于剑环导航装饰。
         const int w=36,h=52;
         pixels=new Color[w*h];
         Vector2[] outline=[new(13,1),new(29,18),new(23,31),new(15,51),new(7,30),new(11,20)];
@@ -66,7 +62,7 @@ public partial class SoulUI
     private static void Line(Vector2 a,Vector2 b,Color color,float width=1)
     {
         Vector2 v=b-a;
-        // MagicPixel is not guaranteed to be a 1x1 texture in this runtime.
+        // 本机原版像素纹理未必为一乘一，画线时显式指定单个像素。
         Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,a,new Rectangle(0,0,1,1),color,
             v.ToRotation(),new(0,.5f),new Vector2(v.Length(),width),SpriteEffects.None,0);
     }
@@ -93,21 +89,21 @@ public partial class SoulUI
     }
     private static void DrawNavigation(bool orbital)
     {
+        if(!orbital){DrawInformationNavigation();return;}
         EnsureEffects();
         float time=(float)(UiTime%3600);Point mouse=new(Main.mouseX,Main.mouseY);
-        for(int i=0;i<TabCount;i++)
+        foreach(int i in NavigationPages)
         {
             Rectangle r=TabBounds(i);
             bool hover=r.Contains(mouse) && (!orbital || ContentBounds().Contains(mouse));
-            bool active=page==i;Color c=PageColors[i];
+            bool active=page==i;Color c=SoulUIPages.Color(i);
             Vector2 at=orbital?r.Center.ToVector2():new(r.X+20,r.Center.Y);
             float pulse=.8f+.2f*MathF.Sin(time*2.4f+i);
             Glow(at,active||hover?37:26,c,(active?.34f:hover?.25f:.10f)*pulse);
             float tilt=MathF.Sin(time*.9f+i*1.7f)*.12f+(active?.20f+(1-PageFade)*.8f:0);
             Main.spriteBatch.Draw(shardTexture,at,null,c*(active||hover?1:.58f),tilt,
                 new(18,26),orbital?.7f:.58f,SpriteEffects.None,0);
-            // Light fragments gently drift past the crystal; selected shards have
-            // a travelling halo, rather than a solid rectangular selection tab.
+            // 光片缓慢掠过晶体；选中的碎片用流动光环提示。
             if(active||hover)
             {
                 Arc(at,orbital?25:21,time*.5f,MathHelper.Pi*1.4f,c*.6f);
@@ -116,16 +112,13 @@ public partial class SoulUI
             }
             if(orbital)
             {
-                string[] shortNames=["寄宿","特性","成长","图鉴","取回"];
-                CenterText(shortNames[i],at+new Vector2(i<=1?39:-39,-8),active?c:Muted,.57f);
+                string[] shortNames=["寄宿","特性","成长","环境"];
+                CenterText(shortNames[SoulUIPages.Index(i)],at+new Vector2(i<=1?39:-39,-8),active?c:Muted,.57f);
             }
-            if(!orbital)
-                Text(PageNames[i],new(r.X+40,r.Center.Y-9),active?Ink:Muted,
-                    Math.Min(.68f,(r.Width-42)/Math.Max(1,FontAssets.MouseText.Value.MeasureString(PageNames[i]).X)));
             if(hover)
             {
-                Main.HoverItem=new Terraria.Item();Main.hoverItemName="天顶碎片 · "+PageNames[i];
-                if(orbital)CenterText(PageNames[i],new(RingCenter.X,RingCenter.Y+63),c,.62f);
+                Main.HoverItem=new Terraria.Item();Main.hoverItemName="天顶碎片 · "+SoulUIPages.Name(i);
+                if(orbital)CenterText(SoulUIPages.Name(i),new(RingCenter.X,RingCenter.Y+63),c,.62f);
             }
         }
     }
@@ -169,8 +162,7 @@ public partial class SoulUI
             int signature=HashCode.Combine(item.type,item.prefix,unlocked);
             if(lastSlotType[i]!=signature)
             {
-                // First draw materializes progressively. Later changes produce
-                // a fresh one-shot ring, including re-insertion of the same sword.
+                // 首次显示逐步显现；后续更换或重放同一把剑均产生一次独立扩散环。
                 slotChangedAt[i]=lastSlotType[i]==-1?now-.15:now;
                 lastSlotType[i]=signature;
             }
@@ -182,7 +174,7 @@ public partial class SoulUI
             Line(center+(at-center)*.75f,at,color*(lit?.16f:.035f)*appear);
             Glow(at,r.Width*(.67f+slotLit[i]*.24f),color,(.07f+slotLit[i]*.42f*pulse+(hover?.12f:0))*appear);
             if(lit)Glow(at,r.Width*.95f,new Color(color.R,color.G,color.B,0),(.28f+.16f*pulse)*appear);
-            // A dark local node keeps each weapon readable over the world.
+            // 局部暗节点保持武器在世界背景前的可读性。
             Glow(at,r.Width*.68f,new Color(6,12,24),.95f*appear);
             float nodeRadius=r.Width*.5f;
             Arc(at,nodeRadius,.14f,MathHelper.TwoPi-.28f,color*(hover?.9f:.22f+slotLit[i]*.36f)*appear,hover?1.7f:1);
@@ -211,8 +203,7 @@ public partial class SoulUI
             {
                 if(!DomainMode)selected=i;
                 HoveredSlotRequirement=SoulProgress.SlotHint(soul,i);
-                // The center is the inspector. A vanilla modded weapon tooltip
-                // can cover the whole constellation; reserve it for inventory.
+                // 中央区域负责详情；原版模组武器提示留给背包，避免遮住整个剑环。
                 Main.HoverItem=new Terraria.Item();Main.hoverItemName="";
             }
         }
@@ -229,7 +220,7 @@ public partial class SoulUI
         if(!soul.Attached)CenterText("尚未获得祝福「附着」",new(center.X,center.Y+46),Color.LightSalmon,.52f);
         else if(!chosen.IsAir)CenterText($"面板伤害 {chosen.damage} · 暴击 {chosen.crit}%",new(center.X,center.Y+46),Muted,.51f);
         if(!DomainMode)DrawNavigation(true);
-        // Put captions in free canvas corners, outside all orbital hit targets.
+        // 分组标注放在画布空角，避开所有环形命中区域。
         GroupCaption("全收集奖励 · 真实剑位",new(body.X+8,body.Y+16-scroll),Champagne);
         GroupCaption("支援剑位 · 仅特性",new(body.Right-148,body.Y+RingCanvasHeight-30-scroll),new(185,171,234));
     }
@@ -243,8 +234,7 @@ public partial class SoulUI
         Color color=on?gold:new Color(112,98,72);
         float pulse=.8f+.2f*MathF.Sin(time*2.4f+1.3f);
         float appear=opening;
-        // Same node language as the ring, but a restrained gold halo/rotating
-        // arcs/star motes mark this as the difficulty-exclusive slot.
+        // 沿用剑环节点风格，用金色光环、旋转弧线和星点标识难度专属剑位。
         Glow(at,r.Width*1.55f,gold,(on?.20f:.06f)*pulse*appear);
         for(int k=0;k<2;k++)
         {

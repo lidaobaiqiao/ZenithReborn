@@ -4,13 +4,13 @@ using Terraria.ModLoader;
 
 namespace ZenithReborn;
 
-// An emissive sprite particle, distinct from the blade's mesh ribbon. The
-// alpha-zero tint uses the game's normal premultiplied blend for gentle glow.
+// 独立发光粒子，使用预乘混合；纯代码排查时停止发射，也不请求自有光斑贴图。
 public class SwordSpark : ModDust
 {
+    public override string Texture=>VfxIsolation.PureCodeOnly?"Terraria/Images/MagicPixel":"ZenithReborn/SwordSpark";
     public static void Emit(Vector2 at,Vector2 velocity,Color tint,float scale)
     {
-        if(Main.dedServ) return;
+        if(Main.dedServ||VfxIsolation.PureCodeOnly) return;
         Dust.NewDustPerfect(at,ModContent.DustType<SwordSpark>(),velocity,0,tint,scale);
     }
     public override void OnSpawn(Dust dust)

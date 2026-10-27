@@ -17,7 +17,7 @@ public static class OreFamily
     public const int AllMaterials = (1<<MaterialCount)-1;
     public const float BaseFlightDamage=1.5f;
 
-    // One representative type per material, used for the flying-sword sprite.
+    // 每种材质的默认代表物品，用于飞剑外观。
     public static readonly int[] DefaultType =
     [
         ItemID.CopperBroadsword, ItemID.TinBroadsword, ItemID.IronBroadsword, ItemID.LeadBroadsword,
@@ -87,8 +87,7 @@ public static class OreFamily
             soul.OreFlightMains.ElementAtOrDefault(primaryOrdinal)?.type==weapon) && Count(soul)>0;
     public static bool CanFlightTrait(SoulItem soul,int weapon)=>Count(soul)>=8 && OreItems(soul).Any(i=>i.type==weapon);
 
-    // Switching permits the first four active primaries for ore flight only.
-    // Release restores all primaries. Support traits keep their normal filter.
+    // 前四把主剑例外只用于百炼飞剑；普通特性和支援仍按切换诅咒过滤。
     public static int Count(SoulItem soul)=>PopCount(Mask(OreItems(soul)));
 
     public static IEnumerable<Item> OreItems(SoulItem soul)=>soul.OreFlightMains.Concat(soul.TraitSupports);
@@ -121,7 +120,8 @@ public static class OreFamily
         var soul=WoodCombat.FindSoul(Main.player[projectile.owner],source.SoulId);
         if(soul==null || !soul.Attached || Main.player[projectile.owner].dead ||
             !ReferenceEquals(Main.player[projectile.owner].HeldItem.ModItem,soul) ||
-            source.PrimaryOrdinal<0 || !TriggerEligible(soul,source.SourceWeapon,source.PrimaryOrdinal) || !blade.TryConsumeOreHit())return;
+            source.PrimaryOrdinal<0 || !TriggerEligible(soul,source.SourceWeapon,source.PrimaryOrdinal) ||
+            (blade.HitUnit>0 && !OreSwordTraits.EchoStacking(soul)) || !blade.TryConsumeOreHit(blade.HitUnit))return;
         int[] materials=Materials(soul);
         if(materials.Length==0)return;
         NPC root=WoodCombat.Root(target);
@@ -149,8 +149,7 @@ public class OreSystem : ModSystem
     private static void Release(Formation f)
     {
         var live=f.Members.Where(Alive).ToArray();
-        // Each member has its own age because hits create them one at a time.
-        // Schedule a common wall-clock release after the last blade has settled.
+        // 成员由不同命中逐个生成，年龄不同；统一安排在最后一把稳定成形后齐射。
         for(int i=0;i<live.Length;i++)
         {
             live[i].Total=live.Length;live[i].RingIndex=i;
@@ -180,6 +179,7 @@ public class OreSystem : ModSystem
         mod.SetCount=materials.Length;
         mod.SourceSoulId=soul.SoulId;mod.Mastered=soul.OreMastered;mod.WaveId=f.WaveId;
         mod.DamageShare=OreFamily.DamageFactor(materials.Length,soul.OreMastered);
+        mod.StackGrowth.Capture(damage,mod.DamageShare);
         mod.WaitForVolley();
         if(materials.Length>=8 && WeaponFamilies.Of(mod.VisualType)==BladeFamily.Solid)
             shot.knockBack=Main.player[parent.owner].GetWeaponKnockback(OreFamily.Representative(soul,material))*1.2f;
@@ -187,6 +187,9 @@ public class OreSystem : ModSystem
         shot.GetGlobalProjectile<SoulSource>().SoulId=soul.SoulId;
         shot.GetGlobalProjectile<SoulSource>().SourceWeapon=parent.GetGlobalProjectile<SoulSource>().SourceWeapon;
         shot.netUpdate=true;f.Members.Add(mod);f.LastHit=Main.GameUpdateCount;
+        // 层数只取当前阵列真实成员数，不聚合弹幕，也不反复乘已经放大的伤害。
+        bool empowered=OreSwordTraits.StackDamage(soul);
+        foreach(var member in f.Members)member.SetFormationStacks(f.Members.Count,empowered);
         if(f.Members.Count==materials.Length)
         {
             Release(f);formations.Remove(key);

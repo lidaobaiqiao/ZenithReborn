@@ -12,22 +12,28 @@ public partial class SoulUI
 {
     public static bool DomainMode { get; set; }=true;
     private static int libraryScroll,libraryFilter;
-    public static Rectangle LibraryBounds()=>new(20,118,Math.Clamp(Main.screenWidth/5,208,310),Math.Max(1,Main.screenHeight-176));
     private static Rectangle DomainWorkBounds()
-    {var left=LibraryBounds();return new(left.Right+20,118,Math.Max(1,Main.screenWidth-left.Right-44),Math.Max(1,Main.screenHeight-176));}
+    {
+        if(page==0)return ArmoryLayout.Workspace;
+        if(page!=0&&page!=RecoveryPage)
+        {
+            int top=Main.screenWidth>=900?80:118;
+            return new(24,top,Math.Max(1,Main.screenWidth-48),Math.Max(1,Main.screenHeight-top-50));
+        }
+        var left=LibraryBounds();return new(left.Right+20,118,Math.Max(1,Main.screenWidth-left.Right-44),Math.Max(1,Main.screenHeight-176));
+    }
     private static bool SideInspector=>DomainMode && DomainWorkBounds().Width>=790;
     private static Rectangle RingViewport
     {
         get {var b=ContentBounds();return SideInspector?new(b.X,b.Y,b.Width-300,b.Height):b;}
     }
-    public static Rectangle DifficultyBounds()=>new(Math.Max(8,Main.screenWidth-298),18,222,36);
+    public static Rectangle DifficultyBounds()=>DomainMode&&page==0?new(Main.screenWidth-(Main.screenWidth<700?146:250),20,Main.screenWidth<700?90:200,30):new(Math.Max(8,Main.screenWidth-298),18,222,36);
     public static int SelectedSlot=>selected;
     public static void SelectSlot(int slot)
-    {if(slot>=0 && (slot<25 || editing?.VisibleSlotIds.Contains(slot)==true))selected=slot;}
+    {if(slot>=0 && (slot<25 || editing?.VisibleSlotIds.Contains(slot)==true)){if(selected!=slot){armoryFocusAt=UiTime;armoryDetailScroll=0;armoryPreview=null;}selected=slot;}}
     public static IEnumerable<int> LibraryItems(Player player)=>Enumerable.Range(0,50)
         .Where(i=>SoulItem.CanHost(player.inventory[i]));
-    // Direct exchange reuses the exact slot validation. The outgoing sword goes
-    // into the vacated inventory slot; no clone, hidden stash or extra capacity.
+    // 直接交换复用原有剑位校验，卸下的剑进入腾出的背包格，不复制或增加容量。
     public static bool EquipFromInventory(Player player,int inventorySlot,out string error)
     {
         error="";
@@ -59,8 +65,7 @@ public partial class SoulUI
     {
         EnsureEffects();float t=(float)(UiTime%3600),open=Ease((float)(UiTime-openedAt)/.55f);
         Box(panel,new Color(5,7,13));
-        // Sparse layers move at different speeds; the foreground sword orbit
-        // stays stationary and clickable while the surrounding space drifts.
+        // 稀疏背景以不同速度漂移；前景剑环保持固定，保证点击位置稳定。
         Vector2 mouse=new(Main.mouseX/(float)Math.Max(1,panel.Width)-.5f,Main.mouseY/(float)Math.Max(1,panel.Height)-.5f);
         Glow(new(panel.Width*.60f,panel.Height*.42f),Math.Max(panel.Width,panel.Height)*.68f,new Color(38,70,94),.32f*open);
         Glow(new(panel.Width*.83f,panel.Height*.78f),panel.Width*.30f,new Color(62,42,85),.20f*open);
@@ -81,16 +86,28 @@ public partial class SoulUI
             Line(new(0,y),new(panel.Width,y),Accent*(.015f+depth*.025f));
         }
         for(int i=-7;i<=7;i++)Line(new(panel.Width*.62f,horizon),new(panel.Width*.62f+i*panel.Width*.16f,panel.Height),Accent*.028f);
-        Line(new(22,102),new(panel.Right-22,102),Champagne*.22f*open);
+        int divider=page!=0&&page!=RecoveryPage?ContentBounds().Y-12:102;
+        Line(new(22,divider),new(panel.Right-22,divider),Champagne*.22f*open);
     }
     private static void DrawDomainHeader(Point mouse)
     {
+        if(page==0){DrawArmoryHeader(mouse);return;}
+        if(page!=0&&page!=RecoveryPage)
+        {
+            Text("ZENITH  /  天 顶 魂 域",new(24,23),Ink,.84f);
+            DrawNavigation(false);return;
+        }
         Text("ZENITH  /  天 顶 魂 域",new(24,22),Ink,1f);
         Text("众剑寄宿之所",new(26,57),Champagne,.63f);
+        DrawDomainDifficulty(mouse,false);
+        DrawNavigation(false);
+    }
+    private static void DrawDomainDifficulty(Point mouse,bool compact)
+    {
         var r=DifficultyBounds();bool hover=r.Contains(mouse);bool legendary=SoulDifficulty.Legendary;
         RoundedBox(r,legendary?new Color(39,67,40)*.85f:new Color(30,35,46)*.9f,9);
         Line(new(r.X+12,r.Bottom-1),new(r.Right-12,r.Bottom-1),legendary?Color.LimeGreen*.5f:Champagne*.3f);
-        CenterText(legendary?"传奇难度 · 已开启":"切换原版传奇难度",new(r.Center.X,r.Y+9),legendary?Color.LightGreen:Champagne,.68f);
+        CenterText(compact?legendary?"传奇 · 开":"世界难度":legendary?"传奇难度 · 已开启":"切换原版传奇难度",new(r.Center.X,r.Y+9),legendary?Color.LightGreen:Champagne,.68f);
         if(hover && Main.mouseLeft && Main.mouseLeftRelease)
         {Main.mouseLeftRelease=false;bool ok=SoulDifficulty.Toggle(out var note);DomainNote(ok,note);}
         if(hover && Main.GameUpdateCount>=feedbackUntil)
@@ -99,55 +116,6 @@ public partial class SoulUI
             feedback=blocked.Length>0?blocked:SoulDifficulty.Instance.Applied?"点击恢复开启前的难度。":"大师＋For the worthy，影响整个世界的战斗与种子规则；不会重新生成地图。";
             feedbackUntil=Main.GameUpdateCount+2;
         }
-        DrawNavigation(false);
-    }
-    private static Rectangle LibraryGridBounds()
-    {var b=LibraryBounds();return new(b.X+8,b.Y+83,b.Width-16,Math.Max(1,b.Height-115));}
-    public static Rectangle LibraryCardBounds(int ordinal)
-    {
-        var b=LibraryGridBounds();int cols=Math.Max(1,b.Width/66),step=b.Width/cols;
-        return new(b.X+ordinal%cols*step,b.Y+ordinal/cols*76-libraryScroll,step-6,68);
-    }
-    private static void DrawLibrary(SoulItem soul)
-    {
-        var b=LibraryBounds();var grid=LibraryGridBounds();var p=Main.LocalPlayer;var mouse=new Point(Main.mouseX,Main.mouseY);
-        RoundedBox(b,new Color(11,17,26)*.92f,14);
-        Text("随身剑库",new(b.X+14,b.Y+13),Champagne,.89f);
-        Text("选择剑位，再点剑直接寄宿",new(b.X+14,b.Y+42),Muted,.62f);
-        var filter=new Rectangle(b.X+12,b.Y+62,b.Width-24,20);
-        Text(libraryFilter==0?"全部可寄宿剑  ▾":"未寄宿的剑  ▾",filter.Location.ToVector2(),Accent,.58f);
-        if(filter.Contains(mouse) && Main.mouseLeft && Main.mouseLeftRelease)
-        {Main.mouseLeftRelease=false;libraryFilter=1-libraryFilter;libraryScroll=0;}
-        int[] items=LibraryItems(p).Where(i=>libraryFilter==0 || !soul.Stored.Any(s=>!s.IsAir && s.type==p.inventory[i].type)).ToArray();
-        int cols=Math.Max(1,grid.Width/66),height=((items.Length+cols-1)/cols)*76;
-        if(b.Contains(mouse) && PlayerInput.ScrollWheelDelta!=0)libraryScroll-=PlayerInput.ScrollWheelDelta/120*76;
-        libraryScroll=Math.Clamp(libraryScroll,0,Math.Max(0,height-grid.Height));
-        for(int i=0;i<items.Length;i++)
-        {
-            var r=LibraryCardBounds(i);if(!grid.Contains(r))continue;
-            var item=p.inventory[items[i]];bool hover=r.Contains(mouse),stored=soul.Stored.Any(s=>!s.IsAir && s.type==item.type);
-            var tint=SoulVisuals.Tint(item.type);
-            RoundedBox(r,new Color(22,29,40)*(hover?.96f:.65f),8);
-            Line(new(r.X+7,r.Bottom-2),new(r.Right-7,r.Bottom-2),tint*(stored?.18f:hover?.9f:.35f));
-            Main.instance.LoadItem(item.type);var texture=TextureAssets.Item[item.type].Value;
-            var frame=Main.itemAnimations[item.type]?.GetFrame(texture)??texture.Frame();
-            float scale=Math.Min(1.1f,34f/Math.Max(frame.Width,frame.Height));
-            if(hover)Glow(r.Center.ToVector2(),32,tint,.23f);
-            Main.spriteBatch.Draw(texture,new Vector2(r.Center.X,r.Y+23),frame,stored?Color.Gray:Color.White,0,frame.Size()*.5f,scale,SpriteEffects.None,0);
-            CenterText(Fit(item.Name,r.Width-6,.46f),new(r.Center.X,r.Bottom-22),stored?Muted:Ink,.46f);
-            if(hover)
-            {
-                HoveredSlotRequirement=item.Name+" · "+EnvironmentSwordTooltips.Label(item)+" · 伤害 "+item.damage+(stored?" · 已寄宿同种":" · 点击装入选中剑位");
-                if(Main.mouseLeft && Main.mouseLeftRelease)
-                {
-                    Main.mouseLeftRelease=false;
-                    bool ok=EquipFromInventory(p,items[i],out var error);
-                    DomainNote(ok,ok?"已寄宿 · "+SlotName(selected):error);break;
-                }
-            }
-        }
-        if(items.Length==0)Paragraph("背包中暂无可寄宿剑。\n将剑放进随身背包，再打开魂域。",grid.X+8,grid.Y+24,grid.Width-16,Muted,.68f);
-        Text($"{items.Length} 把 · 滚轮浏览 · 不额外存储物品",new(b.X+12,b.Bottom-24),Muted,.51f);
     }
     private static int DrawDomainReturn(Rectangle b,int y)
     {

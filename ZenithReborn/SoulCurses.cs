@@ -66,13 +66,15 @@ public static class SoulCurses
             SoulCurse.Sheathing=>free?"新轮不打断旧轮，主剑各自完成攻击。":"开始新轮时，旧轮主剑提前停止攻击并淡出；不锁攻击键。",
             SoulCurse.Barrier=>free?"主剑正常穿越实体地形。":$"每段连续实体地形可穿过{TerrainAllowance(soul)}像素，超出则退出攻击；背景墙、平台不阻断。",
             SoulCurse.Solitude=>$"每轮最多{Blades(soul)}把主剑，不足留空。",
-            _=>free?"同剑按正常8帧间隔重复命中。":$"同剑本趟对同目标最多{HitLimit(soul)}次直接命中，不限制沿途其他敌人。"};
+            _=>stage==CurseStage.Blessed?"本体和三个剑影每次均造成100%伤害，按正常8帧间隔重复命中。":free?
+                "本体100%；三个剑影逐次乘0.8，分别为80%、64%、51.2%伤害，按正常8帧间隔重复命中。":
+                $"本体100%；后续三个剑影各造成20%伤害。同剑本趟对同目标最多{HitLimit(soul)}次直接命中，不限制沿途其他敌人。"};
         if(stage==CurseStage.Blessed)effect+=" "+(curse switch{
             SoulCurse.Binding=>"战斗约15秒蓄满御剑条，满条保留；按独立御剑键（默认O）手动开启10秒，视野翻倍，按命中距离最高独立增伤50%。",
             SoulCurse.Switching=>"百刃接力：不同寄宿主剑首击同一敌人接力，每层强化后续首击特性10%，最多5层；3秒断连清空，同剑帧伤不叠层。",
             SoulCurse.Sheathing=>"归鞘留锋：主剑完整往返后为自身存1次强化，下次登场首击释放50%自身伤害的短距离斩痕。",
             SoulCurse.Barrier=>"破障：每把主剑穿过实体后，下次命中附加4秒破甲（15护甲穿透），每剑只触发一次。",
-            SoulCurse.Bluntness=>"剑痕：同一主剑2秒内命中同一敌人3次，引爆60%自身伤害，每趟每目标一次。",
+            SoulCurse.Bluntness=>"连斩：剑影不再衰减，所有伤害单元保持所属主剑的全量伤害。",
             _=>""});
         if(stage==CurseStage.Blessed && curse==SoulCurse.Solitude)effect+=" 三王后4把，世花6、石巨人7、教徒8、月总10；只取此剑魂铭刻。";
         if((soul.LegacyReleased&(1<<(int)curse))!=0 && RecordedStage(soul,curse)<CurseStage.Released)effect+=" 旧档能力兼容解咒，不代表补齐Boss铭刻或祝福。";
@@ -83,8 +85,7 @@ public static class SoulCurses
         int i=(int)curse;string marks=string.Join("、",Groups[i].Select((b,n)=>((soul.Seals&b)==b?"✓":"○")+BossNames[i][n]));
         return marks+"；"+(Groups[i].Length==2?"第一位解除，第二位祝福。":"第一位削弱，第二位解除，第三位祝福。");
     }
-    // Only unambiguous PERSONAL records migrate. The old Evil bit cannot tell
-    // Brain from Eater and is deliberately not assigned to either seal.
+    // 只迁移能明确辨认的个人击杀记录；旧邪恶标记无法区分脑和世吞，不分配给任一铭刻。
     public static int FromOldKills(int kills)
     {
         int result=0;

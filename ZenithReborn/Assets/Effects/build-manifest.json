@@ -2,12 +2,18 @@
   "effects": [
     {
       "source": "ZRGlassScreen.fx",
-      "sourceSha256": "ef91c601c8cdbd1ee3ec6ae301e8abb6d5fdd1f7b5a2b85fb1486800fa2e34cc",
+      "sourceSha256": "1448ad348356e351085c9f339ac42f801a2ee88b82ec63a33989fc6f192094d9",
       "compiled": "ZRGlassScreen.fxc",
-      "compiledSha256": "2852a9151070dbfca5fde7496639d4ffeb2ff6b8d74bfa6a40e74a019dc114c2",
+      "compiledSha256": "bb2c3e40d43f11ff74a4047b69cbf9589ce167446f96a950e189fb9c3ed417cd",
       "origin": "project-authored",
       "compiler": "Microsoft D3DCompile / d3dcompiler_43 / fx_2_0",
-      "thirdPartySourceIncludes": []
+      "thirdPartySourceIncludes": [],
+      "projectSourceIncludes": [
+        {
+          "source": "ZRSwordSpaceWarp.fxh",
+          "sourceSha256": "a7ac915d0cba0f23d9eb128db01958856640899316170b7dd09909f71e8ebd3e"
+        }
+      ]
     },
     {
       "source": "ZRMaterialSurface.fx",
@@ -16,16 +22,18 @@
       "compiledSha256": "17a152920c27c705758d7059cbd1e13c4448a3c1343136d8e54eb080f1c41df6",
       "origin": "project-authored",
       "compiler": "Microsoft D3DCompile / d3dcompiler_43 / fx_2_0",
-      "thirdPartySourceIncludes": []
+      "thirdPartySourceIncludes": [],
+      "projectSourceIncludes": []
     },
     {
       "source": "ZRSwordFlow.fx",
-      "sourceSha256": "9c7995f381dab7d13d73c1b5b5804cb1f63807bc5c791f9699a142e5ba69063e",
+      "sourceSha256": "867defe284c61c5744d15cb36c17ca13588537385777b8eb516677597bae0b88",
       "compiled": "ZRSwordFlow.fxc",
-      "compiledSha256": "48bc283d394e8cc2d273698f511711f468a520d253662a20ad3f1074a3b55cf0",
+      "compiledSha256": "1ae8061963f129433b04150885283bb6fa73051f506bf82efe39bca9e8de3ee8",
       "origin": "project-authored",
       "compiler": "Microsoft D3DCompile / d3dcompiler_43 / fx_2_0",
-      "thirdPartySourceIncludes": []
+      "thirdPartySourceIncludes": [],
+      "projectSourceIncludes": []
     }
   ]
 }

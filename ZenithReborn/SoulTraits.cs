@@ -6,8 +6,7 @@ namespace ZenithReborn;
 public enum TraitCategory { Wood, Ore, Sword, Growth }
 public readonly record struct SoulTrait(string Key,string Title,string Description,string Requirement,TraitCategory Category,bool Active);
 
-// Presentation only. The same active-slot rules feed the summary and codex;
-// reading the codex never changes unlocks, combat state or stored items.
+// 展示层与战斗读取同一有效槽规则；查阅图鉴不会改变解锁、战斗状态或寄宿物品。
 public static class SoulTraits
 {
     public static string CategoryName(TraitCategory category) => category switch {
@@ -38,7 +37,7 @@ public static class SoulTraits
             "木质1/2/4/6/8种各给1格；矿石1/2/4/6/8/10材质各给1格。基础普通与已开放支援参与；已解锁奖励主槽可贡献矿材，但不能反向凑木质全套。停用取回槽不计入。后续种族可提供新奖励，不固定五格。",TraitCategory.Growth,soul.SupportCapacity>0);
         Add("collection-slots","全收集奖励","解锁左上R1、R2两个共享真实主攻剑位。木质全套或矿石圆满任一满足即可；两族同时完成仍共用2格。普通主槽仍10格，支援数量另由当前激活的各族奖励累加。",
             "已附着，12种木剑同时有效寄宿，或累计有效登记14种矿石材质。矿石登记取下不丢。",TraitCategory.Growth,soul.BonusCapacity>0);
-        Add("ore-wave","百炼飞剑",$"有效矿材 {oreCount}/14（主攻{mainOre}、支援{supportOre}，重复材质合并）。每把允许参与飞剑的主剑首次有效命中积攒一把，同帧不同主剑可分别积攒，不再有共用10帧门槛；同一剑后续帧伤不补触发。按有效材质成阵，集齐后蓄力齐射；中断3秒或目标死亡释放现有飞剑。距目标至少170像素，每趟贯穿560像素，沿途每6帧可再次命中。基础伤害D×150%×[1＋5%×(材质数－1)]，10层再×1.5，全收集再×1.3。防御效果最多按正常100%结算，不放大敌人护甲。累计登记 {soul.OreCollected}/14种。",
+        Add("ore-wave","百炼飞剑",$"有效矿材 {oreCount}/14（主攻{mainOre}、支援{supportOre}，重复材质合并）。每把允许参与飞剑的主剑本体首次有效命中积攒一把；铜质剑特性允许三个剑影各自再积攒一次，同一单元后续帧伤不补触发。不同主剑可同时积攒。按有效材质成阵，集齐后蓄力齐射；中断3秒或目标死亡释放现有飞剑。距目标至少170像素，每趟贯穿560像素，沿途每6帧可再次命中。基础伤害D×150%×[1＋5%×(材质数－1)]，10层再×1.5，全收集再×1.3。防御效果最多按正常100%结算，不放大敌人护甲。累计登记 {soul.OreCollected}/14种。",
             "至少1种有效矿材解锁；切换未解除时仅前4把有效主剑计入矿材并触发飞剑，解除后恢复全部。普通特性和支援仍受原有切换限制。",TraitCategory.Ore,soul.Active.Any(i=>OreFamily.TriggerEligible(soul,i.type)));
         Add("ore-tier-2","锻金 · 淬刃","每把矿石主剑自身伤害＋5%，不按材质数量叠乘，不强化其他武器。",
             "当前有效不同矿材达到2种。",TraitCategory.Ore,oreCount>=2 && oreCount<4);
@@ -46,8 +45,12 @@ public static class SoulTraits
             "当前有效不同矿材达到4种。",TraitCategory.Ore,oreCount>=4);
         Add("ore-tier-6","锻金 · 回锋","飞剑完成一次贯穿后沿原路径折返，再贯穿攻击一次；每趟保留6帧命中间隔。",
             "当前有效不同矿材达到6种。",TraitCategory.Ore,oreCount>=6);
-        Add("ore-tier-8","锻金 · 铸魂","每把飞剑首次有效命中可直接触发其矿剑已有特效；肉后六矿保留原触发冷却和治疗预算，飞剑效果与主剑分别计数。帧伤和折返不重复触发、不递归积攒飞剑。肉前八矿的新独有机制仍未实装。",
+        Add("ore-tier-8","锻金 · 铸魂","每把飞剑首次有效命中可直接触发其矿剑已有特效；肉后六矿保留原触发冷却和治疗预算，飞剑效果与主剑分别计数。帧伤和折返不重复触发、不递归积攒飞剑。铜、锡的成阵联动独立生效，不要求8材质；其他肉前矿材的新独有机制尚未实装。",
             "当前有效不同矿材达到8种。",TraitCategory.Ore,oreCount>=8);
+        Add("ore-copper-echo","铜质剑 · 叠影入阵","本体及三个实体剑影各有一次百炼积攒资格；伤害与共享命中间隔仍按断锋诅咒及原有规则结算，不把外观拖尾当成额外攻击。短剑和阔剑共享此材质特性。",
+            "有效普通主槽或支援槽中存在铜质剑，需要主攻剑；遵守切换诅咒的普通特性限制。",TraitCategory.Ore,OreSwordTraits.EchoStacking(soul));
+        Add("ore-tin-growth","锡质剑 · 百炼增辉",$"同一目标同一阵每多积攒一把，阵中每把飞剑伤害+{OreStackGrowth.DamagePerExtraStack:P0}；第一把不额外加成，最多{OreStackGrowth.MaxStacks}层（+{OreStackGrowth.DamagePerExtraStack*(OreStackGrowth.MaxStacks-1):P0}）。各剑保留自身伤害快照，亮度随层数平滑提高；齐射或超时释放后保留该阵最终倍率，新阵从1层开始。短剑和阔剑共享此材质特性。",
+            "有效普通主槽或支援槽中存在锡质剑，需要主攻剑；遵守切换诅咒的普通特性限制。",TraitCategory.Ore,OreSwordTraits.StackDamage(soul));
         Add("ore-tier-10","锻金 · 共鸣","飞剑伤害与飞行速度各提高50%。每把允许参与的主剑首次命中独立积攒一把，不设共用冷却；切换未解除时仅前4把主剑参与；矿石支援已接入通用机制，1种即计数和解锁飞剑，支援仍受切换诅咒限制。",
             "当前有效不同矿材达到10种，主攻与通用支援合并去重；暂停槽不计入。",TraitCategory.Ore,oreCount>=10);
         string registered=string.Join("、",Enumerable.Range(0,14).Where(i=>(soul.OreCollectionMask&(1<<i))!=0).Select(i=>OreFamily.Names[i]));
@@ -81,8 +84,7 @@ public static class SoulTraits
             (ItemID.Meowmere,"彩虹猫","飞行途中释放彩虹猫弹幕，取来源主剑D的50%。")};
         foreach(var(type,name,description) in specials)
         {
-            // Match ReleaseWeaponSpecial's template.shoot guard: do not advertise
-            // a vanilla on-hit behavior as a soul effect when no shoot is configured.
+            // 与原版发射模板的检查一致：没有发射弹幕时，不把原版命中行为宣传为剑魂特效。
             if(Terraria.ID.ContentSamples.ItemsByType[type].shoot<=ProjectileID.None)continue;
             Add("special-"+type,name,description,
                 "对应天顶材料剑处于有效主槽或支援槽；支援触发独立45帧冷却，使用实际主攻来源伤害。",TraitCategory.Sword,

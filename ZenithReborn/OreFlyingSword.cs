@@ -21,6 +21,14 @@ public class OreFlyingSword : ModProjectile
     public bool Launched { get; private set; }
     public bool Mastered;
     public float DamageShare=OreFamily.BaseFlightDamage;
+    public OreStackGrowth StackGrowth {get;}=new();
+    public OreStackGlow StackGlow {get;}=new();
+    public void SetFormationStacks(int layers,bool empowered)
+    {
+        StackGrowth.SetLayers(layers,empowered);
+        Projectile.damage=Projectile.originalDamage=StackGrowth.Damage;
+        DamageShare=StackGrowth.DamageShare;Projectile.netUpdate=true;
+    }
     public int WaveId;
     public int SetCount=1;
     public int AttackPass {get;private set;}
@@ -69,6 +77,8 @@ public class OreFlyingSword : ModProjectile
         age=0;Launched=false;targetIdentity=0;WaitingForVolley=false;readyAge=GrowFrames+ChargeFrames;
         passAge=0;
         SetCount=1;AttackPass=0;traitAttempted=false;
+        StackGrowth.Reset();
+        StackGlow.Reset();
         hitFlashAge=launchFlashAge=30;
         visualPass=-1;visualStruck.Clear();
     }
@@ -103,6 +113,7 @@ public class OreFlyingSword : ModProjectile
         writer.Write(aimPoint.X);writer.Write(aimPoint.Y);writer.Write(aimVelocity.X);writer.Write(aimVelocity.Y);
         writer.Write(SetCount);writer.Write(AttackPass);writer.Write(traitAttempted);
         writer.Write(passAge);
+        StackGrowth.Send(writer);
     }
     public override void ReceiveExtraAI(BinaryReader reader)
     {
@@ -115,6 +126,7 @@ public class OreFlyingSword : ModProjectile
         aimPoint=new(reader.ReadSingle(),reader.ReadSingle());aimVelocity=new(reader.ReadSingle(),reader.ReadSingle());
         SetCount=Math.Clamp(reader.ReadInt32(),1,14);AttackPass=Math.Clamp(reader.ReadInt32(),0,1);traitAttempted=reader.ReadBoolean();
         passAge=Math.Max(0,reader.ReadInt32());
+        StackGrowth.Receive(reader);
     }
     // 光照强度必须和画面亮度匹配：之前 0.22 只有视觉亮度的四分之一，
     // 结果是"看着很亮却不照亮环境"。火把在泰拉里约等于 1.0。
@@ -136,6 +148,7 @@ public class OreFlyingSword : ModProjectile
         if(!SourceValid()) { Projectile.Kill();return; }
         previousCenter=Projectile.Center;
         age++;
+        StackGlow.Update(StackGrowth.Progress);
         hitFlashAge++;launchFlashAge++;
         if(!Launched)
         {
@@ -153,7 +166,7 @@ public class OreFlyingSword : ModProjectile
             if(!Main.dedServ && FormationAge>0)
             {
                 Color tint=OreFamily.Tints[Math.Clamp(Material,0,13)];
-                Lighting.AddLight(Projectile.Center,tint.ToVector3()*LightIdle);
+                Lighting.AddLight(Projectile.Center,tint.ToVector3()*LightIdle*StackGlow.LightMultiplier);
             }
             if(WaitingForVolley){Projectile.timeLeft=Math.Max(Projectile.timeLeft,120);return;}
             if(age<=GatherFrames)return;
@@ -180,7 +193,7 @@ public class OreFlyingSword : ModProjectile
                 OrePierceFeedback.Launch(Projectile.Center,Projectile.velocity,OreFamily.Tints[Math.Clamp(Material,0,13)]);
             }
             trail.Record(Projectile.Center,Projectile.rotation);
-            AddVolumeLight(Projectile.Center,OreFamily.Tints[Math.Clamp(Material,0,13)].ToVector3()*LightFlight);
+            AddVolumeLight(Projectile.Center,OreFamily.Tints[Math.Clamp(Material,0,13)].ToVector3()*LightFlight*StackGlow.LightMultiplier);
         }
         if(Vector2.Distance(launchedFrom,Projectile.Center)>FlightDistance)
         {
@@ -244,6 +257,9 @@ public class OreFlyingSword : ModProjectile
         }
         OreSwordEffects.FlyingBlade(TextureAssets.Item[type].Value,Projectile.Center,Projectile.rotation,DisplayScale,
             OreFamily.Tints[Math.Clamp(Material,0,13)],alpha,1,Launched?launchFlashAge:30);
+        float bodySnap=Launched&&launchFlashAge<4?1-launchFlashAge/4f:0;
+        OreStackGlow.Draw(TextureAssets.Item[type].Value,Projectile.Center,Projectile.rotation,DisplayScale*(1+bodySnap*.12f),
+            OreFamily.Tints[Math.Clamp(Material,0,13)],alpha,StackGlow.Brightness);
         return false;
     }
     public OreAirFront AirFront()

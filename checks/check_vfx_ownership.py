@@ -19,7 +19,11 @@ def verify(package):
             path='Assets/Effects/'+effect[field]
             assert hashlib.sha256(packed[path]).hexdigest()==effect[hash_field],path
             declared.add(path)
-    actual={path for path in packed if path.endswith(('.fx','.fxc'))}
+        for dependency in effect.get('projectSourceIncludes',[]):
+            path='Assets/Effects/'+dependency['source']
+            assert hashlib.sha256(packed[path]).hexdigest()==dependency['sourceSha256'],path
+            declared.add(path)
+    actual={path for path in packed if path.endswith(('.fx','.fxc','.fxh'))}
     assert actual==declared, (actual,declared)
     for path in (root/'ZenithReborn').glob('*.cs'):
         text=path.read_text(encoding='utf-8-sig')

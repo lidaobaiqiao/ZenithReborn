@@ -9,8 +9,7 @@ public partial class SoulUI
     private static Texture2D veilTexture;
     private static readonly Color Champagne=new(206,187,143);
 
-    // Scanline corners keep a constant UI-unit radius at any aspect ratio.
-    // These are translucent surfaces, not a screen blur or a render-target pass.
+    // 圆角始终使用界面单位；这里只画半透明表面，不进行屏幕模糊。
     private static void RoundedBox(Rectangle r,Color color,int radius=12)
     {
         if(r.Width<=0 || r.Height<=0)return;
@@ -39,15 +38,14 @@ public partial class SoulUI
     }
     private static void DrawChrome(Rectangle panel,Point mouse)
     {
-        // Keep the input rectangle intact, but visually separate the light
-        // floating chrome from the soft circular body. No full-panel blue fill.
+        // 命中矩形保持固定，浮窗标题和柔和圆形主体分别绘制。
         var header=new Rectangle(panel.X+8,panel.Y+4,panel.Width-16,60);
         RoundedBox(new(header.X+2,header.Y+3,header.Width,header.Height),Color.Black*.18f,13);
         RoundedBox(header,new Color(13,15,19)*.95f,13);
         float hover=(WindowDragging || HeaderDragBounds().Contains(mouse)) ? .28f : .12f;
         Line(new(header.X+14,header.Y+1),new(header.Right-14,header.Y+1),Champagne*hover);
         Box(new(header.X+1,header.Y+18,2,22),Champagne*.5f);
-        // Three understated marks afford dragging without a framed title bar.
+        // 三个短刻度提示标题栏可以拖动。
         for(int i=0;i<3;i++)Box(new(header.Center.X-9+i*7,header.Y+7,3,1),Champagne*.35f);
         if(page!=0)
             RoundedBox(new(panel.X+8,panel.Y+65,panel.Width-16,43),new Color(13,15,19)*.95f,11);
@@ -67,7 +65,7 @@ public partial class SoulUI
         if(DomainMode)
         {
             if(page!=0)RoundedBox(body,new Color(11,17,26)*.93f,14);
-            else if(SideInspector)RoundedBox(new(body.Right-294,body.Y,294,body.Height),new Color(11,17,26)*.90f,14);
+
             return;
         }
         EnsureVeil();
@@ -77,7 +75,7 @@ public partial class SoulUI
             float fade=.65f+.35f*Ease((float)(UiTime-openedAt)/.5f);
             Main.spriteBatch.Draw(veilTexture,RingCenter,null,new Color(9,11,15)*(.97f*fade),0,
                 new(64),new Vector2(radius*1.12f/64,radius/64),SpriteEffects.None,0);
-            // Scrolling the details into view gives text its own quiet surface.
+            // 说明滚入视口时，为文字单独提供暗色底板。
             int detailTop=body.Y+RingCanvasHeight+6-scroll;
             if(detailTop<body.Bottom)
                 RoundedBox(new(body.X+2,detailTop,body.Width-4,body.Bottom-detailTop+12),new Color(12,14,18)*.91f,14);

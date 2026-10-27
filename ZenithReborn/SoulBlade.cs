@@ -90,7 +90,8 @@ public class SoulBlade : ModProjectile
     public float Vertical = 60f;
     private int age;
     private bool released;
-    private bool oreHitConsumed;
+    private int oreHitUnits;
+    public int HitUnit {get;private set;}
     private bool retired,terrainArmed;
     private int retireAge;
     private float terrainDepth;
@@ -100,11 +101,11 @@ public class SoulBlade : ModProjectile
         WoodCombat.FindSoul(Main.player[Projectile.owner],Projectile.GetGlobalProjectile<SoulSource>().SoulId):null;
     public bool Retired=>retired;
     public void Retire(){if(retired)return;retired=true;retireAge=0;Projectile.netUpdate=true;}
-    // 每把主飞剑只消耗一次首击资格；先消耗再查冷却，受阻首击不能随后重试。
-    public bool TryConsumeOreHit()
+    // 本体和三个实体剑影各有一次资格；是否允许剑影参与由矿石特性统一判定。
+    public bool TryConsumeOreHit(int unit=0)
     {
-        if (oreHitConsumed) return false;
-        oreHitConsumed = true;
+        if(unit<0 || unit>=SoulTrailUnits.Count || (oreHitUnits&(1<<unit))!=0)return false;
+        oreHitUnits|=1<<unit;
         return true;
     }
     private Vector2[] trailPoints;
@@ -127,7 +128,7 @@ public class SoulBlade : ModProjectile
         Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = 16;
         Projectile.extraUpdates=1;
         Reborn = false;age=0;released=false;retired=terrainArmed=false;retireAge=0;terrainDepth=0;targetHits=[];
-        oreHitConsumed = false;
+        oreHitUnits=0;HitUnit=0;
         Blessings=new();
         Vertical = 60f;
         trailPoints=new Vector2[HistoryLength];trailCenters=new Vector2[HistoryLength];trailRotations=new float[HistoryLength];trailPhases=new float[HistoryLength];trailDirections=new int[HistoryLength];
@@ -226,7 +227,8 @@ public class SoulBlade : ModProjectile
                 Vector2 axis=(trailRotations[idx]-MathHelper.PiOver4).ToRotationVector2();
                 Vector2 at=trailCenters[idx]+axis*26*DisplayScale;
                 Vector2 drift=Vector2.Clamp(trailCenters[idx-1]-trailCenters[idx],new Vector2(-8),new Vector2(8))*.16f;
-                SoulFlowSpark.Spawn(new FlowSparkSpawn(at,drift+new Vector2(0,-.6f),tint,.55f,18,true));
+                if(VfxIsolation.FlowSpark)
+                    SoulFlowSpark.Spawn(new FlowSparkSpawn(at,drift+new Vector2(0,-.6f),tint,.55f,18,true));
             }
         }
         // 服务器同样保留实际姿态历史，剑影碰撞不能依赖客户端绘制或显卡资源。
@@ -242,7 +244,7 @@ public class SoulBlade : ModProjectile
         if(!Main.dedServ)
         {
             CaptureTrailEndings();
-            if(!retired)SoulZenithEffects.EmitFlying(this,player);
+            if(!retired&&VfxIsolation.FlyingParticles)SoulZenithEffects.EmitFlying(this,player);
         }
         if (!released && !retired && phase >= 24)
         {
@@ -251,13 +253,16 @@ public class SoulBlade : ModProjectile
         }
     }
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
+        =>ResolveHitUnit(targetHitbox)>=0;
+    // 重叠时优先本体，其次最近的剑影；一次原生命中只归属一个单元。
+    public int ResolveHitUnit(Rectangle targetHitbox)
     {
-        if(CanDamage()==false)return false;
+        if(CanDamage()==false)return -1;
         bool solid=SolidCollision();
-        if(BodyCanDamage&&PoseCollides(Projectile.Center,Projectile.rotation,targetHitbox,solid))return true;
+        if(BodyCanDamage&&PoseCollides(Projectile.Center,Projectile.rotation,targetHitbox,solid))return 0;
         for(int echo=1;echo<SoulTrailUnits.Count;echo++)
-            if(TryGetEchoPose(echo,out var center,out float rotation,out _)&&PoseCollides(center,rotation,targetHitbox,solid))return true;
-        return false;
+            if(TryGetEchoPose(echo,out var center,out float rotation,out _)&&PoseCollides(center,rotation,targetHitbox,solid))return echo;
+        return -1;
     }
     public bool BodyCollides(Rectangle targetHitbox)
         =>BodyCanDamage&&PoseCollides(Projectile.Center,Projectile.rotation,targetHitbox,SolidCollision());
@@ -296,6 +301,9 @@ public class SoulBlade : ModProjectile
     }
     public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
     {
+        // 在击退移动目标前保存实际碰撞单元，伤害与命中后的矿石积攒读取同一来源。
+        HitUnit=Math.Max(0,ResolveHitUnit(target.Hitbox));
+        modifiers.FinalDamage*=SoulEchoDamage.Multiplier(SourceSoul,HitUnit);
         Blessings.Prepare(Projectile,target);
         WoodCombat.PreparePrimaryHit(Projectile, target);
         WoodCombat.ModifyPrimaryHit(Projectile, target, ref modifiers);
@@ -454,18 +462,24 @@ public class SoulBlade : ModProjectile
         // 15 这个间隔在 FinalFractalHelper.FramesPerImportantTrail 里写死。
         // 亮度 = (60 - j) / 60，即近 0.75、中 0.50、远 0.25，越靠后越暗。
         // 可见性按 phase - j 判定，所以三个剑影是依次点亮、再依次熄灭，不会同时全亮。
+        if(VfxIsolation.EchoBlades)
         for(int j=(SoulTrailUnits.Count-1)*SoulTrailUnits.Spacing;j>0;j-=SoulTrailUnits.Spacing)
         {
             if(!TryGetEchoPose(j/SoulTrailUnits.Spacing,out var center,out float rotation,out float opacity))continue;
+            // 三个位置各自独立开关，可只留近位/中位/远位其中一个
+            if(!VfxIsolation.EchoSlotEnabled(j/SoulTrailUnits.Spacing))continue;
+            // 亮度阶梯可按需摘除，统一满亮度便于单独观察某个位置的形状
+            if(!VfxIsolation.EchoBladeAlpha)opacity=1f;
             int direction=trailDirections[j]==0?Projectile.spriteDirection:trailDirections[j];
+            Color echoColor=VfxIsolation.EchoTint?Color.Lerp(tint,Color.White,.22f):tint;
             Main.EntitySpriteDraw(texture,center-Main.screenPosition,frame,
-                Color.Lerp(tint,Color.White,.22f)*opacity,
+                echoColor*opacity,
                 rotation+MathHelper.PiOver4*(1-direction),origin,DisplayScale,
                 direction==1?SpriteEffects.None:SpriteEffects.FlipHorizontally);
         }
         Main.EntitySpriteDraw(texture, Projectile.Center - Main.screenPosition, frame, WoodTypes.SwordTint(itemType)*visibility,
             DrawRotation, origin, DisplayScale, DrawEffects);
-        SoulZenithEffects.DrawTip(this);
+        if(VfxIsolation.TipGlow)SoulZenithEffects.DrawTip(this);
         return false;
     }
 }

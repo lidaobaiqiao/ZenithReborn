@@ -36,7 +36,8 @@ internal static class EchoDamageCheck
             check(blade.CanDamage()!=false&&Enumerable.Range(1,3).All(i=>blade.TryGetEchoPose(i,out _,out _,out _)),
                 "专用服务端模式能够查询相同的三个剑影攻击姿态");
             Main.netMode=NetmodeID.SinglePlayer;
-            int? damage=null;
+            int fullDamage=0;
+            var actual=new List<object>();
             NPC Target(int index,Vector2 center)
             {
                 var npc=new NPC();npc.SetDefaults(NPCID.Zombie);npc.active=true;npc.whoAmI=index;
@@ -44,21 +45,32 @@ internal static class EchoDamageCheck
                 npc.knockBackResist=0;npc.HideStrikeDamage=true;Main.npc[index]=npc;return npc;
             }
             void ClearImmunity(NPC npc){projectile.localNPCImmunity[npc.whoAmI]=0;Array.Clear(npc.immune);}
-            for(int echo=1;echo<4;echo++)
+            foreach(var stage in new[]{CurseStage.Blessed,CurseStage.Released,CurseStage.Cursed,CurseStage.Weakened})
             {
-                var target=Target(20,centers[echo]);ClearImmunity(target);
-                check(!blade.BodyCollides(target.Hitbox)&&blade.Colliding(projectile.Hitbox,target.Hitbox)==true,
-                    "第"+echo+"个剑影位置在本体外且独立参与碰撞");
-                Main.rand=new UnifiedRandom(7351);projectile.Damage();int dealt=100000-target.life;
-                check(dealt>0,"原版Damage在第"+echo+"个剑影处造成实际伤害");
-                damage??=dealt;
-                check(dealt==damage,"剑影伤害不按亮度折扣，保留所属武器的完整伤害");
-                int after=target.life;target.Center=centers[echo==3?1:echo+1];projectile.Damage();
-                check(target.life==after&&projectile.localNPCImmunity[20]>0,"切换剑影不绕过同飞剑命中冷却");
+                soul.LegacyReleased=63&~(1<<(int)SoulCurse.Bluntness);
+                soul.Seals=stage switch {CurseStage.Blessed=>SoulCurses.Flesh|SoulCurses.Queen|SoulCurses.Empress,
+                    CurseStage.Released=>SoulCurses.Flesh|SoulCurses.Queen,CurseStage.Weakened=>SoulCurses.Flesh,_=>0};
+                for(int echo=0;echo<4;echo++)
+                {
+                    projectile.localAI[0]=echo==0?40:77;
+                    var target=Target(20,echo==0?projectile.Center:centers[echo]);ClearImmunity(target);
+                    check(blade.ResolveHitUnit(target.Hitbox)==echo,"实际碰撞单元对应本体或第"+echo+"个剑影");
+                    Main.rand=new UnifiedRandom(7351);projectile.Damage();int dealt=100000-target.life;
+                    if(fullDamage==0)fullDamage=dealt;
+                    float expected=echo==0||stage==CurseStage.Blessed?1:stage==CurseStage.Released?MathF.Pow(.8f,echo):.2f;
+                    check(dealt>0 && Math.Abs(dealt-fullDamage*expected)<=1,"原生Damage验证"+stage+"第"+echo+"单元比例"+expected);
+                    actual.Add(new {stage=stage.ToString(),unit=echo,damage=dealt,expectedMultiplier=expected,fullDamage});
+                    int after=target.life;target.Center=centers[echo==3?1:echo+1];projectile.Damage();
+                    check(target.life==after&&projectile.localNPCImmunity[20]>0,"切换剑影不绕过同飞剑命中冷却");
+                }
             }
+            string report=Environment.GetEnvironmentVariable("ZENITH_CHECK_REPORT");
+            if(!string.IsNullOrEmpty(report))System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(report),"echo-native-damage-0.3.105.json"),
+                System.Text.Json.JsonSerializer.Serialize(actual,new System.Text.Json.JsonSerializerOptions{WriteIndented=true}));
+            projectile.localAI[0]=77;
             var gap=Target(20,(centers[1]+centers[2])*.5f);ClearImmunity(gap);
             check(blade.Colliding(projectile.Hitbox,gap.Hitbox)==false,"剑影之间的空隙没有整片拖尾伤害");
-            check(!blade.TryConsumeOreHit(),"本体和全部剑影共用已经消耗的矿石首击资格");
+            check(Enumerable.Range(0,4).All(i=>!blade.TryConsumeOreHit(i)),"本体与三个剑影各自已经消耗矿石首击资格");
             soul.LegacyReleased=0;soul.Kills=0;soul.Seals=0;
             var capped=Target(21,centers[1]);
             for(int i=0;i<3;i++){ClearImmunity(capped);projectile.Damage();}

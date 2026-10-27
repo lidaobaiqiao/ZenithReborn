@@ -4,14 +4,18 @@
   "origin": "project-authored",
   "parameters": {
     "Ior": 1.5,
-    "Roughness": 0.08,
+    "Roughness": 0.0,
+    "Metallic": 0.25,
     "Transmission": 0.55,
-    "Opacity": 1.0,
+    "Opacity": 0.1,
     "Thickness": 72.0,
     "Dispersion": 0.35,
     "SsrStrength": 0.6,
     "EmissionStrength": 0.55,
-    "StripeStrength": 0.3
+    "StripeStrength": 0.3,
+    "SpaceWarpStrength": 10.0,
+    "SpaceWarpRadius": 36.0,
+    "SpaceWarpSpeed": 1.3
   },
-  "notes": "只供制作端编辑；构建时生成运行常量，不生成玩家配置界面。Thickness为屏幕折射的虚拟厚度，不是现实物理长度。Dispersion按波长偏移折射率，边缘出彩边；SsrStrength反射近处场景。 EmissionStrength为带面自发光：玻璃只靠透射和反光会读作\"灰膜\"，需要自身发光才有能量感。StripeStrength为沿迹条纹：给连续带面分段间隔感，避免整片读作均匀灰膜，取值过大会显斑驳。"
+  "notes": "制作端唯一参数源，构建生成运行常量，不提供玩家调参界面。Opacity表示主体挡光密度和内部色流浓度，不是整张特效的Alpha淡出；透明主体通过吸收/透射背景呈现，不新增常量自发光底色。设为0仍保留表面反射、亮刃与折射，几何与生命周期覆盖独立。Metallic控制有色F0与反射，Roughness允许0。Thickness为屏幕折射虚拟厚度；Dispersion控制彩边；SsrStrength控制真实当前帧反射；EmissionStrength控制独立表面自发光；StripeStrength控制随主体密度变化的内部色流。SpaceWarpStrength为刀光周围背景偏折的最大屏幕像素数，SpaceWarpRadius为覆盖采样半径，SpaceWarpSpeed为世界坐标扰动的相位速度；B7-7可独立关闭该交互。"
 }

@@ -51,8 +51,14 @@ public class SoulSceneRefraction : ModSystem
     public override void PostUpdateEverything()
     {
         if(screenData==null)return;
-        bool active=!Main.gameMenu&&SoulTrailEnding.HasActive;
-        if(!Main.gameMenu)foreach(var p in Main.ActiveProjectiles)if(p.ModProjectile is SoulBlade){active=true;break;}
+        // 屏幕滤镜总闸必须在扫描飞剑之前判定：原先第 55 行无条件把 active 置真，
+        // 导致 VfxIsolation.GlassFilter=false 时滤镜仍会激活并合成，隔离形同虚设。
+        bool active=false;
+        if(!VfxIsolation.PureCodeOnly&&VfxIsolation.GlassFilter&&!Main.gameMenu)
+        {
+            active=SoulTrailEnding.HasActive;
+            if(!active)foreach(var p in Main.ActiveProjectiles)if(p.ModProjectile is SoulBlade){active=true;break;}
+        }
         if(active&&!Filters.Scene[FilterKey].IsActive())Filters.Scene.Activate(FilterKey);
         else if(!active&&Filters.Scene[FilterKey].IsActive()){Filters.Scene.Deactivate(FilterKey);maskReady=false;}
     }
@@ -85,14 +91,16 @@ public class SoulSceneRefraction : ModSystem
             for(int i=0;i<16;i++)device.Textures[i]=null;
             device.SetRenderTarget(normalMask);device.Clear(Color.Transparent);BuildingMask=true;
             MartialSlashRenderer.DrawWithRestoredState(()=>{
-                foreach(var p in Main.ActiveProjectiles)if(p.ModProjectile is SoulBlade blade)blade.DrawRibbonShader(vertices);
-                SoulTrailEnding.DrawAll(vertices);
+                if(VfxIsolation.SwordTrail)
+                    foreach(var p in Main.ActiveProjectiles)if(p.ModProjectile is SoulBlade blade)blade.DrawRibbonShader(vertices);
+                if(VfxIsolation.TrailEnding)SoulTrailEnding.DrawAll(vertices);
             });
             // 法线和表面共享同一轨迹与动态形状；不把彩色主体预先涂入待折射的世界。
             BuildingMask=false;BuildingSurface=true;device.SetRenderTarget(surfaceMask);device.Clear(Color.Transparent);
             MartialSlashRenderer.DrawWithRestoredState(()=>{
-                foreach(var p in Main.ActiveProjectiles)if(p.ModProjectile is SoulBlade blade)blade.DrawRibbonShader(vertices);
-                SoulTrailEnding.DrawAll(vertices);
+                if(VfxIsolation.SwordTrail)
+                    foreach(var p in Main.ActiveProjectiles)if(p.ModProjectile is SoulBlade blade)blade.DrawRibbonShader(vertices);
+                if(VfxIsolation.TrailEnding)SoulTrailEnding.DrawAll(vertices);
             });
             BuildingSurface=false;
             if(SwordFlowMaterial.HasSurfaceMaterials)
@@ -108,8 +116,9 @@ public class SoulSceneRefraction : ModSystem
                     additionalOutput=mode;for(int i=0;i<16;i++)device.Textures[i]=null;
                     device.SetRenderTarget(mode==3?materialProperties:materialTransmission);device.Clear(Color.Transparent);
                     MartialSlashRenderer.DrawWithRestoredState(()=>{
-                        foreach(var p in Main.ActiveProjectiles)if(p.ModProjectile is SoulBlade blade)blade.DrawRibbonShader(vertices);
-                        SoulTrailEnding.DrawAll(vertices);
+                        if(VfxIsolation.SwordTrail)
+                            foreach(var p in Main.ActiveProjectiles)if(p.ModProjectile is SoulBlade blade)blade.DrawRibbonShader(vertices);
+                        if(VfxIsolation.TrailEnding)SoulTrailEnding.DrawAll(vertices);
                     });
                 }
             }
@@ -135,13 +144,21 @@ public class SoulSceneRefraction : ModSystem
             if(surfaceMask!=null)UseImage(surfaceMask,1,SamplerState.LinearClamp);
             Shader.Parameters["uGlassTexel"].SetValue(new Vector2(1f/Main.screenWidth,1f/Main.screenHeight));
             Shader.Parameters["uGlassTransmission"].SetValue(SwordFlowMaterial.DefaultOptics.Transmission);
+            Shader.Parameters["uGlassBodyOpacity"]?.SetValue(GlassMaterialPreset.Opacity);
+            // P23在原生当前帧上执行反射，不能采到白色占位或旧快照。
+            Shader.Parameters["uGlassSsrStrength"]?.SetValue(GlassMaterialPreset.SsrStrength*
+                (VfxIsolation.Parts[22].Allowed?VfxIsolation.PartValues[22]:0f));
             Shader.Parameters["uGlassThickness"].SetValue(GlassMaterialPreset.Thickness);
             Shader.Parameters["uGlassIor"].SetValue(SwordFlowMaterial.DefaultOptics.Ior);
             Shader.Parameters["uMaskReady"].SetValue(maskReady?1f:0f);
             Shader.Parameters["uHasMaterialProperties"].SetValue(SwordFlowMaterial.HasSurfaceMaterials?1f:0f);
             Shader.Parameters["uMaterialProperties"].SetValue(materialProperties??normalMask);
             Shader.Parameters["uMaterialTransmission"].SetValue(materialTransmission??normalMask);
+            SwordSpaceDistortion.Apply(Shader.Parameters,Main.GlobalTimeWrappedHourly,Main.screenPosition,Main.GameViewMatrix.TransformationMatrix);
             if(maskReady){CapturedFrames++;LastSource="native-screen-filter-current-frame";}
+            // 屏幕构成项统一表驱动，空间交互也能单独关闭，不混入主体密度或高光开关。
+            for(int i=0;i<VfxIsolation.GlassParts.Length&&i<VfxIsolation.GlassPartValues.Length;i++)
+                Shader.Parameters[VfxIsolation.GlassParts[i].Uniform]?.SetValue(VfxIsolation.GlassPartValues[i]);
             base.Apply();
         }
     }

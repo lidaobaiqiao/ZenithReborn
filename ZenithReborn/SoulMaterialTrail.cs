@@ -125,7 +125,9 @@ public static class SoulMaterialTrail
         Vector2 tip=center-screen+axis*halfLength;
         // 剑尖就是亮刃所在边；内侧沿该帧的剑身方向展开，尾部逐渐收束。
         float taper=MathF.Pow(Math.Clamp(1-age,0,1),.65f);
-        float shoulder=MathHelper.Lerp(.44f,1,MathHelper.SmoothStep(0,1,Math.Clamp(age/.24f,0,1)));
+        // 内缘从刀刃靠护手处连续收向旧尾，撤掉先收肩再鼓起的颈部，也不越过护手补到剑柄。
+        float headBlend=1-MathHelper.SmoothStep(0,1,Math.Clamp(age/.24f,0,1));
+        float shoulder=MathHelper.Lerp(1f,1.20f,headBlend);
         // 薄玻璃的轮廓只做轻微呼吸，反光承担主要动效，避免整片材质像液体一样扭动。
         float wave=1+.025f*MathF.Sin(age*9-clock*1.3f)*MathF.Sin(age*MathHelper.Pi);
         float width=halfLength*1.52f*taper*shoulder*growth*wave;

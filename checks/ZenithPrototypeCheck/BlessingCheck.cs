@@ -68,7 +68,7 @@ internal static class BlessingCheck
             Hit(Blade(p,s),n);state.PostUpdate();check(s.YujianCharge==0,"A target dummy cannot charge 御剑");
 
             (p,s,state,n)=Setup();var first=Blade(p,s);Hit(first,n);
-            // Respect the existing wood mark application cadence; relay never bypasses it.
+            // 接力遵守木质印记原有的施加间隔。
             typeof(Main).GetField("_gameUpdateCount",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic)
                 .SetValue(null,Main.GameUpdateCount+31u);
             for(int i=0;i<31;i++)state.PostUpdate();
@@ -108,15 +108,9 @@ internal static class BlessingCheck
             n.DelBuff(n.FindBuffIndex(ModContent.BuffType<SoulBreach>()));Hit(first,n);
             check(!n.HasBuff(ModContent.BuffType<SoulBreach>()),"Each emitted blade spends breach once and does not reapply on frame damage");
 
-            (p,s,state,n)=Setup();first=Blade(p,s);Hit(first,n);Hit(first,n);check(Strikes(1).Length==0,"Two direct hits do not prematurely explode a sword mark");
-            Hit(first,n);check(Strikes(1).Length==1 && Strikes(1)[0].damage==60,"Third same-sword hit emits its own sixty-percent mark explosion");
-            Hit(first,n);Hit(first,n);check(Strikes(1).Length==1,"One blade cannot explode the same target twice during its flight");
-            var explosion=Strikes(1)[0];explosion.Center=n.Center;before=n.life;Array.Clear(n.immune);explosion.Damage();
-            check(n.life<before,"Sword-mark explosion causes actual engine damage");
-            (p,s,state,n)=Setup();first=Blade(p,s);Hit(first,n);Hit(first,n);
-            typeof(Main).GetField("_gameUpdateCount",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic)
-                .SetValue(null,Main.GameUpdateCount+121u);
-            Hit(first,n);check(Strikes(1).Length==0,"A gap longer than two seconds resets that blade's sword marks");
+            (p,s,state,n)=Setup();first=Blade(p,s);for(int i=0;i<6;i++)Hit(first,n);
+            check(Strikes(1).Length==0,"连斩祝福已替换旧剑痕爆炸，不额外叠加旧奖励");
+            check(Enumerable.Range(0,4).All(i=>SoulEchoDamage.Multiplier(s,i)==1),"祝福后本体和三个剑影都使用全量伤害");
             var clone=(SoulItem)s.Item.Clone().ModItem;clone.Seals=0;clone.LegacyReleased=63;
             check(!BlessingTuning.Blessed(clone,SoulCurse.Switching),"Legacy release cannot grant new blessing bonuses");
             check(Enum.GetValues<SoulCurse>().All(c=>!SoulCurses.Description(s,c).Contains("尚未设计")),"Every blessed curse now explains an implemented extra mechanism");

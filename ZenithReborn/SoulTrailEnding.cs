@@ -84,10 +84,14 @@ public sealed class SoulTrailEnding : ModSystem
         endings.RemoveAll(e=>Age(e)>=e.Frames);
         foreach(var ending in endings)
         {
-            int age=Age(ending);float opacity=ending.Opacity*Opacity(age,ending.Frames);
+            // 本体关掉时仍然推进年龄，避免开关切换后残留旧片
+            if(!VfxIsolation.EndingShape)continue;
+            int age=Age(ending);
+            // 消失曲线关掉则只按初始不透明度绘制，便于单独观察本体的形状
+            float opacity=VfxIsolation.EndingFadeCurve?ending.Opacity*Opacity(age,ending.Frames):ending.Opacity;
             int count=ending.Pose.Build(Main.screenPosition,vertices,Main.GlobalTimeWrappedHourly);
             SoulMaterialTrail.Draw(vertices,count,ending.Tint,opacity,Main.GlobalTimeWrappedHourly,
-                dissolve:Dissolve(age,ending.Frames),itemType:ending.ItemType);
+                dissolve:VfxIsolation.EndingDissolve?Dissolve(age,ending.Frames):0,itemType:ending.ItemType);
         }
     }
     public override void OnWorldUnload(){endings.Clear();Created=0;}

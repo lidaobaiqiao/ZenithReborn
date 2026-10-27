@@ -1,4 +1,4 @@
-param([int]$TimeoutSec=180,[switch]$Surface,[switch]$EchoDamage,[switch]$FullModSet,[switch]$FormalSettings,[switch]$Original79,
+param([int]$TimeoutSec=180,[switch]$Surface,[switch]$EchoDamage,[switch]$FullModSet,[switch]$FormalSettings,[switch]$Original79,[string]$RunLabel='',
     [ValidateSet('day','dusk','night','torch')][string]$LightPreset='day')
 $ErrorActionPreference='Stop'
 $taskRoot=Split-Path $PSScriptRoot -Parent
@@ -10,6 +10,7 @@ if($Surface){$profile+='-surface';$output+='-surface'}
 if($EchoDamage){$profile+='-echo-damage';$output+='-echo-damage'}
 if($FullModSet){$profile+='-full';$output+='-full'}
 if($LightPreset -ne 'day'){$profile+="-$LightPreset";$output+="-$LightPreset"}
+if($RunLabel){if($RunLabel -notmatch '^[a-z0-9-]+$'){throw '隔离运行标签只允许小写字母、数字和连字符'};$profile+="-$RunLabel";$output+="-$RunLabel"}
 New-Item -ItemType Directory -Force -Path "$profile/Mods","$profile/Players","$profile/Worlds",$output | Out-Null
 # 只读复制旧隔离档，不读取或改写正式人物／世界。
 foreach($kind in @('Players','Worlds')){
@@ -40,7 +41,7 @@ if($FullModSet){
         Set-Content -Encoding utf8 "$profile/Mods/enabled.json"
 }
 @{Language='zh-Hans';Fullscreen=$false;WindowBorderless=$false;DisplayWidth=1280;DisplayHeight=720;
-  AutoSave=$false;VolumeMusic=0;VolumeSound=0;VolumeAmbient=0;LightingMode=3;
+  AutoSave=$false;AutoPause=$false;VolumeMusic=0;VolumeSound=0;VolumeAmbient=0;LightingMode=3;
   LastLaunchedVersion=279;LastLaunchedTModLoaderVersion='2026.8.3.0';SeenFirstLaunchModderWelcomeMessage=$true} |
     ConvertTo-Json | Set-Content -Encoding utf8 "$profile/config.json"
 if($FormalSettings){
@@ -48,6 +49,7 @@ if($FormalSettings){
     $formalProfile=Join-Path $env:USERPROFILE 'Documents/My Games/Terraria/tModLoader'
     $settings=Get-Content "$formalProfile/config.json" -Raw | ConvertFrom-Json
     $settings.Fullscreen=$false;$settings.WindowBorderless=$false;$settings.AutoSave=$false
+    $settings.AutoPause=$false
     $settings.VolumeMusic=0;$settings.VolumeSound=0;$settings.VolumeAmbient=0
     $settings | ConvertTo-Json -Depth 30 | Set-Content -Encoding utf8 "$profile/config.json"
     New-Item -ItemType Directory -Force -Path "$profile/ModConfigs" | Out-Null
