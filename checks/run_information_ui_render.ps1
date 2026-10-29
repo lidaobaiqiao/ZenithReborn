@@ -1,5 +1,6 @@
-param([string]$Name='final')
+param([string]$Name='final',[switch]$BossUnlocks,[switch]$ArmoryInteraction)
 $ErrorActionPreference='Stop'
+if($BossUnlocks -and $ArmoryInteraction){throw '请选择一种针对性的界面检查'}
 $taskRoot=Split-Path $PSScriptRoot -Parent
 $version=((Get-Content "$taskRoot/ZenithReborn/build.txt" | Where-Object {$_ -match '^version\s*='}) -split '=',2)[1].Trim()
 $uiProfile=Join-Path $taskRoot "artifacts/information-ui-profile-$Name"
@@ -19,6 +20,8 @@ $expectedPackageHash=(Get-FileHash -LiteralPath "$uiProfile/Mods/ZenithReborn.tm
 VolumeMusic=0;VolumeSound=0;VolumeAmbient=0;AutoSave=$false;LastLaunchedVersion=279;LastLaunchedTModLoaderVersion='2026.8.3.0';SeenFirstLaunchModderWelcomeMessage=$true} |
 ConvertTo-Json | Set-Content -Encoding utf8 -LiteralPath "$uiProfile/config.json"
 $env:ZENITH_INFORMATION_GPU=$output
+$env:ZENITH_BOSS_UNLOCKS_GPU=if($BossUnlocks){'1'}else{'0'}
+$env:ZENITH_ARMORY_INTERACTION_GPU=if($ArmoryInteraction){'1'}else{'0'}
 $env:SDL_WINDOW_ACTIVATE_WHEN_SHOWN='0'
 $uiProcess=Start-Process -FilePath 'C:/Program Files/dotnet/dotnet.exe' -ArgumentList @('tModLoader.dll','-nosteam','-tmlsavedirectory',('"{0}"' -f $uiProfile)) -WorkingDirectory 'E:/SteamLibrary/steamapps/common/tModLoader' -WindowStyle Hidden -PassThru -RedirectStandardOutput "$output/client-stdout.log" -RedirectStandardError "$output/client-stderr.log"
 $uiProcess.Id | Set-Content -LiteralPath "$output/client.pid"

@@ -27,6 +27,10 @@ SOURCES = [
     ('Queen', '史莱姆皇后', 'Emote_Boss_Queen_Slime.gif', 'Emote_Boss_Queen_Slime.gif'),
     ('Empress', '光之女皇', 'Empress_of_Light.gif', '255px-Empress_of_Light.gif'),
 ]
+STILLS = {'Eater': ('Eater_of_Worlds.png', '170px-Eater_of_Worlds.png'),
+          'Skeleton': ('Skeletron.png', '255px-Skeletron.png'),
+          'Destroyer': ('The_Destroyer.png', '255px-The_Destroyer.png'),
+          'Queen': ('Queen_Slime.png', 'Queen_Slime.png')}
 
 def main():
     DEST.mkdir(parents=True, exist_ok=True)
@@ -55,6 +59,21 @@ def main():
             atlas.paste(resized, (i % columns * 96 + (96 - size[0]) // 2, i // columns * 96 + (96 - size[1]) // 2))
         atlas.save(DEST / f'{key}.png')
         cell = atlas.crop((0, 0, 96, 96))
+        still = None
+        if key in STILLS:
+            original_name, local_name = STILLS[key]
+            original = DOWNLOADS / local_name
+            shutil.copy2(original, originals / original_name)
+            body = Image.open(original).convert('RGBA')
+            body = body.crop(body.getbbox())
+            body.thumbnail((88, 88), Image.Resampling.NEAREST)
+            clear = Image.new('RGBA', (96, 96))
+            clear.paste(body, ((96-body.width)//2, (96-body.height)//2))
+            clear.save(DEST / f'{key}Body.png')
+            cell = clear
+            still = dict(wikiFile=original_name, downloadedFile=local_name,
+                originalSha256=hashlib.sha256(original.read_bytes()).hexdigest(),
+                filePage='https://terraria.wiki.gg/wiki/File:' + original_name)
         sheet.paste(cell, (n % 5 * 150 + 27, n // 5 * 140 + 10), cell)
         ImageDraw.Draw(sheet).text((n % 5 * 150 + 20, n // 5 * 140 + 112), f'{key}: {len(frames)} frames', fill=(225, 230, 240))
         records.append(dict(key=key, name=name, wikiFile=wiki_file,
@@ -63,7 +82,7 @@ def main():
             downloadedFile=local, originalSha256=hashlib.sha256(source.read_bytes()).hexdigest(),
             atlasSha256=hashlib.sha256((DEST / f'{key}.png').read_bytes()).hexdigest(),
             frames=len(frames), durationsMs=durations, columns=columns,
-            mediaKind='animated emote' if wiki_file.startswith('Emote_') else 'animated boss sprite'))
+            body=still, mediaKind='static boss body with animated emote' if still else 'animated boss sprite'))
         declarations.append(f'        ["{key}"]=new("{key}",{columns},[{",".join(map(str,durations))}]),')
     manifest = dict(source='https://terraria.wiki.gg/zh/wiki/Boss',
         credit='Terraria / Re-Logic; animations hosted by the Official Terraria Wiki and its contributors.',

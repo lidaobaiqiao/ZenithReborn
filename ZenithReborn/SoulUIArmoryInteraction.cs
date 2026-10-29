@@ -24,10 +24,12 @@ public partial class SoulUI
     private static Item CandidateItem=>candidateIndex is >=0 and <50&&candidateReference!=null&&
         ReferenceEquals(Main.LocalPlayer.inventory[candidateIndex],candidateReference)&&SoulItem.CanHost(candidateReference)?candidateReference:null;
     public static void SelectArmoryPane(int value)=>armoryPane=Math.Clamp(value,0,2);
+    private static void ClearArmoryCandidate()
+    {candidateIndex=-1;candidateReference=null;armoryPreview=null;previewSlot=-1;}
     private static void ResetArmory()
     {
-        armoryPane=armoryScroll=armoryDetailScroll=0;candidateIndex=-1;candidateReference=null;
-        armoryPreview=null;previewSlot=-1;armoryFocusAt=UiTime;attunedAt=-10;attunedItem=null;coreFlows.Clear();libraryFilter=0;armorySortDamage=false;
+        armoryPane=armoryScroll=armoryDetailScroll=0;ClearArmoryCandidate();
+        armoryFocusAt=UiTime;attunedAt=-10;attunedItem=null;coreFlows.Clear();libraryFilter=0;armorySortDamage=false;
     }
     public static bool SelectArmoryCandidate(int inventorySlot)
     {
@@ -52,7 +54,7 @@ public partial class SoulUI
         attunedItem=incoming;attunedSlot=selected;attunedFrom=from;attunedAt=UiTime;
         // 剑库确认的剑在0.55秒后到达剑位，随后流光从剑位流入中央。
         TriggerCoreFlow(selected,attunedAt+.55);
-        candidateIndex=-1;candidateReference=null;armoryPreview=null;armoryFocusAt=UiTime;
+        ClearArmoryCandidate();armoryFocusAt=UiTime;
         if(ArmoryLayout.Compact)armoryPane=0;
         return true;
     }

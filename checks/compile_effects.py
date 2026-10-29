@@ -32,7 +32,7 @@ for source in sorted(folder.glob('*.fx')):
     inputs=[]
     def include(match):
         name=match.group(1).decode('ascii')
-        if name not in {'ZRSwordSpaceWarp.fxh'}:
+        if name not in {'ZRSwordSpaceWarp.fxh','ZRClearGlass.fxh','ZRSwordHighlights.fxh','ZRLiquidGlass.fxh'}:
             raise RuntimeError(f'{source.name}: 未登记的着色器模块 {name}')
         part=(folder/name).read_bytes()
         if b'#include' in part:raise RuntimeError(f'{name}: 不允许间接包含')
@@ -50,7 +50,9 @@ for source in sorted(folder.glob('*.fx')):
     if diagnostics:
         print(diagnostics)
     target=source.with_suffix('.fxc')
-    target.write_bytes(compiled)
+    # UI 构建仍验证着色器编译结果，但不反复覆盖完全相同的生产二进制。
+    if not target.exists() or target.read_bytes()!=compiled:
+        target.write_bytes(compiled)
     records.append({'source':source.name,'sourceSha256':hashlib.sha256(data).hexdigest(),
         'compiled':target.name,'compiledSha256':hashlib.sha256(compiled).hexdigest(),
         'origin':'project-authored','compiler':'Microsoft D3DCompile / d3dcompiler_43 / fx_2_0',

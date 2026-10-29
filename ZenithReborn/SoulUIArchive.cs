@@ -80,12 +80,15 @@ public partial class SoulUI
                 if(TraitItem(trait)>0)InfoItem(TraitItem(trait),new(r.X+29,r.Center.Y),29,trait.Active?1:.5f);
                 else Glyph(CategoryGlyph(trait.Category),new(r.X+28,r.Center.Y),22,tint);
                 Text(Fit(trait.Title,r.Width-68,.8f),new(r.X+54,r.Y+9),trait.Active?InfoWhite:Muted,.8f);
-                InfoBadge((trait.Active?"已生效 · ":"待激活 · ")+SoulTraits.CategoryName(trait.Category),new(r.X+55,r.Y+35),trait.Active?tint:InfoQuiet);
+                string status=SoulBossUnlocks.TryCurse(trait.Key,out var rowCurse)?
+                    (soul.Attached?SoulCurses.StageName(soul.Curse(rowCurse)):"待附着"):(trait.Active?"已生效":"待激活");
+                InfoBadge(status+" · "+SoulTraits.CategoryName(trait.Category),new(r.X+55,r.Y+35),trait.Active?tint:InfoQuiet);
                 if(hover&&InfoPressed(r)){traitSelection=trait.Key;traitDetailScroll=0;detailStarted=UiTime;}
             }
         });
         InfoScrollMark(panes.List,traitListScroll,entries.Length*66,accent);
         var selectedTrait=entries.First(t=>t.Key==traitSelection);Color color=TraitColor(selectedTrait.Category);
+        var unlocks=SoulBossUnlocks.TryCurse(selectedTrait.Key,out var selectedCurse)?SoulBossUnlocks.Read(soul,selectedCurse):null;
         InfoSurface(panes.Detail,color);var viewport=new Rectangle(panes.Detail.X+16,panes.Detail.Y+12,panes.Detail.Width-32,Math.Max(1,panes.Detail.Height-24));
         int content=100;
         void Detail(bool render)
@@ -95,12 +98,18 @@ public partial class SoulUI
             {
                 Glyph(CategoryGlyph(selectedTrait.Category),new(viewport.X+15,top+17),23,color);
                 Text(Fit(selectedTrait.Title,viewport.Width-48,1f),new(viewport.X+38,top+1),InfoWhite*DetailReveal,1f);
-                InfoBadge(selectedTrait.Active?"当前寄宿条件已满足":"尚未满足激活条件",new(viewport.X+4,top+40),color);
+                string status=unlocks!=null?$"{(soul.Attached?"当前 · "+SoulCurses.StageName(soul.Curse(selectedCurse)):"待附着")}   |   个人铭刻 {unlocks.Count}/{unlocks.Total}":
+                    selectedTrait.Active?"当前寄宿条件已满足":"尚未满足激活条件";
+                InfoBadge(status,new(viewport.X+4,top+40),color);
                 Line(new(viewport.X,top+69),new(viewport.Right,top+69),color*.18f);
             }
             int bottom=InfoLines(selectedTrait.Description,viewport.X+3,top+88,viewport.Width-6,Ink*DetailReveal,.78f,draw:render)+24;
-            if(render)Text("激活条件",new(viewport.X+3,bottom),color,.82f);
-            bottom=InfoLines(selectedTrait.Requirement,viewport.X+3,bottom+34,viewport.Width-6,InfoQuiet*DetailReveal,.75f,draw:render)+22;
+            if(unlocks!=null)bottom=DrawBossUnlocks(unlocks,viewport.X+3,bottom,viewport.Width-6,render);
+            else
+            {
+                if(render)Text("激活条件",new(viewport.X+3,bottom),color,.82f);
+                bottom=InfoLines(selectedTrait.Requirement,viewport.X+3,bottom+34,viewport.Width-6,InfoQuiet*DetailReveal,.75f,draw:render)+22;
+            }
             content=bottom-top;
         }
         Detail(false);traitDetailScroll=InfoScroll(viewport,traitDetailScroll,content);

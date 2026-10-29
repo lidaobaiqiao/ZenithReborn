@@ -14,7 +14,7 @@ public partial class SoulUI
     private static double detailStarted;
     private static int environmentFocus=1;
     private static void ResetInformation()
-    {infoMotion.Clear();traitSelection="";traitListScroll=traitDetailScroll=environmentGridScroll=environmentDetailScroll=0;environmentFocus=1;detailStarted=0;activeTraitsOnly=true;environmentHelp=false;memoryTab=growthScroll=growthContentHeight=0;}
+    {infoMotion.Clear();traitSelection="";traitListScroll=traitDetailScroll=environmentGridScroll=environmentDetailScroll=0;environmentFocus=1;detailStarted=0;bossAnimationStarted=UiTime;activeTraitsOnly=true;environmentHelp=false;memoryTab=growthScroll=growthContentHeight=0;}
     private static float DetailReveal=>.2f+.8f*SoulInfoLayout.Ease((float)(UiTime-detailStarted)/.2f);
     private static float InfoHover(string key,bool target)
     {
@@ -22,8 +22,10 @@ public partial class SoulUI
         float next=SoulInfoLayout.Approach(previous.Item1,target?1:0,(float)(now-previous.Item2));
         infoMotion[key]=(next,now);return next;
     }
-    private static bool InfoVisible(Rectangle r)=>r.Intersects(ContentBounds());
-    private static bool InfoHovered(Rectangle r)=>r.Contains(Main.mouseX,Main.mouseY)&&ContentBounds().Contains(Main.mouseX,Main.mouseY);
+    private static Rectangle? infoClipBounds;
+    private static bool InfoVisible(Rectangle r)=>r.Intersects(ContentBounds())&&(!infoClipBounds.HasValue||r.Intersects(infoClipBounds.Value));
+    private static bool InfoHovered(Rectangle r)=>r.Contains(Main.mouseX,Main.mouseY)&&ContentBounds().Contains(Main.mouseX,Main.mouseY)&&
+        (!infoClipBounds.HasValue||infoClipBounds.Value.Contains(Main.mouseX,Main.mouseY));
     private static bool InfoPressed(Rectangle r)
     {
         if(!InfoHovered(r)||!Main.mouseLeft||!Main.mouseLeftRelease)return false;
@@ -47,9 +49,13 @@ public partial class SoulUI
         Vector2 end=Vector2.Transform(new Vector2(bounds.Right,bounds.Bottom),Main.UIScaleMatrix);
         Main.spriteBatch.End();device.ScissorRectangle=Rectangle.Intersect(previous,new((int)top.X,(int)top.Y,(int)Math.Ceiling(end.X-top.X),(int)Math.Ceiling(end.Y-top.Y)));
         Main.spriteBatch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,Main.DefaultSamplerState,DepthStencilState.None,clipState,null,Main.UIScaleMatrix);
+        // 鼠标命中必须与绘制裁剪使用同一块界面区域；嵌套裁剪结束后恢复外层范围。
+        Rectangle? previousInfoClip=infoClipBounds;
+        infoClipBounds=previousInfoClip.HasValue?Rectangle.Intersect(previousInfoClip.Value,bounds):bounds;
         try{draw();}
         finally
         {
+            infoClipBounds=previousInfoClip;
             Main.spriteBatch.End();device.ScissorRectangle=previous;
             Main.spriteBatch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,Main.DefaultSamplerState,DepthStencilState.None,clipState,null,Main.UIScaleMatrix);
         }

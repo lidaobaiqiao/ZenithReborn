@@ -21,11 +21,16 @@ float4 uMoreMaps;
 float4 uMaskFrame;
 float2 uSceneTexel;
 float uTime;
+float uSsrStrength;
 float uDissolve;
 float uMode;
 float uUseBrush;
 float uUseNoise;
 float uUseLayerMask;
+// 液态玻璃：在基面法线之上叠加圆滑条带起伏，只驱动折射方向。
+// 0 时完全退回原来的平整玻璃，便于逐项对照。
+float uRidgeStrength;
+#include "ZRLiquidGlass.fxh"
 float4 uDetailA[4];
 float4 uDetailB[4];
 float4 uDetailColor[4];
@@ -186,16 +191,29 @@ float4 Shade(PixelInput input):COLOR0
     float3 reflected=lighting/(1+lighting);
     float3 absorption=exp(-(1-uAbsorption.rgb)*uAbsorption.a*uShape.w/32);
     float3 throughput=absorption*(1-fv)*(1-metal)*uOptics.w*(1-volumeAlpha)*(1-uEmission.w*coatF);
-    float4 normalOutput=float4((n.xy*.5+.5)*coverage,rough*coverage,coverage);
+    // 液态玻璃：圆滑条带把基面顶起来，折射方向随曲面倾斜。
+    // 只改折射用的法线，高光与环境反射仍走基面法线 n，
+    // 于是平整玻璃的反射保持不变，可以单独判断折射形态对不对。
+    float3 refrN=n;
+    if(uRidgeStrength>0.0)
+    {
+        float2 ridge=ZRGlassRidges(s,h,uTime)*uRidgeStrength;
+        refrN=normalize(float3(n.xy+input.Across*ridge.y+input.Along*ridge.x,max(.01,n.z)));
+    }
+    float4 normalOutput=float4((refrN.xy*.5+.5)*coverage,rough*coverage,coverage);
     if(uMode>.5&&uMode<1.5)return normalOutput;
     if(uMode>1.5&&uMode<2.5)return float4(reflected*coverage,coverage);
-    if(uMode>2.5&&uMode<3.5)return float4(float3((uOptics.z-1)/1.5,uShape.w/128,uOptics.w)*coverage,coverage);
+    // 与默认剑流共用属性约定：第三通道保存反射率乘该材质的屏幕反射强度，按0～2编码。
+    if(uMode>2.5&&uMode<3.5)return float4(float3((uOptics.z-1)/1.5,uShape.w/128,dot(fv,float3(.2126,.7152,.0722))*.5)*coverage,coverage);
     if(uMode>3.5)return float4(throughput*coverage,coverage);
-    float3 ray=refract(-v,n,1/uOptics.z);
+    float3 ray=refract(-v,refrN,1/uOptics.z);
     float2 sampleUV=clamp(input.SceneUV+ray.xy/max(abs(ray.z),.1)*uShape.w*uSceneTexel,uSceneTexel*.5,1-uSceneTexel*.5);
-    float2 blur=uSceneTexel*rough*2;
+    // 玻璃即使宏观光滑也有微小散射；粗糙度为 0 时折射成了硬拷贝，
+    // 弯折处会出现锯齿。给一个最小软化量，不额外增加采样次数。
+    float refractionBlur=saturate(.15+rough*.85);
+    float2 blur=uSceneTexel*(1.5+rough*3.0);
     float3 scene=tex2D(sceneSampler,sampleUV).rgb;
-    scene=lerp(scene,(tex2D(sceneSampler,sampleUV+blur).rgb+tex2D(sceneSampler,sampleUV-blur).rgb)*.5,rough);
+    scene=lerp(scene,(tex2D(sceneSampler,sampleUV+blur).rgb+tex2D(sceneSampler,sampleUV-blur).rgb)*.5,refractionBlur);
     float3 color=pow(saturate(reflected+pow(max(scene,0),2.2)*throughput),1/2.2);
     return float4(color*coverage,coverage);
 }

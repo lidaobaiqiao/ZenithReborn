@@ -50,7 +50,7 @@ public partial class SoulUI : ModSystem
         if (ReferenceEquals(editing, soul)) { Sync(editing); editing = null; ResetArmory(); return; }
         if (editing != null) Sync(editing);
         editing = soul; selected = 0; catalogFilter = 0; feedback = ""; SelectPage(0);
-        openedAt=UiTime;libraryScroll=0;ResetInformation();ResetArmory();growthFocus=-1; Array.Fill(lastSlotType,-1); Array.Fill(slotLit,0f); Main.playerInventory = true;
+        openedAt=UiTime;libraryScroll=0;ResetInformation();ResetArmory();growthFocus=sealFocus=-1; Array.Fill(lastSlotType,-1); Array.Fill(slotLit,0f); Main.playerInventory = true;
         SoundEngine.PlaySound(SoundID.MenuOpen);
     }
     public static void Sync(SoulItem soul)

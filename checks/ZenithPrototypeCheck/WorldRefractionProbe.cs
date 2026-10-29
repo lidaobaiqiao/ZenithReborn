@@ -63,6 +63,7 @@ public class WorldRefractionProbe : ModSystem
             spaceWarpRadius=self.Shader.Parameters["uSpaceWarpRadius"].GetValueSingle(),
             spaceWarpEnabled=self.Shader.Parameters["uGlassPartSpaceWarp"].GetValueSingle(),
             ready=self.Shader.Parameters["uMaskReady"].GetValueSingle(),
+            materialPropertiesReady=self.Shader.Parameters["uHasMaterialProperties"].GetValueSingle(),
             normalBoundToSlot1=ReferenceEquals(device.Textures[1],SoulSceneRefraction.NormalMask),
             optics=SwordFlowMaterial.DefaultOptics
         };
@@ -100,6 +101,14 @@ public class WorldRefractionProbe : ModSystem
         }
         finally{probeIor=null;probeWarp=null;foreach(var texture in testProperties)texture.Dispose();testProperties.Clear();}
         var masks=new Color[before.Length];SoulSceneRefraction.NormalMask.GetData(masks);
+        var materialBuffers=new Dictionary<string,int>();
+        foreach(string field in new[]{"surfaceMask","materialProperties","materialTransmission"})
+        {
+            var texture=typeof(SoulSceneRefraction).GetField(field,System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic)?.GetValue(null) as Texture2D;
+            if(texture==null)continue;
+            var data=GlassBufferReadback.Read(texture);
+            materialBuffers[field]=masks.Zip(data).Count(p=>Math.Abs(p.First.A-p.Second.A)>1);
+        }
         long iorDifference=0;int changedPixels=0,outsideChangedPixels=0;
         for(int i=0;i<images[0].Length;i++)
         {
@@ -119,7 +128,7 @@ public class WorldRefractionProbe : ModSystem
             parameters,actualNativeFilter=true,sameFrameFullNativePipeline=true,applyCount,
             testedPackageSha256=Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod")))).ToLowerInvariant(),
             probeTick=ModContent.GetInstance<SoulFlightWorldCheck>().VisualTick,
-            iorDifference,changedPixels,outsideChangedPixels,spaceWarp,
+            iorDifference,changedPixels,outsideChangedPixels,spaceWarp,materialBuffers,
             passed=applyCount==4&&iorDifference>100000&&changedPixels>1000&&outsideChangedPixels==0&&
                 spaceWarp.OutsideBladeChangedPixels>100&&spaceWarp.BeyondReachChangedPixels==0
         },new JsonSerializerOptions{WriteIndented=true}));

@@ -39,6 +39,7 @@
         120
       ],
       "columns": 5,
+      "body": null,
       "mediaKind": "animated boss sprite"
     },
     {
@@ -78,6 +79,7 @@
         120
       ],
       "columns": 5,
+      "body": null,
       "mediaKind": "animated boss sprite"
     },
     {
@@ -95,7 +97,13 @@
         500
       ],
       "columns": 2,
-      "mediaKind": "animated emote"
+      "body": {
+        "wikiFile": "Eater_of_Worlds.png",
+        "downloadedFile": "170px-Eater_of_Worlds.png",
+        "originalSha256": "797331a71c1765f825c79e5d02126608a25056fe6165bff3474ab51b368deb73",
+        "filePage": "https://terraria.wiki.gg/wiki/File:Eater_of_Worlds.png"
+      },
+      "mediaKind": "static boss body with animated emote"
     },
     {
       "key": "Skeleton",
@@ -112,7 +120,13 @@
         500
       ],
       "columns": 2,
-      "mediaKind": "animated emote"
+      "body": {
+        "wikiFile": "Skeletron.png",
+        "downloadedFile": "255px-Skeletron.png",
+        "originalSha256": "9fb6c0d92a13eebe27c502213a4aa52883564f05535bcb6e375f527a68a64001",
+        "filePage": "https://terraria.wiki.gg/wiki/File:Skeletron.png"
+      },
+      "mediaKind": "static boss body with animated emote"
     },
     {
       "key": "Cultist",
@@ -130,6 +144,7 @@
         100
       ],
       "columns": 2,
+      "body": null,
       "mediaKind": "animated boss sprite"
     },
     {
@@ -177,6 +192,7 @@
         70
       ],
       "columns": 6,
+      "body": null,
       "mediaKind": "animated boss sprite"
     },
     {
@@ -200,6 +216,7 @@
         80
       ],
       "columns": 3,
+      "body": null,
       "mediaKind": "animated boss sprite"
     },
     {
@@ -247,6 +264,7 @@
         110
       ],
       "columns": 6,
+      "body": null,
       "mediaKind": "animated boss sprite"
     },
     {
@@ -264,6 +282,7 @@
         1800
       ],
       "columns": 2,
+      "body": null,
       "mediaKind": "animated boss sprite"
     },
     {
@@ -281,7 +300,13 @@
         500
       ],
       "columns": 2,
-      "mediaKind": "animated emote"
+      "body": {
+        "wikiFile": "The_Destroyer.png",
+        "downloadedFile": "255px-The_Destroyer.png",
+        "originalSha256": "42fc1719398491e8622e06c529faba254a578ef56206f765d1ff9ff5083661cf",
+        "filePage": "https://terraria.wiki.gg/wiki/File:The_Destroyer.png"
+      },
+      "mediaKind": "static boss body with animated emote"
     },
     {
       "key": "Twins",
@@ -314,6 +339,7 @@
         150
       ],
       "columns": 5,
+      "body": null,
       "mediaKind": "animated boss sprite"
     },
     {
@@ -359,6 +385,7 @@
         40
       ],
       "columns": 6,
+      "body": null,
       "mediaKind": "animated boss sprite"
     },
     {
@@ -404,6 +431,7 @@
         40
       ],
       "columns": 6,
+      "body": null,
       "mediaKind": "animated boss sprite"
     },
     {
@@ -421,7 +449,13 @@
         500
       ],
       "columns": 2,
-      "mediaKind": "animated emote"
+      "body": {
+        "wikiFile": "Queen_Slime.png",
+        "downloadedFile": "Queen_Slime.png",
+        "originalSha256": "989c9509a59dd8ccb7210fc26a21a44b2ec5affee2098d66081fe66545a7b626",
+        "filePage": "https://terraria.wiki.gg/wiki/File:Queen_Slime.png"
+      },
+      "mediaKind": "static boss body with animated emote"
     },
     {
       "key": "Empress",
@@ -499,6 +533,7 @@
         60
       ],
       "columns": 8,
+      "body": null,
       "mediaKind": "animated boss sprite"
     }
   ]

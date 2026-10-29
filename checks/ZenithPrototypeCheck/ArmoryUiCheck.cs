@@ -35,6 +35,7 @@ internal static class ArmoryUiCheck
                 check(layout.Compact||!layout.Library.Intersects(layout.Detail),"宽屏的剑库与详情不重叠");
                 check(layout.Detail.Contains(layout.Confirm)&&layout.Detail.Contains(layout.Return)&&!layout.Confirm.Intersects(layout.Return),"短视口改为并排操作，确认与取回始终可达");
                 check(layout.Detail.Contains(layout.DetailBody)&&layout.Library.Contains(layout.LibraryList),"详情和剑库滚动区域始终位于各自面板内");
+                check(!layout.DetailBody.Intersects(layout.Confirm)&&!layout.DetailBody.Intersects(layout.Return),"滚动详情与固定操作的可见区域保持分离");
             }
             Main.screenWidth=1440;Main.screenHeight=900;SoulUI.SelectSlot(0);
             byte[] Snapshot(){using var m=new MemoryStream();soul.NetSend(new BinaryWriter(m));return m.ToArray();}
@@ -44,6 +45,11 @@ internal static class ArmoryUiCheck
             var preview=SoulArmoryPreview.Evaluate(soul,0,candidate);
             check(preview.Allowed&&before.SequenceEqual(Snapshot())&&ReferenceEquals(soul.Hosts[0],original)&&ReferenceEquals(player.inventory[1],candidate),"换入计算不写真实剑魂快照、收藏或背包物品");
             check(SoulUI.SelectArmoryCandidate(1)&&before.SequenceEqual(Snapshot()),"选择候选本身只改变界面状态");
+            SoulUI.SelectSlot(0);
+            check(SoulUI.CandidateInventorySlot==-1&&SoulUI.SelectedSlot==0&&before.SequenceEqual(Snapshot()),"再次选择同一剑位退出候选预览，不改变真实物品");
+            SoulUI.SelectArmoryCandidate(1);SoulUI.SelectSlot(1);
+            check(SoulUI.CandidateInventorySlot==-1&&SoulUI.SelectedSlot==1&&before.SequenceEqual(Snapshot()),"选择其他剑位退出候选预览并显示当前剑位");
+            SoulUI.SelectSlot(0);SoulUI.SelectArmoryCandidate(1);
             check(SoulUI.ConfirmArmoryCandidate(out _)&&ReferenceEquals(soul.Hosts[0],candidate)&&ReferenceEquals(player.inventory[1],original)&&candidate.prefix==PrefixID.Legendary,"确认交换真实物品并保持前缀，原武器回原背包格");
             check(SoulUI.CandidateInventorySlot==-1,"完成寄宿后清除候选，不能重复提交旧对象");
             SoulUI.SelectArmoryCandidate(1);player.inventory[1]=new Item(ItemID.Starfury);

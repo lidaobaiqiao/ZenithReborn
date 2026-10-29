@@ -5,10 +5,10 @@
   "parameters": {
     "Ior": 1.5,
     "Roughness": 0.0,
-    "Metallic": 0.25,
+    "Metallic": 0.0,
     "Transmission": 0.55,
     "Opacity": 0.1,
-    "Thickness": 72.0,
+    "Thickness": 18.0,
     "Dispersion": 0.35,
     "SsrStrength": 0.6,
     "EmissionStrength": 0.55,

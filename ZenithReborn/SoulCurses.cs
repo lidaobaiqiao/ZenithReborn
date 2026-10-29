@@ -9,7 +9,7 @@ namespace ZenithReborn;
 public enum SoulCurse { Binding, Switching, Sheathing, Barrier, Solitude, Bluntness }
 public enum CurseStage { Cursed, Weakened, Released, Blessed }
 
-public static class SoulCurses
+public static partial class SoulCurses
 {
     public const int All=(1<<18)-1, AllReleased=63;
     public const int Eye=1,Brain=2,Eater=4,Skeleton=8,Cultist=16,Moon=32,Bee=64,Flower=128,Temple=256,
@@ -32,8 +32,9 @@ public static class SoulCurses
     public static CurseStage RecordedStage(SoulItem soul,SoulCurse curse)
     {
         int count=Count(soul,curse),total=Groups[(int)curse].Length;
-        return count==total?CurseStage.Blessed:count>=total-1?CurseStage.Released:count==1?CurseStage.Weakened:CurseStage.Cursed;
+        return StageForCount(count,total);
     }
+    public static CurseStage StageForCount(int count,int total)=>count>=total?CurseStage.Blessed:count>=total-1?CurseStage.Released:count==1?CurseStage.Weakened:CurseStage.Cursed;
     public static CurseStage Stage(SoulItem soul,SoulCurse curse)
     {
         var actual=RecordedStage(soul,curse);
@@ -51,40 +52,15 @@ public static class SoulCurses
         return edge*factor;
     }
     // 独行：初始2把，削弱3把（走原生发射点，与原版节奏一致），解除4把起走均匀分布。
-    public static int Blades(SoulItem soul)=>Stage(soul,SoulCurse.Solitude) switch{
+    public static int Blades(SoulItem soul)=>BladesAtStage(soul,Stage(soul,SoulCurse.Solitude));
+    public static int BladesAtStage(SoulItem soul,CurseStage stage)=>stage switch{
         CurseStage.Cursed=>2,CurseStage.Weakened=>3,CurseStage.Released=>4,
         _=> (soul.Seals&Moon)!=0?10:(soul.Seals&Cultist)!=0?8:(soul.Seals&Temple)!=0?7:(soul.Seals&Flower)!=0?6:4};
-    public static int HitLimit(SoulItem soul)=>Stage(soul,SoulCurse.Bluntness) switch{CurseStage.Cursed=>3,CurseStage.Weakened=>5,_=>int.MaxValue};
+    public static int HitLimit(SoulItem soul)=>HitLimitAtStage(Stage(soul,SoulCurse.Bluntness));
+    public static int HitLimitAtStage(CurseStage stage)=>stage switch{CurseStage.Cursed=>3,CurseStage.Weakened=>5,_=>int.MaxValue};
     // 阻隔：诅咒态允许穿过约2格厚的实体地形，削弱态约4格，解除后不再阻断。
-    public static int TerrainAllowance(SoulItem soul)=>Stage(soul,SoulCurse.Barrier) switch{CurseStage.Cursed=>32,CurseStage.Weakened=>64,_=>int.MaxValue};
-    public static string Description(SoulItem soul,SoulCurse curse)
-    {
-        var stage=Stage(soul,curse);bool free=stage>=CurseStage.Released;
-        string effect=curse switch{
-            SoulCurse.Binding=>stage==CurseStage.Blessed?"御剑距离不再设上限，仍可鼠标自由选点。":free?"御剑距离最少到屏幕左右边界，保留正常鼠标选点。":"御剑距离最少能打到屏幕左右边界的中点；仍可鼠标自由选点。",
-            SoulCurse.Switching=>free?"所有有效寄宿武器的特性正常生效，全部有效主剑可参与百炼飞剑。":"普通特性仅首把主剑生效；百炼飞剑例外允许前4把有效主剑计入矿材并各自首击积攒，其余主剑仍保留独立伤害。支援仍受普通特性限制。",
-            SoulCurse.Sheathing=>free?"新轮不打断旧轮，主剑各自完成攻击。":"开始新轮时，旧轮主剑提前停止攻击并淡出；不锁攻击键。",
-            SoulCurse.Barrier=>free?"主剑正常穿越实体地形。":$"每段连续实体地形可穿过{TerrainAllowance(soul)}像素，超出则退出攻击；背景墙、平台不阻断。",
-            SoulCurse.Solitude=>$"每轮最多{Blades(soul)}把主剑，不足留空。",
-            _=>stage==CurseStage.Blessed?"本体和三个剑影每次均造成100%伤害，按正常8帧间隔重复命中。":free?
-                "本体100%；三个剑影逐次乘0.8，分别为80%、64%、51.2%伤害，按正常8帧间隔重复命中。":
-                $"本体100%；后续三个剑影各造成20%伤害。同剑本趟对同目标最多{HitLimit(soul)}次直接命中，不限制沿途其他敌人。"};
-        if(stage==CurseStage.Blessed)effect+=" "+(curse switch{
-            SoulCurse.Binding=>"战斗约15秒蓄满御剑条，满条保留；按独立御剑键（默认O）手动开启10秒，视野翻倍，按命中距离最高独立增伤50%。",
-            SoulCurse.Switching=>"百刃接力：不同寄宿主剑首击同一敌人接力，每层强化后续首击特性10%，最多5层；3秒断连清空，同剑帧伤不叠层。",
-            SoulCurse.Sheathing=>"归鞘留锋：主剑完整往返后为自身存1次强化，下次登场首击释放50%自身伤害的短距离斩痕。",
-            SoulCurse.Barrier=>"破障：每把主剑穿过实体后，下次命中附加4秒破甲（15护甲穿透），每剑只触发一次。",
-            SoulCurse.Bluntness=>"连斩：剑影不再衰减，所有伤害单元保持所属主剑的全量伤害。",
-            _=>""});
-        if(stage==CurseStage.Blessed && curse==SoulCurse.Solitude)effect+=" 三王后4把，世花6、石巨人7、教徒8、月总10；只取此剑魂铭刻。";
-        if((soul.LegacyReleased&(1<<(int)curse))!=0 && RecordedStage(soul,curse)<CurseStage.Released)effect+=" 旧档能力兼容解咒，不代表补齐Boss铭刻或祝福。";
-        return effect;
-    }
-    public static string Requirement(SoulItem soul,SoulCurse curse)
-    {
-        int i=(int)curse;string marks=string.Join("、",Groups[i].Select((b,n)=>((soul.Seals&b)==b?"✓":"○")+BossNames[i][n]));
-        return marks+"；"+(Groups[i].Length==2?"第一位解除，第二位祝福。":"第一位削弱，第二位解除，第三位祝福。");
-    }
+    public static int TerrainAllowance(SoulItem soul)=>TerrainAllowanceAtStage(Stage(soul,SoulCurse.Barrier));
+    public static int TerrainAllowanceAtStage(CurseStage stage)=>stage switch{CurseStage.Cursed=>32,CurseStage.Weakened=>64,_=>int.MaxValue};
     // 只迁移能明确辨认的个人击杀记录；旧邪恶标记无法区分脑和世吞，不分配给任一铭刻。
     public static int FromOldKills(int kills)
     {

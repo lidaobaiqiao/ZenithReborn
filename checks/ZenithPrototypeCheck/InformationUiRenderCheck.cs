@@ -41,9 +41,10 @@ public class InformationUiRenderCheck : ModSystem
             SoulUI.DomainMode=true;SoulUI.Open(soul);Main.mouseItem=new Item();Main.mouseLeft=Main.mouseLeftRelease=false;
             byte[] Snapshot(){using var m=new MemoryStream();soul.NetSend(new BinaryWriter(m));return m.ToArray();}
             byte[] before=Snapshot();var images=new List<string>();var draw=typeof(SoulUI).GetMethod("Draw",Hidden);
-            void Render(string name,int page,int width=1440,int height=900,bool activeOnly=true,int group=0,string selection="",int filter=0,Point? click=null,bool continuation=false,float? age=null,float? opening=null)
+            void Render(string name,int page,int width=1440,int height=900,bool activeOnly=true,int group=0,string selection="",int filter=0,Point? click=null,bool continuation=false,float? age=null,float? opening=null,float? bossTime=null,int? detailOffset=null)
             {
-                Main.screenWidth=width;Main.screenHeight=height;Main.mouseX=Main.mouseY=-100;
+                // 正式 UI 层已经换成界面单位；离屏夹具也必须先除缩放，目标纹理仍用物理像素。
+                Main.screenWidth=(int)(width/Main.UIScale);Main.screenHeight=(int)(height/Main.UIScale);Main.mouseX=Main.mouseY=-100;
                 Field("<HoveredSlotRequirement>k__BackingField","");
                 if(!continuation){SoulUI.SelectPage(page);SoulUI.SelectTraitScope(activeOnly);SoulUI.SelectTraitCategory(filter);Field("traitSelection",selection);Field("memoryTab",group);Field("scroll",0);}
                 Main.mouseLeft=Main.mouseLeftRelease=click.HasValue;
@@ -51,12 +52,52 @@ public class InformationUiRenderCheck : ModSystem
                 double now=System.Diagnostics.Stopwatch.GetTimestamp()/(double)System.Diagnostics.Stopwatch.Frequency;
                 Field("pageStarted",now-1);Field("openedAt",now-(opening??3));Field("detailStarted",now-1);Field("armoryFocusAt",now-1);
                 if(age.HasValue)Field("attunedAt",now-age.Value);
+                if(bossTime.HasValue)Field("bossAnimationStarted",now-bossTime.Value);
+                if(detailOffset.HasValue)Field("traitDetailScroll",detailOffset.Value);
                 using var target=new RenderTarget2D(device,width,height);device.SetRenderTarget(target);device.Clear(Color.Black);
                 Main.spriteBatch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,Main.DefaultSamplerState,
                     DepthStencilState.None,RasterizerState.CullNone,null,Main.UIScaleMatrix);
                 draw.Invoke(null,null);Main.spriteBatch.End();device.SetRenderTarget(null);
                 string relative=name+".png",path=Path.Combine(root,relative);Directory.CreateDirectory(Path.GetDirectoryName(path));
                 using(var png=File.Create(path))target.SaveAsPng(png,width,height);images.Add(relative);
+            }
+            if(Environment.GetEnvironmentVariable("ZENITH_ARMORY_INTERACTION_GPU")=="1")
+            {
+                var interaction=ArmoryInteractionRenderCheck.Run(soul,player,(name,width,height,click)=>
+                    Render(name,0,width,height,click:click,continuation:true),out bool interactionPassed);
+                Render("24-trait-row",SoulUI.TraitsPage,activeOnly:false,filter:2,click:new Point(110,285));
+                bool traitRow=SoulUI.SelectedTraitKey=="ore-tier-2";
+                Field("growthFocus",-1);Render("25-growth-node",2,click:new Point(100,320));
+                bool growthNode=(int)typeof(SoulUI).GetField("growthFocus",Hidden).GetValue(null)==0;
+                Field("sealFocus",-1);Render("26-seal-card",2,group:2,click:new Point(700,320));
+                bool sealCard=(int)typeof(SoulUI).GetField("sealFocus",Hidden).GetValue(null)==1;
+                var environmentBefore=soul.DomainEnvironment;
+                Render("27-environment",SoulUI.EnvironmentPage,click:new Point(210,176));
+                bool environment=(int)typeof(SoulUI).GetField("environmentFocus",Hidden).GetValue(null)==2&&soul.DomainEnvironment==environmentBefore;
+                bool snapshotUnchanged=before.SequenceEqual(Snapshot());
+                bool interactionAndPagesPassed=interactionPassed&&traitRow&&growthNode&&sealCard&&environment&&snapshotUnchanged;
+                File.WriteAllText(Path.Combine(root,"gpu.json"),JsonSerializer.Serialize(new{
+                    passed=interactionAndPagesPassed,actualGpu=true,actualProductionUi=true,images,interaction,sharedClipPages=new{traitRow,growthNode,sealCard,environment},
+                    readOnlySoulSnapshotUnchanged=snapshotUnchanged,physicalMouseTested=false,worldCombatTested=false,multiplayerTested=false,
+                    testedPackageSha256=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+                        File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod")))).ToLowerInvariant()
+                },new JsonSerializerOptions{WriteIndented=true}));
+                Environment.Exit(interactionAndPagesPassed?0:1);return;
+            }
+            if(Environment.GetEnvironmentVariable("ZENITH_BOSS_UNLOCKS_GPU")=="1")
+            {
+                var bosses=BossUnlockUiRenderCheck.Run(soul,player,(name,curse,width,height,age,offset)=>
+                    Render(name,SoulUI.TraitsPage,width,height,activeOnly:false,selection:"curse-"+curse,filter:4,bossTime:age,detailOffset:offset),out bool bossPassed);
+                Field("sealFocus",1);Render("boss-growth-seals",2,group:2);
+                Render("boss-growth-seals-small",2,640,720,group:2);
+                bool snapshotUnchanged=before.SequenceEqual(Snapshot());
+                File.WriteAllText(Path.Combine(root,"gpu.json"),JsonSerializer.Serialize(new{
+                    passed=bossPassed&&snapshotUnchanged,actualGpu=true,actualProductionUi=true,images,bosses,
+                    readOnlySoulSnapshotUnchanged=snapshotUnchanged,physicalMouseTested=false,worldCombatTested=false,multiplayerTested=false,
+                    testedPackageSha256=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+                        File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod")))).ToLowerInvariant()
+                },new JsonSerializerOptions{WriteIndented=true}));
+                Environment.Exit(bossPassed&&snapshotUnchanged?0:1);return;
             }
             Render("armory",0);
             Render("armory-compact",0,960,720);

@@ -11,6 +11,21 @@ public static class VfxIsolation
     // 用户已允许恢复贴图与屏幕材质；切回纯代码排查时仍由这一处统一限制输入。
     public static bool PureCodeOnly => false;
 
+    // ================= 玻璃平面基线 =================
+    // 用户要求：先做出"一片平整玻璃"，不依赖任何外来贴图，再在它上面加条带起伏。
+    // 打开时强制关闭全部贴图输入、曲率与倾角，只保留形状、玻璃介质（IOR／透射／菲涅耳）
+    // 和背景折射。此时看到的应当是：一条干净的长条，透出被轻微压暗的背景，
+    // 边缘有菲涅耳提亮，表面完全平整——这是后续条带起伏的对照基准。
+    public static bool GlassPlaneOnly => true;
+
+    // 玻璃平面基线的不透明度。正式值 0.1 是为最终效果调的，太透，
+    // 单独看基底时几乎看不见"有没有这片玻璃"。
+    // 换算关系：opacity ≈ 0.66 × 这个值 × 形状，再经 smoothstep(0.01,0.48) 变成覆盖度。
+    // 0.1 → 覆盖度约 0.13（折射几乎无能量）；0.36 → 覆盖度约 0.5（玻璃可辨认）。
+    // 注意 (1-bodyOpacity) 在屏幕合成里是"背景保留比例"，抬高会压暗背景，
+    // 玻璃的可见度来自反射层而不是主体密度，所以这里只抬到可辨认，不追求实心。
+    public static float GlassOpacity(float normalOpacity) => GlassPlaneOnly ? .36f : normalOpacity;
+
     // ================= 一、渲染分支总闸 =================
     // 主飞剑拖尾带面
     public static bool SwordTrail = true;
@@ -89,34 +104,43 @@ public static class VfxIsolation
     public static readonly Part[] Parts =
     {
         new("uPartShape",             "P01 主体形状（关掉整条带面消失）", 1f),
-        new("uPartBend",              "P02 边界正弦弯曲", 1f),
-        new("uPartThreads",           "P03 尾部拉丝细缕", 1f),
-        new("uPartDepthGradient",     "P04 横向明暗梯度（刃侧亮、腹部暗）", 1f),
-        new("uPartProcField",         "P05 程序色场低频噪声", 1f),
-        new("uPartDissolve",          "P06 消融与回收前沿", 1f),
-        new("uPartRim",               "P07 消融前沿发光", 1f),
+        new("uPartBend",              "P02 边界正弦弯曲", 0f),
+        new("uPartThreads",           "P03 尾部拉丝细缕", 0f),
+        new("uPartDepthGradient",     "P04 横向明暗梯度（刃侧亮、腹部暗）", 0f),
+        new("uPartProcField",         "P05 程序色场低频噪声", 0f),
+        new("uPartDissolve",          "P06 消融与回收前沿", 0f),
+        new("uPartRim",               "P07 消融前沿发光", 0f),
         new("uPartCurvature",         "P08 双轴曲面法线", 1f),
         new("uPartBevel",             "P09 刃口倒角", 1f),
-        new("uPartRazorCore",         "P10 刃核白线", 1f),
-        new("uPartRazorHalo",         "P11 刃线中层光晕", 1f),
-        new("uPartRazorMist",         "P12 刃线外层弥散", 1f),
-        new("uPartInnerRim",          "P13 内缘线", 1f),
-        new("uPartBodyTint",          "P14 剑身色铺底", 1f),
-        new("uPartBandReflection",    "P15 沿迹带状反射", 1f),
+        new("uPartRazorCore",         "P10 刃核白线", 0f),
+        new("uPartRazorHalo",         "P11 刃线中层光晕", 0f),
+        new("uPartRazorMist",         "P12 刃线外层弥散", 0f),
+        new("uPartInnerRim",          "P13 内缘线", 0f),
+        new("uPartBodyTint",          "P14 剑身色铺底", 0f),
+        new("uPartBandReflection",    "P15 局部光面边缘", 0f),
         new("uPartGlassBase",         "P16 玻璃基底不透明度", 1f),
-        new("uPartGgxCore",           "P17 GGX 高光核", 1f),
-        new("uPartSoftLobe",          "P18 宽高光包络", 1f),
-        new("uPartWhiteShift",        "P19 高光亮色过渡", 1f),
-        new("uPartHighlightNoise",    "P20 噪声调制高光（需噪声图）", 1f, true),
-        new("uPartDispersion",        "P21 色散（需背景透射才可见）", 1f, true),
+        new("uPartGgxCore",           "P17 GGX 高光核", 0f),
+        new("uPartSoftLobe",          "P18 宽高光包络", 0f),
+        new("uPartWhiteShift",        "P19 高光亮色过渡", 0f),
+        new("uPartHighlightNoise",    "P20 噪声调制高光（需噪声图）", 0f, true),
+        new("uPartDispersion",        "P21 色散（需背景透射才可见）", 0f, true),
         new("uPartSceneTransmission", "P22 背景透射", 1f, true),
         new("uPartSsr",               "P23 屏幕空间反射", 1f, true),
-        new("uPartStripe",            "P24 沿迹条纹", 1f),
-        new("uPartEmission",          "P25 自发光（需自发光贴图）", 1f, true),
+        new("uPartStripe",            "P24 虚拟光面强度", 0f),
+        new("uPartEmission",          "P25 虚拟光源亮度", 0f),
+        new("uPartRidges",            "P26 液态玻璃条带起伏（只驱动折射）", 0f),
     };
 
     // 与 Parts 一一对应的当前值，下标即序号
     public static readonly float[] PartValues = Parts.Select(part => part.Allowed?part.Default:0f).ToArray();
+
+    // 按 uniform 名取当前值：供不走 Parts 循环的着色器入口（如材质核心）读取同一份开关状态。
+    public static float PartValue(string uniform)
+    {
+        for (int i = 0; i < Parts.Length && i < PartValues.Length; i++)
+            if (Parts[i].Uniform == uniform) return Parts[i].Allowed ? PartValues[i] : 0f;
+        return 0f;
+    }
 
     public static void SetAllParts(float value)
     {

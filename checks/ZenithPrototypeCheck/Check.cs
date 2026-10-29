@@ -35,11 +35,17 @@ public class Check : ModSystem
         if (string.IsNullOrEmpty(path)) return;
         try
         {
+            if(Environment.GetEnvironmentVariable("ZENITH_GLASS")=="1")
+            {
+                RibbonCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} focused checks; sword trail geometry, shared normals, lifecycle coverage and camera translation. Glass optical behavior is verified separately on the actual GPU; no full combat regression or live multiplayer validation.\n");
+                Console.WriteLine("ZENITH_GLASS_PASS "+checks);Environment.Exit(0);return;
+            }
             if(Environment.GetEnvironmentVariable("ZENITH_INFORMATION_UI")=="1")
             {
                 CurseFixture.NeutralDefaults=true;SoulUI.DomainMode=false;
                 UiCheck.Run(Assert);UiInputCheck.Run(Assert);WindowDragCheck.Run(Assert);
-                TraitCheck.Run(Assert);DomainCheck.Run(Assert);InformationUiCheck.Run(Assert);ArmoryUiCheck.Run(Assert);
+                TraitCheck.Run(Assert);DomainCheck.Run(Assert);InformationUiCheck.Run(Assert);ArmoryUiCheck.Run(Assert);BossUnlockUiCheck.Run(Assert);
                 File.WriteAllText(path,$"PASS: {checks} focused checks; information layouts, narrow viewport, catalogue filters and read-only browsing, UI input shields, hidden-slot rejection, exact inventory exchange and recovery, existing domain controls. Graphical capture recorded separately; no live multiplayer validation.\n");
                 Console.WriteLine("ZENITH_INFORMATION_UI_PASS "+checks);Environment.Exit(0);return;
             }

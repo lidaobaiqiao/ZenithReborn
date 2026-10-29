@@ -30,7 +30,14 @@ public partial class SoulUI
     public static Rectangle DifficultyBounds()=>DomainMode&&page==0?new(Main.screenWidth-(Main.screenWidth<700?146:250),20,Main.screenWidth<700?90:200,30):new(Math.Max(8,Main.screenWidth-298),18,222,36);
     public static int SelectedSlot=>selected;
     public static void SelectSlot(int slot)
-    {if(slot>=0 && (slot<25 || editing?.VisibleSlotIds.Contains(slot)==true)){if(selected!=slot){armoryFocusAt=UiTime;armoryDetailScroll=0;armoryPreview=null;}selected=slot;}}
+    {
+        if(slot<0 || (slot>=25 && editing?.VisibleSlotIds.Contains(slot)!=true))return;
+        // 点击剑阵是查看当前剑位，即使再次点击同一个剑位，也应退出剑库候选预览。
+        bool leavingPreview=DomainMode&&page==0&&candidateIndex>=0;
+        if(DomainMode&&page==0)ClearArmoryCandidate();
+        if(selected!=slot||leavingPreview){armoryFocusAt=UiTime;armoryDetailScroll=0;armoryPreview=null;}
+        selected=slot;
+    }
     public static IEnumerable<int> LibraryItems(Player player)=>Enumerable.Range(0,50)
         .Where(i=>SoulItem.CanHost(player.inventory[i]));
     // 直接交换复用原有剑位校验，卸下的剑进入腾出的背包格，不复制或增加容量。

@@ -104,7 +104,8 @@ public class SwordFlowMaterial : ModSystem
     private static void BindMap(EffectParameterCollection parameters,string flagKey,string samplerKey,string mapName)
     {
         Texture2D texture=null;
-        if(!VfxIsolation.PureCodeOnly)maps.TryGetValue(mapName,out texture);
+        // 玻璃平面基线不接任何外来贴图：先做出干净的平整玻璃，再谈条带。
+        if(!VfxIsolation.PureCodeOnly&&!VfxIsolation.GlassPlaneOnly)maps.TryGetValue(mapName,out texture);
         parameters[flagKey]?.SetValue(texture!=null?1f:0f);
         parameters[samplerKey]?.SetValue(texture??white);
     }
@@ -249,7 +250,6 @@ public class SwordFlowMaterial : ModSystem
                 width??Main.screenWidth,height??Main.screenHeight,unscaled,dissolve,SoulSceneRefraction.MaterialOutputMode);
             return;
         }
-        if(SoulSceneRefraction.MaterialOutputMode>=3)return;
         var parameters=effect.Parameters;
         var view=unscaled?Matrix.Identity:Main.GameViewMatrix.TransformationMatrix;
         parameters["transformMatrix"].SetValue(view*
@@ -279,10 +279,11 @@ public class SwordFlowMaterial : ModSystem
         // 贴图宽长比修正倍率：1 = 着色器按实际几何自动算，方形贴图不再被压成横条
         parameters["uMapAspectScale"]?.SetValue(1f);
         // 资源策略在加载与绑定两端生效；纯代码时只绑定运行时创建的1×1白色中性值。
-        parameters["uUseBrush"]?.SetValue(!VfxIsolation.PureCodeOnly&&defaultBrush!=null?1f:0f);
-        parameters["uBrushTex"]?.SetValue(VfxIsolation.PureCodeOnly?white:defaultBrush??white);
-        parameters["uUseNoise"]?.SetValue(!VfxIsolation.PureCodeOnly&&defaultNoise!=null?1f:0f);
-        parameters["uNoiseTex"]?.SetValue(VfxIsolation.PureCodeOnly?white:defaultNoise??white);
+        bool mapsOn=!VfxIsolation.PureCodeOnly&&!VfxIsolation.GlassPlaneOnly;
+        parameters["uUseBrush"]?.SetValue(mapsOn&&defaultBrush!=null?1f:0f);
+        parameters["uBrushTex"]?.SetValue(mapsOn?defaultBrush??white:white);
+        parameters["uUseNoise"]?.SetValue(mapsOn&&defaultNoise!=null?1f:0f);
+        parameters["uNoiseTex"]?.SetValue(mapsOn?defaultNoise??white:white);
         BindMap(parameters,"uUseNormal","uNormalTex","NormalMap");
         BindMap(parameters,"uUseSurface","uSurfaceTex","SurfaceMap");
         BindMap(parameters,"uUseHeight","uHeightTex","HeightMap");
@@ -296,8 +297,11 @@ public class SwordFlowMaterial : ModSystem
         // 带面构成逐项开关：集中表驱动下发，加新项只改 VfxIsolation.Parts 一处。
         for(int i=0;i<VfxIsolation.Parts.Length&&i<VfxIsolation.PartValues.Length;i++)
             parameters[VfxIsolation.Parts[i].Uniform]?.SetValue(VfxIsolation.Parts[i].Allowed?VfxIsolation.PartValues[i]:0f);
+        // 液态玻璃条带起伏的强度：1 ≈ 峰值坡度 45°，折射偏移随它线性变化。
+        parameters["uRidgeStrength"]?.SetValue(1f);
         parameters["uOutputRefractionMask"].SetValue(SoulSceneRefraction.BuildingMask?1f:0f);
         parameters["uOutputSurface"].SetValue(SoulSceneRefraction.BuildingSurface?1f:0f);
+        parameters["uMaterialOutput"].SetValue((float)SoulSceneRefraction.MaterialOutputMode);
         parameters["uSceneTexel"].SetValue(scene==null?Vector2.One:new Vector2(1f/scene.Width,1f/scene.Height));
         parameters["uSceneUvTransform"].SetValue(SoulSceneRefraction.UvTransform);
         parameters["uSeed"].SetValue(tint.R*.007f+tint.B*.003f);

@@ -35,7 +35,7 @@ float4 GlassScreen(float2 uv:TEXCOORD0):COLOR0
     float3 decoded=properties.rgb/max(properties.a,.001);
     float ior=lerp(uGlassIor,1+decoded.r*1.5,advanced);
     float thickness=lerp(uGlassThickness,decoded.g*128,advanced);
-    // 覆盖度定义玻璃是否存在；主体成熟后替换背景，羽化与消散区域才混回原图。
+    // 覆盖度定义玻璃是否存在，不能因为主体透明而改变轮廓。
     float coverage=smoothstep(0.01,0.48,mask.a)*uMaskReady*uGlassPartCoverage;
     coverage=lerp(coverage,mask.a*uMaskReady*uGlassPartCoverage,advanced);
     float2 normalXY=mask.rg/max(mask.a,0.001)*2-1;
@@ -58,11 +58,18 @@ float4 GlassScreen(float2 uv:TEXCOORD0):COLOR0
     float bodyOpacity=saturate(uGlassBodyOpacity);
     float3 reflectedRay=reflect(float3(0,0,-1),normal);
     float2 reflectionUV=clamp(uv+reflectedRay.xy*uGlassTexel*34.0,uGlassTexel*0.5,1-uGlassTexel*0.5);
-    float3 sceneReflection=pow(max(tex2D(screenSampler,reflectionUV).rgb,0),2.2)*saturate(coating.a)*uGlassSsrStrength;
+    // 逐像素反射权重已经包含其所属材质的开关和强度，不拿默认全局强度覆盖自定义材质。
+    // 全局反射强度此前只在非材质路径生效：材质路径直接取 decoded.b，
+    // 调 uGlassSsrStrength 没有任何效果。现在两条路径都乘它，成为真正的总控。
+    // decoded.b 里只放菲涅耳，不再重复乘材质自身强度，避免双重衰减。
+    float reflectance=lerp(saturate(coating.a),decoded.b*2,advanced)*uGlassSsrStrength;
+    float3 sceneReflection=pow(max(tex2D(screenSampler,reflectionUV).rgb,0),2.2)*reflectance*uGlassPartCoating;
     float3 glass=pow(saturate(pow(max(transmitted.rgb,0),2.2)*transmittance*(1-saturate(coating.a))*(1-bodyOpacity)
         +max(coating.rgb,0)+sceneReflection),1/2.2);
-    float3 throughput=tex2D(transmissionSampler,uv).rgb/max(mask.a,.001);
-    float3 advancedGlass=pow(saturate(coating.rgb+pow(max(transmitted.rgb,0),2.2)*throughput),1/2.2);
+    float4 transmittedEnergy=tex2D(transmissionSampler,uv);
+    float3 throughput=transmittedEnergy.rgb/max(transmittedEnergy.a,.001);
+    throughput=lerp(float3(1,1,1),throughput,uGlassPartTransmittance);
+    float3 advancedGlass=pow(saturate(coating.rgb+sceneReflection+pow(max(transmitted.rgb,0),2.2)*throughput),1/2.2);
     glass=lerp(glass,advancedGlass,advanced);
     // 泛光只扩散材质自身的亮部，不把白天背景当作白色笔刷叠到透明玻璃上。
     // 按最大通道提取亮部并保留各通道比例，避免逐通道截断洗掉剑色。

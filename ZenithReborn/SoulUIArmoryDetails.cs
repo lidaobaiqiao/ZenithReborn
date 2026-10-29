@@ -51,7 +51,7 @@ public partial class SoulUI
                     preview.Reason;
                 y=InfoLines(result,x,y,w,InfoWhite,.68f)+16;
                 if(InfoAction(new(x,y,w,30),"取消预览",InfoQuiet,glyph:SoulGlyph.Return))
-                {candidateIndex=-1;candidateReference=null;armoryPreview=null;armoryFocusAt=UiTime;}
+                {ClearArmoryCandidate();armoryFocusAt=UiTime;}
                 y+=46;
             }
             else

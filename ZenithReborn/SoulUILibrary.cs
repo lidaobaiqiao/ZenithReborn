@@ -29,7 +29,7 @@ public partial class SoulUI
         Rectangle b=layout.Library,list=layout.LibraryList;var mouse=new Point(Main.mouseX,Main.mouseY);
         RoundedBox(b,new Color(13,22,32),12);
         Text("随 身 剑 库",new(b.X+18,b.Y+15),InfoWhite,.94f);
-        if(b.Height>=240)Text("点击预览，再决定让哪把剑归位",new(b.X+18,b.Y+46),InfoQuiet,.60f);
+        if(b.Height>=240)Text("先选剑位，再选武器预览",new(b.X+18,b.Y+46),InfoQuiet,.60f);
         for(int f=0;f<2&&b.Height>=240;f++)
         {
             var filter=new Rectangle(b.X+14+f*85,b.Y+74,78,24);bool active=libraryFilter==f;
