@@ -41,7 +41,7 @@ internal static class GlassBloomRenderCheck
         Color[] Render(string name,bool bloom)
         {
             device.SetRenderTarget(target);device.Clear(Color.Magenta);
-            MartialSlashRenderer.DrawWithRestoredState(()=>
+            VfxRenderState.DrawWithRestoredState(()=>
             {
                 p["uGlassPartBloom"].SetValue(bloom?1f:0f);
                 batch.Begin(SpriteSortMode.Immediate,BlendState.Opaque,SamplerState.PointClamp,DepthStencilState.None,RasterizerState.CullNone,shader);

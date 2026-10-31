@@ -306,7 +306,7 @@ public sealed class LiquidGlassTrailRenderCheck : ModSystem
                     batch.Begin(SpriteSortMode.Immediate,BlendState.Opaque,SamplerState.PointClamp,DepthStencilState.None,RasterizerState.CullNone);
                     batch.Draw(background,Vector2.Zero,Color.White);batch.End();
                 }
-                MartialSlashRenderer.DrawWithRestoredState(()=>{
+                VfxRenderState.DrawWithRestoredState(()=>{
                     device.BlendState=diagnostics?BlendState.Opaque:BlendState.NonPremultiplied;
                     device.DepthStencilState=DepthStencilState.None;device.RasterizerState=RasterizerState.CullNone;
                     foreach(var pass in effect.CurrentTechnique.Passes){pass.Apply();device.DrawUserPrimitives(PrimitiveType.TriangleList,vertices,0,count/3);}

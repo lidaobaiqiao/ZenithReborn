@@ -3,7 +3,7 @@ using Terraria.ModLoader;
 
 namespace ZenithReborn;
 
-// Vanilla ItemCheck owns the clock. This class only selects the next host.
+// 原版物品检查控制发射时序，本类只选择下一把寄宿武器。
 public class SoulSwingPlayer : ModPlayer
 {
     private SoulItem swinging;
@@ -29,21 +29,20 @@ public class SoulSwingPlayer : ModPlayer
 
     private bool Valid()=>swinging!=null && !Player.dead && Player.HeldItem.ModItem==swinging &&
         swinging.Attached && Player.altFunctionUse!=2 && Player.itemAnimation>0 && !SoulUI.IsEditing(swinging) &&
-        !Player.GetModPlayer<MartialPlayer>().SuppressNative(swinging) &&
         hosts.Length>0 && swinging.Active.SequenceEqual(hosts) && hosts.Select(i=>i.type).SequenceEqual(types);
 
     public void FireHost()
     {
         if(!Valid()){Cancel();return;}
-        if(budget>3)return; // Evenly spaced extra nodes are handled below.
+        if(budget>3)return; // 均匀分布的额外发射时机由下方处理。
         EmitNext();
     }
     private void EmitNext()
     {
         if(lastAnimation==Player.itemAnimation)return;
         lastAnimation=Player.itemAnimation;
-        // Sparse loadouts use each host once; spare native firing opportunities
-        // remain empty. The next gesture resumes the same persistent cursor.
+        // 寄宿数量较少时，每把剑只发射一次，多余时机留空；
+        // 下一轮从保留的游标位置继续。
         if(shots>=budget)return;
         shots++;
         swinging.EmitBlade(Player,hosts[cursor],cursor,hosts.Length);

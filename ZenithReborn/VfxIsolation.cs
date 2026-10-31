@@ -11,20 +11,9 @@ public static class VfxIsolation
     // 用户已允许恢复贴图与屏幕材质；切回纯代码排查时仍由这一处统一限制输入。
     public static bool PureCodeOnly => false;
 
-    // ================= 玻璃平面基线 =================
-    // 用户要求：先做出"一片平整玻璃"，不依赖任何外来贴图，再在它上面加条带起伏。
-    // 打开时强制关闭全部贴图输入、曲率与倾角，只保留形状、玻璃介质（IOR／透射／菲涅耳）
-    // 和背景折射。此时看到的应当是：一条干净的长条，透出被轻微压暗的背景，
-    // 边缘有菲涅耳提亮，表面完全平整——这是后续条带起伏的对照基准。
-    public static bool GlassPlaneOnly => true;
-
-    // 玻璃平面基线的不透明度。正式值 0.1 是为最终效果调的，太透，
-    // 单独看基底时几乎看不见"有没有这片玻璃"。
-    // 换算关系：opacity ≈ 0.66 × 这个值 × 形状，再经 smoothstep(0.01,0.48) 变成覆盖度。
-    // 0.1 → 覆盖度约 0.13（折射几乎无能量）；0.36 → 覆盖度约 0.5（玻璃可辨认）。
-    // 注意 (1-bodyOpacity) 在屏幕合成里是"背景保留比例"，抬高会压暗背景，
-    // 玻璃的可见度来自反射层而不是主体密度，所以这里只抬到可辨认，不追求实心。
-    public static float GlassOpacity(float normalOpacity) => GlassPlaneOnly ? .36f : normalOpacity;
+    // 当前迁移采用79材质；保留平面试验参数供其他材质接口使用。
+    public static bool GlassPlaneOnly => false;
+    public static float GlassOpacity(float normalOpacity) => normalOpacity;
 
     // ================= 一、渲染分支总闸 =================
     // 主飞剑拖尾带面

@@ -117,7 +117,7 @@ public sealed class SurfaceMaterialRenderer : ModSystem
         var p=effect.Parameters;var m=material;
         p["transformMatrix"].SetValue((unscaled?Matrix.Identity:Main.GameViewMatrix.TransformationMatrix)*Matrix.CreateOrthographicOffCenter(0,width,height,0,-1,1));
         var baseColor=m.BaseColor*(m.UseWeaponColor?weaponColor.ToVector3():Vector3.One);
-        p["uBase"].SetValue(new Vector4(baseColor,Math.Clamp(VfxIsolation.GlassOpacity(m.Opacity*opacity),0,1)));
+        p["uBase"].SetValue(new Vector4(baseColor,Math.Clamp(m.Opacity*opacity,0,1)));
         p["uOptics"].SetValue(new Vector4(m.Metallic,m.Roughness,m.Ior,m.Transmission));
         // 色散与屏幕反射：shader 还没实现时参数不存在，安全跳过，不影响其他参数
         p["uDispersion"]?.SetValue(m.Dispersion);
@@ -152,19 +152,12 @@ public sealed class SurfaceMaterialRenderer : ModSystem
         p["uSubsurface"].SetValue(new Vector4(m.SubsurfaceColor,m.SubsurfaceRadius));
         p["uVolume"].SetValue(new Vector4(m.VolumeDensity,m.VolumeAnisotropy,m.VolumeEmission,0));
         p["uVolumeColor"].SetValue(m.VolumeColor);
-        // 玻璃平面基线：曲率与倾角归零，得到真正平整的表面（法线垂直向上）。
-        // 厚度保留，它是折射强度而不是形状。
-        bool plainGlass=VfxIsolation.GlassPlaneOnly;
-        p["uShape"].SetValue(new Vector4(shape,plainGlass?0f:m.CrossCurvature,plainGlass?0f:m.AlongTilt,m.Thickness));
-        // 液态玻璃条带起伏：取 P26 的当前值（0 关闭 / 1 开启），
-        // 峰值坡度由 ZRLiquidGlass.fxh 里的三条带参数决定。
-        p["uRidgeStrength"].SetValue(VfxIsolation.PartValue("uPartRidges"));
+        p["uShape"].SetValue(new Vector4(shape,m.CrossCurvature,m.AlongTilt,m.Thickness));
         float az=MathHelper.ToRadians(m.LightAzimuth),el=MathHelper.ToRadians(m.LightElevation);
         p["uLight"].SetValue(new Vector4(MathF.Cos(az)*MathF.Cos(el),MathF.Sin(az)*MathF.Cos(el),MathF.Sin(el),m.EnvironmentStrength));
         p["uLightColor"].SetValue(m.LightColor*m.LightStrength);p["uAmbient"].SetValue(m.AmbientColor);
-        // 玻璃平面基线不采样任何外来贴图：色场／动态遮罩／法线／表面／高度／自发光／环境全部关掉。
-        p["uMaps"].SetValue(plainGlass?Vector4.Zero:new Vector4(inputs.ColorField!=null?1:0,inputs.MotionMask!=null?1:0,inputs.NormalMap!=null?1:0,inputs.SurfaceMap!=null?1:0));
-        p["uMoreMaps"].SetValue(plainGlass?Vector4.Zero:new Vector4(inputs.HeightMap!=null?1:0,inputs.EmissionMap!=null?1:0,inputs.EnvironmentMap!=null?1:0,0));
+        p["uMaps"].SetValue(new Vector4(inputs.ColorField!=null?1:0,inputs.MotionMask!=null?1:0,inputs.NormalMap!=null?1:0,inputs.SurfaceMap!=null?1:0));
+        p["uMoreMaps"].SetValue(new Vector4(inputs.HeightMap!=null?1:0,inputs.EmissionMap!=null?1:0,inputs.EnvironmentMap!=null?1:0,0));
         var ainfo=m.Assets;var mask=inputs.MotionMask??white;
         int rows=(ainfo.Frames+ainfo.Columns-1)/ainfo.Columns,frame=(int)(Math.Max(0,clock)/ainfo.LoopSeconds*ainfo.Frames)%ainfo.Frames;
         float fw=mask.Width/(float)ainfo.Columns,fh=mask.Height/(float)rows;

@@ -107,7 +107,7 @@ public class SoulTrailRenderCheck : ModSystem
                             ((x+y)/32)%2==0?new Color(52,65,80):new Color(172,185,196));
                     Main.spriteBatch.End();
                 }
-                MartialSlashRenderer.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(surface,6,new Color(120,195,255),
+                VfxRenderState.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(surface,6,new Color(120,195,255),
                     1,.3f,width,height,true));
                 device.SetRenderTarget(null);
                 if(scene==0)
@@ -144,7 +144,7 @@ public class SoulTrailRenderCheck : ModSystem
                 var blend=device.BlendState;var depth=device.DepthStencilState;var raster=device.RasterizerState;
                 var textures=Enumerable.Range(0,3).Select(i=>device.Textures[i]).ToArray();
                 var samplers=Enumerable.Range(0,3).Select(i=>device.SamplerStates[i]).ToArray();
-                MartialSlashRenderer.DrawWithRestoredState(()=>
+                VfxRenderState.DrawWithRestoredState(()=>
                     SoulMaterialTrail.Draw(vertices,count,SoulVisuals.Tint(item),opacity*.86f,clock,width,height,true,dissolve,item));
                 restored&=device.BlendState==blend && device.DepthStencilState==depth && device.RasterizerState==raster &&
                     Enumerable.Range(0,3).All(i=>device.Textures[i]==textures[i] && device.SamplerStates[i]==samplers[i]);

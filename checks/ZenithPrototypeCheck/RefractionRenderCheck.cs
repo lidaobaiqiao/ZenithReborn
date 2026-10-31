@@ -66,7 +66,7 @@ internal static class RefractionRenderCheck
             {
                 device.SetRenderTarget(result);
                 batch.Begin(SpriteSortMode.Deferred,BlendState.Opaque);batch.Draw(scene,Vector2.Zero,Color.White);batch.End();
-                MartialSlashRenderer.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(surface,6,new Color(120,195,255),1,.3f,
+                VfxRenderState.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(surface,6,new Color(120,195,255),1,.3f,
                     960,540,true,optics:new SwordFlowMaterial.GlassOptics(mode==0?1:1.5f,.08f,1)));
                 images[mode]=new Color[before.Length];result.GetData(images[mode]);
                 if(patterned)
@@ -83,7 +83,7 @@ internal static class RefractionRenderCheck
         int Highlight(float roughness)
         {
             device.SetRenderTarget(result);device.Clear(Color.Transparent);
-            MartialSlashRenderer.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(surface,6,new Color(120,195,255),1,.3f,
+            VfxRenderState.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(surface,6,new Color(120,195,255),1,.3f,
                 960,540,true,optics:new SwordFlowMaterial.GlassOptics(1.5f,roughness,.55f)));
             var pixels=new Color[960*540];result.GetData(pixels);
             return pixels.Count(pixel=>pixel.R>180&&pixel.G>180&&pixel.B>180);

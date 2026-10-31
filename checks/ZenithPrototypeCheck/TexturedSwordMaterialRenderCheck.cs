@@ -148,7 +148,7 @@ public sealed class TexturedSwordMaterialRenderCheck : ModSystem
             {backgroundBatch.Begin(SpriteSortMode.Deferred,BlendState.Opaque,SamplerState.PointClamp,DepthStencilState.None,RasterizerState.CullNone);
                 backgroundBatch.Draw(scene,Vector2.Zero,Color.White);backgroundBatch.End();}
             mask.SetValue(null,mode==1);surface.SetValue(null,mode==2);
-            try{MartialSlashRenderer.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(vertices,count,SoulVisuals.Tint(item),opacity,clock,960,540,true,dissolve,item,optics));}
+            try{VfxRenderState.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(vertices,count,SoulVisuals.Tint(item),opacity,clock,960,540,true,dissolve,item,optics));}
             finally{mask.SetValue(null,false);surface.SetValue(null,false);}
             var pixels=new Color[960*540];target.GetData(pixels);
             using(var png=File.Create(Path.Combine(output,name+".png")))target.SaveAsPng(png,960,540);

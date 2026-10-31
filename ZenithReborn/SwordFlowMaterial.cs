@@ -79,10 +79,9 @@ public class SwordFlowMaterial : ModSystem
                 }
             }
         }
-        // 打包后 png 会被转成 rawimg，资源名不带扩展名，由加载器自行解析；
-        // 写成 ".png" 会导致 HasAsset 失败而静默返回 null，所有贴图都不生效。
-        defaultBrush=TryLoad("ZenithReborn/Assets/Vfx/Materials/SwordFlow/BrushDefault");
-        defaultNoise=TryLoad("ZenithReborn/Assets/Vfx/Materials/SwordFlow/NoiseSeamless");
+        // 原始79的普通贴图未实际加载；维持其程序输入，避免修复后的加载路径改变原有画面。
+        defaultBrush=null;
+        defaultNoise=null;
         // 四区遮罩必须走原始数据上传：这张图的 A 通道本身就是磨损区数据，
         // 常规贴图加载会清空 Alpha=0 处的 RGB，刃口/脊线/腹部三区会整片读成黑色。
         var loadingOwner=owner;
@@ -93,11 +92,6 @@ public class SwordFlowMaterial : ModSystem
             if(zone!=null)maps["ZoneMask"]=zone;
             ValidateLoaded(loadingOwner);
         });
-        foreach(string name in new[]{"NormalMap","ColorField","SurfaceMap","HeightMap","EmissionMap","EnvironmentMap"})
-        {
-            var texture=TryLoad("ZenithReborn/Assets/Vfx/Materials/SwordFlow/"+name);
-            if(texture!=null)maps[name]=texture;
-        }
     }
 
     // 把一张可选贴图绑到对应的开关与 sampler
@@ -238,10 +232,9 @@ public class SwordFlowMaterial : ModSystem
         }
         string identity=ItemLoader.GetItem(itemType)?.FullName??ItemID.Search.GetName(itemType)??"";
         artwork.TryGetValue(identity,out var art);
-        if(VfxIsolation.PureCodeOnly)art=null;
         SurfaceMaterialDefinition material=null;SurfaceMaterialRenderer.Inputs materialInputs=null;
-        if(!VfxIsolation.PureCodeOnly&&runtimeMaterials.TryGetValue(itemType,out var bound)){material=bound.Material;materialInputs=bound.Inputs;}
-        else if(!VfxIsolation.PureCodeOnly&&surfaceMaterials.TryGetValue(identity,out var stored)){material=stored;materialInputs=SurfaceMaterialRenderer.LoadInputs(stored);}
+        if(runtimeMaterials.TryGetValue(itemType,out var bound)){material=bound.Material;materialInputs=bound.Inputs;}
+        else if(surfaceMaterials.TryGetValue(identity,out var stored)){material=stored;materialInputs=SurfaceMaterialRenderer.LoadInputs(stored);}
         if(material!=null)
         {
             var quality=MaterialQuality.Current;
@@ -250,67 +243,46 @@ public class SwordFlowMaterial : ModSystem
                 width??Main.screenWidth,height??Main.screenHeight,unscaled,dissolve,SoulSceneRefraction.MaterialOutputMode);
             return;
         }
+        if(SoulSceneRefraction.MaterialOutputMode>=3)return;
         var parameters=effect.Parameters;
-        var view=unscaled?Matrix.Identity:Main.GameViewMatrix.TransformationMatrix;
-        parameters["transformMatrix"].SetValue(view*
+        parameters["transformMatrix"].SetValue((unscaled?Matrix.Identity:Main.GameViewMatrix.TransformationMatrix)*
             Matrix.CreateOrthographicOffCenter(0,width??Main.screenWidth,height??Main.screenHeight,0,-1,1));
         parameters["uTime"].SetValue(clock);
-        // 沿用后续版本的屏幕主光方向计算，日月位置改变曲面高光；不读取固定环境反射图。
-        float daylight=Math.Clamp((float)Main.time/(Main.dayTime?54000f:32400f),0,1);
-        float lightAngle=MathHelper.Pi*(.18f+.64f*daylight);
-        parameters["uLightDirection"]?.SetValue(Vector3.Normalize(new Vector3(-MathF.Cos(lightAngle)*.75f,-MathF.Sin(lightAngle)*.72f,.65f)));
-        // 该值只表示形成、羽化与消散；玻璃主体密度不能拿来抹掉整个光学表面。
-        parameters["uOpacity"].SetValue(Math.Clamp(opacity,0,1));
+        parameters["uOpacity"].SetValue(Math.Clamp(opacity*GlassMaterialPreset.Opacity,0,1));
         parameters["uThickness"].SetValue(GlassMaterialPreset.Thickness*MaterialQuality.ThicknessScale);
         parameters["uDissolve"].SetValue(Math.Clamp(dissolve,0,1));
         var glass=optics??DefaultOptics;
-        parameters["uBodyOpacity"]?.SetValue(Math.Clamp(glass.BodyOpacity,0,1));
         parameters["uIor"].SetValue(Math.Clamp(glass.Ior,1,2.5f));
-        parameters["uRoughness"].SetValue(Math.Clamp(glass.Roughness,0,1));
-        parameters["uMetallic"]?.SetValue(Math.Clamp(glass.Metallic,0,1));
+        parameters["uRoughness"].SetValue(Math.Clamp(glass.Roughness,.02f,1));
         parameters["uTransmission"].SetValue(Math.Clamp(glass.Transmission,0,1));
         // 色散与屏幕反射不随质量档位变化：它们直接影响画面亮度
         parameters["uDispersion"]?.SetValue(Math.Clamp(GlassMaterialPreset.Dispersion,0,1));
-        // 【逐项测试】这三项强度改由对应 part 开关（P21/P23/P24）在着色器里门控，
-        // 这里回填生产值，保证单独打开那一项时能真正看到效果。
         parameters["uSsrStrength"]?.SetValue(Math.Clamp(GlassMaterialPreset.SsrStrength,0,2));
         parameters["uEmissionStrength"]?.SetValue(Math.Clamp(GlassMaterialPreset.EmissionStrength,0,2));
-        parameters["uStripeStrength"]?.SetValue(Math.Clamp(GlassMaterialPreset.StripeStrength,0,2));
-        // 贴图宽长比修正倍率：1 = 着色器按实际几何自动算，方形贴图不再被压成横条
-        parameters["uMapAspectScale"]?.SetValue(1f);
-        // 资源策略在加载与绑定两端生效；纯代码时只绑定运行时创建的1×1白色中性值。
-        bool mapsOn=!VfxIsolation.PureCodeOnly&&!VfxIsolation.GlassPlaneOnly;
-        parameters["uUseBrush"]?.SetValue(mapsOn&&defaultBrush!=null?1f:0f);
-        parameters["uBrushTex"]?.SetValue(mapsOn?defaultBrush??white:white);
-        parameters["uUseNoise"]?.SetValue(mapsOn&&defaultNoise!=null?1f:0f);
-        parameters["uNoiseTex"]?.SetValue(mapsOn?defaultNoise??white:white);
+        // 常量路径也要吃笔刷/噪声：这是生产环境实际走的路径
+        parameters["uUseBrush"]?.SetValue(defaultBrush!=null?1f:0f);
+        parameters["uBrushTex"]?.SetValue(defaultBrush);
+        parameters["uUseNoise"]?.SetValue(defaultNoise!=null?1f:0f);
+        parameters["uNoiseTex"]?.SetValue(defaultNoise);
+        // PBR 贴图：存在才开，采样开关交给 shader
         BindMap(parameters,"uUseNormal","uNormalTex","NormalMap");
+        BindMap(parameters,"uUseColorField","uColorField","ColorField");
         BindMap(parameters,"uUseSurface","uSurfaceTex","SurfaceMap");
         BindMap(parameters,"uUseHeight","uHeightTex","HeightMap");
         BindMap(parameters,"uUseEmission","uEmissionTex","EmissionMap");
         BindMap(parameters,"uUseEnvironment","uEnvironmentTex","EnvironmentMap");
         BindMap(parameters,"uUseZoneMask","uZoneMaskTex","ZoneMask");
-        var scene=VfxIsolation.PureCodeOnly?null:SoulSceneRefraction.Scene;
+        var scene=SoulSceneRefraction.Scene;
         parameters["uScene"].SetValue(scene??white);
-        // 【逐项测试】背景采样恢复生产取值，是否进入颜色由 P22 在着色器里门控。
         parameters["uHasScene"].SetValue(scene==null?0f:1f);
-        // 带面构成逐项开关：集中表驱动下发，加新项只改 VfxIsolation.Parts 一处。
-        for(int i=0;i<VfxIsolation.Parts.Length&&i<VfxIsolation.PartValues.Length;i++)
-            parameters[VfxIsolation.Parts[i].Uniform]?.SetValue(VfxIsolation.Parts[i].Allowed?VfxIsolation.PartValues[i]:0f);
-        // 液态玻璃条带起伏的强度：1 ≈ 峰值坡度 45°，折射偏移随它线性变化。
-        parameters["uRidgeStrength"]?.SetValue(1f);
         parameters["uOutputRefractionMask"].SetValue(SoulSceneRefraction.BuildingMask?1f:0f);
         parameters["uOutputSurface"].SetValue(SoulSceneRefraction.BuildingSurface?1f:0f);
-        parameters["uMaterialOutput"].SetValue((float)SoulSceneRefraction.MaterialOutputMode);
         parameters["uSceneTexel"].SetValue(scene==null?Vector2.One:new Vector2(1f/scene.Width,1f/scene.Height));
         parameters["uSceneUvTransform"].SetValue(SoulSceneRefraction.UvTransform);
         parameters["uSeed"].SetValue(tint.R*.007f+tint.B*.003f);
-        var palette=SwordFlowPalette.From(tint);
         parameters["uBodyColor"].SetValue(tint.ToVector3()*1.25f);
-        parameters["uEdgeColor"].SetValue(palette.Highlight);
-        parameters["uShadeColor"].SetValue(palette.Shadow);
-        parameters["uMidColor"].SetValue(palette.Mid);
-        parameters["uHighlightColor"].SetValue(palette.Highlight);
+        // 向着色器提供剑色亮阶，亮芯再平滑过渡到白色。
+        parameters["uEdgeColor"].SetValue(SwordFlowPalette.From(tint).Highlight);
         parameters["uColorField"].SetValue(Texture(art?.ColorField));
         var mask=Texture(art?.MotionMask);
         parameters["uMotionMask"].SetValue(mask);
@@ -324,9 +296,8 @@ public class SwordFlowMaterial : ModSystem
             (frame/columns*frameHeight+.5f)/mask.Height,Math.Max(0,frameWidth-1)/mask.Width,Math.Max(0,frameHeight-1)/mask.Height));
         device.BlendState=BlendState.AlphaBlend;device.DepthStencilState=DepthStencilState.None;
         device.RasterizerState=RasterizerState.CullNone;
-        var smoothVertices=SwordFlowMeshBasis.Prepare(vertices,count,view);
         foreach(var pass in effect.CurrentTechnique.Passes)
-        {pass.Apply();device.DrawUserPrimitives(PrimitiveType.TriangleList,smoothVertices,0,count/3);}
+        {pass.Apply();device.DrawUserPrimitives(PrimitiveType.TriangleList,vertices,0,count/3);}
     }
     public override void PostUpdateEverything()
     {

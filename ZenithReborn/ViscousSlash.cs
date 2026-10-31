@@ -92,7 +92,7 @@ public class ViscousSlash : ModSystem
         {
             // 复用混合、深度、光栅、纹理与采样状态的恢复包装。
             // 此处不切换渲染目标；该入口并不负责保存渲染目标内容。
-            MartialSlashRenderer.DrawWithRestoredState(()=>
+            VfxRenderState.DrawWithRestoredState(()=>
             {
                 // 加法混合：残影不是"变淡的武器"，而是"武器留下的光"。
                 // 用 AlphaBlend + 低 alpha 会画成半透明黑，看起来暗沉沉；

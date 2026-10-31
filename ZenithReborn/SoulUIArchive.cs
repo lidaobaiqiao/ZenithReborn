@@ -16,18 +16,19 @@ public partial class SoulUI
     public static void SelectTraitScope(bool activeOnly)
     {activeTraitsOnly=activeOnly;traitListScroll=traitDetailScroll=0;traitSelection="";}
     public static void SelectTraitCategory(int value)
-    {catalogFilter=Math.Clamp(value,0,4);traitListScroll=traitDetailScroll=0;traitSelection="";}
+    {catalogFilter=Math.Clamp(value,0,6);traitListScroll=traitDetailScroll=0;traitSelection="";}
     public static IEnumerable<SoulTrait> TraitEntries(SoulItem soul)=>SoulTraits.All(soul)
         .Where(t=>(!activeTraitsOnly||t.Active)&&(catalogFilter==0||(int)t.Category==catalogFilter-1));
     private static Color TraitColor(TraitCategory category)=>category switch {
         TraitCategory.Wood=>new(135,211,168),TraitCategory.Ore=>new(126,194,218),
-        TraitCategory.Growth=>new(224,193,130),_=>new(184,162,224)};
+        TraitCategory.Growth=>new(224,193,130),TraitCategory.Heaven=>new(255,221,135),TraitCategory.Living=>new(165,220,255),_=>new(184,162,224)};
     private static int TraitItem(SoulTrait trait)
     {
         if(trait.Key.StartsWith("wood-")&&int.TryParse(trait.Key[5..],out int wood)&&wood>=0&&wood<WoodTypes.Types.Length)return WoodTypes.Types[wood];
         if(trait.Key.StartsWith("ore-trait-")&&int.TryParse(trait.Key[10..],out int ore)&&ore>=0&&ore<HardOreTypes.Types.Length)return HardOreTypes.Types[ore];
         if(trait.Key.StartsWith("special-")&&int.TryParse(trait.Key[8..],out int special))return special;
         return trait.Key switch {
+            "heaven-star"=>ItemID.FallenStar,"living-armament"=>ItemID.EnchantedSword,
             "ore-copper-echo" or "copper-close"=>ItemID.CopperShortsword,"ore-tin-growth"=>ItemID.TinBroadsword,
             "wood-set" or "forest"=>ItemID.WoodenSword,"ore-wave" or "ore-mastery"=>ItemID.TitaniumSword,
             "family-Swift"=>ItemID.CopperShortsword,"family-Solid"=>ItemID.BoneSword,
@@ -47,7 +48,7 @@ public partial class SoulUI
         Box(new(chosenMode.X+12,chosenMode.Bottom-1,chosenMode.Width-24,2),accent*.8f);
         if(!inline)y+=46;
         int filterWidth=Math.Min(840,Math.Max(20,b.Width-28)),columns=Math.Clamp(filterWidth/132,2,5),step=filterWidth/columns;
-        for(int i=0;i<5;i++)
+        for(int i=0;i<7;i++)
         {
             int filter=i;var source=all.Where(t=>!activeTraitsOnly||t.Active);
             int count=source.Count(t=>filter==0||(int)t.Category==filter-1);
@@ -56,7 +57,7 @@ public partial class SoulUI
             if(InfoAction(r,label,catalogFilter==i?accent:InfoQuiet,true,i==0?SoulGlyph.Book:CategoryGlyph((TraitCategory)(i-1))))SelectTraitCategory(i);
             if(catalogFilter==i)Box(new(r.X+12,r.Bottom-1,Math.Max(1,r.Width-24),2),accent*.8f);
         }
-        y+=((5+columns-1)/columns)*38+10;
+        y+=((7+columns-1)/columns)*38+10;
         var panes=SoulInfoLayout.MasterDetail(new(b.X+14,y,b.Width-28,Math.Max(1,b.Bottom-y-12)));
         var entries=TraitEntries(soul).ToArray();
         if(entries.Length==0)

@@ -77,7 +77,7 @@ internal static class ClearHighlightRenderCheck
             }
             else SoulSceneRefraction.EndCapture();
             device.SetRenderTarget(target);device.Clear(background?new Color(128,128,128):blackDisplay?Color.Black:Color.Transparent);
-            MartialSlashRenderer.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(mesh,6,color,1,.3f,960,540,true));
+            VfxRenderState.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(mesh,6,color,1,.3f,960,540,true));
             var pixels=new Color[960*540];target.GetData(pixels);
             if(path!=null){using var png=File.Create(Path.Combine(output,path));target.SaveAsPng(png,960,540);}
             return pixels;

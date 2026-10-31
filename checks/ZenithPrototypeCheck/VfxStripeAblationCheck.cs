@@ -98,7 +98,7 @@ public sealed class VfxStripeAblationCheck : ModSystem
                     DiffuseColor=Vector3.One,Alpha=.25f};
                 using var raster=new RasterizerState{CullMode=CullMode.None,FillMode=wireframe?FillMode.WireFrame:FillMode.Solid};
                 device.SetRenderTarget(target);device.Clear(Color.Transparent);
-                MartialSlashRenderer.DrawWithRestoredState(()=>{
+                VfxRenderState.DrawWithRestoredState(()=>{
                     device.BlendState=BlendState.AlphaBlend;device.RasterizerState=raster;
                     foreach(var pass in effect.CurrentTechnique.Passes){pass.Apply();device.DrawUserPrimitives(PrimitiveType.TriangleList,mesh,0,vertexCount/3);}
                 });
@@ -111,7 +111,7 @@ public sealed class VfxStripeAblationCheck : ModSystem
             {
                 using var target=new RenderTarget2D(device,960,540,false,SurfaceFormat.Color,DepthFormat.None);
                 device.SetRenderTarget(target);device.Clear(new Color(10,13,17));
-                MartialSlashRenderer.DrawWithRestoredState(()=>SoulMaterialTrail.Draw(mesh,vertexCount,new Color(107,139,250),1,.3f,960,540,true));
+                VfxRenderState.DrawWithRestoredState(()=>SoulMaterialTrail.Draw(mesh,vertexCount,new Color(107,139,250),1,.3f,960,540,true));
                 var pixels=new Color[960*540];target.GetData(pixels);
                 hashes[name]=Convert.ToHexString(SHA256.HashData(System.Runtime.InteropServices.MemoryMarshal.AsBytes(pixels.AsSpan())));
                 using(var file=File.Create(Path.Combine(output,name+".png")))target.SaveAsPng(file,960,540);

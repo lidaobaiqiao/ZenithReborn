@@ -61,7 +61,7 @@ public partial class SoulUI
         SoulUIPages.Weapons=>SoulGlyph.Orbit,SoulUIPages.Traits=>SoulGlyph.Spark,SoulUIPages.Memories=>SoulGlyph.Memory,
         SoulUIPages.Recovery=>SoulGlyph.Return,_=>SoulGlyph.World};
     private static SoulGlyph CategoryGlyph(TraitCategory value)=>value switch {
-        TraitCategory.Wood=>SoulGlyph.Leaf,TraitCategory.Ore=>SoulGlyph.Ingot,TraitCategory.Sword=>SoulGlyph.Blade,_=>SoulGlyph.Core};
+        TraitCategory.Wood=>SoulGlyph.Leaf,TraitCategory.Ore=>SoulGlyph.Ingot,TraitCategory.Sword=>SoulGlyph.Blade,TraitCategory.Heaven=>SoulGlyph.Spark,TraitCategory.Living=>SoulGlyph.Blade,_=>SoulGlyph.Core};
     private static SoulGlyph CurseGlyph(SoulCurse curse)=>curse switch {
         SoulCurse.Binding=>SoulGlyph.Chain,SoulCurse.Switching=>SoulGlyph.Spark,SoulCurse.Sheathing=>SoulGlyph.Return,
         SoulCurse.Barrier=>SoulGlyph.Shield,SoulCurse.Solitude=>SoulGlyph.Orbit,_=>SoulGlyph.BrokenBlade};

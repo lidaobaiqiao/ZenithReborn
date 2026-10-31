@@ -35,7 +35,7 @@ public static class MaterialQuality
         stamp=Main.GameUpdateCount;
         int swords=0;
         foreach(var projectile in Main.ActiveProjectiles)
-            if(projectile.ModProjectile is OreFlyingSword or OreSkyfall or HardOreShot or MartialGiant)swords++;
+            if(projectile.ModProjectile is OreFlyingSword or OreSkyfall or HardOreShot)swords++;
         level=swords>LowThreshold?Level.Low:swords>MediumThreshold?Level.Medium:Level.Full;
     }
 }

@@ -3,14 +3,14 @@ using Terraria.ID;
 
 namespace ZenithReborn;
 
-public enum TraitCategory { Wood, Ore, Sword, Growth }
+public enum TraitCategory { Wood, Ore, Sword, Growth, Heaven, Living }
 public readonly record struct SoulTrait(string Key,string Title,string Description,string Requirement,TraitCategory Category,bool Active);
 
 // 展示层与战斗读取同一有效槽规则；查阅图鉴不会改变解锁、战斗状态或寄宿物品。
 public static class SoulTraits
 {
     public static string CategoryName(TraitCategory category) => category switch {
-        TraitCategory.Wood=>"木质族",TraitCategory.Ore=>"矿石族",TraitCategory.Sword=>"剑术",_=>"成长" };
+        TraitCategory.Wood=>"木质族",TraitCategory.Ore=>"矿石族",TraitCategory.Sword=>"剑术",TraitCategory.Heaven=>"神圣天堂",TraitCategory.Living=>"剑灵（暂名）",_=>"成长" };
     public static IEnumerable<SoulTrait> Active(SoulItem soul) => All(soul).Where(t=>t.Active);
     public static IReadOnlyList<SoulTrait> All(SoulItem soul)
     {
@@ -66,6 +66,11 @@ public static class SoulTraits
                 "放入有效主槽，或作为有效支援附加到主攻剑；需要至少一把有效主攻剑，按各来源独立计数和取伤害。",TraitCategory.Ore,
                 hasMain&&main.Any(i=>HardOreTypes.Enabled(soul,i.type,(HardOreKind)kind)));
         }
+        int heavenCount=HolyHeavenFamily.Count(soul);
+        Add("heaven-star","神圣天堂 · 落星",$"有效寄宿 {heavenCount} 种神圣或星辰武器。主剑命中后召唤落星，基础伤害1000；撞击时对120像素内其他敌人造成同等基础伤害，同一剑魂间隔5秒。落星受方块阻挡。",
+            "成员：珍珠木剑、星怒、神圣剑、真神圣剑、星光、狂星之怒、日耀喷发剑、破晓之光。至少一把处于有效普通或支援槽，且有有效主攻剑；珍珠木剑同时保留木质族身份。",TraitCategory.Heaven,HolyHeavenFamily.Enabled(soul));
+        Add("living-armament","剑灵 · 唤兵（暂名）",$"有效族成员 {LivingArmamentFamily.Count(soul)} 种。持有剑魂时召唤有效出战武器，自动追击敌人并使用对应武器攻击；保留现有飞剑及其他种族效果。",
+            "暂定成员：附魔剑、飞刀、波涌之刃、无头骑士剑。至少一把在有效主槽或支援槽，且有有效出战主剑。",TraitCategory.Living,LivingArmamentFamily.Enabled(soul));
         var families=new[]{(BladeFamily.Swift,ItemID.CopperShortsword),(BladeFamily.Solid,ItemID.BoneSword),
             (BladeFamily.Frost,ItemID.IceBlade),(BladeFamily.Nature,ItemID.BladeofGrass),(BladeFamily.Arcane,ItemID.EnchantedSword)};
         foreach(var(family,type) in families)

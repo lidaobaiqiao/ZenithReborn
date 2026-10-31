@@ -62,7 +62,7 @@ public class SoulVisuals : ModSystem
         foreach(var projectile in Main.ActiveProjectiles)
             if(projectile.ModProjectile is SoulBlade){visible=true;break;}
         if(!visible)return;
-        MartialSlashRenderer.DrawWithRestoredState(()=>
+        VfxRenderState.DrawWithRestoredState(()=>
         {
             if(VfxIsolation.SwordTrail)
                 foreach(var projectile in Main.ActiveProjectiles)

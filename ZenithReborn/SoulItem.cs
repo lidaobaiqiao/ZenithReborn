@@ -40,11 +40,11 @@ public partial class SoulItem : ModItem
     public WoodLoadout Wood => WoodTypes.Evaluate(this);
     public int BaseCapacity => Attached ? Math.Min(10, SoulProgress.Capacity(Kills, Cores)) : 0;
     public int Capacity => BaseCapacity;
-    // Compatibility alias only: the common mechanism no longer belongs to wood.
+    // 仅保留兼容别名；共用机制不再归属于木质族。
     public int WoodSupportCapacity => SoulSupport.GrantedBy(this,"wood");
     public int SupportCapacity => SoulSupport.Capacity(this);
-    // Extended arrays are retained solely to recover items saved by 0.3.9/10.
-    // They never grant active slots or contribute to combat/set counts.
+    // 扩展数组只用于取回0.3.9和0.3.10存入的物品。
+    // 这些物品不提供生效槽位，也不计入战斗和套装数量。
     public bool HasLegacyExpansion => Hosts.Skip(10).Concat(SupportHosts.Skip(5)).Any(i => !i.IsAir);
     public int BonusCapacity => Attached && (Wood.Full || OreMastered) ? 2 : 0;
     public IEnumerable<Item> Stored => Hosts.Concat(SupportHosts).Concat(ForestHosts).Concat(AdditionalSupports)
@@ -147,7 +147,7 @@ public partial class SoulItem : ModItem
         AdditionalSupports=[]; LegendaryHost = new();
         EnvironmentCollection=EnvironmentBlessings=0;DomainEnvironment=SwordEnvironment.None;
         Kills = Cores = OreCollectionMask = Seals = LegacyReleased = YujianCharge = 0;
-        MartialCharge=0;MartialTier=1;
+        LegacyMartialCharge=0;LegacyMartialTier=1;
         Attached = KingMemory = false;
         Item.width = Item.height = 40; Item.damage = 20; Item.knockBack = 3;
         var zenith=new Item(ItemID.Zenith);
@@ -169,14 +169,14 @@ public partial class SoulItem : ModItem
         return copy;
     }
 
-    // The soul draws itself as a projectile (noUseGraphic = true), so vanilla's
-    // default MeleePrefix() returns false and the reforge pool becomes the
-    // AnyWeapon (spear) pool, which has no Legendary. Force the sword pool.
+    // 剑魂以弹幕绘制自身，原版会因此否定近战前缀，
+    // 并错误使用任意武器的前缀池；
+    // 这里强制使用包含传奇前缀的剑类前缀池。
     public override bool MeleePrefix() => true;
 
-    // ResetPrefix() -> Refresh() serializes/reloads the item through ItemIO.
-    // Keep the soul's data across that round-trip even if the reload replaces
-    // the ModItem instance.
+    // 重置前缀时会通过物品读写接口重新加载。
+    // 即使重新加载替换了物品实例，
+    // 也要保留剑魂中的完整数据。
     private static Item[] reforgeHosts;
     private static Item[] reforgeSupports, reforgeForest;
     private static List<Item> reforgeAdditional;
@@ -204,14 +204,14 @@ public partial class SoulItem : ModItem
         reforgeCores = Cores;
         reforgeOreCollection = OreCollectionMask;
         reforgeYujian=YujianCharge;
-        reforgeMartialCharge=MartialCharge;reforgeMartialTier=MartialTier;
+        reforgeLegacyMartialCharge=LegacyMartialCharge;reforgeLegacyMartialTier=LegacyMartialTier;
         reforgeSeals=Seals;reforgeLegacy=LegacyReleased;
         reforgeAttached = Attached; reforgeMemory = KingMemory;
         RefreshStats();
-        // Reforge rolls reject damage prefixes when the integer result does not
-        // change (damage 1-3 + Legendary's 1.15x often rounds back to itself).
-        // The soul's real damage is computed in Shoot; this value only feeds the
-        // Goblin Tinkerer's prefix roll.
+        // 重铸时若伤害取整前后不变，原版会拒绝该伤害前缀；
+        // 低伤害乘传奇前缀后常发生这种情况。
+        // 剑魂真实伤害在发射时另行计算，
+        // 此处数值仅供哥布林重铸前缀使用。
         Item.damage = Math.Max(Item.damage, 20);
     }
     public override void PostReforge()
@@ -232,7 +232,7 @@ public partial class SoulItem : ModItem
             AwakeningMemory = reforgeAwakened;
             OreCollectionMask = reforgeOreCollection & OreFamily.AllMaterials;
             YujianCharge=reforgeYujian;
-            MartialCharge=reforgeMartialCharge;MartialTier=reforgeMartialTier;
+            LegacyMartialCharge=reforgeLegacyMartialCharge;LegacyMartialTier=reforgeLegacyMartialTier;
             EnvironmentCollection=reforgeEnvironments;EnvironmentBlessings=reforgeEnvironmentBlessings;DomainEnvironment=reforgeDomain;
             NormalizeEnvironments();
             Seals=reforgeSeals;LegacyReleased=reforgeLegacy;
@@ -243,8 +243,8 @@ public partial class SoulItem : ModItem
         reforgeSoulId = null;
         RefreshStats();
     }
-    // HEROsMod's prefix editor rebuilds the soul with netDefaults + Prefix, so
-    // ApplyPrefix is the only hook that runs on the new empty item.
+    // 英雄模组的前缀编辑器会重建物品；
+    // 新建空剑魂只能在应用前缀时恢复原数据。
     public override void ApplyPrefix(int pre)
     {
         if (HeroPrefixCompat.TryRestore(this)) RefreshStats();
@@ -255,7 +255,7 @@ public partial class SoulItem : ModItem
         RegisterOreCollection();
         RegisterEnvironments();
         tag["version"] = 9; tag["id"] = SoulId; tag["kills"] = Kills; tag["cores"] = Cores;
-        SaveMartial(tag);
+        SaveLegacyMartial(tag);
         tag["environments"]=EnvironmentCollection;tag["environmentBlessings"]=EnvironmentBlessings;tag["environmentDomain"]=(int)DomainEnvironment;
         SaveCurses(tag);
         tag["oreCollection"] = OreCollectionMask;
@@ -275,7 +275,7 @@ public partial class SoulItem : ModItem
         Kills = tag.GetInt("kills") & SoulProgress.All; Cores = tag.GetInt("cores") & 63;
         var stored = tag.GetList<TagCompound>("hosts");
         Hosts = Enumerable.Range(0, 12).Select(i => i < stored.Count ? ItemIO.Load(stored[i]) : new Item()).ToArray();
-        // Keep older, already-used souls playable; an empty old remnant starts the new prologue.
+        // 使用过的旧剑魂保持可用；空白旧残魂从新序章开始。
         Attached = tag.ContainsKey("attachment") ? tag.GetBool("attachment") : Hosts.Any(i=>!i.IsAir) || Kills!=0 || Cores!=0;
         KingMemory = tag.GetBool("kingMemory");
         SupportHosts = LoadSlots(tag, "supports", 11);
@@ -286,7 +286,7 @@ public partial class SoulItem : ModItem
         OreCollectionMask=tag.GetInt("oreCollection") & OreFamily.AllMaterials;
         LoadCurses(tag);
         YujianCharge=Math.Clamp(tag.GetInt("yujianCharge"),0,BlessingTuning.ChargeFrames);
-        LoadMartial(tag);
+        LoadLegacyMartial(tag);
         RegisterOreCollection();
         EnvironmentCollection=tag.GetInt("environments");EnvironmentBlessings=tag.GetInt("environmentBlessings");
         DomainEnvironment=(SwordEnvironment)tag.GetInt("environmentDomain");RegisterEnvironments();NormalizeEnvironments();
@@ -310,7 +310,7 @@ public partial class SoulItem : ModItem
         ItemIO.Send(LegendaryHost,writer,writeStack:true,writeFavorite:true);
         writer.Write((ushort)Math.Clamp(YujianCharge,0,BlessingTuning.ChargeFrames));
         RegisterEnvironments();NormalizeEnvironments();writer.Write(EnvironmentCollection);writer.Write(EnvironmentBlessings);writer.Write((byte)DomainEnvironment);
-        SendMartial(writer);
+        SendLegacyMartial(writer);
     }
     public override void NetReceive(BinaryReader reader)
     {
@@ -327,7 +327,7 @@ public partial class SoulItem : ModItem
         LegendaryHost=ItemIO.Receive(reader,readStack:true,readFavorite:true);
         YujianCharge=Math.Clamp((int)reader.ReadUInt16(),0,BlessingTuning.ChargeFrames);
         EnvironmentCollection=reader.ReadInt32();EnvironmentBlessings=reader.ReadInt32();DomainEnvironment=(SwordEnvironment)reader.ReadByte();NormalizeEnvironments();
-        ReceiveMartial(reader);
+        ReceiveLegacyMartial(reader);
     }
     public override bool AltFunctionUse(Player player) => true;
     public override bool CanUseItem(Player player)
@@ -353,8 +353,8 @@ public partial class SoulItem : ModItem
         AwakeningMemory |= CanAwaken;
         var active = Active.ToArray();
         Item.damage = active.Length == 0 ? 1 : Math.Max(1, (int)(active.Average(i => i.damage) * Potency));
-        // Set native timing once in SetDefaults. Do not overwrite prefix speed
-        // or average the hosts' useTime when refreshing the soul's panel damage.
+        // 原版攻击时序只在默认值中设置；刷新面板伤害时，
+        // 不覆盖前缀攻速，也不平均寄宿武器的使用时间。
         Item.SetNameOverride(Awakened ? "复生·天顶剑" : SoulProgress.Mechs(Kills) == 3 ? "复苏的天顶剑魂" : "诅咒的天顶残魂");
         Item.rare = Awakened ? ItemRarityID.Red : Stage >= 4 ? ItemRarityID.Yellow : ItemRarityID.Blue;
     }
@@ -373,7 +373,7 @@ public partial class SoulItem : ModItem
     }
     public override float UseSpeedMultiplier(Player player)
     {
-        // The old mechanical slow/flow blessing is replaced by the six curses.
+        // 旧机械迟滞与流转祝福已由六种诅咒取代。
         return (1 + player.GetModPlayer<WoodPlayer>().LayersFor(this) * .02f) /
             (TraitSupports.Any(i => WeaponFamilies.Of(i.type) == BladeFamily.Swift) ? .85f : 1);
     }
@@ -396,11 +396,11 @@ public partial class SoulItem : ModItem
         return range*(1+player.GetModPlayer<EnvironmentPlayer>().Stat("Reach"));
     }
     public override void UseAnimation(Player player)
-    {if(!player.GetModPlayer<MartialPlayer>().BeginAttack(this))player.GetModPlayer<SoulSwingPlayer>().Begin(this);}
-    // Native swing style supplies the pose; ItemCheck supplies the firing clock.
+    {player.GetModPlayer<SoulSwingPlayer>().Begin(this);}
+    // 使用原版挥动姿势与物品检查中的发射时序。
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
         Vector2 velocity, int type, int damage, float knockback)
-    { if(!player.GetModPlayer<MartialPlayer>().SuppressNative(this))player.GetModPlayer<SoulSwingPlayer>().FireHost(); return false; }
+    { player.GetModPlayer<SoulSwingPlayer>().FireHost(); return false; }
 
     public int EmitBlade(Player player, Item host, int ordinal, int hostCount)
     {
@@ -421,13 +421,13 @@ public partial class SoulItem : ModItem
         blade.TargetOffset = delta.RotatedBy((ordinal - (hostCount - 1) * .5f) * .06f);
         blade.SwordScale = host.scale*(1+player.GetModPlayer<EnvironmentPlayer>().Stat("Size"));
         blade.SpecialDamage = baseHostDamage;
-        // Vanilla Zenith 933: one ellipse, ai[0] = Random.Next(-100, 101).
+        // 原版天顶弹幕使用一条椭圆轨迹，纵向参数取随机整数。
         blade.Vertical = Main.rand.Next(-100, 101);
         Main.projectile[index].CritChance = player.GetWeaponCrit(host);
         Main.projectile[index].GetGlobalProjectile<SoulSource>().SoulId = SoulId;
         Main.projectile[index].GetGlobalProjectile<SoulSource>().SourceWeapon = host.type;
-        // Use the actual active host position, not the swing's firing node or
-        // item type: a duplicate sword after the fourth must not bypass Switching.
+        // 使用实际生效主攻槽位，而不是挥动时的发射节点或
+        // 物品类型，避免第四把之后的重复剑绕过切换限制。
         Main.projectile[index].GetGlobalProjectile<SoulSource>().PrimaryOrdinal =
             Array.FindIndex(Active.ToArray(),item=>ReferenceEquals(item,host));
         Main.projectile[index].GetGlobalProjectile<SoulSource>().HostSlot=VisibleSlotIds.FirstOrDefault(slot=>ReferenceEquals(ItemAt(slot),host),-1);
@@ -437,9 +437,9 @@ public partial class SoulItem : ModItem
     }
     public override void ModifyTooltips(List<TooltipLine> tooltips)
     {
-        // Keep the inventory tooltip bounded regardless of the hosted loadout.
-        // Full effects, conditions and progression live in the scrollable UI.
-        tooltips.Add(new(Mod,"SoulControl",Attached && MartialTuning.Enabled?"P打开魂域；G武技，V选档":"按P或手持右键打开剑魂窗口"));
+        // 物品提示保持简短，避免随寄宿配置无限增长。
+        // 完整效果、条件和进度在可滚动界面中查看。
+        tooltips.Add(new(Mod,"SoulControl","按P或手持右键打开剑魂窗口"));
         tooltips.Add(new(Mod,"SoulStats",$"主攻 {Active.Count()}/{Capacity+BonusCapacity+(LegendaryOn?1:0)} · 支援 {Supports.Count()}/{SupportCapacity}"));
         tooltips.Add(new(Mod,"TraitCodex","特性与成长详情请在窗口内查看"));
         if(!Attached) tooltips.Add(new(Mod,"Unstable","尚未附着：与友善史莱姆王对话"));

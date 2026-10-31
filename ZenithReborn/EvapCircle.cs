@@ -10,7 +10,7 @@ namespace ZenithReborn;
 // 蒸发小圆圈的生成参数：位置、向上初速、初始尺寸、寿命（帧）、染色。
 public readonly record struct EvapCircleSpawn(Vector2 Position,Vector2 Velocity,Color Tint,float Size,int Lifetime);
 
-// 武技巨剑挥砍结束时，月牙弧面被不规则蚕食后脱落的小圆圈。
+// 近战挥砍残影逐渐消散时脱落的小圆圈。
 // 复用原版 Dust 池与 Cloud 粉尘贴图，但更新交给这里：向上飘、边飘边缩小、
 // 最后淡尽，不做下落、不加光。与月牙 shader 的 uErode 侵蚀配对。
 public class EvapCircle : ModDust

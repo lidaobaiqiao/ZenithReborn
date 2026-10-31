@@ -37,7 +37,7 @@ public sealed class LiquidGlassRenderCheck : ModSystem
             // 固定色像素着色器先检验应用和读回，再判定高度场输出是否可信。
             using var sentinel=ModContent.Request<Effect>("ZenithPrototypeCheck/Assets/LiquidGlass/Sentinel",AssetRequestMode.ImmediateLoad).Value.Clone();
             device.SetRenderTarget(image);device.Clear(Color.Black);
-            MartialSlashRenderer.DrawWithRestoredState(()=>{
+            VfxRenderState.DrawWithRestoredState(()=>{
                 batch.Begin(SpriteSortMode.Immediate,BlendState.Opaque,SamplerState.LinearClamp,DepthStencilState.None,RasterizerState.CullNone,sentinel);
                 batch.Draw(background,Vector2.Zero,Color.White);batch.End();
             });
@@ -160,7 +160,7 @@ public sealed class LiquidGlassRenderCheck : ModSystem
                 effect.Parameters["uLight"].SetValue(light);effect.Parameters["uResolution"].SetValue(new Vector2(width,height));
                 modeReadbacks[name]=effect.Parameters["uMode"].GetValueSingle();
                 device.SetRenderTarget(image);device.Clear(Color.Magenta);
-                MartialSlashRenderer.DrawWithRestoredState(()=>{
+                VfxRenderState.DrawWithRestoredState(()=>{
                     batch.Begin(SpriteSortMode.Immediate,BlendState.Opaque,SamplerState.LinearClamp,DepthStencilState.None,RasterizerState.CullNone,effect);
                     batch.Draw(background,Vector2.Zero,Color.White);batch.End();
                 });
@@ -172,7 +172,7 @@ public sealed class LiquidGlassRenderCheck : ModSystem
                 parameterProbe.Parameters["uProbeMode"].SetValue(mode);
                 modeReadbacks[name]=parameterProbe.Parameters["uProbeMode"].GetValueSingle();
                 device.SetRenderTarget(image);device.Clear(Color.Black);
-                MartialSlashRenderer.DrawWithRestoredState(()=>{
+                VfxRenderState.DrawWithRestoredState(()=>{
                     batch.Begin(SpriteSortMode.Immediate,BlendState.Opaque,SamplerState.LinearClamp,DepthStencilState.None,RasterizerState.CullNone,parameterProbe);
                     batch.Draw(background,Vector2.Zero,Color.White);batch.End();
                 });
@@ -187,7 +187,7 @@ public sealed class LiquidGlassRenderCheck : ModSystem
                 effect.Parameters["uSmooth"].SetValue(0f);effect.Parameters["uTime"].SetValue(.3f);
                 effect.Parameters["uLight"].SetValue(0f);effect.Parameters["uResolution"].SetValue(new Vector2(width*2,height*2));
                 device.SetRenderTarget(high);device.Clear(Color.Black);
-                MartialSlashRenderer.DrawWithRestoredState(()=>{
+                VfxRenderState.DrawWithRestoredState(()=>{
                     batch.Begin(SpriteSortMode.Immediate,BlendState.Opaque,SamplerState.LinearClamp,DepthStencilState.None,RasterizerState.CullNone,effect);
                     batch.Draw(background,new Rectangle(0,0,width*2,height*2),Color.White);batch.End();
                 });

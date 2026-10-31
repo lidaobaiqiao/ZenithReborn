@@ -145,7 +145,7 @@ public sealed class ClearGlassRenderCheck : ModSystem
                 mask.SetValue(null,mode==1);surface.SetValue(null,mode==2);extra.SetValue(null,mode>=3?mode:0);
                 for(int slot=0;slot<16;slot++)device.Textures[slot]=null;
                 device.SetRenderTarget(buffers[mode-1]);device.Clear(Color.Transparent);
-                MartialSlashRenderer.DrawWithRestoredState(()=>{
+                VfxRenderState.DrawWithRestoredState(()=>{
                     for(int n=0;n<repeats;n++)SwordFlowMaterial.Draw(vertices,count,SoulVisuals.Tint(item),visibility,clock,width,height,true,dissolve,item,glass);
                 });
                 pixels[mode-1]=GlassBufferReadback.Read(buffers[mode-1]);
@@ -191,7 +191,7 @@ public sealed class ClearGlassRenderCheck : ModSystem
             p["uGlassPartSpaceWarp"].SetValue(0f);
             if(ready==0)p["uGlassPartBloom"].SetValue(0f);
             device.SetRenderTarget(target);device.Clear(Color.Magenta);
-            MartialSlashRenderer.DrawWithRestoredState(()=>{
+            VfxRenderState.DrawWithRestoredState(()=>{
                 batch.Begin(SpriteSortMode.Immediate,BlendState.Opaque,SamplerState.PointClamp,DepthStencilState.None,RasterizerState.CullNone,shader);
                 device.Textures[1]=buffers[0];device.Textures[2]=buffers[1];
                 device.SamplerStates[1]=SamplerState.LinearClamp;device.SamplerStates[2]=SamplerState.LinearClamp;

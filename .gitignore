@@ -23,4 +23,7 @@ artifacts/
 # 反编译工具与其输出：体积大（约 22MB），可由 tModLoader.dll 重新生成，不入库
 tools/ilspy/
 tools/decomp/
+# XNB 解包工具二进制与下载压缩包：体积大（约 50MB），可从开源仓库重新获取，不入库；脚本源码 tools/xnbcli/ 保留
+tools/xnbcli-binary/
+tools/xnbcli-windows-x64.zip
 .workbuddy/

@@ -3,11 +3,11 @@ using Terraria;
 
 namespace ZenithReborn;
 
-// HEROsMod's prefix editor replaces the item with
-//   new Item(); netDefaults(id); Prefix(pre); itemSlot.item = val2.Clone();
-// so all ModItem data is discarded and PreReforge/PostReforge never run.
-// Cache the last soul the player held on the cursor (the one being placed into
-// that editor), then restore it inside ApplyPrefix on the rebuilt empty soul.
+// 英雄模组的前缀编辑器会用以下步骤替换物品：
+//   新建物品、载入默认值、应用前缀，再用克隆结果替换槽位。
+// 原物品数据因此被丢弃，普通重铸前后回调也不会运行。
+// 缓存鼠标上准备放入编辑器的剑魂，
+// 随后在新建空剑魂应用前缀时恢复数据。
 internal static class HeroPrefixCompat
 {
     private static Item[] hosts;
@@ -39,7 +39,7 @@ internal static class HeroPrefixCompat
         cores = soul.Cores;
         oreCollection=soul.OreCollectionMask;
         seals=soul.Seals;legacy=soul.LegacyReleased;yujian=soul.YujianCharge;
-        martialCharge=soul.MartialCharge;martialTier=soul.MartialTier;
+        martialCharge=soul.LegacyMartialCharge;martialTier=soul.LegacyMartialTier;
         attached = soul.Attached; memory = soul.KingMemory;
         has = true;
     }
@@ -47,7 +47,7 @@ internal static class HeroPrefixCompat
     internal static bool TryRestore(SoulItem soul)
     {
         if (!has) return false;
-        // Only fill a freshly rebuilt, empty soul. Never overwrite real data.
+        // 只恢复刚重建的空剑魂，不能覆盖已有数据。
         if (soul.Stored.Any(h => !h.IsAir) || soul.Kills != 0 || soul.Cores != 0 || soul.OreCollectionMask!=0 || soul.Seals!=0 || soul.EnvironmentCollection!=0) return false;
         for (int i = 0; i < soul.Hosts.Length && i < hosts.Length; i++)
             if (soul.Hosts[i].IsAir && !hosts[i].IsAir)
@@ -63,7 +63,7 @@ internal static class HeroPrefixCompat
         soul.AwakeningMemory = awakened;
         soul.OreCollectionMask=oreCollection & OreFamily.AllMaterials;
         soul.Seals=seals;soul.LegacyReleased=legacy;soul.YujianCharge=yujian;
-        soul.MartialCharge=martialCharge;soul.MartialTier=martialTier;
+        soul.LegacyMartialCharge=martialCharge;soul.LegacyMartialTier=martialTier;
         soul.EnvironmentCollection=environments;soul.EnvironmentBlessings=environmentBlessings;soul.DomainEnvironment=domain;soul.NormalizeEnvironments();
         return true;
     }

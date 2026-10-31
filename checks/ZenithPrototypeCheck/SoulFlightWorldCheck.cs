@@ -79,6 +79,8 @@ public class SoulFlightWorldCheck : ModSystem
     {
         if(RealInput&&output!=null&&File.Exists(Path.Combine(output,"exit"))){Main.instance.Exit();return;}
         if(!Enabled || Main.gameMenu || finished)return;
+        // 局部光源必须每帧注入：Lighting 每帧重算，AddLight 只影响当帧。
+        if(ready&&LightPreset=="torch")Lighting.AddLight(anchor+new Vector2(180,0),1.8f,1.4f,.9f);
         if(!ready)
         {
             ready=true;player=Main.LocalPlayer;anchor=player.Center-new Vector2(0,200);
@@ -100,11 +102,13 @@ public class SoulFlightWorldCheck : ModSystem
                     SwordFlowMaterial.SetMaterialBinding(type,material,new(){LayerMask=regionMask});
             }
         }
+        // 仅隔离检查主动平移人物及目标；正常游戏不受此夹具影响。
+        if(Environment.GetEnvironmentVariable("ZENITH_WORLD_MOVING")=="1")anchor+=new Vector2(3,0);
         player.Center=anchor;player.velocity=Vector2.Zero;player.immune=true;player.immuneTime=60;
         // 同一隔离档与攻击姿态只切换世界照明；局部光源用原版照明接口注入，不给材质伪造亮度。
         Main.dayTime=LightPreset is "day" or "dusk";
         Main.time=LightPreset=="dusk"?51840:Main.dayTime?27000:16200;
-        if(LightPreset=="torch")Lighting.AddLight(anchor+new Vector2(180,0),1.8f,1.4f,.9f);
+        // 火把改为每帧注入：光照每帧重算，一次性 AddLight 只有一帧生效。
         // 天顶椭圆在前端折返，目标放在真实端点；椭圆内部不等于剑体经过的位置。
         var target=Main.npc[npcId];target.Center=anchor+new Vector2(360,0);target.velocity=Vector2.Zero;
         target.noGravity=true;target.noTileCollide=true;target.knockBackResist=0;target.defense=0;
@@ -140,6 +144,20 @@ public class SoulFlightWorldCheck : ModSystem
                 blade.TargetOffset=new Vector2(360,0);blade.Vertical=60;
                 weapons[id]=type;
                 if(tick==340)forcedEndingId=id;
+            }
+        }
+        // 多剑同时出现，只在专用隔离夹具中制造叠加画面。
+        if(tick==20&&Environment.GetEnvironmentVariable("ZENITH_MULTI_BLADE")=="1")
+        {
+            int ordinal=0;
+            foreach(int type in new[]{ItemID.EnchantedSword,ItemID.Starfury,ItemID.GoldBroadsword})
+            {
+                soul.Hosts[0]=new Item(type);soul.RefreshStats();
+                int id=soul.EmitBlade(player,soul.Hosts[0],0,1);
+                if(id>=Main.maxProjectiles)continue;
+                var blade=(SoulBlade)Main.projectile[id].ModProjectile;
+                blade.TargetOffset=new Vector2(360,0);blade.Vertical=48+ordinal*12;
+                weapons[id]=type;ordinal++;
             }
         }
         // 隔离夹具额外检查提前收回后父弹幕立即消失，材质仍可正常收尽。
@@ -185,7 +203,7 @@ public class SoulFlightWorldCheck : ModSystem
         {
             finished=true;
             File.WriteAllText(Path.Combine(output,"world.json"),JsonSerializer.Serialize(new{
-                passed=damaged.Count==3 && returned.Count==3 && SoulSceneRefraction.CapturedFrames>0 && refractionMaskPixels>0&&(!Advanced||materialLightCalls>0)&&endingAfterParentKill&&SoulTrailEnding.Created>=4&&!SoulTrailEnding.HasActive&&(!EchoDamage||echoHits.Count==3),
+                passed=damaged.Count==(Environment.GetEnvironmentVariable("ZENITH_MULTI_BLADE")=="1"?4:3) && returned.Count==(Environment.GetEnvironmentVariable("ZENITH_MULTI_BLADE")=="1"?4:3) && SoulSceneRefraction.CapturedFrames>0 && refractionMaskPixels>0&&(!Advanced||materialLightCalls>0)&&endingAfterParentKill&&SoulTrailEnding.Created>=4&&!SoulTrailEnding.HasActive&&(!EchoDamage||echoHits.Count==3),
                 testedPackageSha256=Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(Main.SavePath,"Mods/ZenithReborn.tmod"))))
                     .ToLowerInvariant(),
                 actualWorld=true,productionAI=true,productionRenderer=true,isolatedSaves=true,

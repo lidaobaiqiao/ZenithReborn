@@ -26,9 +26,7 @@ internal static class OrePierceCheck
     {
         int[] types=[Terraria.ModLoader.ModContent.ProjectileType<SoulBlade>(),
             Terraria.ModLoader.ModContent.ProjectileType<OreFlyingSword>(),
-            Terraria.ModLoader.ModContent.ProjectileType<OreSkyfall>(),
-            Terraria.ModLoader.ModContent.ProjectileType<MartialBlade>(),
-            Terraria.ModLoader.ModContent.ProjectileType<MartialGiant>()];
+            Terraria.ModLoader.ModContent.ProjectileType<OreSkyfall>()];
         var player=Terraria.Main.player[0];byte oldEnchant=player.meleeEnchant;
         var oldNpc=Terraria.Main.npc[199];
         try

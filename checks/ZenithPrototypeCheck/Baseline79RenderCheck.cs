@@ -43,7 +43,7 @@ internal static class Baseline79RenderCheck
         {
             if(effect!=null)field.SetValue(null,effect);
             device.SetRenderTarget(target);device.Clear(Color.Transparent);
-            MartialSlashRenderer.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(mesh,6,color,1,clock,640,300,true,dissolve));
+            VfxRenderState.DrawWithRestoredState(()=>SwordFlowMaterial.Draw(mesh,6,color,1,clock,640,300,true,dissolve));
             var pixels=new Color[640*300];target.GetData(pixels);return pixels;
         }
     }

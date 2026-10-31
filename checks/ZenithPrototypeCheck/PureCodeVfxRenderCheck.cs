@@ -102,7 +102,7 @@ public sealed class PureCodeVfxRenderCheck : ModSystem
             int count=SoulMaterialTrail.Build(points,rotations,points.Length,62,Vector2.Zero,vertices,clock);
             using var target=new RenderTarget2D(device,960,540,false,SurfaceFormat.Color,DepthFormat.None);
             device.SetRenderTarget(target);device.Clear(Color.Transparent);
-            MartialSlashRenderer.DrawWithRestoredState(()=>SoulMaterialTrail.Draw(vertices,count,tint??SoulVisuals.Tint(ItemID.TerraBlade),opacity,clock,960,540,true,0,ItemID.TerraBlade));
+            VfxRenderState.DrawWithRestoredState(()=>SoulMaterialTrail.Draw(vertices,count,tint??SoulVisuals.Tint(ItemID.TerraBlade),opacity,clock,960,540,true,0,ItemID.TerraBlade));
             var pixels=new Color[960*540];target.GetData(pixels);
             hashes[name]=Convert.ToHexString(SHA256.HashData(System.Runtime.InteropServices.MemoryMarshal.AsBytes(pixels.AsSpan())));
             using(var png=File.Create(Path.Combine(output,name+".png")))target.SaveAsPng(png,960,540);

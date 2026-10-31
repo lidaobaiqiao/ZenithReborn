@@ -67,22 +67,12 @@ Mods: {
 			}
 
 			SlashZenithTest: {
-				// DisplayName: Slash Zenith Test
-				// Tooltip: ""
+				// 测试物品显示名使用默认值。
+				// 测试物品没有额外说明。
 			}
 		}
 
 		Buffs: {
-			MartialImpaled: {
-				DisplayName: 贯剑
-				Description: 刺入的武器持续造成伤害
-			}
-
-			MartialScar: {
-				DisplayName: 绝斩剑痕
-				Description: 凝时绝斩留下的持续剑伤
-			}
-
 			ForestBreath: {
 				DisplayName: 森息
 				Description: 木质族命中增益：额外自然回复0.25×S生命/秒
@@ -152,34 +142,24 @@ Mods: {
 		NPCs.GuardianSlimeKing.DisplayName: 史莱姆王·守望者
 
 		Projectiles: {
-			MartialBlade.DisplayName: 武技刺剑
-			MartialGiant.DisplayName: 武技天顶巨剑
-			MartialWave.DisplayName: 凝时绝斩剑气
+
+
+
 			BlessingStrike.DisplayName: 祝福斩痕
 			SoulBlade.DisplayName: 天顶剑影
 			HardOreShot.DisplayName: 锻金衍刃
 			OreFlyingSword.DisplayName: 百炼飞剑
 			OreSkyfall.DisplayName: 天铸巨剑
-			// EnvironmentDomain.DisplayName: Environment Domain
-			// EnvironmentEffect.DisplayName: Environment Effect
+			// 环境领域显示名使用默认值。
+			// 环境效果显示名使用默认值。
 		}
 
 		Keybinds: {
-			ActivateMartial.DisplayName: 启动/收起武技攻击
-			CycleMartial.DisplayName: 切换武技剑势档位
+
+
 			ActivateYujian.DisplayName: 手动开启御剑祝福
 			OpenSoul.DisplayName: 打开剑魂寄宿界面
 		}
 
-		Configs: {
-			MartialConfig: {
-				DisplayName: 武技攻击试作
-
-				EnableAttackPrototype: {
-					Label: 启用三档武技试作
-					Tooltip: 暂向已附着剑魂开放全部三档攻击。种族羁绊与支援奖励后续接入。
-				}
-			}
-		}
 	}
 }

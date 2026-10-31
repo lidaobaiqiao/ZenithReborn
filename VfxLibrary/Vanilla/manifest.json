@@ -1,0 +1,23 @@
+{
+  "source": "E:\\SteamLibrary\\steamapps\\common\\Terraria\\Content\\Images",
+  "source_type": "Terraria 原版安装目录 XNB",
+  "raw_png_count": 3461,
+  "dust_slices": 324,
+  "counts": {
+    "其他": 169,
+    "弹幕": 1136,
+    "火焰": 19,
+    "物品火焰": 32,
+    "碎片": 1404,
+    "粒子": 324,
+    "粒子图集": 1,
+    "辉光": 384,
+    "额外特效": 316
+  },
+  "notes": [
+    "贴图为原始素材，不等于实际动画或完整战斗效果",
+    "粒子按原版8×8帧从Dust图集裁剪，三帧并排",
+    "英文标识来自本机 tModLoader ID 定义，部分资源无名称映射",
+    "按照文件类型归档，分类并不保证每张图都可作为特效"
+  ]
+}

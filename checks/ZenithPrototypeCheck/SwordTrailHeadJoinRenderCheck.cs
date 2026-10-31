@@ -78,7 +78,7 @@ public sealed class SwordTrailHeadJoinRenderCheck : ModSystem
                     using var target=new RenderTarget2D(device,960,540,false,SurfaceFormat.Color,DepthFormat.None);
                     device.SetRenderTarget(target);device.Clear(coverageOnly?Color.Transparent:new Color(10,13,17));
                     mask.SetValue(null,coverageOnly);
-                    try{MartialSlashRenderer.DrawWithRestoredState(()=>SoulMaterialTrail.Draw(vertices,count,tint,1,.3f,960,540,true,0,item));}
+                    try{VfxRenderState.DrawWithRestoredState(()=>SoulMaterialTrail.Draw(vertices,count,tint,1,.3f,960,540,true,0,item));}
                     finally{mask.SetValue(null,false);}
                     if(drawSword)
                     {

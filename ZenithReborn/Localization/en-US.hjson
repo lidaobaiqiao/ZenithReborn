@@ -73,16 +73,6 @@ Mods: {
 		}
 
 		Buffs: {
-			MartialImpaled: {
-				DisplayName: Impaled swords
-				Description: Embedded soul weapons cause continuous damage
-			}
-
-			MartialScar: {
-				DisplayName: Temporal sword scar
-				Description: A lingering wound left by the temporal finishing slash
-			}
-
 			ForestBreath: {
 				DisplayName: ForestBreath
 				Description: Woodland soul effect. See the soul hosting panel for details.
@@ -152,9 +142,9 @@ Mods: {
 		NPCs.GuardianSlimeKing.DisplayName: King Slime, the Keeper
 
 		Projectiles: {
-			MartialBlade.DisplayName: Martial impaling sword
-			MartialGiant.DisplayName: Martial Zenith greatsword
-			MartialWave.DisplayName: Temporal finishing wave
+
+
+
 			BlessingStrike.DisplayName: Blessed slash
 			SoulBlade.DisplayName: Zenith Soul Blade
 			HardOreShot.DisplayName: Hard Ore Shot
@@ -165,21 +155,11 @@ Mods: {
 		}
 
 		Keybinds: {
-			ActivateMartial.DisplayName: Activate/cancel martial form
-			CycleMartial.DisplayName: Select martial charge tier
+
+
 			ActivateYujian.DisplayName: Activate Yujian burst
 			OpenSoul.DisplayName: Open soul hosting interface
 		}
 
-		Configs: {
-			MartialConfig: {
-				DisplayName: Martial attack prototype
-
-				EnableAttackPrototype: {
-					Label: Enable three-tier attack prototype
-					Tooltip: Temporarily enables all three tiers for attached souls. Race and support rewards are not implemented yet.
-				}
-			}
-		}
 	}
 }

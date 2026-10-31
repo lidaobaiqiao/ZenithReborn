@@ -9,7 +9,7 @@ public class SwordEnchantmentVisuals : GlobalProjectile
 {
     public override void SetDefaults(Projectile projectile)
     {
-        if(projectile.ModProjectile is SoulBlade or OreFlyingSword or OreSkyfall or MartialBlade or MartialGiant)
+        if(projectile.ModProjectile is SoulBlade or OreFlyingSword or OreSkyfall)
             projectile.noEnchantmentVisuals=true;
     }
 }

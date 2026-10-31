@@ -21,11 +21,9 @@ public class SoulSource : GlobalProjectile
     public int HostSlot=-1;
     private bool environmentFirstHit;
     public bool EnvironmentServerHit;
-    public bool MartialCharged;
     public override void OnHitNPC(Projectile p,NPC target,NPC.HitInfo hit,int damageDone)
     {
         if(string.IsNullOrEmpty(SoulId) || damageDone<=0 || p.owner<0 || p.owner>=Main.maxPlayers)return;
-        Main.player[p.owner].GetModPlayer<MartialPlayer>().PrimaryHit(p,target,damageDone);
         bool first=p.ModProjectile is SoulBlade && !environmentFirstHit;
         if(first)environmentFirstHit=true;
         Main.player[p.owner].GetModPlayer<EnvironmentPlayer>().Hit(p,target,hit,damageDone,first);
@@ -118,6 +116,8 @@ public class SoulBlade : ModProjectile
     private const int TrailLength = SoulRibbonMesh.HistoryLength;
     private const int HistoryLength = 96;
     private int trailCount;
+    private Vector2 lastTrailAnchor;
+    private bool hasTrailAnchor;
     public override string Texture => "Terraria/Images/Item_" + ItemID.Zenith;
     public override void SetDefaults()
     {
@@ -132,7 +132,7 @@ public class SoulBlade : ModProjectile
         Blessings=new();
         Vertical = 60f;
         trailPoints=new Vector2[HistoryLength];trailCenters=new Vector2[HistoryLength];trailRotations=new float[HistoryLength];trailPhases=new float[HistoryLength];trailDirections=new int[HistoryLength];
-        trailCount=0;
+        trailCount=0;hasTrailAnchor=false;
         trailEndings=new SoulTrailEnding.Handle[SoulTrailUnits.Count];
     }
     public override bool ShouldUpdatePosition() => false;
@@ -172,6 +172,16 @@ public class SoulBlade : ModProjectile
     {
         Player player = Main.player[Projectile.owner];
         if (!player.active || player.dead) { Projectile.Kill(); return; }
+        // 相同主人位移作用于历史剑影，避免人物移动把原本的轨迹拉成斜带。
+        // 服务器与客户端使用同一历史，剑影显示和碰撞不会分离。
+        Vector2 anchor=player.MountedCenter;
+        if(hasTrailAnchor && trailCount>0)
+        {
+            Vector2 shift=anchor-lastTrailAnchor;
+            if(SoulTrailMotion.IsOrdinaryShift(shift))SoulTrailMotion.Translate(trailCenters,trailPoints,trailCount,shift);
+            else trailCount=0;
+        }
+        lastTrailAnchor=anchor;hasTrailAnchor=true;
         float elapsed = ++age - Projectile.ai[2];
         if (elapsed < 0) { Projectile.Center = player.Center; Projectile.hide = true; return; }
         Projectile.hide = false;
@@ -297,6 +307,7 @@ public class SoulBlade : ModProjectile
         WoodCombat.FinishPrimaryHit(Projectile, target, damageDone);
         Main.player[Projectile.owner].GetModPlayer<HardOrePlayer>().Hit(Projectile, target, damageDone);
         OreFamily.OnMainHit(Projectile, target, damageDone);
+        HolyHeavenProc.OnMainHit(Projectile, target, damageDone);
         Blessings.Hit(Projectile,target,damageDone);
     }
     public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)

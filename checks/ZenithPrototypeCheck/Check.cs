@@ -35,6 +35,24 @@ public class Check : ModSystem
         if (string.IsNullOrEmpty(path)) return;
         try
         {
+            if(Environment.GetEnvironmentVariable("ZENITH_MELEE_MATRIX")=="1")
+            {
+                CurseFixture.NeutralDefaults=true;LivingMeleeMatrix.Run();
+                File.WriteAllText(path,"矩阵已执行，逐武器结果见旁边的 matrix.json。\n");
+                Environment.Exit(0);return;
+            }
+            if(Environment.GetEnvironmentVariable("ZENITH_LIVING_ARMAMENT")=="1")
+            {
+                CurseFixture.NeutralDefaults=true;LivingArmamentCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} living armament checks; isolated fixture only, no live gameplay or multiplayer.\n");
+                Console.WriteLine("ZENITH_LIVING_ARMAMENT_PASS "+checks);Environment.Exit(0);return;
+            }
+            if(Environment.GetEnvironmentVariable("ZENITH_HEAVEN")=="1")
+            {
+                CurseFixture.NeutralDefaults=true;HolyHeavenCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} focused holy heaven checks; isolated server fixture, no natural gameplay or multiplayer validation.\n");
+                Console.WriteLine("ZENITH_HEAVEN_PASS "+checks);Environment.Exit(0);return;
+            }
             if(Environment.GetEnvironmentVariable("ZENITH_GLASS")=="1")
             {
                 RibbonCheck.Run(Assert);
@@ -73,6 +91,19 @@ public class Check : ModSystem
                 Console.WriteLine("ZENITH_ORE_PASS "+checks); Environment.Exit(0); return;
             }
             // 只测量不判定：把剑影相位一致性的实测数据写出，供人工判断。
+            if(Environment.GetEnvironmentVariable("ZENITH_TRAIL_MOTION")=="1")
+            {
+                SoulTrailMotionCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} focused moving trail and echo collision checks.\n");
+                Console.WriteLine("ZENITH_TRAIL_MOTION_PASS "+checks);Environment.Exit(0);return;
+            }
+            if(Environment.GetEnvironmentVariable("ZENITH_REMOVE_SYSTEMS")=="1")
+            {
+                CurseFixture.NeutralDefaults=true;
+                RemovedSystemsCheck.Run(Assert);SwingCheck.Run(Assert);StageOneCheck.Run(Assert);WoodCheck.Run(Assert);OreCheck.Run(Assert);OreStackCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} focused removed systems, native attacks, save compatibility, wood and ore checks.\n");
+                Console.WriteLine("ZENITH_REMOVE_SYSTEMS_PASS "+checks);Environment.Exit(0);return;
+            }
             if(Environment.GetEnvironmentVariable("ZENITH_ECHO_PHASE")=="1")
             {
                 File.WriteAllText(path,EchoPhaseProbe.Run()+"\n");
@@ -110,14 +141,10 @@ public class Check : ModSystem
                 BlessingCheck.Run(Assert);
                 BlessingCameraCheck.Run(Assert);
                 EnvironmentAttributeCheck.Run(Assert);
-                SpiritFamilyCheck.Run(Assert);
                 EnvironmentCombatCheck.Run(Assert);
-                MartialCheck.Run(Assert);
-                MartialSlashCheck.Run(Assert);
                 FlowParticleCheck.Run(Assert);
                 OrePierceCheck.Run(Assert);
                 File.WriteAllText(path,$"PASS: {checks} focused checks; fullscreen domain layout, direct inventory sword exchange/return and loss protection, native legendary toggle/restoration/world-state persistence; six curse groups and distinct personal boss stages, actual blessed ItemCheck cadence up to ten blades, direct-hit limits and terrain interception, legacy migration and HERO/reforge/save/network preservation; active-only traits/codex, ten primary slots, additive shared supports and legacy recovery, UI click-through shielding, drag/viewport/slot mappings; six hardmode ore mechanisms, independent damage, cumulative ore mastery and piercing multi-target frame damage; actual native ItemCheck cadence across prefixes/speed modifiers, native two-update flight without phase rescaling, seeded actual vanilla dust comparison, tip flare envelope; compact tooltips, palettes, lunar recovery, progression, wood and DoT regressions. Graphical checks recorded separately; no live multiplayer validation.\n");
-                File.AppendAllText(path,"Martial attack prototype: retained manual three-tier meter, independent weapon snapshots, rear formation and embedded DoT, giant pin release, player dash, two-second hold damage, reversible NPC/projectile time stop, finishing wave/scar, serialization and legacy-input fallback verified. Graphical-world checkpoints recorded separately.\n");
                 Console.WriteLine("ZENITH_WOOD_PASS "+checks); Environment.Exit(0); return;
             }
             if(Environment.GetEnvironmentVariable("ZENITH_STAGE_ONE")=="1")

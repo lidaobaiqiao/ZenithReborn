@@ -70,7 +70,7 @@ public sealed class LiquidGlassPerfCheck : ModSystem
             candidate.Parameters["uLightDirection"].SetValue(new Vector2(.6f,-1f));
             var baseTimes=new List<double>();var candidateTimes=new List<double>();
             device.SetRenderTarget(target);device.Clear(Color.Transparent);
-            MartialSlashRenderer.DrawWithRestoredState(()=>{
+            VfxRenderState.DrawWithRestoredState(()=>{
                 device.BlendState=BlendState.NonPremultiplied;device.DepthStencilState=DepthStencilState.None;
                 device.RasterizerState=RasterizerState.CullNone;
                 // 预热后交错两种顺序，时间戳只包围相同数量的绘制，不包含贴图准备或读回。

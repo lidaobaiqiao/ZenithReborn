@@ -51,7 +51,7 @@ internal static class SwordSpaceDistortionRenderCheck
         Color[] Render(string name,bool enabled,float clock)
         {
             device.SetRenderTarget(target);device.Clear(Color.Magenta);
-            MartialSlashRenderer.DrawWithRestoredState(()=>
+            VfxRenderState.DrawWithRestoredState(()=>
             {
                 SwordSpaceDistortion.Apply(p,clock,Vector2.Zero);p["uGlassPartSpaceWarp"].SetValue(enabled?1f:0f);
                 batch.Begin(SpriteSortMode.Immediate,BlendState.Opaque,SamplerState.LinearClamp,DepthStencilState.None,RasterizerState.CullNone,shader);
