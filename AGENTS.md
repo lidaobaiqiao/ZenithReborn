@@ -10,6 +10,8 @@
 
 > 原版特效美术参考库已整理至 [VfxLibrary/Vanilla](VfxLibrary/Vanilla/README.md)，3461张原版XNB提取PNG与324项粒子切片可在[可搜索图鉴](VfxLibrary/Vanilla/浏览原版特效.html)浏览；静态素材不等于运行时完整特效。本轮仅整理素材，未修改生产包。
 
+> 多代理调度规则见 [.codebuddy/rules/00-delegation.md](.codebuddy/rules/00-delegation.md)；项目入口、环境事实与常用命令见 [.codebuddy/CODEBUDDY.md](.codebuddy/CODEBUDDY.md)。两者由编辑器自动加载，本文件只保留不可让渡的硬规则与版本状态。
+
 ## 长期开发硬规则：模块职责与代码归属
 
 用户已将项目分解，后续开发必须维护现有拆分。用户最新明确纠正：**不要把一堆功能写到一块，也不要把同类功能代码乱放。** “保持可测试性”的首要要求是代码组织清楚，不能用增加测试、调试面板或隔离开关代替职责拆分。
