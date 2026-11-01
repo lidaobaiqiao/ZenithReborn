@@ -6,8 +6,9 @@ using Terraria.ModLoader;
 
 namespace ZenithReborn;
 
-// 飞刃弹幕三阶段：直线飞出 → 刺中（或飞满射程）原地旋转三圈（持续伤害）→ 无伤害收回。
-// 旋转期伤害为直击的50%，节奏沿用8帧共享免疫；收回期伤害归零。印记为核心设计留白，未实现。全部为暂定初值。
+// 飞刃弹幕三阶段：直线飞出 → 刺中（或飞满射程）原地旋转三圈（持续伤害）→ 收回。
+// 旋转期伤害为直击的50%，节奏沿用8帧共享免疫；收回期默认无伤害，印刃寄宿后保留50%。
+// 印记为核心设计留白，未实现；印刃目前只接管"收回期伤害"这一项特殊效果。
 public class FlyingBladeShot : ModProjectile
 {
     // 绘制完全由 PreDraw 接管（寄宿武器原版贴图逐剑取色）；此占位仅满足资产加载，兜底显示原版飞刀贴图。
@@ -17,6 +18,8 @@ public class FlyingBladeShot : ModProjectile
     private Phase phase;
     private int rotateLeft;   // 旋转剩余帧
     private float travel;     // 直飞行程
+    // 印刃开关：由 Launch 写入 ai[1]（>0 表示收回期保留伤害），随弹幕自动同步。
+    private bool ReturnHits=>Projectile.ai[1]>0f;
     public const float LaunchSpeed=12f;  // 掷出速度（暂定初值，接近原版飞刀）
     public const float MaxRange=600f;    // 未命中时的射程
     public const int RotationFrames=45;  // 三圈，每圈15帧
@@ -45,7 +48,8 @@ public class FlyingBladeShot : ModProjectile
                 Projectile.velocity=Vector2.Zero;
                 Projectile.rotation+=MathHelper.TwoPi/15f;
                 rotateLeft--;
-                if(rotateLeft<=0){phase=Phase.Return;Projectile.damage=0;}
+                // 印刃未寄宿时收回期无伤害；寄宿后保留 50%（见 ModifyHitNPC）。
+                if(rotateLeft<=0){phase=Phase.Return;if(!ReturnHits)Projectile.damage=0;}
                 break;
             case Phase.Return:
                 var back=Main.player[Projectile.owner].Center-Projectile.Center;
@@ -61,7 +65,7 @@ public class FlyingBladeShot : ModProjectile
         phase=Phase.Rotate;rotateLeft=RotationFrames;
         Projectile.velocity=Vector2.Zero;
     }
-    public override bool? CanHitNPC(NPC target)=>phase==Phase.Return?false:null;
+    public override bool? CanHitNPC(NPC target)=>phase==Phase.Return && !ReturnHits?false:null;
     public string KillReason=""; // 夹具诊断：记录收回期 Kill 的触发条件
     public string DebugState=>$"phase={phase} rotateLeft={rotateLeft} travel={travel:F0} vel={Projectile.velocity} timeLeft={Projectile.timeLeft} active={Projectile.active} {KillReason}";
     public override void OnHitNPC(NPC target,NPC.HitInfo hit,int damageDone)
@@ -70,7 +74,8 @@ public class FlyingBladeShot : ModProjectile
     }
     public override void ModifyHitNPC(NPC target,ref NPC.HitModifiers modifiers)
     {
-        if(phase==Phase.Rotate)modifiers.FinalDamage*=RotationDamage;
+        // 旋转期与印刃收回期都只结算一半伤害。
+        if(phase==Phase.Rotate || phase==Phase.Return)modifiers.FinalDamage*=RotationDamage;
     }
     public override bool PreDraw(ref Color lightColor)
     {

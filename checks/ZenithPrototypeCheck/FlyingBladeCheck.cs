@@ -16,7 +16,8 @@ internal static class FlyingBladeCheck
         Main.myPlayer=0;Main.netMode=NetmodeID.SinglePlayer;Main.dayTime=true;
         var player=new Player{active=true,whoAmI=0,position=new Vector2(1000,1000)};Main.player[0]=player;player.ResetEffects();
         var soul=(SoulItem)new Item(ModContent.ItemType<SoulItem>()).ModItem;
-        soul.Attached=true;soul.Kills=SoulProgress.All;soul.Cores=63;
+        // 四把族核心可以放支援槽，因此夹具需解除全部诅咒，否则切换诅咒只放行首把主剑的特性。
+        soul.Attached=true;soul.Kills=SoulProgress.All;soul.Cores=63;soul.Seals=SoulCurses.All;
         player.inventory[0]=soul.Item;player.selectedItem=0;
 
         // 名册边界：抽验正反例——弹幕剑与非常规不入族。
@@ -28,7 +29,7 @@ internal static class FlyingBladeCheck
         check(!FlyingBladeFamily.IsMember(ItemID.LightsBane)&&!FlyingBladeFamily.IsMember(ItemID.EnchantedSword)&&
             !FlyingBladeFamily.IsMember(ItemID.Meowmere)&&!FlyingBladeFamily.IsMember(ItemID.IceSickle)&&
             !FlyingBladeFamily.IsMember(ItemID.Umbrella)&&!FlyingBladeFamily.IsMember(ItemID.FlyingKnife)&&
-            FlyingBladeFamily.Weapons.Length==31,"弹幕剑与非常规不入族，名册31把");
+            FlyingBladeFamily.Weapons.Length==35,"弹幕剑与非常规不入族，名册31把＋族核心4把");
 
         // 名册-普查一致性：名册每把在引擎中无弹幕且可寄宿，防手滑加错。
         var survey=new Item();bool clean=true;string bad="";
@@ -39,12 +40,12 @@ internal static class FlyingBladeCheck
         }
         check(clean,$"名册全部无引擎弹幕{bad}");
 
-        // 激活条件：主槽或支援槽的族成员 + 有效主攻。
+        // 激活条件：族激活权交给启刃，只有族成员不再自动激活。
+        // 注：族核心必须放主槽——支援槽要木质/矿石族激活才开，本夹具没有那些族成员。
         soul.Hosts[0]=new Item(ItemID.BloodButcherer);soul.RefreshStats();
-        check(FlyingBladeFamily.Count(soul)>=1&&FlyingBladeFamily.Enabled(soul),"有效族成员与主攻激活族特性");
-        soul.Hosts[0]=new Item(ItemID.WoodenSword);
-        check(!FlyingBladeFamily.Enabled(soul),"无族成员时特性失效");
-        soul.Hosts[0]=new Item(ItemID.BloodButcherer);soul.RefreshStats();
+        check(FlyingBladeFamily.Count(soul)>=1&&!FlyingBladeFamily.Enabled(soul),"仅族成员、未寄宿启刃时不激活");
+        soul.Hosts[0]=new Item(ModContent.ItemType<FlyingBladeSeed>());soul.RefreshStats();
+        check(FlyingBladeCores.Seeded(soul)&&FlyingBladeFamily.Enabled(soul),"寄宿启刃后族激活");
 
         // 蓄能节奏：0.3秒（18帧）一把，弹容量=独行祝福上限10。虚拟时钟注入，不伪造全局状态。
         var hand=player.GetModPlayer<FlyingBladeHand>();
@@ -84,5 +85,31 @@ internal static class FlyingBladeCheck
         check(shot.CanHitNPC(null)==false,"收回途中不再造成伤害");
         check(FlyingBladeShot.MaxRange==600f&&FlyingBladeShot.RotationFrames==45&&
             FlyingBladeShot.RotationDamage==.5f&&FlyingBladeShot.LaunchSpeed==12f,"射程、旋转周期、持续伤害与速度为暂定初值");
+
+        // 族核心四把：各自一层开关，逐条验证。启刃已在激活段验证。
+        // 叠刃：族内武器越多飞刃伤害越高，且有上限。
+        soul.Hosts[1]=new Item(ModContent.ItemType<FlyingBladeTally>());soul.RefreshStats();
+        int tallyCount=FlyingBladeFamily.Count(soul);
+        float expected=1+FlyingBladeCores.StepPercent/100f*Math.Min(tallyCount-1,FlyingBladeCores.StepCap-1);
+        check(FlyingBladeCores.Tally(soul)&&Math.Abs(FlyingBladeCores.DamageBonus(soul)-expected)<0.0001f,
+            $"叠刃按族内武器数放大飞刃伤害（{tallyCount}把→×{expected:F2}）");
+
+        // 通刃：非本族主剑也能作为飞刃载体。
+        foreach(var p in Main.projectile)p.active=false;
+        soul.Hosts[2]=new Item(ModContent.ItemType<FlyingBladePass>());
+        soul.Hosts[4]=new Item(ItemID.WoodenSword);soul.RefreshStats();
+        hand.Loaded=6;hand.Launch(soul);
+        var hosts=Main.projectile.Where(p=>p.active&&p.ModProjectile is FlyingBladeShot).Select(p=>(int)p.ai[0]).ToArray();
+        check(FlyingBladeCores.Pass(soul)&&hosts.Contains(ItemID.WoodenSword),"通刃让非本族主剑也能掷出飞刃");
+
+        // 印刃：把收回期伤害开关写进弹幕，并让收回期仍可命中。
+        foreach(var p in Main.projectile)p.active=false;
+        soul.Hosts[3]=new Item(ModContent.ItemType<FlyingBladeSigil>());soul.RefreshStats();
+        hand.Loaded=1;hand.Launch(soul);
+        var sigilShot=Main.projectile.First(p=>p.active&&p.ModProjectile is FlyingBladeShot);
+        var sigilMod=(FlyingBladeShot)sigilShot.ModProjectile;
+        check(FlyingBladeCores.Sigil(soul)&&sigilShot.ai[1]==1f,"印刃把收回期伤害开关写进弹幕");
+        for(int i=0;i<60+FlyingBladeShot.RotationFrames+3;i++){sigilMod.AI();sigilShot.position+=sigilShot.velocity;}
+        check(sigilShot.damage>0&&sigilMod.CanHitNPC(null)!=false,"印刃让收回期保留伤害并可命中");
     }
 }

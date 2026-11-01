@@ -16,12 +16,13 @@ public partial class SoulUI
     public static void SelectTraitScope(bool activeOnly)
     {activeTraitsOnly=activeOnly;traitListScroll=traitDetailScroll=0;traitSelection="";}
     public static void SelectTraitCategory(int value)
-    {catalogFilter=Math.Clamp(value,0,6);traitListScroll=traitDetailScroll=0;traitSelection="";}
+    {catalogFilter=Math.Clamp(value,0,7);traitListScroll=traitDetailScroll=0;traitSelection="";}
     public static IEnumerable<SoulTrait> TraitEntries(SoulItem soul)=>SoulTraits.All(soul)
         .Where(t=>(!activeTraitsOnly||t.Active)&&(catalogFilter==0||(int)t.Category==catalogFilter-1));
     private static Color TraitColor(TraitCategory category)=>category switch {
         TraitCategory.Wood=>new(135,211,168),TraitCategory.Ore=>new(126,194,218),
-        TraitCategory.Growth=>new(224,193,130),TraitCategory.Heaven=>new(255,221,135),TraitCategory.Living=>new(165,220,255),_=>new(184,162,224)};
+        TraitCategory.Growth=>new(224,193,130),TraitCategory.Heaven=>new(255,221,135),TraitCategory.Living=>new(165,220,255),
+        TraitCategory.Flying=>new(148,212,221),_=>new(184,162,224)};
     private static int TraitItem(SoulTrait trait)
     {
         if(trait.Key.StartsWith("wood-")&&int.TryParse(trait.Key[5..],out int wood)&&wood>=0&&wood<WoodTypes.Types.Length)return WoodTypes.Types[wood];
@@ -48,7 +49,7 @@ public partial class SoulUI
         Box(new(chosenMode.X+12,chosenMode.Bottom-1,chosenMode.Width-24,2),accent*.8f);
         if(!inline)y+=46;
         int filterWidth=Math.Min(840,Math.Max(20,b.Width-28)),columns=Math.Clamp(filterWidth/132,2,5),step=filterWidth/columns;
-        for(int i=0;i<7;i++)
+        for(int i=0;i<8;i++)
         {
             int filter=i;var source=all.Where(t=>!activeTraitsOnly||t.Active);
             int count=source.Count(t=>filter==0||(int)t.Category==filter-1);

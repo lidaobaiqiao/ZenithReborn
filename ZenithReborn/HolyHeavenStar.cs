@@ -13,7 +13,7 @@ public class HolyHeavenStar : ModProjectile
     public override void SetDefaults()
     {
         Projectile.CloneDefaults(ProjectileID.FallingStar);
-        Projectile.aiStyle=5;Projectile.hostile=false;Projectile.friendly=true;
+        Projectile.aiStyle=ProjAIStyleID.FallingStar;Projectile.hostile=false;Projectile.friendly=true;
         Projectile.DamageType=DamageClass.Generic;Projectile.timeLeft=180;
         Projectile.usesLocalNPCImmunity=true;Projectile.localNPCHitCooldown=-1;
     }

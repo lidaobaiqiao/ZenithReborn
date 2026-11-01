@@ -3,14 +3,15 @@ using Terraria.ID;
 
 namespace ZenithReborn;
 
-public enum TraitCategory { Wood, Ore, Sword, Growth, Heaven, Living }
+// 分类顺序同时是图鉴筛选按钮的顺序，新增分类只能追加在末尾，不能插到中间打乱旧编号。
+public enum TraitCategory { Wood, Ore, Sword, Growth, Heaven, Living, Flying }
 public readonly record struct SoulTrait(string Key,string Title,string Description,string Requirement,TraitCategory Category,bool Active);
 
 // 展示层与战斗读取同一有效槽规则；查阅图鉴不会改变解锁、战斗状态或寄宿物品。
 public static class SoulTraits
 {
     public static string CategoryName(TraitCategory category) => category switch {
-        TraitCategory.Wood=>"木质族",TraitCategory.Ore=>"矿石族",TraitCategory.Sword=>"剑术",TraitCategory.Heaven=>"神圣天堂",TraitCategory.Living=>"剑灵（暂名）",_=>"成长" };
+        TraitCategory.Wood=>"木质族",TraitCategory.Ore=>"矿石族",TraitCategory.Sword=>"剑术",TraitCategory.Heaven=>"神圣天堂",TraitCategory.Living=>"剑灵（暂名）",TraitCategory.Flying=>"飞刃族",_=>"成长" };
     public static IEnumerable<SoulTrait> Active(SoulItem soul) => All(soul).Where(t=>t.Active);
     public static IReadOnlyList<SoulTrait> All(SoulItem soul)
     {
@@ -71,6 +72,15 @@ public static class SoulTraits
             "成员：珍珠木剑、星怒、神圣剑、真神圣剑、星光、狂星之怒、日耀喷发剑、破晓之光。至少一把处于有效普通或支援槽，且有有效主攻剑；珍珠木剑同时保留木质族身份。",TraitCategory.Heaven,HolyHeavenFamily.Enabled(soul));
         Add("living-armament","剑灵 · 唤兵（暂名）",$"有效族成员 {LivingArmamentFamily.Count(soul)} 种。持有剑魂时召唤有效出战武器，自动追击敌人并使用对应武器攻击；保留现有飞剑及其他种族效果。",
             "暂定成员：附魔剑、飞刀、波涌之刃、无头骑士剑。至少一把在有效主槽或支援槽，且有有效出战主剑。",TraitCategory.Living,LivingArmamentFamily.Enabled(soul));
+        // 飞刃族四把核心武器各掌一层族级开关，四把都是纯挥砍剑，本身也计入族名册。
+        Add("flying-seed","启刃","激活飞刃族的掷刃攻击；没有它，族内武器只按普通挥砍结算。",
+            "寄宿对应核心武器：启刃在有效普通或支援槽中。",TraitCategory.Flying,FlyingBladeCores.Seeded(soul));
+        Add("flying-tally","叠刃",$"族内每多一把有效武器，飞刃伤害 +{FlyingBladeCores.StepPercent}%，最多计 {FlyingBladeCores.StepCap} 把。",
+            "寄宿对应核心武器：叠刃在有效普通或支援槽中，且启刃已激活。",TraitCategory.Flying,FlyingBladeCores.Tally(soul));
+        Add("flying-pass","通刃","允许非本族主剑也使用飞刃攻击方式；飞刃仍沿用该主剑自己的贴图与伤害，用于混族配装。",
+            "寄宿对应核心武器：通刃在有效普通或支援槽中，且启刃已激活。",TraitCategory.Flying,FlyingBladeCores.Pass(soul));
+        Add("flying-sigil","印刃","族特殊效果生效：当前为收回期的飞刃保留一半伤害。",
+            "寄宿对应核心武器：印刃在有效普通或支援槽中，且启刃已激活。",TraitCategory.Flying,FlyingBladeCores.Sigil(soul));
         var families=new[]{(BladeFamily.Swift,ItemID.CopperShortsword),(BladeFamily.Solid,ItemID.BoneSword),
             (BladeFamily.Frost,ItemID.IceBlade),(BladeFamily.Nature,ItemID.BladeofGrass),(BladeFamily.Arcane,ItemID.EnchantedSword)};
         foreach(var(family,type) in families)

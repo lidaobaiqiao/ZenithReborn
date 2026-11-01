@@ -30,22 +30,28 @@ public class FlyingBladeHand : ModPlayer
     {
         if(Player.whoAmI!=Main.myPlayer || Main.netMode==NetmodeID.Server || Loaded<=0 ||
             !FlyingBladeFamily.Enabled(soul))return;
-        var members=soul.Active.Where(i=>FlyingBladeFamily.IsMember(i.type)).ToArray();
+        // 通刃已寄宿时，非本族主剑也能掷飞刃；否则只掷本族成员。
+        Item[] members=FlyingBladeCores.Pass(soul)
+            ?soul.Active.ToArray()
+            :soul.Active.Where(i=>FlyingBladeFamily.IsMember(i.type)).ToArray();
         if(members.Length==0)return;
         Vector2 aim=(AimOverride==Vector2.Zero?Main.MouseWorld:AimOverride)-Player.Center;
         if(aim.LengthSquared()<2500)aim=Vector2.UnitX*Player.direction*50;
         float baseAngle=(float)Math.Atan2(aim.Y,aim.X);
         int count=Loaded;
+        // 叠刃寄宿后，族内武器数量会放大飞刃伤害。
+        float bonus=FlyingBladeCores.DamageBonus(soul);
+        bool sigil=FlyingBladeCores.Sigil(soul);
         for(int i=0;i<count;i++)
         {
             var host=members[i%members.Length];
             // 扇形展开：以瞄准线为中心，相邻飞刃相隔5°。
             float angle=baseAngle+(i-(count-1)*.5f)*MathHelper.ToRadians(SpreadDegrees);
-            int damage=soul.BladeDamage(Player,host);
+            int damage=(int)(soul.BladeDamage(Player,host)*bonus);
             int index=Projectile.NewProjectile(Player.GetSource_ItemUse(soul.Item),Player.Center,
                 new Vector2((float)Math.Cos(angle),(float)Math.Sin(angle))*FlyingBladeShot.LaunchSpeed,
                 ModContent.ProjectileType<FlyingBladeShot>(),damage,
-                Player.GetWeaponKnockback(host),Player.whoAmI,host.type);
+                Player.GetWeaponKnockback(host),Player.whoAmI,host.type,sigil?1f:0f);
             if(index<0 || index>=Main.maxProjectiles)break;
             var shot=(FlyingBladeShot)Main.projectile[index].ModProjectile;
             shot.HostType=host.type;
