@@ -36,7 +36,7 @@ try {
     $result = $LASTEXITCODE
 } finally { Pop-Location }
 Get-Content "$taskRoot/artifacts/wood-check.txt"
-if ($result -ne 0) { throw 'Isolated wood checks failed; see artifacts/wood-load.log' }
-# 回归结果绑定实际加载的包；不能把旧bin目录里的DLL当成本次原生编译产物。
-@{compiler='tModLoader native';packages=$nativePackages;passed=$true} | ConvertTo-Json -Depth 5 |
+# 回归结果绑定实际加载的包；失败时也要落盘 passed=false，不能让上一轮的成功记录冒充本次通过。
+@{compiler='tModLoader native';packages=$nativePackages;passed=($result -eq 0)} | ConvertTo-Json -Depth 5 |
     Set-Content -Encoding utf8 "$taskRoot/artifacts/native-build-check.json"
+if ($result -ne 0) { throw 'Isolated wood checks failed; see artifacts/wood-load.log' }
