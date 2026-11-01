@@ -35,6 +35,12 @@ public class Check : ModSystem
         if (string.IsNullOrEmpty(path)) return;
         try
         {
+            if(Environment.GetEnvironmentVariable("ZENITH_FLYING_BLADE_CHECK")=="1")
+            {
+                CurseFixture.NeutralDefaults=true;FlyingBladeCheck.Run(Assert);
+                File.WriteAllText(path,$"PASS: {checks} flying blade checks; isolated server fixture, no live gameplay or multiplayer validation.\n");
+                Console.WriteLine("ZENITH_FLYING_BLADE_CHECK_PASS "+checks);Environment.Exit(0);return;
+            }
             if(Environment.GetEnvironmentVariable("ZENITH_FLYING_BLADE")=="1")
             {
                 FlyingBladeSurveyCheck.Run(Environment.GetEnvironmentVariable("ZENITH_FLYING_BLADE_OUTPUT"));

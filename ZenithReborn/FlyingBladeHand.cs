@@ -13,14 +13,15 @@ public class FlyingBladeHand : ModPlayer
     public uint NextStack;          // 下一把叠层的更新计数
     public const int StackInterval=18;   // 0.3秒 = 18帧
     public const float SpreadDegrees=5f; // 齐射扇面相邻间隔
+    public Func<uint> Clock=null;     // 夹具注入的虚拟时钟；生产路径为 null，读全局更新计数
+    public Vector2 AimOverride=Vector2.Zero; // 夹具注入的瞄准点；生产路径为零向量，读真实鼠标世界坐标
 
     public override void PostUpdate()
     {
-        FlyingBladeMark.Prune();
         if(Player.HeldItem.ModItem is not SoulItem soul || !soul.Attached || !FlyingBladeFamily.Enabled(soul))
         {Loaded=0;NextStack=0;return;}
         int capacity=SoulCurses.Blades(soul);
-        uint now=(uint)Main.GameUpdateCount;
+        uint now=Clock!=null?Clock():(uint)Main.GameUpdateCount;
         if(Loaded<capacity && now>=NextStack){Loaded++;NextStack=now+StackInterval;}
     }
 
@@ -31,7 +32,7 @@ public class FlyingBladeHand : ModPlayer
             !FlyingBladeFamily.Enabled(soul))return;
         var members=soul.Active.Where(i=>FlyingBladeFamily.IsMember(i.type)).ToArray();
         if(members.Length==0)return;
-        Vector2 aim=Main.MouseWorld-Player.Center;
+        Vector2 aim=(AimOverride==Vector2.Zero?Main.MouseWorld:AimOverride)-Player.Center;
         if(aim.LengthSquared()<2500)aim=Vector2.UnitX*Player.direction*50;
         float baseAngle=(float)Math.Atan2(aim.Y,aim.X);
         int count=Loaded;
@@ -42,12 +43,12 @@ public class FlyingBladeHand : ModPlayer
             float angle=baseAngle+(i-(count-1)*.5f)*MathHelper.ToRadians(SpreadDegrees);
             int damage=soul.BladeDamage(Player,host);
             int index=Projectile.NewProjectile(Player.GetSource_ItemUse(soul.Item),Player.Center,
-                new Vector2((float)Math.Cos(angle),(float)Math.Sin(angle))*12f,
+                new Vector2((float)Math.Cos(angle),(float)Math.Sin(angle))*FlyingBladeShot.LaunchSpeed,
                 ModContent.ProjectileType<FlyingBladeShot>(),damage,
                 Player.GetWeaponKnockback(host),Player.whoAmI,host.type);
             if(index<0 || index>=Main.maxProjectiles)break;
             var shot=(FlyingBladeShot)Main.projectile[index].ModProjectile;
-            shot.HostType=host.type;shot.BaseDamage=damage;
+            shot.HostType=host.type;
             Main.projectile[index].CritChance=Player.GetWeaponCrit(host);
             Main.projectile[index].netUpdate=true;
         }
