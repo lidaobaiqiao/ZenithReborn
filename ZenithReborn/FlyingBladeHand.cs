@@ -30,8 +30,8 @@ public class FlyingBladeHand : ModPlayer
     {
         if(Player.whoAmI!=Main.myPlayer || Main.netMode==NetmodeID.Server || Loaded<=0 ||
             !FlyingBladeFamily.Enabled(soul))return;
-        // 通刃已寄宿时，非本族主剑也能掷飞刃；否则只掷本族成员。
-        Item[] members=FlyingBladeCores.Pass(soul)
+        // 名册第3把（绿相位剑）已寄宿时，非本族主剑也能掷飞刃；否则只掷本族成员。
+        Item[] members=FlyingBladeFamily.Pass(soul)
             ?soul.Active.ToArray()
             :soul.Active.Where(i=>FlyingBladeFamily.IsMember(i.type)).ToArray();
         if(members.Length==0)return;
@@ -39,9 +39,9 @@ public class FlyingBladeHand : ModPlayer
         if(aim.LengthSquared()<2500)aim=Vector2.UnitX*Player.direction*50;
         float baseAngle=(float)Math.Atan2(aim.Y,aim.X);
         int count=Loaded;
-        // 叠刃寄宿后，族内武器数量会放大飞刃伤害。
-        float bonus=FlyingBladeCores.DamageBonus(soul);
-        bool sigil=FlyingBladeCores.Sigil(soul);
+        // 名册第2把寄宿后，族内武器数量会放大飞刃伤害；第4把决定收回期是否留伤。
+        float bonus=FlyingBladeFamily.DamageBonus(soul);
+        bool sigil=FlyingBladeFamily.Sigil(soul);
         for(int i=0;i<count;i++)
         {
             var host=members[i%members.Length];

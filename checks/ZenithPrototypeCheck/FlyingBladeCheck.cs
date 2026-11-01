@@ -29,7 +29,7 @@ internal static class FlyingBladeCheck
         check(!FlyingBladeFamily.IsMember(ItemID.LightsBane)&&!FlyingBladeFamily.IsMember(ItemID.EnchantedSword)&&
             !FlyingBladeFamily.IsMember(ItemID.Meowmere)&&!FlyingBladeFamily.IsMember(ItemID.IceSickle)&&
             !FlyingBladeFamily.IsMember(ItemID.Umbrella)&&!FlyingBladeFamily.IsMember(ItemID.FlyingKnife)&&
-            FlyingBladeFamily.Weapons.Length==35,"弹幕剑与非常规不入族，名册31把＋族核心4把");
+            FlyingBladeFamily.Weapons.Length==31,"弹幕剑与非常规不入族，名册31把");
 
         // 名册-普查一致性：名册每把在引擎中无弹幕且可寄宿，防手滑加错。
         var survey=new Item();bool clean=true;string bad="";
@@ -40,12 +40,14 @@ internal static class FlyingBladeCheck
         }
         check(clean,$"名册全部无引擎弹幕{bad}");
 
-        // 激活条件：族激活权交给启刃，只有族成员不再自动激活。
-        // 注：族核心必须放主槽——支援槽要木质/矿石族激活才开，本夹具没有那些族成员。
+        // 阶梯：名册前四把各带一层族级效果，顺序必须与名册前四位一致，否则四层效果会漂移。
+        check(FlyingBladeFamily.Tiers.SequenceEqual(FlyingBladeFamily.Weapons.Take(4)),"阶梯四把与名册前四位一致");
+        // 激活条件：族激活权交给名册第1把（蓝相位剑），只有族成员不再自动激活。
+        // 注：阶梯剑放主槽即可；支援槽要木质/矿石族激活才开，本夹具没有那些族成员。
         soul.Hosts[0]=new Item(ItemID.BloodButcherer);soul.RefreshStats();
-        check(FlyingBladeFamily.Count(soul)>=1&&!FlyingBladeFamily.Enabled(soul),"仅族成员、未寄宿启刃时不激活");
-        soul.Hosts[0]=new Item(ModContent.ItemType<FlyingBladeSeed>());soul.RefreshStats();
-        check(FlyingBladeCores.Seeded(soul)&&FlyingBladeFamily.Enabled(soul),"寄宿启刃后族激活");
+        check(FlyingBladeFamily.Count(soul)>=1&&!FlyingBladeFamily.Enabled(soul),"仅族成员、未寄宿名册第1把时不激活");
+        soul.Hosts[0]=new Item(ItemID.BluePhaseblade);soul.RefreshStats();
+        check(FlyingBladeFamily.Activated(soul)&&FlyingBladeFamily.Enabled(soul),"寄宿蓝相位剑后族激活");
 
         // 蓄能节奏：0.3秒（18帧）一把，弹容量=独行祝福上限10。虚拟时钟注入，不伪造全局状态。
         var hand=player.GetModPlayer<FlyingBladeHand>();
@@ -86,30 +88,30 @@ internal static class FlyingBladeCheck
         check(FlyingBladeShot.MaxRange==600f&&FlyingBladeShot.RotationFrames==45&&
             FlyingBladeShot.RotationDamage==.5f&&FlyingBladeShot.LaunchSpeed==12f,"射程、旋转周期、持续伤害与速度为暂定初值");
 
-        // 族核心四把：各自一层开关，逐条验证。启刃已在激活段验证。
-        // 叠刃：族内武器越多飞刃伤害越高，且有上限。
-        soul.Hosts[1]=new Item(ModContent.ItemType<FlyingBladeTally>());soul.RefreshStats();
+        // 阶梯四层：名册第1把已在激活段验证，其余三把逐条验证。
+        // 第2把（红相位剑）：族内武器越多飞刃伤害越高，且有上限。
+        soul.Hosts[1]=new Item(ItemID.RedPhaseblade);soul.RefreshStats();
         int tallyCount=FlyingBladeFamily.Count(soul);
-        float expected=1+FlyingBladeCores.StepPercent/100f*Math.Min(tallyCount-1,FlyingBladeCores.StepCap-1);
-        check(FlyingBladeCores.Tally(soul)&&Math.Abs(FlyingBladeCores.DamageBonus(soul)-expected)<0.0001f,
-            $"叠刃按族内武器数放大飞刃伤害（{tallyCount}把→×{expected:F2}）");
+        float expected=1+FlyingBladeFamily.StepPercent/100f*Math.Min(tallyCount-1,FlyingBladeFamily.StepCap-1);
+        check(FlyingBladeFamily.Tally(soul)&&Math.Abs(FlyingBladeFamily.DamageBonus(soul)-expected)<0.0001f,
+            $"红相位剑按族内武器数放大飞刃伤害（{tallyCount}把→×{expected:F2}）");
 
-        // 通刃：非本族主剑也能作为飞刃载体。
+        // 第3把（绿相位剑）：非本族主剑也能作为飞刃载体。
         foreach(var p in Main.projectile)p.active=false;
-        soul.Hosts[2]=new Item(ModContent.ItemType<FlyingBladePass>());
+        soul.Hosts[2]=new Item(ItemID.GreenPhaseblade);
         soul.Hosts[4]=new Item(ItemID.WoodenSword);soul.RefreshStats();
         hand.Loaded=6;hand.Launch(soul);
         var hosts=Main.projectile.Where(p=>p.active&&p.ModProjectile is FlyingBladeShot).Select(p=>(int)p.ai[0]).ToArray();
-        check(FlyingBladeCores.Pass(soul)&&hosts.Contains(ItemID.WoodenSword),"通刃让非本族主剑也能掷出飞刃");
+        check(FlyingBladeFamily.Pass(soul)&&hosts.Contains(ItemID.WoodenSword),"绿相位剑让非本族主剑也能掷出飞刃");
 
-        // 印刃：把收回期伤害开关写进弹幕，并让收回期仍可命中。
+        // 第4把（紫相位剑）：把收回期伤害开关写进弹幕，并让收回期仍可命中。
         foreach(var p in Main.projectile)p.active=false;
-        soul.Hosts[3]=new Item(ModContent.ItemType<FlyingBladeSigil>());soul.RefreshStats();
+        soul.Hosts[3]=new Item(ItemID.PurplePhaseblade);soul.RefreshStats();
         hand.Loaded=1;hand.Launch(soul);
         var sigilShot=Main.projectile.First(p=>p.active&&p.ModProjectile is FlyingBladeShot);
         var sigilMod=(FlyingBladeShot)sigilShot.ModProjectile;
-        check(FlyingBladeCores.Sigil(soul)&&sigilShot.ai[1]==1f,"印刃把收回期伤害开关写进弹幕");
+        check(FlyingBladeFamily.Sigil(soul)&&sigilShot.ai[1]==1f,"紫相位剑把收回期伤害开关写进弹幕");
         for(int i=0;i<60+FlyingBladeShot.RotationFrames+3;i++){sigilMod.AI();sigilShot.position+=sigilShot.velocity;}
-        check(sigilShot.damage>0&&sigilMod.CanHitNPC(null)!=false,"印刃让收回期保留伤害并可命中");
+        check(sigilShot.damage>0&&sigilMod.CanHitNPC(null)!=false,"紫相位剑让收回期保留伤害并可命中");
     }
 }

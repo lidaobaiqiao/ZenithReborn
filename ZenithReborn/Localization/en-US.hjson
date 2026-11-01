@@ -66,26 +66,6 @@ Mods: {
 				Tooltip: Restores hosting capacity up to ten slots.
 			}
 
-			FlyingBladeSeed: {
-				DisplayName: Seed Blade
-				Tooltip: Activates the flying-blade attack of the Flying Blade family
-			}
-
-			FlyingBladeTally: {
-				DisplayName: Tally Blade
-				Tooltip: Each additional family weapon raises flying-blade damage by 3%, up to 12 weapons
-			}
-
-			FlyingBladePass: {
-				DisplayName: Pass Blade
-				Tooltip: Lets non-family primary swords use the flying-blade attack
-			}
-
-			FlyingBladeSigil: {
-				DisplayName: Sigil Blade
-				Tooltip: Family effect: returning blades keep half their damage
-			}
-
 			SlashZenithTest: {
 				DisplayName: Slash Zenith Test
 				Tooltip: ""

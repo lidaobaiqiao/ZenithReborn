@@ -66,26 +66,6 @@ Mods: {
 				Tooltip: 月亮领主的封印碎片，恢复最后槽位的承载能力
 			}
 
-			FlyingBladeSeed: {
-				DisplayName: 启刃
-				Tooltip: 激活飞刃族的掷刃攻击
-			}
-
-			FlyingBladeTally: {
-				DisplayName: 叠刃
-				Tooltip: 族内每多一把有效武器，飞刃伤害提高3%，最多计12把
-			}
-
-			FlyingBladePass: {
-				DisplayName: 通刃
-				Tooltip: 允许非本族主剑也使用飞刃攻击方式
-			}
-
-			FlyingBladeSigil: {
-				DisplayName: 印刃
-				Tooltip: 族特殊效果生效：收回期的飞刃保留一半伤害
-			}
-
 			SlashZenithTest: {
 				// 测试物品显示名使用默认值。
 				// 测试物品没有额外说明。

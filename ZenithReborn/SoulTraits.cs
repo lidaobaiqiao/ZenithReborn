@@ -72,15 +72,15 @@ public static class SoulTraits
             "成员：珍珠木剑、星怒、神圣剑、真神圣剑、星光、狂星之怒、日耀喷发剑、破晓之光。至少一把处于有效普通或支援槽，且有有效主攻剑；珍珠木剑同时保留木质族身份。",TraitCategory.Heaven,HolyHeavenFamily.Enabled(soul));
         Add("living-armament","剑灵 · 唤兵（暂名）",$"有效族成员 {LivingArmamentFamily.Count(soul)} 种。持有剑魂时召唤有效出战武器，自动追击敌人并使用对应武器攻击；保留现有飞剑及其他种族效果。",
             "暂定成员：附魔剑、飞刀、波涌之刃、无头骑士剑。至少一把在有效主槽或支援槽，且有有效出战主剑。",TraitCategory.Living,LivingArmamentFamily.Enabled(soul));
-        // 飞刃族四把核心武器各掌一层族级开关，四把都是纯挥砍剑，本身也计入族名册。
-        Add("flying-seed","启刃","激活飞刃族的掷刃攻击；没有它，族内武器只按普通挥砍结算。",
-            "寄宿对应核心武器：启刃在有效普通或支援槽中。",TraitCategory.Flying,FlyingBladeCores.Seeded(soul));
-        Add("flying-tally","叠刃",$"族内每多一把有效武器，飞刃伤害 +{FlyingBladeCores.StepPercent}%，最多计 {FlyingBladeCores.StepCap} 把。",
-            "寄宿对应核心武器：叠刃在有效普通或支援槽中，且启刃已激活。",TraitCategory.Flying,FlyingBladeCores.Tally(soul));
-        Add("flying-pass","通刃","允许非本族主剑也使用飞刃攻击方式；飞刃仍沿用该主剑自己的贴图与伤害，用于混族配装。",
-            "寄宿对应核心武器：通刃在有效普通或支援槽中，且启刃已激活。",TraitCategory.Flying,FlyingBladeCores.Pass(soul));
-        Add("flying-sigil","印刃","族特殊效果生效：当前为收回期的飞刃保留一半伤害。",
-            "寄宿对应核心武器：印刃在有效普通或支援槽中，且启刃已激活。",TraitCategory.Flying,FlyingBladeCores.Sigil(soul));
+        // 飞刃族阶梯：名册前四把各带一层特殊效果，越靠前越先拿到。
+        Add("flying-seed","蓝相位剑 · 飞刃启程","激活飞刃族的掷刃攻击；不寄宿它，族内其他剑只按普通挥砍结算。",
+            "寄宿蓝相位剑（名册第1把）于有效普通或支援槽。",TraitCategory.Flying,FlyingBladeFamily.Activated(soul));
+        Add("flying-tally","红相位剑 · 飞刃叠势",$"族内每多一把有效武器，飞刃伤害 +{FlyingBladeFamily.StepPercent}%，最多计 {FlyingBladeFamily.StepCap} 把。",
+            "寄宿红相位剑（名册第2把）于有效普通或支援槽。",TraitCategory.Flying,FlyingBladeFamily.Tally(soul));
+        Add("flying-pass","绿相位剑 · 飞刃通行","允许非本族主剑也使用飞刃攻击方式；飞刃仍沿用该主剑自己的贴图与伤害，用于混族配装。",
+            "寄宿绿相位剑（名册第3把）于有效普通或支援槽。",TraitCategory.Flying,FlyingBladeFamily.Pass(soul));
+        Add("flying-sigil","紫相位剑 · 飞刃印记","族特殊效果生效：当前为收回期的飞刃保留一半伤害。",
+            "寄宿紫相位剑（名册第4把）于有效普通或支援槽。",TraitCategory.Flying,FlyingBladeFamily.Sigil(soul));
         var families=new[]{(BladeFamily.Swift,ItemID.CopperShortsword),(BladeFamily.Solid,ItemID.BoneSword),
             (BladeFamily.Frost,ItemID.IceBlade),(BladeFamily.Nature,ItemID.BladeofGrass),(BladeFamily.Arcane,ItemID.EnchantedSword)};
         foreach(var(family,type) in families)
