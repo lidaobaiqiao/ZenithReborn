@@ -10,7 +10,7 @@
 
 > 原版特效美术参考库已整理至 [VfxLibrary/Vanilla](VfxLibrary/Vanilla/README.md)，3461张原版XNB提取PNG与324项粒子切片可在[可搜索图鉴](VfxLibrary/Vanilla/浏览原版特效.html)浏览；静态素材不等于运行时完整特效。本轮仅整理素材，未修改生产包。
 
-> 多代理调度规则见 [.codebuddy/rules/00-delegation.md](.codebuddy/rules/00-delegation.md)；项目入口、环境事实与常用命令见 [.codebuddy/CODEBUDDY.md](.codebuddy/CODEBUDDY.md)。两者由编辑器自动加载，本文件只保留不可让渡的硬规则与版本状态。
+> 多代理调度规则见 [.codebuddy/rules/00-delegation.md](.codebuddy/rules/00-delegation.md)；项目入口、环境事实与常用命令见 [CODEBUDDY.md](CODEBUDDY.md)。该入口文件顶部用 `@AGENTS.md` 导入本文件——两者同时存在时编辑器只认 CODEBUDDY.md，本文件靠那行导入才不会被丢。本文件只保留不可让渡的硬规则与版本状态。
 
 ## 长期开发硬规则：模块职责与代码归属
 

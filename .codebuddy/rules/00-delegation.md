@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # 项目开发与多代理调度政策
 
 本文件是 ZenithReborn 项目的**常驻开发规则**，由 WorkBuddy 自动加载，适用于本项目内所有任务。
