@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace ZenithReborn;
@@ -9,6 +10,8 @@ namespace ZenithReborn;
 // 旋转期伤害为直击的50%，节奏沿用8帧共享免疫；收回期伤害归零。印记为核心设计留白，未实现。全部为暂定初值。
 public class FlyingBladeShot : ModProjectile
 {
+    // 绘制完全由 PreDraw 接管（寄宿武器原版贴图逐剑取色）；此占位仅满足资产加载，兜底显示原版飞刀贴图。
+    public override string Texture => "Terraria/Images/Item_" + ItemID.FlyingKnife;
     public int HostType;      // 外观与伤害来源的寄宿武器
     private enum Phase{Fly,Rotate,Return}
     private Phase phase;
