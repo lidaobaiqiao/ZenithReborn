@@ -83,7 +83,7 @@ Boss 进度不直接给数值，而是逐道**解除限制**：
 
 ```bash
 dotnet build ZenithReborn/ZenithReborn.csproj -c Release   # 编译
-pwsh -File checks/run_wood_checks.ps1                       # 8393 项隔离引擎回归
+pwsh -File checks/run_wood_checks.ps1                       # 隔离引擎回归，断言项数按启用套件动态统计
 ```
 
 检查脚本只使用独立测试目录，**不会修改正式人物和世界**。图形客户端证据另存于 `artifacts/`。
@@ -95,7 +95,7 @@ pwsh -File checks/run_wood_checks.ps1                       # 8393 项隔离引�
 
 | 主题 | 文档 |
 |---|---|
-| 版本历史（全部 92 条） | [docs/CHANGELOG.md](docs/CHANGELOG.md) |
+| 版本历史（全部 104 条） | [docs/CHANGELOG.md](docs/CHANGELOG.md) |
 | 已归档的历史记录（116 篇） | [docs/archive/](docs/archive/) |
 | 原版天顶飞剑反编译源码 | [原版天顶飞剑源码](docs/原版天顶飞剑源码.md) |
 | 剑族旧设计（已终止） | [剑族 R2](docs/archive/剑族R2-环境系统后的种族重构.md) |
