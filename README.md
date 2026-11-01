@@ -87,6 +87,7 @@ pwsh -File checks/run_wood_checks.ps1                       # 隔离引擎回归
 ```
 
 检查脚本只使用独立测试目录，**不会修改正式人物和世界**。图形客户端证据另存于 `artifacts/`。
+回归第一步是 `checks/check_mod_assets.py`：静态核对每个需要贴图的 Mod 类型有没有同名 png 或显式 `Texture` override。服务端夹具看不到图形资产，这类缺口只会在客户端加载时崩溃（0.3.127 首装包的教训）。
 另有两个专项探测：`checks/run_echo_phase_probe.ps1` 实测剑影相位偏移（确认与原版 933 一致，留作防误改护栏）。
 
 ---

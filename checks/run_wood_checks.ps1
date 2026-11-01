@@ -9,6 +9,9 @@ New-Item -ItemType Directory -Force -Path "$testProfile/Mods", "$taskRoot/artifa
 # 只编译项目自有着色器；微软编译器只在开发时使用，不新增玩家依赖。
 $python=Join-Path $env:USERPROFILE '.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe'
 if(-not(Test-Path $python)){$python=(Get-Command python -ErrorAction Stop).Source}
+# 资产完整性先跑：服务端夹具不加载图形资产，新增 Mod 类型缺同名 png 或缺 Texture override 只会在客户端崩溃。
+& $python "$taskRoot/checks/check_mod_assets.py"
+if($LASTEXITCODE -ne 0){throw '资产完整性检查失败：新增 Mod 类型必须有同名 png 或显式 Texture override'}
 & $python "$taskRoot/checks/emit_glass_preset.py" *> "$taskRoot/artifacts/glass-preset-build.log"
 if($LASTEXITCODE -ne 0){Get-Content "$taskRoot/artifacts/glass-preset-build.log";throw '制作端玻璃预设生成失败'}
 & $python "$taskRoot/checks/compile_effects.py" *> "$taskRoot/artifacts/own-effect-build.log"

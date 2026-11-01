@@ -45,6 +45,9 @@ dotnet build ZenithReborn/ZenithReborn.csproj -c Release
 
 # 全量隔离回归：着色器编译 → 原生打包两包 → 起隔离服务端跑断言
 pwsh -File checks/run_wood_checks.ps1
+
+# 资产完整性（回归第一步，也可单独跑）：缺同名 png 又没 Texture override 就失败
+python checks/check_mod_assets.py
 ```
 
 回归的实测事实（2026-11-01）：
