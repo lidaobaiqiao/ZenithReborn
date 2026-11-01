@@ -20,6 +20,8 @@ public class SoulSwingPlayer : ModPlayer
         if(hosts.Length>0)cursor%=hosts.Length;
         shots=0;lastAnimation=-1;
         budget=Math.Min(hosts.Length,SoulCurses.Blades(soul));
+        // 飞刃族：每次挥臂掷出手中蓄能的全部飞刃（docs/飞刃族F1-掷刃与印记.md）。
+        Player.GetModPlayer<FlyingBladeHand>().Launch(soul);
         if(soul.Curse(SoulCurse.Sheathing)<CurseStage.Released)
             foreach(var p in Main.ActiveProjectiles)
                 if(p.owner==Player.whoAmI && p.ModProjectile is SoulBlade blade &&

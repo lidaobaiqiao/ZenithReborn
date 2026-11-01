@@ -35,6 +35,13 @@ public class Check : ModSystem
         if (string.IsNullOrEmpty(path)) return;
         try
         {
+            if(Environment.GetEnvironmentVariable("ZENITH_FLYING_BLADE")=="1")
+            {
+                FlyingBladeSurveyCheck.Run(Environment.GetEnvironmentVariable("ZENITH_FLYING_BLADE_OUTPUT"));
+                File.WriteAllText(path,"飞刃族候选普查完成；逐项数据见 flying-blade-survey.json。只读引擎数据，未改游戏行为或存档。\n");
+                Console.WriteLine("ZENITH_FLYING_BLADE_DONE");
+                Environment.Exit(0);return;
+            }
             if(Environment.GetEnvironmentVariable("ZENITH_MELEE_MATRIX")=="1")
             {
                 CurseFixture.NeutralDefaults=true;LivingMeleeMatrix.Run();
