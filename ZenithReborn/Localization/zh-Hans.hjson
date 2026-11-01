@@ -142,24 +142,22 @@ Mods: {
 		NPCs.GuardianSlimeKing.DisplayName: 史莱姆王·守望者
 
 		Projectiles: {
-
-
-
 			BlessingStrike.DisplayName: 祝福斩痕
 			SoulBlade.DisplayName: 天顶剑影
 			HardOreShot.DisplayName: 锻金衍刃
 			OreFlyingSword.DisplayName: 百炼飞剑
 			OreSkyfall.DisplayName: 天铸巨剑
-			// 环境领域显示名使用默认值。
-			// 环境效果显示名使用默认值。
+			// EnvironmentDomain 显示名使用默认值。
+			// EnvironmentEffect 显示名使用默认值。
+			// FlyingBladeShot 显示名使用默认值。
+			// HolyHeavenImpact 显示名使用默认值。
+			// HolyHeavenStar 显示名使用默认值。
+			// LivingArmament 显示名使用默认值。
 		}
 
 		Keybinds: {
-
-
 			ActivateYujian.DisplayName: 手动开启御剑祝福
 			OpenSoul.DisplayName: 打开剑魂寄宿界面
 		}
-
 	}
 }

@@ -142,9 +142,6 @@ Mods: {
 		NPCs.GuardianSlimeKing.DisplayName: King Slime, the Keeper
 
 		Projectiles: {
-
-
-
 			BlessingStrike.DisplayName: Blessed slash
 			SoulBlade.DisplayName: Zenith Soul Blade
 			HardOreShot.DisplayName: Hard Ore Shot
@@ -152,14 +149,15 @@ Mods: {
 			OreSkyfall.DisplayName: Skyforged Greatsword
 			EnvironmentDomain.DisplayName: Environment Domain
 			EnvironmentEffect.DisplayName: Environment Effect
+			FlyingBladeShot.DisplayName: Flying Blade Shot
+			HolyHeavenImpact.DisplayName: Holy Heaven Impact
+			HolyHeavenStar.DisplayName: Holy Heaven Star
+			LivingArmament.DisplayName: Living Armament
 		}
 
 		Keybinds: {
-
-
 			ActivateYujian.DisplayName: Activate Yujian burst
 			OpenSoul.DisplayName: Open soul hosting interface
 		}
-
 	}
 }
