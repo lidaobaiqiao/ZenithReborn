@@ -121,8 +121,10 @@ internal static class OreRewardCheck
         (p,s,n)=Setup(10);Primary(p,s,9,n);
         check(Flights().Length==1 && Flights()[0].SetCount==10,"Ten-tier ore support makes a non-ore primary charge exactly one sword");
         Gather(p,s,n,9,9);check(Flights().Length==10,"Ten supported first hits complete one ten-material formation");
+        // 十层齐射时每把剑会吃到锡的叠层增伤：生成瞬间的快照伤害仍是 PerSwordDamage，
+        // 实战 Projectile.damage 已被 StackGrowth 放大为 快照×(1+5%×(层数-1))，两处都要核。
         check(Flights().All(f=>Math.Abs(f.Projectile.velocity.Length()-OreFlyingSword.LungeSpeed*1.5f*OreFlightMotion.InitialSpeed)<.01f) &&
-            Flights().All(f=>f.Projectile.damage==OreFamily.PerSwordDamage(100,10)),"Ten-tier damage and native movement speed both gain fifty percent");
+            Flights().All(f=>f.StackGrowth.BaseDamage==OreFamily.PerSwordDamage(100,10) && f.Projectile.damage==f.StackGrowth.Damage),"Ten-tier damage and native movement speed both gain fifty percent");
         first=Flights()[0];using(var bytes=new MemoryStream())
         {
             first.SendExtraAI(new BinaryWriter(bytes));bytes.Position=0;var clone=new Projectile();clone.SetDefaults(first.Projectile.type);
