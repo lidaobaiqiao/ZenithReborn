@@ -73,8 +73,8 @@ public static class SoulTraits
         Add("living-armament","剑灵 · 唤兵（暂名）",$"有效族成员 {LivingArmamentFamily.Count(soul)} 种。持有剑魂时召唤有效出战武器，自动追击敌人并使用对应武器攻击；保留现有飞剑及其他种族效果。",
             "暂定成员：附魔剑、飞刀、波涌之刃、无头骑士剑。至少一把在有效主槽或支援槽，且有有效出战主剑。",TraitCategory.Living,LivingArmamentFamily.Enabled(soul));
         // 飞刃族按族内有效武器数量分阶（1/2/4/6/8/10），激活只看数量，不绑定特定武器。
-        Add("flying-seed","飞刃族 · 启程","族内有效武器达到 1 把即激活掷刃攻击，主槽与支援槽都计入。",
-            "寄宿任意一把飞刃族武器。",TraitCategory.Flying,FlyingBladeFamily.Activated(soul));
+        Add("flying-seed","飞刃族 · 启程","族内有效武器达到 1 把即激活掷刃攻击。",
+            "寄宿任意一把飞刃族武器（主槽；支援槽需木质或矿石族已开启才可用）。",TraitCategory.Flying,FlyingBladeFamily.Activated(soul));
         Add("flying-tally","飞刃族 · 叠势",$"族内每多一把有效武器，飞刃伤害 +{FlyingBladeFamily.StepPercent}%，最多计 {FlyingBladeFamily.StepCap} 把。",
             "族内有效武器达到 2 把。",TraitCategory.Flying,FlyingBladeFamily.Tally(soul));
         Add("flying-pass","飞刃族 · 通行","允许非本族主剑也使用飞刃攻击方式；飞刃仍沿用该主剑自己的贴图与伤害。",

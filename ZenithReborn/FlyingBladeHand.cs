@@ -30,7 +30,7 @@ public class FlyingBladeHand : ModPlayer
     {
         if(Player.whoAmI!=Main.myPlayer || Main.netMode==NetmodeID.Server || Loaded<=0 ||
             !FlyingBladeFamily.Enabled(soul))return;
-        // 名册第3把（绿相位剑）已寄宿时，非本族主剑也能掷飞刃；否则只掷本族成员。
+        // 第3阶（4 把）起，非本族主剑也能掷飞刃；否则只掷本族成员。
         Item[] members=FlyingBladeFamily.Pass(soul)
             ?soul.Active.ToArray()
             :soul.Active.Where(i=>FlyingBladeFamily.IsMember(i.type)).ToArray();
@@ -39,7 +39,7 @@ public class FlyingBladeHand : ModPlayer
         if(aim.LengthSquared()<2500)aim=Vector2.UnitX*Player.direction*50;
         float baseAngle=(float)Math.Atan2(aim.Y,aim.X);
         int count=Loaded;
-        // 名册第2把寄宿后，族内武器数量会放大飞刃伤害；第4把决定收回期是否留伤。
+        // 第2阶（2 把）起按族内数量放大飞刃伤害；第4阶（6 把）决定收回期是否留伤。
         float bonus=FlyingBladeFamily.DamageBonus(soul);
         bool sigil=FlyingBladeFamily.Sigil(soul);
         for(int i=0;i<count;i++)
@@ -54,7 +54,6 @@ public class FlyingBladeHand : ModPlayer
                 Player.GetWeaponKnockback(host),Player.whoAmI,host.type,sigil?1f:0f);
             if(index<0 || index>=Main.maxProjectiles)break;
             var shot=(FlyingBladeShot)Main.projectile[index].ModProjectile;
-            shot.HostType=host.type;
             Main.projectile[index].CritChance=Player.GetWeaponCrit(host);
             Main.projectile[index].netUpdate=true;
         }

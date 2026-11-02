@@ -7,18 +7,19 @@ using Terraria.ModLoader;
 namespace ZenithReborn;
 
 // 飞刃弹幕三阶段：直线飞出 → 刺中（或飞满射程）原地旋转三圈（持续伤害）→ 收回。
-// 旋转期伤害为直击的50%，节奏沿用8帧共享免疫；收回期默认无伤害，印刃寄宿后保留50%。
-// 印记为核心设计留白，未实现；印刃目前只接管"收回期伤害"这一项特殊效果。
+// 旋转期伤害为直击的50%，节奏沿用8帧共享免疫；收回期默认无伤害，族内达到第4阶（6把）后保留50%。
+// 印记为核心设计留白，未实现；第4阶目前只接管"收回期伤害"这一项特殊效果。
 public class FlyingBladeShot : ModProjectile
 {
     // 绘制完全由 PreDraw 接管（寄宿武器原版贴图逐剑取色）；此占位仅满足资产加载，兜底显示原版飞刀贴图。
     public override string Texture => "Terraria/Images/Item_" + ItemID.FlyingKnife;
-    public int HostType;      // 外观与伤害来源的寄宿武器
+    // 外观与伤害来源的寄宿武器类型。存在 ai[0] 而不是自定义字段，才能随弹幕同步给其他玩家。
+    public int HostType => (int)Projectile.ai[0];
     private enum Phase{Fly,Rotate,Return}
     private Phase phase;
     private int rotateLeft;   // 旋转剩余帧
     private float travel;     // 直飞行程
-    // 印刃开关：由 Launch 写入 ai[1]（>0 表示收回期保留伤害），随弹幕自动同步。
+    // 第4阶开关：由 Launch 写入 ai[1]（>0 表示收回期保留伤害），随弹幕自动同步。
     private bool ReturnHits=>Projectile.ai[1]>0f;
     public const float LaunchSpeed=12f;  // 掷出速度（暂定初值，接近原版飞刀）
     public const float MaxRange=600f;    // 未命中时的射程

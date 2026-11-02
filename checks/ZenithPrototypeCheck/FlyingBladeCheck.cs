@@ -114,5 +114,10 @@ internal static class FlyingBladeCheck
         check(sigilShot.ai[1]==1f,"第4阶把收回期伤害开关写进弹幕");
         for(int i=0;i<60+FlyingBladeShot.RotationFrames+3;i++){sigilMod.AI();sigilShot.position+=sigilShot.velocity;}
         check(sigilShot.damage>0&&sigilMod.CanHitNPC(null)!=false,"第4阶让收回期保留伤害并可命中");
+
+        // 未解除切换诅咒时，族内数量仍按实际把数统计——诅咒限制的是单把武器特性，不是配备数量。
+        soul.Seals=0;soul.RefreshStats();
+        check(FlyingBladeFamily.Count(soul)>=6&&FlyingBladeFamily.Stage(soul)>=4,"未解咒时族内数量照常统计");
+        soul.Seals=SoulCurses.All;soul.RefreshStats();
     }
 }

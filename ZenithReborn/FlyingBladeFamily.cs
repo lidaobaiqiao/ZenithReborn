@@ -32,12 +32,17 @@ public static class FlyingBladeFamily
     // 激活只看数量，不绑定任何特定武器，也不新增按键或独立操作。
     public static readonly int[] Stages=[1,2,4,6,8,10];
 
-    // 第2阶的加成幅度与计入上限：+3%/把，最多计 12 把（最高 +33%）。
+    // 第2阶的加成幅度与计入上限：+3%/把，最多计 10 把（等于主槽容量上限，最高 +27%）。
+    // 上限对齐容量是有意的：写 12 的话玩家永远看不到那个封顶，会被当成数值 bug。
     public const int StepPercent=3;
-    public const int StepCap=12;
+    public const int StepCap=10;
 
     public static bool IsMember(int type)=>Array.IndexOf(Weapons,type)>=0;
-    public static int Count(SoulItem soul)=>soul.Attached?soul.TraitItems.Where(i=>IsMember(i.type)).Select(i=>i.type).Distinct().Count():0;
+    // 族内有效武器数量 = 主槽 + 已开启的支援槽。
+    // 刻意不走 TraitItems：切换诅咒的"仅首把主剑特性生效"限制的是单把武器特性，
+    // 不该把族内配备数量一起砍成 1，否则未解咒前"达到 N 把进下一阶"永远做不到。
+    // 同种武器唯一已由 SoulItem.TrySwapHost 保证，因此按把数统计不会重复吃倍数。
+    public static int Count(SoulItem soul)=>soul.Attached?soul.Active.Concat(soul.Supports).Count(i=>IsMember(i.type)):0;
 
     // 当前阶级：0 表示族内还没有有效武器。主槽与支援槽都计入，与矿石族阶梯口径一致。
     public static int Stage(SoulItem soul)
