@@ -119,5 +119,38 @@ internal static class FlyingBladeCheck
         soul.Seals=0;soul.RefreshStats();
         check(FlyingBladeFamily.Count(soul)>=6&&FlyingBladeFamily.Stage(soul)>=4,"未解咒时族内数量照常统计");
         soul.Seals=SoulCurses.All;soul.RefreshStats();
+
+        // 取代断言：族激活后挥臂走完整发射路径（Begin→FireHost→PostItemCheck），只掷飞刃，
+        // 本体飞剑（SoulBlade）完全不发射——两者互斥，不是叠加。
+        foreach(var p in Main.projectile)p.active=false;
+        for(int i=1;i<7;i++)soul.Hosts[i]=new Item();
+        soul.Hosts[0]=new Item(ItemID.BloodButcherer);soul.RefreshStats();
+        hand.Loaded=3;hand.AimOverride=player.Center+Vector2.UnitX*200;
+        var swing=player.GetModPlayer<SoulSwingPlayer>();
+        player.itemAnimation=player.itemAnimationMax=30;
+        swing.Begin(soul);swing.FireHost();swing.PostItemCheck();
+        check(!Main.projectile.Any(p=>p.active&&p.ModProjectile is SoulBlade),"族激活时本体飞剑完全不发射");
+        check(Main.projectile.Count(p=>p.active&&p.ModProjectile is FlyingBladeShot)==3,
+            "族激活时挥臂只掷飞刃，场上没有任何本体飞剑");
+
+        // 取代断言（回归红线）：族未激活（0 把族武器）时挥臂照常发射本体飞剑，行为与取代前完全一致，
+        // 即使手中蓄有飞刃也不会掷出。
+        foreach(var p in Main.projectile)p.active=false;
+        soul.Hosts[0]=new Item(ItemID.WoodenSword);soul.RefreshStats();
+        check(!FlyingBladeFamily.Enabled(soul),"族内没有武器时不激活，取代不生效");
+        hand.Loaded=2;
+        swing.Begin(soul);swing.FireHost();swing.PostItemCheck();
+        check(Main.projectile.Count(p=>p.active&&p.ModProjectile is SoulBlade)==1,"族未激活时挥臂照常发射本体飞剑");
+        check(!Main.projectile.Any(p=>p.active&&p.ModProjectile is FlyingBladeShot),"族未激活时挥臂不出飞刃");
+
+        // 取代边界：族激活但手中没有蓄能飞刃时，本次挥臂无可掷出的飞刃，不取代，本体飞剑照常发射。
+        // 蓄能下一帧即恢复，正常挥速下只出现在装备剑魂后的首 0.3 秒；此断言同时钉住回归套件的兼容契约。
+        foreach(var p in Main.projectile)p.active=false;
+        soul.Hosts[0]=new Item(ItemID.BloodButcherer);soul.RefreshStats();
+        hand.Loaded=0;
+        swing.Begin(soul);swing.FireHost();swing.PostItemCheck();
+        check(Main.projectile.Count(p=>p.active&&p.ModProjectile is SoulBlade)==1&&
+            !Main.projectile.Any(p=>p.active&&p.ModProjectile is FlyingBladeShot),
+            "族激活但无蓄能飞刃时本次挥臂不取代，本体飞剑照常");
     }
 }

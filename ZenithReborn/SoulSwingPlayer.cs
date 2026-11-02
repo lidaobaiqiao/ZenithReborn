@@ -19,9 +19,12 @@ public class SoulSwingPlayer : ModPlayer
         if(cursorSoul!=soul.SoulId){cursorSoul=soul.SoulId;cursor=0;}
         if(hosts.Length>0)cursor%=hosts.Length;
         shots=0;lastAnimation=-1;
-        budget=Math.Min(hosts.Length,SoulCurses.Blades(soul));
-        // 飞刃族：每次挥臂掷出手中蓄能的全部飞刃（docs/飞刃族F1-掷刃与印记.md）。
-        Player.GetModPlayer<FlyingBladeHand>().Launch(soul);
+        // 挥臂开始时先掷出手中全部飞刃；掷出飞刃的挥臂取代本体攻击方式：预算归零，
+        // 本体飞剑（含齐射节拍、拖尾与相关统计的所有分支）完全不发射——单次挥臂上两者互斥。
+        // 族未激活或手中没有蓄能飞刃时不取代，预算照常计算，本体飞剑行为与取代前完全一致
+        // （docs/飞刃族F1-掷刃与印记.md；蓄能每帧恢复，该窗口实际只出现在装备剑魂后的首 0.3 秒）。
+        bool volley=Player.GetModPlayer<FlyingBladeHand>().Launch(soul);
+        budget=volley?0:Math.Min(hosts.Length,SoulCurses.Blades(soul));
         if(soul.Curse(SoulCurse.Sheathing)<CurseStage.Released)
             foreach(var p in Main.ActiveProjectiles)
                 if(p.owner==Player.whoAmI && p.ModProjectile is SoulBlade blade &&
