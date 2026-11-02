@@ -17,7 +17,6 @@ namespace ZenithReborn;
 [Autoload(Side=ModSide.Client)]
 public class ViscousSlash : ModSystem
 {
-    private const bool Enabled=true;
     private const int Lifetime=26;          // 残影寿命（帧）：越小回填越快
     private const int MaxGhosts=90;         // 上限，防止长时间挥动堆积
     private const float BaseAlpha=.55f;     // 单个残影强度（加法混合，不再是透明度）
@@ -38,7 +37,7 @@ public class ViscousSlash : ModSystem
     // 每帧记录：谁在挥动，就把当前武器轮廓存一份残影
     public override void PostUpdateEverything()
     {
-        if(!Enabled||Main.dedServ)return;
+        if(!VfxIsolation.ViscousSlash||Main.dedServ)return;
         for(int i=0;i<ghosts.Count;i++)
         {
             var g=ghosts[i];int newAge=(int)g.Age+1;
@@ -87,7 +86,7 @@ public class ViscousSlash : ModSystem
     private static void DrawHook(On_Main.orig_DrawDust orig,Main self)
     {
         orig(self);
-        if(!Enabled||Main.dedServ||Main.gameMenu||ghosts.Count==0)return;
+        if(!VfxIsolation.ViscousSlash||Main.dedServ||Main.gameMenu||ghosts.Count==0)return;
         try
         {
             // 复用混合、深度、光栅、纹理与采样状态的恢复包装。

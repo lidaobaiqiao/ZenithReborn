@@ -30,6 +30,10 @@ public static class VfxIsolation
     public static bool FlowSpark = !PureCodeOnly;
     // 玻璃屏幕折射滤镜
     public static bool GlassFilter = !PureCodeOnly;
+    // 粘性空腔挥动残影（ViscousSlash）：实验稿，用户判定效果失败，默认关闭。
+    // 它原先在类内写死 Enabled=true，靠 [Autoload] 自注册生效，绕过了本文件的总闸，
+    // 也没进 Branch 列表——所以"一键全开/全关"管不到它。改为由这里统一控制，不参与 SetAll。
+    public static bool ViscousSlash = false;
 
     // 一键全开或全关，避免逐个漏改
     public static void SetAll(bool value)
