@@ -25,9 +25,20 @@ public static class WeaponFamilyTags
     public static bool IsAny(int type)=>Of(type).Length>0;
 
     // 界面与 tooltip 共用的说明行；不属于任何族时返回空串，调用方据此跳过这一行。
-    public static string Line(int type)
+    // 传入 soul 时会补一句"为什么没生效"——族成员寄宿了但条件没满足时，不说明会被当成功能坏了。
+    public static string Line(int type,SoulItem soul=null)
     {
         string names=Of(type);
-        return names.Length==0?"":"所属种族："+names;
+        if(names.Length==0)return "";
+        return "所属种族："+names+ActivationHint(type,soul);
+    }
+
+    // 飞刃族的激活权在名册第1把（蓝相位剑）。寄宿了族内其他剑却没开族时，明确说出差哪一把。
+    private static string ActivationHint(int type,SoulItem soul)
+    {
+        if(soul==null || !soul.Attached)return "";
+        if(FlyingBladeFamily.IsMember(type) && !FlyingBladeFamily.Activated(soul))
+            return "（未激活 · 需再寄宿蓝相位剑）";
+        return "";
     }
 }

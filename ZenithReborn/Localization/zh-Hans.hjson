@@ -67,8 +67,8 @@ Mods: {
 			}
 
 			SlashZenithTest: {
-				// 测试物品显示名使用默认值。
-				// 测试物品没有额外说明。
+				// DisplayName: Slash Zenith Test
+				// Tooltip: ""
 			}
 		}
 
@@ -147,12 +147,12 @@ Mods: {
 			HardOreShot.DisplayName: 锻金衍刃
 			OreFlyingSword.DisplayName: 百炼飞剑
 			OreSkyfall.DisplayName: 天铸巨剑
-			// EnvironmentDomain 显示名使用默认值。
-			// EnvironmentEffect 显示名使用默认值。
-			// FlyingBladeShot 显示名使用默认值。
-			// HolyHeavenImpact 显示名使用默认值。
-			// HolyHeavenStar 显示名使用默认值。
-			// LivingArmament 显示名使用默认值。
+			// EnvironmentDomain.DisplayName: Environment Domain
+			// EnvironmentEffect.DisplayName: Environment Effect
+			// FlyingBladeShot.DisplayName: Flying Blade Shot
+			// HolyHeavenImpact.DisplayName: Holy Heaven Impact
+			// HolyHeavenStar.DisplayName: Holy Heaven Star
+			// LivingArmament.DisplayName: Living Armament
 		}
 
 		Keybinds: {

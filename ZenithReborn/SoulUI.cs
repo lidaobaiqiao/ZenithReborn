@@ -410,7 +410,7 @@ public partial class SoulUI : ModSystem
         if(!chosen.IsAir)
         {
             // 族名先于环境：先说明这是哪一族的剑，再说它吃哪个环境。
-            string familyLine=WeaponFamilyTags.Line(chosen.type);
+            string familyLine=WeaponFamilyTags.Line(chosen.type,soul);
             if(familyLine.Length>0)bottom=Paragraph(familyLine,b.X+18,bottom,b.Width-30,Champagne,.66f)+4;
             bottom=Paragraph(EnvironmentSwordTooltips.Label(chosen),b.X+18,bottom,b.Width-30,Accent,.66f)+12;
         }
