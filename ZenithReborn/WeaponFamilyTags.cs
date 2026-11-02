@@ -23,4 +23,11 @@ public static class WeaponFamilyTags
 
     // 是否属于至少一个已实装种族；无族的普通近战武器返回 false，展示层据此决定是否加行。
     public static bool IsAny(int type)=>Of(type).Length>0;
+
+    // 界面与 tooltip 共用的说明行；不属于任何族时返回空串，调用方据此跳过这一行。
+    public static string Line(int type)
+    {
+        string names=Of(type);
+        return names.Length==0?"":"所属种族："+names;
+    }
 }

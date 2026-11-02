@@ -57,7 +57,10 @@ public partial class SoulUI
                 ArmoryItem(item,new(r.X+29,r.Center.Y),34,stored?new Color(159,169,181):Color.White);
                 Text(Fit(item.Name,r.Width-72,.7f),new(r.X+57,r.Y+8),candidate?Champagne:InfoWhite,.7f);
                 Text($"{item.damage} 伤害  ·  {item.crit}% 暴击",new(r.X+57,r.Y+31),InfoQuiet,.53f);
-                Text(Fit(stored?"已有同种寄宿":EnvironmentSwordTooltips.Label(item).Replace("所属环境：",""),r.Width-66,.50f),new(r.X+57,r.Y+48),stored?new Color(183,146,122):tint,.50f);
+                // 副标题族名在前：列表里 30 把光剑只看名字和伤害分不出族。
+                string family=WeaponFamilyTags.Of(item.type),environment=EnvironmentSwordTooltips.Label(item).Replace("所属环境：","");
+                string subtitle=stored?"已有同种寄宿":family.Length==0?environment:family+" · "+environment;
+                Text(Fit(subtitle,r.Width-66,.50f),new(r.X+57,r.Y+48),stored?new Color(183,146,122):tint,.50f);
                 if(hover)
                 {
                     HoveredSlotRequirement=item.Name+" · 点击查看换入对比";

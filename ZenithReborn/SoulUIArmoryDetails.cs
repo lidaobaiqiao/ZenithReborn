@@ -39,6 +39,9 @@ public partial class SoulUI
                     y=InfoLines(delta,x,y,w,Champagne,.61f)+8;
                 }
                 y=InfoLines("面板比较；实际伤害还受剑魂效能与战斗特性影响。",x,y,w,InfoQuiet,.56f)+14;
+                // 族名放在环境之前：先回答"这是哪一族的剑"，再回答"它吃哪个环境"。
+                string familyLine=WeaponFamilyTags.Line(shown.type);
+                if(familyLine.Length>0)y=InfoLines(familyLine,x,y,w,Champagne,.66f)+8;
                 y=InfoLines(EnvironmentSwordTooltips.Label(shown),x,y,w,Accent,.66f)+18;
             }
             Line(new(x,y),new(x+w,y),hue*.18f);y+=16;

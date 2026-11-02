@@ -407,7 +407,13 @@ public partial class SoulUI : ModSystem
         var chosen=soul.ItemAt(selected);
         string state=Available(soul,selected)?!soul.Attached?"预览 · 附着后启用":SoulItem.SupportOrdinal(selected)>=0?"支援 · 不出剑":"主攻 · 独立出剑":"未解锁 / 已暂停 · 可空手取回";
         bottom=Section(SlotName(selected)+(chosen.IsAir?"":" · "+chosen.Name),state,b.X+8,bottom,b.Width-16,Color.Gold);
-        if(!chosen.IsAir)bottom=Paragraph(EnvironmentSwordTooltips.Label(chosen),b.X+18,bottom,b.Width-30,Accent,.66f)+12;
+        if(!chosen.IsAir)
+        {
+            // 族名先于环境：先说明这是哪一族的剑，再说它吃哪个环境。
+            string familyLine=WeaponFamilyTags.Line(chosen.type);
+            if(familyLine.Length>0)bottom=Paragraph(familyLine,b.X+18,bottom,b.Width-30,Champagne,.66f)+4;
+            bottom=Paragraph(EnvironmentSwordTooltips.Label(chosen),b.X+18,bottom,b.Width-30,Accent,.66f)+12;
+        }
         bottom=Section("解锁条件",SoulProgress.SlotHint(soul,selected),b.X+8,bottom,b.Width-16,Accent);
         bottom=Section("下一步",SoulProgress.Next(soul),b.X+8,bottom,b.Width-16,Accent);
         if(DomainMode)bottom=DrawDomainReturn(b,bottom);
