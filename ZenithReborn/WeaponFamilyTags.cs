@@ -33,12 +33,15 @@ public static class WeaponFamilyTags
         return "所属种族："+names+ActivationHint(type,soul);
     }
 
-    // 飞刃族的激活权在名册第1把（蓝相位剑）。寄宿了族内其他剑却没开族时，明确说出差哪一把。
+    // 飞刃族按数量分阶（1/2/4/6/8/10），这里顺带显示当前阶位与下一个门槛，省得玩家猜。
     private static string ActivationHint(int type,SoulItem soul)
     {
-        if(soul==null || !soul.Attached)return "";
-        if(FlyingBladeFamily.IsMember(type) && !FlyingBladeFamily.Activated(soul))
-            return "（未激活 · 需再寄宿蓝相位剑）";
-        return "";
+        if(soul==null || !soul.Attached || !FlyingBladeFamily.IsMember(type))return "";
+        int stage=FlyingBladeFamily.Stage(soul);
+        if(stage<=0)return "";
+        int count=FlyingBladeFamily.Count(soul);
+        return stage<FlyingBladeFamily.Stages.Length
+            ?$"（第{stage}阶 · {count}/{FlyingBladeFamily.Stages[stage]}把）"
+            :$"（第{stage}阶 · 满阶）";
     }
 }

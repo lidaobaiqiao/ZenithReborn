@@ -40,14 +40,12 @@ internal static class FlyingBladeCheck
         }
         check(clean,$"名册全部无引擎弹幕{bad}");
 
-        // 阶梯：名册前四把各带一层族级效果，顺序必须与名册前四位一致，否则四层效果会漂移。
-        check(FlyingBladeFamily.Tiers.SequenceEqual(FlyingBladeFamily.Weapons.Take(4)),"阶梯四把与名册前四位一致");
-        // 激活条件：族激活权交给名册第1把（蓝相位剑），只有族成员不再自动激活。
-        // 注：阶梯剑放主槽即可；支援槽要木质/矿石族激活才开，本夹具没有那些族成员。
+        // 激活条件：族内有效武器数量达到 1 把即激活，不绑定任何特定武器，也不依赖任何按键。
+        soul.Hosts[0]=new Item(ItemID.WoodenSword);soul.RefreshStats();
+        check(FlyingBladeFamily.Stage(soul)==0&&!FlyingBladeFamily.Enabled(soul),"族内没有武器时不激活");
         soul.Hosts[0]=new Item(ItemID.BloodButcherer);soul.RefreshStats();
-        check(FlyingBladeFamily.Count(soul)>=1&&!FlyingBladeFamily.Enabled(soul),"仅族成员、未寄宿名册第1把时不激活");
-        soul.Hosts[0]=new Item(ItemID.BluePhaseblade);soul.RefreshStats();
-        check(FlyingBladeFamily.Activated(soul)&&FlyingBladeFamily.Enabled(soul),"寄宿蓝相位剑后族激活");
+        check(FlyingBladeFamily.Count(soul)==1&&FlyingBladeFamily.Stage(soul)==1&&FlyingBladeFamily.Enabled(soul),
+            "族内一把武器即激活");
 
         // 蓄能节奏：0.3秒（18帧）一把，弹容量=独行祝福上限10。虚拟时钟注入，不伪造全局状态。
         var hand=player.GetModPlayer<FlyingBladeHand>();
@@ -88,30 +86,33 @@ internal static class FlyingBladeCheck
         check(FlyingBladeShot.MaxRange==600f&&FlyingBladeShot.RotationFrames==45&&
             FlyingBladeShot.RotationDamage==.5f&&FlyingBladeShot.LaunchSpeed==12f,"射程、旋转周期、持续伤害与速度为暂定初值");
 
-        // 阶梯四层：名册第1把已在激活段验证，其余三把逐条验证。
-        // 第2把（红相位剑）：族内武器越多飞刃伤害越高，且有上限。
-        soul.Hosts[1]=new Item(ItemID.RedPhaseblade);soul.RefreshStats();
+        // 阶级：1/2/4/6 四个门槛依次解锁增伤、跨族、特殊效果。Hosts[0] 已有 1 把。
+        // 第2阶（2 把）：族内每多一把放大飞刃伤害，且有上限。
+        soul.Hosts[1]=new Item(ItemID.FieryGreatsword);soul.RefreshStats();
         int tallyCount=FlyingBladeFamily.Count(soul);
         float expected=1+FlyingBladeFamily.StepPercent/100f*Math.Min(tallyCount-1,FlyingBladeFamily.StepCap-1);
-        check(FlyingBladeFamily.Tally(soul)&&Math.Abs(FlyingBladeFamily.DamageBonus(soul)-expected)<0.0001f,
-            $"红相位剑按族内武器数放大飞刃伤害（{tallyCount}把→×{expected:F2}）");
+        check(FlyingBladeFamily.Stage(soul)==2&&FlyingBladeFamily.Tally(soul)&&
+            Math.Abs(FlyingBladeFamily.DamageBonus(soul)-expected)<0.0001f,
+            $"两把进入第2阶并按数量放大飞刃伤害（{tallyCount}把→×{expected:F2}）");
 
-        // 第3把（绿相位剑）：非本族主剑也能作为飞刃载体。
+        // 第3阶（4 把）：非本族主剑也能作为飞刃载体。
+        soul.Hosts[2]=new Item(ItemID.Flymeal);soul.Hosts[3]=new Item(ItemID.BluePhaseblade);
+        soul.Hosts[6]=new Item(ItemID.WoodenSword);soul.RefreshStats();
+        check(FlyingBladeFamily.Stage(soul)==3&&FlyingBladeFamily.Pass(soul),"四把进入第3阶");
         foreach(var p in Main.projectile)p.active=false;
-        soul.Hosts[2]=new Item(ItemID.GreenPhaseblade);
-        soul.Hosts[4]=new Item(ItemID.WoodenSword);soul.RefreshStats();
-        hand.Loaded=6;hand.Launch(soul);
+        hand.Loaded=8;hand.Launch(soul);
         var hosts=Main.projectile.Where(p=>p.active&&p.ModProjectile is FlyingBladeShot).Select(p=>(int)p.ai[0]).ToArray();
-        check(FlyingBladeFamily.Pass(soul)&&hosts.Contains(ItemID.WoodenSword),"绿相位剑让非本族主剑也能掷出飞刃");
+        check(hosts.Contains(ItemID.WoodenSword),"第3阶让非本族主剑也能掷出飞刃");
 
-        // 第4把（紫相位剑）：把收回期伤害开关写进弹幕，并让收回期仍可命中。
+        // 第4阶（6 把）：族特殊效果生效，收回期保留伤害并可命中。
+        soul.Hosts[4]=new Item(ItemID.RedPhaseblade);soul.Hosts[5]=new Item(ItemID.GreenPhaseblade);soul.RefreshStats();
+        check(FlyingBladeFamily.Stage(soul)==4&&FlyingBladeFamily.Sigil(soul),"六把进入第4阶");
         foreach(var p in Main.projectile)p.active=false;
-        soul.Hosts[3]=new Item(ItemID.PurplePhaseblade);soul.RefreshStats();
         hand.Loaded=1;hand.Launch(soul);
         var sigilShot=Main.projectile.First(p=>p.active&&p.ModProjectile is FlyingBladeShot);
         var sigilMod=(FlyingBladeShot)sigilShot.ModProjectile;
-        check(FlyingBladeFamily.Sigil(soul)&&sigilShot.ai[1]==1f,"紫相位剑把收回期伤害开关写进弹幕");
+        check(sigilShot.ai[1]==1f,"第4阶把收回期伤害开关写进弹幕");
         for(int i=0;i<60+FlyingBladeShot.RotationFrames+3;i++){sigilMod.AI();sigilShot.position+=sigilShot.velocity;}
-        check(sigilShot.damage>0&&sigilMod.CanHitNPC(null)!=false,"紫相位剑让收回期保留伤害并可命中");
+        check(sigilShot.damage>0&&sigilMod.CanHitNPC(null)!=false,"第4阶让收回期保留伤害并可命中");
     }
 }

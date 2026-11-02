@@ -7,11 +7,13 @@ namespace ZenithReborn;
 // 动机：给寄宿后没有远程手段的剑补上属于自己的远程攻击方式，弹幕剑不入族。
 // 名单依据 artifacts/flying-blade-candidates.json（引擎普查），非常规武器留置待特殊处理。
 //
-// 阶梯：名册前四把各带一层族级特殊效果（按名册顺序，改动顺序会让效果跟着漂移）。
-//   第1把 蓝相位剑：激活飞刃族的掷刃攻击。没有它，族成员寄宿也不掷刃。
-//   第2把 红相位剑：族内每多一把有效武器，飞刃伤害再提高一档（有上限，避免全收集失衡）。
-//   第3把 绿相位剑：允许非本族主剑也使用飞刃攻击方式。
-//   第4把 紫相位剑：族特殊效果生效。当前接管"收回期保留一半伤害"，印记定稿后并入此处。
+// 族级成长按"族内有效武器数量"分阶，门槛 1/2/4/6/8/10：
+//   1 把：激活飞刃族的掷刃攻击。
+//   2 把：族内每多一把，飞刃伤害再提高一档（有上限，避免全收集失衡）。
+//   4 把：允许非本族主剑也使用飞刃攻击方式。
+//   6 把：族特殊效果生效。当前只接管"收回期保留一半伤害"。
+//   8 把、10 把：内容尚未定案，门槛先保留，暂不挂效果。
+// 激活只看数量，不绑定任何特定武器，也不新增按键或独立操作。
 public static class FlyingBladeFamily
 {
     public static readonly int[] Weapons=[
@@ -26,25 +28,29 @@ public static class FlyingBladeFamily
         ItemID.DyeTradersScimitar,ItemID.BeeKeeper,ItemID.FalconBlade,ItemID.DD2SquireDemonSword,
         ItemID.BreakerBlade,ItemID.Cutlass,ItemID.PsychoKnife,ItemID.Keybrand,ItemID.Bladetongue];
 
-    // 阶梯四把，必须与名册前四位一一对应（夹具里有断言守着）。
-    public static readonly int[] Tiers=[
-        ItemID.BluePhaseblade,ItemID.RedPhaseblade,ItemID.GreenPhaseblade,ItemID.PurplePhaseblade];
+    // 阶级门槛：族内有效武器数量达到这些值即进入下一阶（1/2/4/6/8/10）。
+    // 激活只看数量，不绑定任何特定武器，也不新增按键或独立操作。
+    public static readonly int[] Stages=[1,2,4,6,8,10];
 
-    // 第2把的加成幅度与计入上限：+3%/把，最多计 12 把（最高 +33%）。
+    // 第2阶的加成幅度与计入上限：+3%/把，最多计 12 把（最高 +33%）。
     public const int StepPercent=3;
     public const int StepCap=12;
 
     public static bool IsMember(int type)=>Array.IndexOf(Weapons,type)>=0;
     public static int Count(SoulItem soul)=>soul.Attached?soul.TraitItems.Where(i=>IsMember(i.type)).Select(i=>i.type).Distinct().Count():0;
 
-    // 某一把阶梯剑是否有效寄宿（主槽与支援槽都算，与矿石族阶梯口径一致）。
-    public static bool TierHeld(SoulItem soul,int tier)=>
-        soul.Attached && tier>=0 && tier<Tiers.Length && soul.TraitItems.Any(i=>i.type==Tiers[tier]);
+    // 当前阶级：0 表示族内还没有有效武器。主槽与支援槽都计入，与矿石族阶梯口径一致。
+    public static int Stage(SoulItem soul)
+    {
+        int count=Count(soul),stage=0;
+        for(int i=0;i<Stages.Length;i++) if(count>=Stages[i]) stage=i+1;
+        return stage;
+    }
 
-    public static bool Activated(SoulItem soul)=>TierHeld(soul,0);   // 第1把：激活族
-    public static bool Tally(SoulItem soul)=>TierHeld(soul,1);       // 第2把：族内数量加成
-    public static bool Pass(SoulItem soul)=>TierHeld(soul,2);        // 第3把：跨族授权
-    public static bool Sigil(SoulItem soul)=>TierHeld(soul,3);       // 第4把：族特殊效果
+    public static bool Activated(SoulItem soul)=>Stage(soul)>=1;   // 1 把：激活族
+    public static bool Tally(SoulItem soul)=>Stage(soul)>=2;       // 2 把：族内数量加成
+    public static bool Pass(SoulItem soul)=>Stage(soul)>=3;        // 4 把：跨族授权
+    public static bool Sigil(SoulItem soul)=>Stage(soul)>=4;       // 6 把：族特殊效果
 
     // 第2把提供的伤害倍率；未寄宿时为 1，不改变原有数值。
     public static float DamageBonus(SoulItem soul)
