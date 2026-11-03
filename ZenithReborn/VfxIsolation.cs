@@ -35,13 +35,19 @@ public static class VfxIsolation
     // 也没进 Branch 列表——所以"一键全开/全关"管不到它。改为由这里统一控制，不参与 SetAll。
     public static bool ViscousSlash = false;
 
+    // 飞刃弹幕（FlyingBladeShot）的三项视觉分支，默认全开；都不依赖外部输入，纯代码模式下同样允许。
+    // 生产环境必须为 true，否则飞刃退回"只有一张贴图在飞"。
+    public static bool FlyingBladeTrail = true;   // 飞行/收回拖尾、旋转环影、尾部火花
+    public static bool FlyingBladeGlow = true;    // 中心光点、命中扩散光环、刃身光照
+    public static bool FlyingBladeImpact = true;  // 命中 dust 爆发
+
     // 一键全开或全关，避免逐个漏改
     public static void SetAll(bool value)
     {
         SetAllBranches(value);
     }
 
-    // 7 个分支开关的统一遍历入口：调试面板据此把它们和 25 个构成项放进同一个清单。
+    // 10 个分支开关的统一遍历入口：调试面板据此把它们和 26 个构成项放进同一个清单。
     // 用委托读写静态字段，避免再维护一份平行状态导致两边不一致。
     public readonly record struct Branch(string Label, Func<bool> Get, Action<bool> Set, bool UsesExternalInput=false)
     {
@@ -63,6 +69,10 @@ public static class VfxIsolation
         new("B5 飞行粒子与光照",  () => FlyingParticles, value => FlyingParticles = value),
         new("B6 刃缘碎光",        () => FlowSpark,       value => FlowSpark = value, true),
         new("B7 玻璃屏幕折射滤镜", () => GlassFilter,     value => GlassFilter = value, true),
+        // 飞刃三项单独成组，一键全开/全关同样覆盖；不标记外部输入，纯代码模式下也允许。
+        new("B8 飞刃拖尾与环影",  () => FlyingBladeTrail, value => FlyingBladeTrail = value),
+        new("B9 飞刃光点与光环",  () => FlyingBladeGlow,  value => FlyingBladeGlow = value),
+        new("B10 飞刃命中爆发",   () => FlyingBladeImpact,value => FlyingBladeImpact = value),
     };
 
     // 回到当前输入策略下的全开预设，默认值和面板使用同一套元数据。
@@ -184,7 +194,7 @@ public static class VfxIsolation
     public static bool SparkCore = !PureCodeOnly; // B6-2 白色亮芯
     public static bool SparkMote = !PureCodeOnly; // B6-3 横向第二笔（十字）
 
-    // 统一遍历：热键面板据此把 18 个构成项接在 7 个分支之后
+    // 统一遍历：热键面板据此把 18 个构成项接在 10 个分支之后
     public static readonly Detail[] Details =
     {
         new("B2-1 近位剑影（15）", () => EchoNear, value => EchoNear = value, true),

@@ -5,11 +5,11 @@ using Terraria.ModLoader;
 
 namespace ZenithReborn;
 
-// 特效逐项调试总面板，共 56 项，分四组依次遍历：
-//   1) B1~B7  七个渲染分支总闸
-//   2) B2-1~B6-3  六个分支各自拆出的内部构成项
-//   3) P01~P25  主飞剑带面的构成项
-//   4) B7-1~B7-6  玻璃屏幕滤镜的构成项
+// 特效逐项调试总面板，共 61 项（10+18+26+7，实时按数组长度统计），分四组依次遍历：
+//   1) B1~B10  十个渲染分支总闸
+//   2) B2-1~B6-3  五个分支（B2~B6）各自拆出的内部构成项，共 18 项
+//   3) P01~P26  主飞剑带面的构成项
+//   4) B7-1~B7-7  玻璃屏幕滤镜的构成项
 // F7 下一项，F8 上一项，F9 切换当前项，F10 全关，Shift+F10 全开，Ctrl+F10 回基线。
 public class VfxPartDebug : ModSystem
 {
@@ -41,7 +41,7 @@ public class VfxPartDebug : ModSystem
         else if (now.IsKeyDown(Keys.LeftControl) || now.IsKeyDown(Keys.RightControl))
         {
             VfxIsolation.ResetAll();
-            Main.NewText(VfxIsolation.PureCodeOnly?"恢复全部允许的纯代码项":"恢复完整材质预设：56项开启，包含贴图与屏幕效果", Color.Yellow);
+            Main.NewText(VfxIsolation.PureCodeOnly?"恢复全部允许的纯代码项":"恢复完整材质预设：61项开启，包含贴图与屏幕效果", Color.Yellow);
         }
         else
         {
