@@ -11,7 +11,7 @@ namespace ZenithReborn;
 internal static class HeroPrefixCompat
 {
     private static Item[] hosts;
-    private static Item[] supports, forest;
+    private static Item[] supports, forest, crown;
     private static List<Item> additional;
     private static Item legendary;
     private static bool awakened;
@@ -31,6 +31,7 @@ internal static class HeroPrefixCompat
         hosts = soul.Hosts.Select(i => i.Clone()).ToArray();
         supports = soul.SupportHosts.Select(i => i.Clone()).ToArray();
         forest = soul.ForestHosts.Select(i => i.Clone()).ToArray();
+        crown = soul.CrownHosts.Select(i => i.Clone()).ToArray();
         additional=soul.AdditionalSupports.Select(i=>i.Clone()).ToList();
         legendary=soul.LegendaryHost.Clone();
         awakened = soul.Awakened;
@@ -58,6 +59,7 @@ internal static class HeroPrefixCompat
         soul.Attached = attached; soul.KingMemory = memory;
         soul.SupportHosts = supports.Select(i => i.Clone()).ToArray();
         soul.ForestHosts = forest.Select(i => i.Clone()).ToArray();
+        soul.CrownHosts = crown.Select(i => i.Clone()).ToArray();
         soul.AdditionalSupports=additional.Select(i=>i.Clone()).ToList();
         soul.LegendaryHost=legendary.Clone();
         soul.AwakeningMemory = awakened;
@@ -71,7 +73,7 @@ internal static class HeroPrefixCompat
     internal static void Clear()
     {
         hosts = null;
-        supports = forest = null;
+        supports = forest = crown = null;
         additional=null;
         legendary=null;
         soulId = null;

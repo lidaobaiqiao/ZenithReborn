@@ -184,8 +184,9 @@ internal static class OreCheck
         reward=new Item();soul.TrySwapHost(15,ref reward,out _);reward=new Item();soul.TrySwapHost(16,ref reward,out _);
         var both=(SoulItem)new Item(soul.Type).ModItem;both.Attached=true;both.Kills=SoulProgress.All;both.Cores=63;
         both.OreCollectionMask=OreFamily.AllMaterials;
-        for(int i=0;i<7;i++)both.Hosts[i]=new Item(WoodTypes.Types[i]);
-        for(int i=0;i<5;i++)both.SupportHosts[i]=new Item(WoodTypes.Types[i+7]);
+        // 旧口径：7 主槽 + 5 支援槽共 12 木；现名册 8 把 → 6 主槽 + 2 支援槽。
+        for(int i=0;i<6;i++)both.Hosts[i]=new Item(WoodTypes.Types[i]);
+        for(int i=0;i<2;i++)both.SupportHosts[i]=new Item(WoodTypes.Types[i+6]);
         both.RefreshStats();
         check(both.Wood.Full && both.BonusCapacity==2,"Both collection families still share two reward slots rather than stacking to four");
         both.Hosts[0].TurnToAir();both.RefreshStats();

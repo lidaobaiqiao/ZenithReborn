@@ -24,20 +24,29 @@ public static class SoulTraits
         void Add(string key,string title,string description,string requirement,TraitCategory category,bool active) =>
             result.Add(new(key,title,description,requirement,category,active));
         Add("wood-set","自然之力",wood.Count>0?
-            $"木质族 {wood.Count}/12 · 环境效果 {wood.Strength:0.##}倍 · 最大生命 +{wood.Life}":
-            "1/2/4/6/8种有效木剑对应1.10/1.20/1.35/1.50/1.75倍环境效果、5/10/15/20/30生命。支援槽已改为独立通用机制。",
-            "获得附着，将木剑放入有效普通槽；有效支援中的木剑也计入种类。",TraitCategory.Wood,wood.Count>0);
-        Add("forest","森林之力","12种木剑同时有效寄宿：环境效果达到基础3倍，最大生命+100，解锁2个共享全收集奖励剑位；有效战斗60秒到12层。满层主攻伤害+36%、速度+24%、防御+36、回复+6/秒、自有持续伤害+60%、减伤+12个百分点。",
-            "12种木剑同时放在基础普通及有效支援槽中，支持共用支援池的不同排布。取下失效，奖励槽不能反向凑木质全套。",TraitCategory.Wood,wood.Full);
+            $"木质族 {wood.Count}/8 · 环境效果 {wood.Strength:0.##}倍 · 最大生命 +{wood.Life}":
+            "1/2/4/6/8种有效木剑对应1.10/1.20/1.35/1.50/2.00倍环境效果、5/10/15/25/40生命；圣林归冠时环境效果3.00倍、生命+100。支援槽已改为独立通用机制。",
+            "获得附着，将木剑放入有效普通槽；有效支援槽、森林/圣林奖励位与传奇位中的木剑也计入种类。",TraitCategory.Wood,wood.Count>0);
+        Add("forest","森林之力","8种木剑全部有效寄宿时激活：环境效果达到2.00倍，最大生命+40；圣林归冠激活后覆盖为3.00倍、+100。成长上限：基础6层（有效战斗30秒），圣林归冠12层（60秒）。每层按当前表计算——基础：伤害+2%、速度+1%、防御+2、回复+0.3/秒、自有持续伤害+3%、减伤+0.5个百分点；归冠：伤害+3%、速度+2%、防御+3、回复+0.5/秒、DoT+5%、减伤+1个百分点。",
+            "8种木剑同时放在基础普通、有效支援槽、森林/圣林奖励位与传奇位中，支持共用支援池的不同排布。取下失效；奖励位同样计入，不设例外。",TraitCategory.Wood,wood.Full);
         for(int i=0;i<WoodTypes.Types.Length;i++)
             Add("wood-"+i,WoodTypes.Names[i]+" · "+WoodTypes.Effects[i],WoodTypes.Description(WoodTypes.Types[i]),
-                "该木剑处于有效普通或支援槽。S为当前木族倍率，P为实际主剑影伤害；命中后触发，持续时间与目标免疫仍适用。",TraitCategory.Wood,(wood.Mask&(1<<i))!=0);
+                "该木剑处于有效普通、支援、森林/圣林奖励位或传奇位。S为当前木族倍率，P为实际主剑影伤害；命中后触发，持续时间与目标免疫仍适用。",TraitCategory.Wood,(wood.Mask&(1<<i))!=0);
+        // V2 复合羁绊四组合：激活判定见 WoodBondCore（实时求值），命中派发见 SoulBlade.OnHitNPC。
+        Add("wood-bond-forge","锻根共生","木质达到 III 繁枝（4种有效木剑）且含棕榈木剑，铜阔剑与铁阔剑同时有效寄宿时激活：铜/铁阔剑主剑影命中带盐蚀标记的目标积攒锻芽，满3层立即消耗并补斩（30%×本次伤害，仅1个目标，同目标90帧冷却；锻芽上限3层、持续180帧）。奖励槽中的铜/铁阔剑同样计入。",
+            "基础普通＋有效支援槽＋森林/圣林奖励位＋传奇位计数≥4种木剑且含棕榈木剑；铜阔剑与铁阔剑各一把处于任意有效槽位。",TraitCategory.Wood,WoodBondCore.ActiveForge(soul));
+        Add("wood-bond-rot","腐林凋蚀","木质达到 IV 森罗（6种有效木剑）且含红木剑与乌木剑，魔光剑与永夜刃同时有效寄宿时激活：魔光/永夜刃主剑影命中带本剑魂瘴毒的目标时，提前结算剩余瘴毒预算的25%（单次≤50%×本次伤害，从未来预算扣除，同目标180帧冷却；不暴击、不产生新DoT）。",
+            "基础普通＋有效支援槽＋森林/圣林奖励位＋传奇位计数≥6种木剑且含红木剑、乌木剑；魔光剑与永夜刃各一把处于任意有效槽位。",TraitCategory.Wood,WoodBondCore.ActiveRot(soul));
+        Add("wood-bond-ember","灰烬繁生","木质达到 IV 森罗（6种有效木剑）且含红木剑与白蜡木剑，火山有效寄宿时激活：火山主剑影命中同时带瘴毒与烬燃的目标时，引发64像素爆发（30%×本次伤害，每次至多3个不同敌人各命中一次，同剑魂180帧冷却；不重新施加状态）。",
+            "基础普通＋有效支援槽＋森林/圣林奖励位＋传奇位计数≥6种木剑且含红木剑、白蜡木剑；火山处于任意有效槽位。",TraitCategory.Wood,WoodBondCore.ActiveEmber(soul));
+        Add("wood-bond-crown","圣林归冠","木质达到 V 森林共鸣（8种木剑全部有效寄宿：基础普通＋有效支援槽＋森林/圣林奖励位＋传奇位计数，奖励位同样计入）且泰拉刃有效寄宿于非圣林槽时激活：环境效果覆盖为3.00倍、最大生命+100，并解锁2个圣林之冠真实主攻剑位；组合失效时圣林槽暂停、物品保留。泰拉刃处于圣林槽时不能反向解锁本组合（防自举）。",
+            "8种木剑全有效（分布于普通主槽、有效支援槽、森林/圣林奖励位或传奇位）＋泰拉刃在非圣林的有效槽位（普通主槽、有效支援槽、森林奖励槽或传奇槽均可）。",TraitCategory.Wood,WoodBondCore.ActiveCrown(soul));
         int oreCount=OreFamily.Count(soul);
         int mainOre=OreFamily.PopCount(OreFamily.Mask(soul.OreFlightMains)),supportOre=OreFamily.PopCount(OreFamily.Mask(support));
         Add("shared-support","共用支援",$"当前激活 {soul.SupportCapacity} 格：{SoulSupport.Breakdown(soul)}。每条已激活的支援奖励各提供1格，累加而非取最大值。所有可寄宿近战武器均可放入；不出主剑、不提供武器面板属性，但计入所属族羁绊及已实装特性。",
-            "木质1/2/4/6/8种各给1格；矿石1/2/4/6/8/10材质各给1格。基础普通与已开放支援参与；已解锁奖励主槽可贡献矿材，但不能反向凑木质全套。停用取回槽不计入。后续种族可提供新奖励，不固定五格。",TraitCategory.Growth,soul.SupportCapacity>0);
-        Add("collection-slots","全收集奖励","解锁左上R1、R2两个共享真实主攻剑位。木质全套或矿石圆满任一满足即可；两族同时完成仍共用2格。普通主槽仍10格，支援数量另由当前激活的各族奖励累加。",
-            "已附着，12种木剑同时有效寄宿，或累计有效登记14种矿石材质。矿石登记取下不丢。",TraitCategory.Growth,soul.BonusCapacity>0);
+            "木质1/2/4/6/8种各给1格；矿石1/2/4/6/8/10材质各给1格。基础普通、已开放支援与各族名额参与；已解锁奖励主槽可贡献矿材与木质种类，但不反向解锁支援格。停用取回槽不计入。后续种族可提供新奖励，不固定五格。",TraitCategory.Growth,soul.SupportCapacity>0);
+        Add("collection-slots","全收集奖励","仅由矿石圆满解锁左上R1、R2两个共享真实主攻剑位；木质全套不再提供奖励槽，改为圣林归冠在右下开启两个圣林主攻剑位（条件见『圣林归冠』）。两族同时完成仍共用2格。普通主槽仍10格，支援数量另由当前激活的各族奖励累加。",
+            "已附着，累计有效登记14种矿石材质。矿石登记取下不丢。",TraitCategory.Growth,soul.BonusCapacity>0);
         Add("ore-wave","百炼飞剑",$"有效矿材 {oreCount}/14（主攻{mainOre}、支援{supportOre}，重复材质合并）。每把允许参与飞剑的主剑本体首次有效命中积攒一把；铜质剑特性允许三个剑影各自再积攒一次，同一单元后续帧伤不补触发。不同主剑可同时积攒。按有效材质成阵，集齐后蓄力齐射；中断3秒或目标死亡释放现有飞剑。距目标至少170像素，每趟贯穿560像素，沿途每6帧可再次命中。基础伤害D×150%×[1＋5%×(材质数－1)]，10层再×1.5，全收集再×1.3。防御效果最多按正常100%结算，不放大敌人护甲。累计登记 {soul.OreCollected}/14种。",
             "至少1种有效矿材解锁；切换未解除时仅前4把有效主剑计入矿材并触发飞剑，解除后恢复全部。普通特性和支援仍受原有切换限制。",TraitCategory.Ore,soul.Active.Any(i=>OreFamily.TriggerEligible(soul,i.type)));
         Add("ore-tier-2","锻金 · 淬刃","每把矿石主剑自身伤害＋5%，不按材质数量叠乘，不强化其他武器。",

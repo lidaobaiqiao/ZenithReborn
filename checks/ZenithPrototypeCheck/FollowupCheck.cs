@@ -12,9 +12,11 @@ internal static class FollowupCheck
     {
         var soul=(SoulItem)new Item(ModContent.ItemType<SoulItem>()).ModItem;
         soul.Attached=true;soul.Kills=SoulProgress.All;soul.Cores=63;soul.Seals=SoulCurses.All;soul.OreCollectionMask=OreFamily.AllMaterials;
-        for(int i=0;i<7;i++)soul.Hosts[i]=new Item(WoodTypes.Types[i]);
+        // 旧口径：7 主槽 + 5 支援槽共 12 木；现名册 8 把 → 3 主槽 + 5 支援槽，
+        // 保持 11 个支援槽全部占满（后面逐个点击取回需要每格都有物品）。
+        for(int i=0;i<3;i++)soul.Hosts[i]=new Item(WoodTypes.Types[i]);
         for(int i=0;i<3;i++)soul.Hosts[i+7]=new Item(OreFamily.DefaultType[i]);
-        for(int i=0;i<5;i++)soul.SupportHosts[i]=new Item(WoodTypes.Types[i+7]);
+        for(int i=0;i<5;i++)soul.SupportHosts[i]=new Item(WoodTypes.Types[i+3]);
         soul.AdditionalSupports=OreFamily.DefaultType.Skip(3).Take(6).Select(t=>new Item(t)).ToList();
         soul.ForestHosts[0]=new Item(OreFamily.DefaultType[9]);soul.ForestHosts[1]=new Item(OreFamily.DefaultType[10]);
         Main.myPlayer=0;Main.GameMode=2;Main.getGoodWorld=true;
@@ -52,11 +54,13 @@ internal static class FollowupCheck
         var future=(SoulItem)new Item(ModContent.ItemType<SoulItem>()).ModItem;future.Attached=true;
         future.AdditionalSupports=Enumerable.Range(0,10).Select(i=>new Item(OreFamily.DefaultType[i])).ToList();
         future.LegendaryHost=new Item(ItemID.Meowmere);
-        check(SoulItem.SupportSlotId(14)==35 && SoulItem.SupportOrdinal(35)==14 && SoulItem.SupportOrdinal(34)==-1 &&
-            future.ItemAt(35).type==OreFamily.DefaultType[9] && future.ItemAt(34).type==ItemID.Meowmere &&
-            future.VisibleSlotIds.Distinct().Count()==future.VisibleSlotIds.Count(),"Reserved legendary ID cannot alias a future fifteenth support or duplicate a visible slot");
-        Item recovered=new();check(future.TrySwapHost(35,ref recovered,out _) && recovered.type==OreFamily.DefaultType[9] &&
-            future.LegendaryHost.type==ItemID.Meowmere,"Future paused support beyond the legendary ID can be recovered without touching legendary storage");
+        // 旧口径（0.3.129 之前）：无圣林槽，第 15 个支援是 35。现 35/36 归圣林之冠，支援后移两位到 37。
+        check(SoulItem.SupportSlotId(14)==37 && SoulItem.SupportOrdinal(37)==14 && SoulItem.SupportOrdinal(34)==-1 &&
+            SoulItem.SupportOrdinal(35)==-1 && SoulItem.SupportOrdinal(36)==-1 &&
+            future.ItemAt(37).type==OreFamily.DefaultType[9] && future.ItemAt(34).type==ItemID.Meowmere &&
+            future.VisibleSlotIds.Distinct().Count()==future.VisibleSlotIds.Count(),"Reserved legendary and crown IDs cannot alias a future fifteenth support or duplicate a visible slot");
+        Item recovered=new();check(future.TrySwapHost(37,ref recovered,out _) && recovered.type==OreFamily.DefaultType[9] &&
+            future.LegendaryHost.type==ItemID.Meowmere,"Future paused support beyond the legendary and crown IDs can be recovered without touching legendary storage");
         var detail=(SoulItem)new Item(ModContent.ItemType<SoulItem>()).ModItem;detail.Attached=true;detail.Kills=SoulProgress.All;detail.Cores=63;
         detail.LegacyReleased=0;detail.Seals=0;detail.Hosts[0]=new Item(ItemID.WoodenSword);
         detail.Hosts[1]=new Item(ItemID.CopperBroadsword);detail.Hosts[2]=new Item(ItemID.TinBroadsword);

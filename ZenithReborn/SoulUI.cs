@@ -216,6 +216,14 @@ public partial class SoulUI : ModSystem
             Vector2 legendaryCenter=OrbitPoint(-45,RingRadius+86);
             return new((int)legendaryCenter.X-29,(int)legendaryCenter.Y-29,58,58);
         }
+        // 圣林之冠双槽位于森林奖励位与传奇位之间的空档弧段（约-104°与-78°），
+        // 避开下方支援弧线随数量增长可能占据的左下区域。
+        if(SoulItem.IsCrownSlot(index))
+        {
+            Vector2 crownCenter=OrbitPoint(-104+(index-SoulItem.CrownSlotBase)*26,RingRadius+62);
+            int crownSize=RingViewport.Width<420?38:44;
+            return new((int)crownCenter.X-crownSize/2,(int)crownCenter.Y-crownSize/2,crownSize,crownSize);
+        }
         int supportOrdinal=SoulItem.SupportOrdinal(index);
         if(supportOrdinal>=0)
         {
@@ -323,11 +331,13 @@ public partial class SoulUI : ModSystem
         return Paragraph(body,x+10,y+28,width-14,Ink)+18;
     }
     private static bool Available(SoulItem soul,int i) => i==SoulItem.LegendarySlotId ? soul.LegendaryOn :
+        SoulItem.IsCrownSlot(i) ? i-SoulItem.CrownSlotBase<soul.CrownCapacity :
         i<10 ? i<Math.Max(1,soul.Capacity) :
         i<15 ? i-10<soul.SupportCapacity : i<17 ? i-15<soul.BonusCapacity :
         i>=25 && SoulItem.SupportOrdinal(i)<soul.SupportCapacity;
-    private static string SlotName(int i) => i==SoulItem.LegendarySlotId?"传奇剑位":i<10?$"普通剑位 {i+1:00}":i<15?$"支援剑位 S{i-9:00}":
-        i<17?$"奖励剑位 R{i-14:00}":i<19?$"旧普通扩展 {i-16:00} · 仅可取回":i<25?$"旧支援扩展 {i-18:00} · 仅可取回":$"支援剑位 S{SoulItem.SupportOrdinal(i)+1:00}";
+    private static string SlotName(int i) => i==SoulItem.LegendarySlotId?"传奇剑位":SoulItem.IsCrownSlot(i)?$"圣林之冠剑位 C{i-SoulItem.CrownSlotBase+1:00}":
+        i<10?$"普通剑位 {i+1:00}":i<15?$"支援剑位 S{i-9:00}":
+        i<17?$"矿石奖励剑位 R{i-14:00}":i<19?$"旧普通扩展 {i-16:00} · 仅可取回":i<25?$"旧支援扩展 {i-18:00} · 仅可取回":$"支援剑位 S{SoulItem.SupportOrdinal(i)+1:00}";
     private static void Draw()
     {
         var soul=editing;if(SoulUIPages.Resolve(page,soul.HasLegacyExpansion)!=page)SelectPage(0);
@@ -345,7 +355,7 @@ public partial class SoulUI : ModSystem
             DrawChrome(panel,mouse);
             Text(soul.Awakened?"天顶复生 · 众剑归位":"天顶残魂",new(panel.X+18,panel.Y+14),Ink,panel.Width<430?.86f:1f);
             if(panel.Width>=430) Text("拖动标题栏",new(panel.Right-145,panel.Y+18),WindowDragging?Accent:Muted,.6f);
-            Text(soul.Attached?$"主攻 {soul.Active.Count()}/{soul.Capacity+soul.BonusCapacity+(soul.LegendaryOn?1:0)}   支援 {soul.Supports.Count()}/{soul.SupportCapacity}   效能 {soul.Potency:P0}":
+            Text(soul.Attached?$"主攻 {soul.Active.Count()}/{soul.Capacity+soul.BonusCapacity+soul.CrownCapacity+(soul.LegendaryOn?1:0)}   支援 {soul.Supports.Count()}/{soul.SupportCapacity}   效能 {soul.Potency:P0}":
                 "尚未附着 · 第一剑位仅供预览",new(panel.X+18,panel.Y+43),Accent,panel.Width<430?.61f:.73f);
         }
         var close=CloseBounds();

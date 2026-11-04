@@ -67,9 +67,16 @@ internal static class LivingMeleeMatrix
     }
     public static void Run()
     {
+        // 专用服务器默认没有活动光照引擎；仅在隔离矩阵中初始化，保留原版发光路径。
+        Lighting.Initialize();
         var rows=new List<object>();
-        foreach(var item in ContentSamples.ItemsByType.Values.Where(i=>i.type>0&&i.type<ItemID.Count&&SoulItem.CanHost(i)).OrderBy(i=>i.type))
-            rows.Add(new{id=item.type,name=ItemID.Search.GetName(item.type),channel=item.channel,shoot=item.shoot,style=item.shoot>0&&ContentSamples.ProjectilesByType.TryGetValue(item.shoot,out var sample)?sample.aiStyle:-1,normal=Trial(item.type,false),proxy=Trial(item.type,true)});
+        // 默认沿用原版范围；显式开启后还会统计当前隔离档实际加载的模组武器。
+        bool includeMods=Environment.GetEnvironmentVariable("ZENITH_MELEE_INCLUDE_MODS")=="1";
+        foreach(var item in ContentSamples.ItemsByType.Values.Where(i=>i.type>0&&(includeMods||i.type<ItemID.Count)&&SoulItem.CanHost(i)).OrderBy(i=>i.type))
+        {
+            string identity=ItemLoader.GetItem(item.type)?.FullName??ItemID.Search.GetName(item.type)??item.type.ToString();
+            rows.Add(new{id=item.type,name=identity,modded=item.type>=ItemID.Count,channel=item.channel,shoot=item.shoot,style=item.shoot>0&&ContentSamples.ProjectilesByType.TryGetValue(item.shoot,out var sample)?sample.aiStyle:-1,normal=Trial(item.type,false),proxy=Trial(item.type,true)});
+        }
         string path=Environment.GetEnvironmentVariable("ZENITH_MELEE_MATRIX_OUTPUT");
         System.IO.File.WriteAllText(path,JsonSerializer.Serialize(rows,new JsonSerializerOptions{WriteIndented=true}));
     }

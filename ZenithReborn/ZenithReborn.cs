@@ -21,6 +21,8 @@ public class ZenithReborn : Mod
         if(action==11){EnvironmentPlayer.ReceiveHit(reader,whoAmI);return;}
         if(action==10){BlessingPlayer.Receive(reader,whoAmI);return;}
         if (action == 3) { WoodCombat.ReceiveHit(reader, whoAmI); return; }
+        // 木质复合羁绊 A/B/C 的独立中继帧（锻芽/凋蚀/焚叶），服务端专用，帧格式见 WoodBondRelay 注释。
+        if (action == 12) { WoodBondRelay.Receive(reader, whoAmI); return; }
         if (action == 4)
         {
             int player = reader.ReadByte();

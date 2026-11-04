@@ -73,7 +73,9 @@ public static partial class SoulProgress
             return $"共用支援第{ordinal+1}槽 · {(ordinal<soul.SupportCapacity?"已激活":"未激活／暂停")}\n当前奖励：{SoulSupport.Breakdown(soul)}＝{soul.SupportCapacity}格；各族提供的槽位累加，不取较高值\n木质1/2/4/6/8种各给1格；矿石1/2/4/6/8/10材质各给1格\n支援不出主剑、计入所属族羁绊和已实装特性；失去条件时暂停，物品仍可取回";
         }
         if (slot < 17)
-            return $"全收集奖励第{slot-14}槽 · {(soul.BonusCapacity>0?"已解锁":"尚未解锁")}\n12种木剑同时有效寄宿（{soul.Wood.Count}/12），或累计登记14种矿石（{soul.OreCollected}/14）\n两族共用2格真实主攻剑位；矿石登记取下不丢，木族仍需维持全套";
+            return $"矿石全收集第{slot-14}槽 · {(soul.BonusCapacity>0?"已解锁":"尚未解锁")}\n累计有效登记14种矿石（{soul.OreCollected}/14）即可解锁\n2格真实主攻剑位；矿石登记取下不丢（V2起木质全收集不再开启此奖励）";
+        if (SoulItem.IsCrownSlot(slot))
+            return $"圣林之冠第{slot-SoulItem.CrownSlotBase+1}槽 · {(soul.CrownCapacity>0?"已激活":"未激活／暂停")}\n圣林归冠：8种木剑同时有效寄宿且泰拉刃寄宿于剑魂\n2格真实主攻剑位，仅归冠激活时生效；失效时暂停并保留物品，空手可取回\n圣林槽位不参与归冠自身的解锁判定（防自举）";
         return "旧扩展已停用：物品不参与伤害、特性与羁绊；只可空手取回，不可放入。";
     }
     public static void RequestCoreRecovery(SoulItem soul)

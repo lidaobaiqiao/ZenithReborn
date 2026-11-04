@@ -1,6 +1,7 @@
 # AI 接入指南（ZenithReborn）
 
 > 读者：接手本项目的另一个 AI。本文自包含，读完即可开工。
+> 本指南不替代 AGENTS.md / CODEBUDDY.md；动手前先读 AGENTS.md、CODEBUDDY.md，以及 docs/archive/DeepSeek开发交接-v0.3.11.md、docs/archive/DeepSeek接手提示词.md。
 > 生成时间：2026-11-04，对应版本见 `ZenithReborn/build.txt`。
 
 ## 1. 这是什么项目
@@ -12,7 +13,7 @@
 | 项 | 值 |
 |---|---|
 | 版本 | `0.3.130`（以 `ZenithReborn/build.txt` 为准） |
-| 回归基线 | 8511 项（见 `artifacts/install-result.json` 的 `focused_checks`） |
+| 回归基线 | 8511 项，以 `artifacts/install-result.json` 的 `focused_checks` 为准；AGENTS.md 记的 8498 为旧值，历史 8393/8453 均已过时 |
 | 仓库 | `https://github.com/lidaobaiqiao/ZenithReborn.git` |
 | 源码规模 | `ZenithReborn/` 121 个 `.cs`，平铺根目录、单命名空间 |
 
@@ -22,22 +23,23 @@
 git clone https://github.com/lidaobaiqiao/ZenithReborn.git
 ```
 
-**必须改两处硬编码**（写死的是原作者机器的路径，不改必然编译失败）：
+**必须改三处硬编码**（写死的是原作者机器的路径，不改必然编译失败）：
 
 | 文件 | 行 | 内容 |
 |---|---|---|
 | `ZenithReborn/ZenithReborn.csproj` | 6 | `<Import Project="E:/SteamLibrary/steamapps/common/tModLoader/tMLMod.targets" />` |
 | `checks/ZenithPrototypeCheck/ZenithPrototypeCheck.csproj` | 3 | 同上 |
+| `checks/run_wood_checks.ps1` | 4 | `$loaderRoot='E:/SteamLibrary/steamapps/common/tModLoader'`（第三处硬编码，换机器同样要改，不要提交） |
 
-改成你自己机器的 tModLoader 安装路径。**这两处改动不要提交**，会污染别人的仓库（可用 `git update-index --skip-worktree` 或提交前手动还原）。
+改成你自己机器的 tModLoader 安装路径。**这三处改动不要提交**，会污染别人的仓库（可用 `git update-index --skip-worktree` 或提交前手动还原）。
 
 ## 3. 环境四件套
 
 | 项 | 要求 | 踩坑 |
 |---|---|---|
-| .NET | 8 / C# 12 | — |
+| .NET | net8.0 / C# 12 | 本机 PATH 的 `dotnet` 是 10.x，不是项目要求；回归打包用 `E:/SteamLibrary/steamapps/common/tModLoader/dotnet/dotnet.exe` |
 | tModLoader | 1.4.4 | `tMLMod.targets` 在安装根目录；`dotnet.exe` 在 `tModLoader/dotnet/` **子目录** |
-| PowerShell | **必须 pwsh 7** | Windows PowerShell 5.1 把无 BOM 的 UTF-8 脚本当 GBK 读，0.5 秒 ParserError |
+| PowerShell | **必须 pwsh 7**（本机 7.6.6，`C:\Program Files\PowerShell\7\pwsh.exe`） | Windows PowerShell 5.1 不可用（无 BOM UTF-8 脚本会被按 GBK 读而解析失败） |
 | Python | 3.x | 全部脚本只用标准库，无需 pip |
 
 ## 4. 三条命令
@@ -59,6 +61,7 @@ python checks/check_mod_assets.py
 - 项数**动态统计**（当前 8511），历史文档里的 8393 / 8453 已过时。
 - 耗时约 70–85 秒，不要按"十几分钟"设超时。
 - 结果落 `artifacts/wood-check.txt`（首行 `PASS: N focused checks [suite=full ZENITH_WOOD]`，末行 `SUITE=ZENITH_WOOD`）；`artifacts/native-build-check.json` 记录两包 sha256 与 `passed`。
+- 全量回归由脚本用 tModLoader 自带 dotnet 重新打包（`run_wood_checks.ps1:24`，`dotnet ./tModLoader.dll -server -build`），与 §4 的 `dotnet build` 是两条独立链路；§7.1 关于夹具引用 `bin/Release` 旧 DLL 的告警只针对手动编译夹具。
 
 ## 5. 改代码之前先看地图
 
@@ -89,7 +92,7 @@ python checks/check_mod_assets.py
 2. **先找归属再写代码**，不把多职责塞进同一文件/方法。`SoulItem`(27KB) / `SoulUI`(28KB) / `SoulBlade`(29KB) 已职责超载，新增能力优先开新文件。
 3. **证据分级：隔离服务端夹具 ≪ 图形客户端 ≪ 真实多人。** 服务端夹具看不到图形资产——新增 Mod 类型必须有贴图或显式 `Texture` override，否则客户端加载即崩（这条是真实热修教训）。
 4. **检查只用隔离目录**，绝不碰 `My Games/Terraria/tModLoader/` 下的正式人物与世界。只替换目标 `.tmod`，先备份；文件被锁就等玩家退出，**不得强杀游戏进程**。
-5. **大改动前先落 git 提交点**，保证有干净可回退的基线。
+5. 大改动前**提醒用户**先落 git 提交点（CODEBUDDY.md:71），不要自行提交；当前工作区状态未知，动手前先确认。
 6. **不凭世界已击败 Boss 的全局标记伪造剑魂成长记录**，成长必须来自剑魂自己的记录。
 
 ## 7. 六个已经踩过的坑
@@ -145,7 +148,7 @@ python checks/build_file_index.py && python checks/map_audit.py
 | 现象 | 先看 |
 |---|---|
 | 编译失败 | 两处 `tMLMod.targets` 路径是否改对 |
-| 回归莫名失败 | 是否重编了 DLL（7.1）、是否撞了毒开关（7.3） |
+| 回归莫名失败 | 三处硬编码路径是否都改对：两处 csproj 的 `tMLMod.targets` + `run_wood_checks.ps1:4` 的 `$loaderRoot`；再查是否重编 DLL（7.1）、是否撞毒开关（7.3） |
 | 安装被拒 | 是否用 `run_wood_checks.ps1` 跑了全量（7.2）、是否改了源码没重跑（7.6） |
 | 改了族判定但数字不对 | 三套口径是否同改（7.5） |
 | 改了特效开关没反应 | 是不是空开关（7.4） |

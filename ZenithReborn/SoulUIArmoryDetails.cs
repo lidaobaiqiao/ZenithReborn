@@ -26,7 +26,8 @@ public partial class SoulUI
             y+=30;
             Item shown=candidate??current;
             y=InfoLines(shown.IsAir?"等待一把剑":shown.Name,x,y,w,InfoWhite,1.06f,3)+9;
-            string role=SoulItem.SupportOrdinal(selected)>=0?"共鸣支援 · 提供特性":selected==SoulItem.LegendarySlotId?"传奇主攻 · 独立出剑":selected is 15 or 16?"全收集奖励 · 独立出剑":"普通主攻 · 独立出剑";
+            string role=SoulItem.SupportOrdinal(selected)>=0?"共鸣支援 · 提供特性":selected==SoulItem.LegendarySlotId?"传奇主攻 · 独立出剑":
+                SoulItem.IsCrownSlot(selected)?"圣林之冠 · 独立出剑":selected is 15 or 16?"矿石全收集 · 独立出剑":"普通主攻 · 独立出剑";
             y=InfoLines(role,x,y,w,hue,.66f)+18;
             if(!shown.IsAir)
             {
@@ -42,6 +43,13 @@ public partial class SoulUI
                 // 族名放在环境之前：先回答"这是哪一族的剑"，再回答"它吃哪个环境"。
                 string familyLine=WeaponFamilyTags.Line(shown.type,soul);
                 if(familyLine.Length>0)y=InfoLines(familyLine,x,y,w,Champagne,.66f)+8;
+                // 木质族武器额外显示全族实时进度，避免“所属种族”只有名字、看不到阶段。
+                if(WoodTypes.IsWood(shown.type))
+                {
+                    BondState woodBond=BondSnapshot.Wood(soul);
+                    string woodLine=$"木质族 {woodBond.StageLine} · {woodBond.Count}/{woodBond.MaxCount}";
+                    y=InfoLines(woodLine,x,y,w,woodBond.Active?BondColors.Tier(BondKind.Wood,woodBond.Tier):InfoQuiet,.62f)+8;
+                }
                 y=InfoLines(EnvironmentSwordTooltips.Label(shown),x,y,w,Accent,.66f)+18;
             }
             Line(new(x,y),new(x+w,y),hue*.18f);y+=16;

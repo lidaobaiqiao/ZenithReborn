@@ -6,21 +6,6 @@ Mods: {
 				Tooltip: A promise kept by the smallest creatures of the land
 			}
 
-			DynastyWoodSword: {
-				DisplayName: Dynasty Wood Sword
-				Tooltip: Order carried by a traveler
-			}
-
-			SpookyWoodSword: {
-				DisplayName: Spooky Wood Sword
-				Tooltip: The mourning forest still remembers
-			}
-
-			FeyWoodSword: {
-				DisplayName: Fey Wood Sword
-				Tooltip: A soft glow woven from living wood and mushrooms
-			}
-
 			SoulItem: {
 				DisplayName: Cursed Zenith Remnant
 				Tooltip: The echo of a fallen summit, waiting for a blade to host it.
@@ -83,11 +68,6 @@ Mods: {
 				Description: Woodland soul effect. See the soul hosting panel for details.
 			}
 
-			DynastyOrder: {
-				DisplayName: DynastyOrder
-				Description: Woodland soul effect. See the soul hosting panel for details.
-			}
-
 			ForestPower: {
 				DisplayName: ForestPower
 				Description: Woodland soul effect. See the soul hosting panel for details.
@@ -108,11 +88,6 @@ Mods: {
 				Description: Woodland soul effect. See the soul hosting panel for details.
 			}
 
-			CactusBleed: {
-				DisplayName: CactusBleed
-				Description: Woodland soul effect. See the soul hosting panel for details.
-			}
-
 			WoodWither: {
 				DisplayName: WoodWither
 				Description: Woodland soul effect. See the soul hosting panel for details.
@@ -125,11 +100,6 @@ Mods: {
 
 			HallowRadiance: {
 				DisplayName: HallowRadiance
-				Description: Woodland soul effect. See the soul hosting panel for details.
-			}
-
-			MourningMark: {
-				DisplayName: MourningMark
 				Description: Woodland soul effect. See the soul hosting panel for details.
 			}
 

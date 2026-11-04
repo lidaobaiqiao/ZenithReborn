@@ -20,6 +20,11 @@ public class VfxPartDebug : ModSystem
     private static int GlassCount => VfxIsolation.GlassParts.Length;
     private static int Total => BranchCount + DetailCount + PartCount + GlassCount;
 
+    // P01~P26 与 B7-1~B7-7 共 33 项当前没有 shader 消费方（打包的 .fx 未声明对应 uniform，
+    // 生产代码也没有 PartValue/GlassPartValues 调用方）。给它们加后缀，让操作者一眼看出按下没用。
+    // Branches 那 10 项是真生效的绘制前判断，不加后缀。
+    private const string UnwiredSuffix = "（未接线）";
+
     public override void PostUpdateEverything()
     {
         if (Main.dedServ || Main.gameMenu) return;
@@ -103,12 +108,12 @@ public class VfxPartDebug : ModSystem
         }
         else if ((position -= DetailCount) < PartCount)
         {
-            label = VfxIsolation.Parts[position].Label; on = VfxIsolation.PartValues[position] > 0.5f;
+            label = VfxIsolation.Parts[position].Label + UnwiredSuffix; on = VfxIsolation.PartValues[position] > 0.5f;
         }
         else
         {
             position -= PartCount;
-            label = VfxIsolation.GlassParts[position].Label; on = VfxIsolation.GlassPartValues[position] > 0.5f;
+            label = VfxIsolation.GlassParts[position].Label + UnwiredSuffix; on = VfxIsolation.GlassPartValues[position] > 0.5f;
         }
         Main.NewText($"[{index + 1}/{Total}] {label} → {(on ? "开" : "关")}　F7 下一项 / F8 上一项 / F9 切换 / F10 全关",
             on ? Color.LightGreen : Color.Gray);

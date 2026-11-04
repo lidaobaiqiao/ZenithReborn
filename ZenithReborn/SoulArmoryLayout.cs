@@ -40,9 +40,26 @@ public readonly record struct SoulArmoryLayout(Rectangle Workspace,Rectangle Lib
         if(id is 15 or 16)return Stage.Width<420?
             new(Stage.X+12+(id-15)*48,Stage.Y+53-scroll,40,40):
             new(Stage.X+18+(id-15)*58,Stage.Y+53-scroll,44,44);
+        // 圣林之冠双槽：参照全收集奖励的排布，紧随其下方一行。
+        if(SoulItem.IsCrownSlot(id))return Stage.Width<420?
+            new(Stage.X+12+(id-SoulItem.CrownSlotBase)*48,Stage.Y+97-scroll,40,40):
+            new(Stage.X+18+(id-SoulItem.CrownSlotBase)*58,Stage.Y+103-scroll,44,44);
         int ordinal=SoulItem.SupportOrdinal(id),columns=SupportColumns;
         int start=Stage.Center.X-columns*56/2;
         return new(start+ordinal%columns*56,SupportTop(supports,scroll)+ordinal/columns*58,44,44);
+    }
+    // 木质族面板锚点：贴在剑阵左缘、圣林槽下方。
+    // 宽度取“羁绊核心环左缘”到舞台左缘的余量，因此面板整体位于圆环包围盒之外，
+    // 任何滚动位置都不会压住核心、剑位与既有的全收集/归冠标注；
+    // 纵向到支援栏标题上方 38 像素结束。舞台过窄时返回空矩形，宁可不画也不挤压剑阵。
+    public Rectangle WoodPanel(int supports,int scroll)
+    {
+        int ringLeft=(int)(Center(supports,scroll).X-Radius(supports));
+        int width=Math.Min(244,ringLeft-Stage.X-16);
+        if(width<96)return Rectangle.Empty;
+        int top=Stage.Y+152-scroll;
+        int height=Math.Min(212,SupportTop(supports,scroll)-38-top);
+        return height<150?Rectangle.Empty:new(Stage.X+8,top,width,height);
     }
     public Rectangle LibraryList=>new(Library.X+12,Library.Y+(Library.Height<240?46:106),Math.Max(1,Library.Width-24),
         Math.Max(1,Library.Height-(Library.Height<240?64:142)));

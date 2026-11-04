@@ -12,6 +12,6 @@ public sealed record SoulArmoryPreview(bool Allowed,string Reason,int DamageDelt
         bool allowed=copy.TrySwapHost(slot,ref incoming,out string reason);
         return new(allowed,reason,candidate.damage-(outgoing.IsAir?0:outgoing.damage),
             candidate.crit-(outgoing.IsAir?0:outgoing.crit),copy.Active.Count(),
-            copy.Capacity+copy.BonusCapacity+(copy.LegendaryOn?1:0),copy.SupportCapacity);
+            copy.Capacity+copy.BonusCapacity+copy.CrownCapacity+(copy.LegendaryOn?1:0),copy.SupportCapacity);
     }
 }

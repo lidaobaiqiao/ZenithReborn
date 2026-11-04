@@ -156,7 +156,7 @@ public partial class SoulUI
                 Array.Resize(ref slotChangedAt,i+1);Array.Resize(ref slotLit,i+1);
             }
             Rectangle r=SlotBounds(i);Vector2 at=r.Center.ToVector2();var item=soul.ItemAt(i);bool unlocked=Available(soul,i);
-            Color family=i<10?Accent:SoulItem.SupportOrdinal(i)>=0?new(185,171,234):Champagne;
+            Color family=i<10?Accent:SoulItem.IsCrownSlot(i)?CrownHue:SoulItem.SupportOrdinal(i)>=0?new(185,171,234):Champagne;
             Color color=unlocked?family:new Color(78,89,108);
             bool lit=!item.IsAir&&unlocked;
             int signature=HashCode.Combine(item.type,item.prefix,unlocked);
@@ -197,7 +197,7 @@ public partial class SoulUI
                 }
             }
             else CenterText(unlocked?"+":"·",at-new Vector2(0,9),color*(.55f+.15f*pulse)*appear,.75f);
-            string number=i<10?$"{i+1:00}":SoulItem.SupportOrdinal(i)>=0?$"S{SoulItem.SupportOrdinal(i)+1}":$"R{i-14}";
+            string number=i<10?$"{i+1:00}":SoulItem.IsCrownSlot(i)?$"C{i-SoulItem.CrownSlotBase+1}":SoulItem.SupportOrdinal(i)>=0?$"S{SoulItem.SupportOrdinal(i)+1}":$"R{i-14}";
             CenterText(number,new(at.X,at.Y+nodeRadius-1),color*appear,.45f);
             if(hover)
             {
@@ -209,7 +209,7 @@ public partial class SoulUI
         }
         float textWidth=Math.Min(202,2*radius-70);
         CenterText(soul.Awakened?"众 剑 归 位":"天 顶 剑 环",new(center.X,center.Y-62),Ink,.78f);
-        CenterText($"主攻 {soul.Active.Count()}/{soul.Capacity+soul.BonusCapacity+(soul.LegendaryOn?1:0)}  ·  支援 {soul.Supports.Count()}/{soul.SupportCapacity}",
+        CenterText($"主攻 {soul.Active.Count()}/{soul.Capacity+soul.BonusCapacity+soul.CrownCapacity+(soul.LegendaryOn?1:0)}  ·  支援 {soul.Supports.Count()}/{soul.SupportCapacity}",
             new(center.X,center.Y-35),Accent,textWidth<170?.52f:.62f);
         Line(center+new Vector2(-textWidth*.45f,-8),center+new Vector2(textWidth*.45f,-8),Accent*.22f);
         var chosen=soul.ItemAt(selected);
@@ -221,7 +221,9 @@ public partial class SoulUI
         else if(!chosen.IsAir)CenterText($"面板伤害 {chosen.damage} · 暴击 {chosen.crit}%",new(center.X,center.Y+46),Muted,.51f);
         if(!DomainMode)DrawNavigation(true);
         // 分组标注放在画布空角，避开所有环形命中区域。
-        GroupCaption("全收集奖励 · 真实剑位",new(body.X+8,body.Y+16-scroll),Champagne);
+        GroupCaption("矿石全收集 · 真实剑位",new(body.X+8,body.Y+16-scroll),Champagne);
+        if(soul.CrownCapacity>0||soul.CrownHosts.Any(i=>!i.IsAir))
+            GroupCaption("圣林之冠 · 真实剑位",new(body.X+8,body.Y+38-scroll),CrownHue);
         GroupCaption("支援剑位 · 仅特性",new(body.Right-148,body.Y+RingCanvasHeight-30-scroll),new(185,171,234));
     }
     private static void DrawLegendarySlot(SoulItem soul,int index,Rectangle r,Rectangle body,Point mouse,float time,float opening)

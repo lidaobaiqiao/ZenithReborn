@@ -56,7 +56,7 @@ public class Check : ModSystem
             }
             if(Environment.GetEnvironmentVariable("ZENITH_LIVING_ARMAMENT")=="1")
             {
-                CurseFixture.NeutralDefaults=true;LivingArmamentCheck.Run(Assert);
+                CurseFixture.NeutralDefaults=true;LivingArmamentCheck.Run(Assert);LivingBatHealCheck.Run(Assert);LivingProjectileOwnershipCheck.Run(Assert);
                 File.WriteAllText(path,$"PASS: {checks} living armament checks; isolated fixture only, no live gameplay or multiplayer.\n");
                 Console.WriteLine("ZENITH_LIVING_ARMAMENT_PASS "+checks);Environment.Exit(0);return;
             }
@@ -113,7 +113,7 @@ public class Check : ModSystem
             if(Environment.GetEnvironmentVariable("ZENITH_REMOVE_SYSTEMS")=="1")
             {
                 CurseFixture.NeutralDefaults=true;
-                RemovedSystemsCheck.Run(Assert);SwingCheck.Run(Assert);StageOneCheck.Run(Assert);WoodCheck.Run(Assert);OreCheck.Run(Assert);OreStackCheck.Run(Assert);
+                RemovedSystemsCheck.Run(Assert);SwingCheck.Run(Assert);StageOneCheck.Run(Assert);WoodCheck.Run(Assert);WoodV2Check.Run(Assert);OreCheck.Run(Assert);OreStackCheck.Run(Assert);
                 File.WriteAllText(path,$"PASS: {checks} focused removed systems, native attacks, save compatibility, wood and ore checks.\n");
                 Console.WriteLine("ZENITH_REMOVE_SYSTEMS_PASS "+checks);Environment.Exit(0);return;
             }
@@ -129,6 +129,7 @@ public class Check : ModSystem
                 StageOneCheck.Run(Assert);
                 RibbonCheck.Run(Assert);
                 WoodCheck.Run(Assert);
+                WoodV2Check.Run(Assert);
                 ProgressionCheck.Run(Assert);
                 SwingCheck.Run(Assert);
                 DamageBalanceCheck.Run(Assert);

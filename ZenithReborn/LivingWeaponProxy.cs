@@ -10,6 +10,7 @@ internal sealed class LivingWeaponProxy
 {
     [ThreadStatic] internal static LivingWeaponProxy Current;
     private readonly Player player;
+    private readonly Player owner;
     private readonly Projectile summon;
     private readonly int summonIdentity;
     public bool Active=>summon.active && summon.type==ModContent.ProjectileType<LivingArmament>() && summon.identity==summonIdentity;
@@ -17,9 +18,10 @@ internal sealed class LivingWeaponProxy
     private readonly int type,prefix;
     private readonly Item source;
     public Player Player=>player;
+    internal Player Owner=>owner;
     public LivingWeaponProxy(Player owner,Item weapon,Projectile summon)
     {
-        this.summon=summon;summonIdentity=summon.identity;source=weapon;type=weapon.type;prefix=weapon.prefix;
+        this.owner=owner;this.summon=summon;summonIdentity=summon.identity;source=weapon;type=weapon.type;prefix=weapon.prefix;
         player=new Player {whoAmI=owner.whoAmI,active=true,direction=1};
         player.ResetEffects();player.inventory[0]=weapon.Clone();player.selectedItem=0;
         player.lastVisualizedSelectedItem=player.inventory[0].Clone();
@@ -27,6 +29,7 @@ internal sealed class LivingWeaponProxy
     public bool Matches(Item item)=>ReferenceEquals(source,item) && item.type==type && item.prefix==prefix;
     public void Tick(Vector2 position,Vector2 target)
     {
+        LivingProxyOwnerState.Copy(owner,player);
         Target=target;player.Center=position;player.direction=target.X>=position.X?1:-1;
         player.controlUseItem=true;player.releaseUseItem=true;
         int oldX=Main.mouseX,oldY=Main.mouseY;var previous=Current;

@@ -31,8 +31,10 @@ public partial class SoulUI
             Vector2 c=layout.Center(supports,armoryScroll);float radius=layout.Radius(supports);
             Color hue=CandidateItem!=null?new(243,203,132):ArmorySlotColor(selected);
             Text("御 剑 配 阵",new(area.X+16,area.Y+8-armoryScroll),InfoWhite,.94f);
-            Text($"主攻 {soul.Active.Count()} / {soul.Capacity+soul.BonusCapacity+(soul.LegendaryOn?1:0)}",new(area.Right-126,area.Y+14-armoryScroll),Accent,.65f);
-            Text("全收集奖励",new(area.X+18,area.Y+34-armoryScroll),Champagne,.51f);
+            Text($"主攻 {soul.Active.Count()} / {soul.Capacity+soul.BonusCapacity+soul.CrownCapacity+(soul.LegendaryOn?1:0)}",new(area.Right-126,area.Y+14-armoryScroll),Accent,.65f);
+            // V2：全收集奖励仅由矿石圆满开启；木质奖励转移给圣林归冠组合。
+            Text("矿石全收集",new(area.X+18,area.Y+34-armoryScroll),Champagne,.51f);
+            if(soul.CrownCapacity>0||soul.CrownHosts.Any(i=>!i.IsAir))Text("圣林之冠",new(area.X+18,area.Y+84-armoryScroll),CrownHue,.51f);
             if(soul.LegendaryOn||!soul.LegendaryHost.IsAir)Text("传奇",new(area.Right-58,area.Y+34-armoryScroll),Champagne,.51f);
             // 多层低亮刻度形成仪盘深度；亮度集中在正在阅读的剑与节点上。
             Glow(c,radius*1.48f,hue,.16f);
@@ -56,6 +58,9 @@ public partial class SoulUI
             Rectangle chosen=layout.Slot(selected,supports,armoryScroll);
             // 中央羁绊核心：实时显示主导羁绊，颜色随阶段，满羁绊棱彩。
             DrawBondCore(soul,c,chosen,time,opening);
+            // 木质族面板贴在剑阵左缘、圣林槽下沿与支援栏标题之间：该矩形整体位于
+            // 核心圆环包围盒左侧，不压剑位、核心或既有的全收集/归冠标注。
+            DrawWoodPanel(soul,layout);
             foreach(int id in soul.VisibleSlotIds)DrawArmoryNode(soul,id,layout.Slot(id,supports,armoryScroll),area,time,opening);
             int supportY=layout.SupportTop(supports,armoryScroll);
             Text($"共鸣支援   {soul.Supports.Count()} / {soul.SupportCapacity}",new(area.X+16,supportY-29),new Color(184,163,233),.66f);

@@ -76,7 +76,9 @@ internal static class BlessingCheck
             check(Math.Abs(second.Blessings.TraitPower-1.1f)<.001f,"Different primary first hits build a real ten-percent relay");
             Hit(second,n);check(second.Blessings.TraitPower==1,"Frame damage receives no repeated first-hit relay bonus");
             var wood=n.GetGlobalNPC<WoodCombat>().Contributions[(0,s.SoulId)];
-            check(wood.Power[1]>s.CombatWood.Strength,"Relay actually strengthens the applied wood mark, not just display text");
+            // 旧口径（0.3.129 之前）：接力倍率会放大木质印记强度。V2 已把 TraitPower 乘区断开，
+            // 木族特性只吃 S＝CombatWood.Strength；接力仍走祝福伤害通道（矿石花瓣等不受影响）。
+            check(Math.Abs(wood.Power[1]-s.CombatWood.Strength)<.001,"Relay no longer inflates the applied wood mark; it only feeds the blessing damage channel");
             for(int i=0;i<8;i++){var b=Blade(p,s,i%2);Hit(b,n);}
             var capped=Blade(p,s,1);capped.Blessings.Prepare(capped.Projectile,n);
             check(capped.Blessings.TraitPower<=1.5f,"Relay has a fifty-percent maximum");

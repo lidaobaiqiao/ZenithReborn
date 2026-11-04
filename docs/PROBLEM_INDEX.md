@@ -53,7 +53,7 @@
 ### 现象：羁绊不触发，或阶段一直不涨
 | 顺序 | 可能模块 | 优先检查 | 关联检查位置 |
 |---|---|---|---|
-| 1 | 复合羁绊的三条额外条件 | `ZenithReborn/WoodBondCore.cs:29`（棕榈 + 铜/铁阔剑）、`:39`（红木 + 乌木 + 魔光/永夜）、`:49`（红木 + 灰烬 + 火山） | `checks/ZenithPrototypeCheck/WoodBondCheck.cs` |
+| 1 | 复合羁绊的三条额外条件 | `ZenithReborn/WoodBondCore.cs:29`（棕榈 + 铜/铁阔剑）、`:39`（红木 + 乌木 + 魔光/永夜）、`:49`（红木 + 灰烬木剑(源码名白蜡木剑) + 火山） | `checks/ZenithPrototypeCheck/WoodBondCheck.cs` |
 | 2 | 阈值表与文案表不同步 | `ZenithReborn/BondSnapshot.cs:38`（`WoodThresholds=[1,2,4,6,8]`）/ `:40`（`OreThresholds` 到 10）vs `ZenithReborn/SoulTraits.cs:26-43` 的写死文案 | `checks/ZenithPrototypeCheck/`（羁绊阶段断言） |
 | 3 | 森林之力不涨 | `ZenithReborn/WoodPlayer.cs`（`AdvanceGrowth` 在 `HeldSoul==null` 直接 return；`EffectiveLayers` 还要求 `CurrentSoul==soul.SoulId`）；常量见 `ZenithReborn/ForestPower.cs:14-18`（`BaseCap=6` / 300 帧一层 / 脱战 120 帧 -1） | `checks/ZenithPrototypeCheck/WoodCheck.cs` |
 | 4 | 矿石圆满永不回退 | `ZenithReborn/SoulItem.cs:40`（`OreCollectionMask` 只增不减）→ 取走剑后 14/14 仍然成立 | — |

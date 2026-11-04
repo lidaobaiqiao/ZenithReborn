@@ -6,21 +6,6 @@ Mods: {
 				Tooltip: 凝胶里藏着大陆最弱小者守护的承诺
 			}
 
-			DynastyWoodSword: {
-				DisplayName: 王朝木剑
-				Tooltip: 旅人的旧木，守住心中的秩序
-			}
-
-			SpookyWoodSword: {
-				DisplayName: 阴森木剑
-				Tooltip: 哀木未寂，凋零亦能成为力量
-			}
-
-			FeyWoodSword: {
-				DisplayName: 仙灵木剑
-				Tooltip: 蘑菇与生命木交织出的温柔菌光
-			}
-
 			SoulItem: {
 				DisplayName: 诅咒的天顶残魂
 				Tooltip: 大陆之巅的残响，随众剑一同复苏
@@ -83,11 +68,6 @@ Mods: {
 				Description: 剑魂直接治疗效果提高4%×S，不扩大治疗额度
 			}
 
-			DynastyOrder: {
-				DisplayName: 御令
-				Description: 新受白名单减益持续时间缩短4%×S
-			}
-
 			ForestPower: {
 				DisplayName: 森林之力
 				Description: 全木共鸣：额外两个真实剑位，属性随有效战斗成长
@@ -108,11 +88,6 @@ Mods: {
 				Description: 受到有来源记录的丛林毒伤
 			}
 
-			CactusBleed: {
-				DisplayName: 裂伤
-				Description: 仙人掌造成的敌人流血，最多三层
-			}
-
 			WoodWither: {
 				DisplayName: 蚀枯
 				Description: 所属剑魂持续伤害增幅2%×S
@@ -126,11 +101,6 @@ Mods: {
 			HallowRadiance: {
 				DisplayName: 净辉
 				Description: 所属剑魂主攻伤害提高1.5%×S
-			}
-
-			MourningMark: {
-				DisplayName: 悼魂
-				Description: 所属剑魂持续伤害增幅10%×S，死亡时传播部分剩余预算
 			}
 
 			SoulBreach: {

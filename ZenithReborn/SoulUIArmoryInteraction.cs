@@ -76,7 +76,11 @@ public partial class SoulUI
         if(r.Bottom>layout.Stage.Bottom-6)armoryScroll+=r.Bottom-layout.Stage.Bottom+6;
         if(r.Top<layout.Stage.Top+6)armoryScroll=Math.Max(0,armoryScroll-layout.Stage.Top+r.Top-6);
     }
-    private static string ArmorySlotCode(int id)=>id==SoulItem.LegendarySlotId?"L":id<10?$"{id+1:00}":
+    // 圣林之冠剑位使用独立的森绿色调，与全收集奖励的香槟金、支援的紫罗兰区分。
+    private static readonly Color CrownHue=new(126,222,168);
+    private static string ArmorySlotCode(int id)=>id==SoulItem.LegendarySlotId?"L":
+        SoulItem.IsCrownSlot(id)?$"C{id-SoulItem.CrownSlotBase+1}":
+        id<10?$"{id+1:00}":
         id is 15 or 16?$"R{id-14}":$"S{SoulItem.SupportOrdinal(id)+1}";
-    private static Color ArmorySlotColor(int id)=>id<10?Accent:SoulItem.SupportOrdinal(id)>=0?new(184,163,233):Champagne;
+    private static Color ArmorySlotColor(int id)=>id<10?Accent:SoulItem.IsCrownSlot(id)?CrownHue:SoulItem.SupportOrdinal(id)>=0?new(184,163,233):Champagne;
 }

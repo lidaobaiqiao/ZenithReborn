@@ -78,10 +78,12 @@ internal static class SupportIntegrationCheck
             "HERO reconstruction keeps newly earned support separate from retired storage and preserves its prefix");
         compat.GetMethod("Clear",flags).Invoke(null,null);
         var mixed=Soul();mixed.OreCollectionMask=OreFamily.AllMaterials;
-        for(int i=0;i<7;i++)mixed.Hosts[i]=new Item(WoodTypes.Types[i]);
+        // 旧口径：7 主槽 + 5 支援槽共 12 木；现名册 8 把 → 3 主槽 + 5 支援槽，
+        // 保持「5 个木质支援 + 6 个矿石支援 = 11 格」的原断言结构不变。
+        for(int i=0;i<3;i++)mixed.Hosts[i]=new Item(WoodTypes.Types[i]);
         for(int i=0;i<3;i++)mixed.Hosts[i+7]=new Item(OreFamily.DefaultType[i]);
         mixed.ForestHosts[0]=new Item(OreFamily.DefaultType[9]);mixed.ForestHosts[1]=new Item(OreFamily.DefaultType[10]);
-        for(int i=0;i<5;i++){Item wood=new(WoodTypes.Types[i+7]);check(mixed.TrySwapHost(SoulItem.SupportSlotId(i),ref wood,out _),"Mixed race pool admits wood support "+i);}
+        for(int i=0;i<5;i++){Item wood=new(WoodTypes.Types[i+3]);check(mixed.TrySwapHost(SoulItem.SupportSlotId(i),ref wood,out _),"Mixed race pool admits wood support "+i);}
         for(int i=0;i<6;i++){Item ore=new(OreFamily.DefaultType[i+3]);check(mixed.TrySwapHost(SoulItem.SupportSlotId(i+5),ref ore,out _),"Mixed race pool admits additional ore support "+i);}
         check(mixed.SupportCapacity==11 && SoulSupport.GrantedBy(mixed,"wood")==5 && SoulSupport.GrantedBy(mixed,"ore")==6 &&
             mixed.Supports.Count()==11 && mixed.Wood.Full && OreFamily.Count(mixed)==11,
@@ -110,9 +112,13 @@ internal static class SupportIntegrationCheck
         check(paused.SupportCapacity==3 && OreFamily.Count(paused)==0 && !OreFamily.TriggerEligible(paused,ItemID.EnchantedSword),
             "Switching curse suppresses support combat traits without destroying structural support unlocks");
         var forest=Soul();forest.OreCollectionMask=OreFamily.AllMaterials;
-        for(int i=0;i<10;i++)forest.Hosts[i]=new Item(WoodTypes.Types[i]);
-        forest.ForestHosts[0]=new Item(WoodTypes.Types[10]);forest.ForestHosts[1]=new Item(WoodTypes.Types[11]);
-        check(!forest.Wood.Full && !forest.CombatWood.Full,"Shared reward slots cannot reverse-complete forest through the combat-only counting path");
+        // 裁决：奖励位本身是给玩家的回报，不设例外——森林奖励槽同样计入族数量。
+        // 森林槽由矿石圆满解锁（BonusCapacity=OreMastered），与木质数量无关，因此不存在自举。
+        for(int i=0;i<6;i++)forest.Hosts[i]=new Item(WoodTypes.Types[i]);
+        forest.ForestHosts[0]=new Item(WoodTypes.Types[6]);forest.ForestHosts[1]=new Item(WoodTypes.Types[7]);
+        check(forest.Wood.Full,"Forest reward slots count toward the family total with no reward-slot exception");
+        forest.Seals=SoulCurses.Brain|SoulCurses.Cultist;
+        check(forest.CombatWood.Full,"Combat counting agrees with the full set once the switching curse is released");
         check(OreFamily.PerSwordDamage(100,1)==150 && OreFamily.PerSwordDamage(100,10)==326 &&
             OreFamily.PerSwordDamage(100,14,true)==482,"Confirmed independent flight snapshots are 150, 326 and 482 for a 100-damage source");
     }

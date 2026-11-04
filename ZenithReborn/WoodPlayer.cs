@@ -7,16 +7,20 @@ namespace ZenithReborn;
 
 public class WoodPlayer : ModPlayer
 {
-    public int Layers { get; private set; }
-    public int CombatFrames { get; private set; }
-    public int RecentCombat { get; private set; }
-    private int decay;
-    private string currentSoul = "";
+    // 森林之力成长状态：成长引擎与对外查询契约在 ForestPower（ForestPower.cs），
+    // 此处仅存放字段以沿用 ModPlayer 同步链路。
+    public int Layers { get; internal set; }
+    public int CombatFrames { get; internal set; }
+    public int RecentCombat { get; internal set; }
+    internal int Decay { get; set; }
+    internal string CurrentSoul { get; set; } = "";
     private readonly Dictionary<string, ulong> cooldowns = [];
     private float regenRemainder;
     public SoulItem HeldSoul => !Player.dead && Player.HeldItem.ModItem is SoulItem soul && soul.Attached ? soul : null;
     public WoodLoadout Loadout => HeldSoul?.CombatWood ?? default;
-    public int LayersFor(SoulItem soul) => currentSoul == soul.SoulId && soul.CombatWood.Full ? Layers : 0;
+    // 当前生效层数：手持魂与成长魂一致且 8 木全套时才非零。
+    internal int EffectiveLayers => HeldSoul is { } soul && CurrentSoul == soul.SoulId && ForestPower.FullSet(soul) ? Layers : 0;
+    public int LayersFor(SoulItem soul) => HeldSoul?.SoulId == soul.SoulId ? EffectiveLayers : 0;
     public bool Ready(string key, int frames)
     {
         ulong tick = Main.GameUpdateCount;
@@ -24,29 +28,18 @@ public class WoodPlayer : ModPlayer
         cooldowns[key] = tick + (ulong)frames;
         return true;
     }
-    public void RecordHit(SoulItem soul)
-    {
-        if (HeldSoul?.SoulId != soul.SoulId || !soul.CombatWood.Full) return;
-        if (currentSoul != soul.SoulId) { ResetGrowth(); currentSoul = soul.SoulId; }
-        RecentCombat = 300;
-    }
-    public void ResetGrowth() { Layers = CombatFrames = RecentCombat = decay = 0; currentSoul = ""; }
+    // 对外入口保留：WoodCombat.FinishPrimaryHit/ReceiveHit 仍调 RecordHit，换魂/死亡清零仍调 ResetGrowth；
+    // 成长规则（基础6层/归冠12层、脱战衰减、降级钳制）见 ForestPower。
+    public void RecordHit(SoulItem soul) => ForestPower.RecordHit(this, soul);
+    public void ResetGrowth() => ForestPower.Reset(this);
     public void AdvanceGrowth()
     {
-        SoulItem soul = HeldSoul;
-        if (soul == null || !soul.CombatWood.Full) { ResetGrowth(); return; }
-        if (currentSoul != soul.SoulId) { ResetGrowth(); currentSoul = soul.SoulId; }
-        if (RecentCombat > 0)
-        {
-            RecentCombat--; decay = 0;
-            if (Layers < 12 && ++CombatFrames >= 300) { Layers++; CombatFrames = 0; }
-        }
-        else if (++decay >= 120)
-        {
-            decay = 0;
-            Layers = Math.Max(0, Layers - 1);
-            if (Layers == 0) CombatFrames = 0;
-        }
+        // 森林之力 V2 清除时机只有三种：换魂（HeldSoul.soulId 变化）、死亡（UpdateDead→ResetGrowth）、
+        // 失去 8 木 Full（持魂但不再全套）；由 ForestPower.Advance 内部统一判定。
+        // 手持非剑魂物品（镐子等）不再清零：HeldSoul 为空的帧直接跳过推进，保留层数与进度；
+        // 此时 EffectiveLayers 因 HeldSoul 为空天然为 0，收益不生效（仅冻结积累与脱战衰减）。
+        if (HeldSoul == null) return;
+        ForestPower.Advance(this);
     }
     public override void PreUpdateBuffs()
     {
@@ -56,8 +49,8 @@ public class WoodPlayer : ModPlayer
         else Player.ClearBuff(ModContent.BuffType<ForestPower>());
         if (!wood.Has(WoodKind.Forest)) Player.ClearBuff(ModContent.BuffType<ForestBreath>());
         if (!wood.Has(WoodKind.Shade)) Player.ClearBuff(ModContent.BuffType<BloodFragrance>());
-        if (!wood.Has(WoodKind.Dynasty)) Player.ClearBuff(ModContent.BuffType<DynastyOrder>());
     }
+    // 供 EnvironmentPlayer 的减益抗性判定使用；原御令的持续时间缩短钩子已随 WoodBuffHooks 一并移除。
     public static bool IsShortenable(int type) => type is BuffID.Poisoned or BuffID.OnFire or BuffID.Darkness or
         BuffID.Cursed or BuffID.Bleeding or BuffID.Slow or BuffID.Weak or BuffID.Silenced or BuffID.BrokenArmor or
         BuffID.Confused or BuffID.Blackout or BuffID.Chilled or BuffID.Frostburn or BuffID.Venom or BuffID.CursedInferno or BuffID.Ichor;
@@ -66,14 +59,13 @@ public class WoodPlayer : ModPlayer
         var soul = HeldSoul;
         if (soul == null) return;
         Player.statLifeMax2 += soul.CombatWood.Life;
-        int layers = LayersFor(soul);
-        Player.statDefense += layers * 3;
-        Player.endurance += layers * .01f;
+        Player.statDefense += ForestPower.DefenseBonus(Player);
+        Player.endurance += ForestPower.DamageReduction(Player);
     }
     public override void UpdateLifeRegen()
     {
         var soul = HeldSoul;
-        float perSecond = soul == null ? 0 : LayersFor(soul) * .5f;
+        float perSecond = soul == null ? 0 : ForestPower.RegenBonus(Player);
         if (soul != null && soul.CombatWood.Has(WoodKind.Forest) && Player.HasBuff(ModContent.BuffType<ForestBreath>()))
             perSecond += .25f * soul.CombatWood.Strength;
         // Fractional lifeRegen units accumulate; no per-frame minimum heal and no Heal hook.
@@ -83,16 +75,17 @@ public class WoodPlayer : ModPlayer
         regenRemainder -= whole;
         Player.lifeRegen += whole;
     }
-    public int BoostSoulHealing(int baseAmount, int remainingBudget)
+    public int BoostSoulHealing(SoulItem soul, int baseAmount, int remainingBudget)
     {
-        float bonus = Loadout.Has(WoodKind.Shade) && Player.HasBuff(ModContent.BuffType<BloodFragrance>()) ? .04f * Loadout.Strength : 0;
+        // S 与战斗侧同源：取该剑魂自身的 CombatWood.Strength，而不是手持 Loadout 的缓存值。
+        float bonus = soul.CombatWood.Has(WoodKind.Shade) && Player.HasBuff(ModContent.BuffType<BloodFragrance>()) ? .04f * soul.CombatWood.Strength : 0;
         return Math.Clamp((int)(baseAmount * (1 + bonus)*Player.GetModPlayer<EnvironmentPlayer>().HealingMultiplier), 0, Math.Max(0, remainingBudget));
     }
     // Shared entry for direct-healing sword traits. Never scales unrelated potions or global life steal.
     public int HealFromSoul(SoulItem soul, int baseAmount, ref float remainingBudget)
     {
         if (HeldSoul?.SoulId != soul.SoulId || baseAmount <= 0 || remainingBudget < 1 || Player.dead) return 0;
-        int amount = Math.Min(Player.statLifeMax2 - Player.statLife, BoostSoulHealing(baseAmount, (int)remainingBudget));
+        int amount = Math.Min(Player.statLifeMax2 - Player.statLife, BoostSoulHealing(soul, baseAmount, (int)remainingBudget));
         if (amount <= 0) return 0;
         Player.Heal(amount);
         remainingBudget -= amount;
@@ -104,7 +97,6 @@ public class WoodPlayer : ModPlayer
         var wood = soul.CombatWood;
         if (wood.Has(WoodKind.Forest) && Ready(soul.SoulId + ":breath", 60)) Player.AddBuff(ModContent.BuffType<ForestBreath>(), 360);
         if (wood.Has(WoodKind.Shade) && Ready(soul.SoulId + ":blood", 60)) Player.AddBuff(ModContent.BuffType<BloodFragrance>(), 360);
-        if (wood.Has(WoodKind.Dynasty) && Ready(soul.SoulId + ":order", 60)) Player.AddBuff(ModContent.BuffType<DynastyOrder>(), 360);
     }
     public override void UpdateDead() => ResetGrowth();
     public override void OnEnterWorld() { ResetGrowth(); cooldowns.Clear(); }
@@ -112,32 +104,20 @@ public class WoodPlayer : ModPlayer
     {
         if (Main.netMode != NetmodeID.Server) return;
         var packet = Mod.GetPacket(); packet.Write((byte)4); packet.Write((byte)Player.whoAmI);
-        packet.Write(currentSoul); packet.Write((byte)Layers); packet.Write((ushort)CombatFrames);
-        packet.Write((ushort)RecentCombat); packet.Write((byte)decay);
+        packet.Write(CurrentSoul); packet.Write((byte)Layers); packet.Write((ushort)CombatFrames);
+        packet.Write((ushort)RecentCombat); packet.Write((byte)Decay);
         packet.Send(toWho, fromWho);
     }
     public void ReceiveGrowth(BinaryReader reader)
     {
-        currentSoul = reader.ReadString(); Layers = Math.Clamp((int)reader.ReadByte(), 0, 12);
+        // 层数绝对上限取归冠上限（12）；失去归冠时 Advance 会钳制回 6。
+        CurrentSoul = reader.ReadString(); Layers = Math.Clamp((int)reader.ReadByte(), 0, ForestPower.CrownCap);
         CombatFrames = Math.Clamp((int)reader.ReadUInt16(), 0, 299);
-        RecentCombat = Math.Clamp((int)reader.ReadUInt16(), 0, 300); decay = Math.Clamp((int)reader.ReadByte(), 0, 119);
+        RecentCombat = Math.Clamp((int)reader.ReadUInt16(), 0, 300); Decay = Math.Clamp((int)reader.ReadByte(), 0, 119);
     }
     public override void PostUpdate()
     {
         if (Main.netMode == NetmodeID.Server && Main.GameUpdateCount % 60 == 0) SyncPlayer(-1, -1, false);
-    }
-}
-
-public class WoodBuffHooks : ModSystem
-{
-    public override void Load() => On_Player.AddBuff += ShortenDebuff;
-    public override void Unload() => On_Player.AddBuff -= ShortenDebuff;
-    private static void ShortenDebuff(On_Player.orig_AddBuff orig, Player player, int type, int timeToAdd, bool quiet, bool foodHack)
-    {
-        var wood = player.GetModPlayer<WoodPlayer>();
-        if (WoodPlayer.IsShortenable(type) && wood.Loadout.Has(WoodKind.Dynasty) && player.HasBuff(ModContent.BuffType<DynastyOrder>()))
-            timeToAdd = Math.Max(1, (int)(timeToAdd * (1 - .04f * wood.Loadout.Strength)));
-        orig(player, type, timeToAdd, quiet, foodHack);
     }
 }
 
@@ -148,13 +128,4 @@ public abstract class WoodPlayerBuff : ModBuff
 }
 public class ForestBreath : WoodPlayerBuff { }
 public class BloodFragrance : WoodPlayerBuff { }
-public class DynastyOrder : WoodPlayerBuff { }
-public class ForestPower : WoodPlayerBuff
-{
-    public override void ModifyBuffText(ref string buffName, ref string tip, ref int rare)
-    {
-        var wood = Main.LocalPlayer.GetModPlayer<WoodPlayer>();
-        int n = wood.Layers;
-        tip = $"森林之力 {n}/12层 · 生命＋100 · 真实剑位＋2\n主攻伤害＋{n*3}% · 出剑速度＋{n*2}% · 防御＋{n*3}\n自然回复＋{n*.5f:0.#}/秒 · 自有持续伤害＋{n*5}% · 减伤＋{n}个百分点\n有效战斗60秒满层，脱战衰减；失去全套立即失效";
-    }
-}
+// ForestPower buff 类已迁至 ForestPower.cs（与森林之力查询契约、成长引擎同文件）。

@@ -22,7 +22,8 @@ internal static class TraitCheck
         var soul=Soul(false);soul.Hosts[0]=new Item(ItemID.WoodenSword);
         check(!SoulTraits.Active(soul).Any(),"Unattached preview never displays active traits");
         var all=SoulTraits.All(soul);
-        check(Enumerable.Range(0,12).All(i=>all.Any(t=>t.Key=="wood-"+i)) && all.Count(t=>t.Key.StartsWith("ore-trait-"))==6,"Codex keeps all twelve wood and six implemented hard-ore effects without equipment");
+        // 旧口径：木质 12 种（含已删除的三把新增木剑）；0.3.129 起名册只剩 8 把原版木剑。
+        check(Enumerable.Range(0,WoodTypes.Types.Length).All(i=>all.Any(t=>t.Key=="wood-"+i)) && all.Count(t=>t.Key.StartsWith("ore-trait-"))==6,"Codex keeps all eight wood and six implemented hard-ore effects without equipment");
         check(all.All(t=>t.Requirement.Length>0 && t.Description.Length>0) && all.Select(t=>t.Key).Distinct().Count()==all.Count,"Every codex entry has a unique key, current description and activation requirement");
         soul.Attached=true;soul.SupportHosts[0]=new Item(ItemID.CobaltSword);
         var active=Keys(soul);
@@ -44,17 +45,18 @@ internal static class TraitCheck
         soul.Hosts[0].TurnToAir();
         check(!Keys(soul).Contains("family-Frost"),"Losing wood unlock pauses Ice support immediately");
         var full=Soul();full.Kills=SoulProgress.All;full.Cores=63;
-        for(int i=0;i<7;i++)full.Hosts[i]=new Item(WoodTypes.Types[i]);
-        for(int i=0;i<5;i++)full.SupportHosts[i]=new Item(WoodTypes.Types[i+7]);
-        check(Keys(full).Contains("forest") && Enumerable.Range(0,12).All(i=>Keys(full).Contains("wood-"+i)),"Full valid wood set displays all twelve effects and Forest Power");
+        // 旧口径：7 主槽 + 5 支援槽凑满 12 木；现名册 8 把 → 6 主槽 + 2 支援槽。
+        for(int i=0;i<6;i++)full.Hosts[i]=new Item(WoodTypes.Types[i]);
+        for(int i=0;i<2;i++)full.SupportHosts[i]=new Item(WoodTypes.Types[i+6]);
+        check(Keys(full).Contains("forest") && Enumerable.Range(0,WoodTypes.Types.Length).All(i=>Keys(full).Contains("wood-"+i)),"Full valid wood set displays all eight effects and Forest Power");
         var tips=new List<TooltipLine>();full.ModifyTooltips(tips);
         check(tips.Count==3 && tips.All(t=>!t.Name.StartsWith("Trait-")) && tips.Any(t=>t.Name=="TraitCodex"),
             "Full forest loadout keeps only three compact tooltip lines, detailed traits remain in UI");
         check(tips.All(t=>t.Text.Length<=28 && !t.Text.Contains('\n')),"Every custom tooltip line stays short and single-line");
         full.Hosts[0].SetNameOverride(new string('剑',300));tips.Clear();full.ModifyTooltips(tips);
         check(tips.Count==3 && tips.All(t=>t.Text.Length<=28),"Long hosted names never inflate the soul tooltip");
-        full.Hosts[6].TurnToAir();tips.Clear();full.ModifyTooltips(tips);
-        check(!tips.Any(t=>t.Name=="Trait-forest" || t.Name=="Trait-wood-6") && tips.Any(t=>t.Name=="TraitCodex"),"Removing a wood hides its effect and Forest Power in the real tooltip while retaining codex link");
+        full.SupportHosts[1].TurnToAir();tips.Clear();full.ModifyTooltips(tips);
+        check(!tips.Any(t=>t.Name=="Trait-forest" || t.Name=="Trait-wood-7") && tips.Any(t=>t.Name=="TraitCodex"),"Removing a wood hides its effect and Forest Power in the real tooltip while retaining codex link");
         Main.player[0].inventory[0]=full.Item;SoulUI.Open(full);
         byte[] before=Snapshot(full);SoulUI.SelectTraitScope(false);
         for(int filter=0;filter<5;filter++)

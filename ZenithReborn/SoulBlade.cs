@@ -305,6 +305,26 @@ public class SoulBlade : ModProjectile
             if (soul.TraitSupports.Any(i => WeaponFamilies.Of(i.type) == BladeFamily.Nature)) target.AddBuff(BuffID.Poisoned,(int)(180*Blessings.TraitPower));
         }
         WoodCombat.FinishPrimaryHit(Projectile, target, damageDone);
+        // 木质族 V2 复合羁绊派发：按弹幕携带的来源武器（SoulSource.SourceWeapon）路由——
+        // 铜/铁阔剑→锻根共生、魔光/永夜刃→腐林凋蚀、火山→灰烬繁生。
+        // 门限：仅 PrimaryOrdinal>=0 的真主命中且实际造成伤害（damageDone>0）才进入；附属弹幕不进。
+        // 零开销：先按来源武器短路，再判组合激活，最后才构造上下文——未匹配/未激活时无任何分配。
+        // 防递归：三个机制的衍生伤害（补斩/爆发/提前结算）均走直伤路径，不发射 SoulBlade 或派生弹幕，
+        // 因此不会再进入本命中管道；7.5 统一来源规则见 WoodBondHit 注释。
+        if (soul != null && damageDone > 0)
+        {
+            var bondSource = Projectile.GetGlobalProjectile<SoulSource>();
+            if (bondSource.PrimaryOrdinal >= 0)
+            {
+                int weapon = bondSource.SourceWeapon;
+                if (weapon is ItemID.CopperBroadsword or ItemID.IronBroadsword && WoodBondCore.ActiveForge(soul))
+                    WoodBondForge.OnPrimaryHit(NewBondHit(bondSource, soul, target, damageDone), Projectile.identity);
+                else if (weapon is ItemID.Muramasa or ItemID.NightsEdge && WoodBondCore.ActiveRot(soul))
+                    WoodBondRot.OnPrimaryHit(NewBondHit(bondSource, soul, target, damageDone), Projectile.identity);
+                else if (weapon == ItemID.FieryGreatsword && WoodBondCore.ActiveEmber(soul))
+                    WoodBondEmber.OnPrimaryHit(NewBondHit(bondSource, soul, target, damageDone), Projectile.identity);
+            }
+        }
         Main.player[Projectile.owner].GetModPlayer<HardOrePlayer>().Hit(Projectile, target, damageDone);
         OreFamily.OnMainHit(Projectile, target, damageDone);
         HolyHeavenProc.OnMainHit(Projectile, target, damageDone);
@@ -324,6 +344,11 @@ public class SoulBlade : ModProjectile
             Vector2.Distance(Main.player[Projectile.owner].Center, target.Center) < 180)
             modifiers.FinalDamage *= 1.2f;
     }
+    // 构造木质羁绊命中上下文：来源武器/槽位/序号一律读弹幕 SoulSource，
+    // D 取本次命中实际伤害（7.5 统一来源规则见 WoodBondHit 注释）。
+    private WoodBondHit NewBondHit(SoulSource source, SoulItem soul, NPC target, int damageDone) =>
+        new(Main.player[Projectile.owner], soul, source.SourceWeapon, source.HostSlot,
+            source.PrimaryOrdinal, target, damageDone, true);
     private void ReleaseSpecial(Player player)
     {
         ReleaseWeaponSpecial(player, (int)Projectile.ai[0]);

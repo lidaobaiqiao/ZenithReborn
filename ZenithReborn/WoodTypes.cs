@@ -5,33 +5,39 @@ using Terraria.ModLoader;
 
 namespace ZenithReborn;
 
-public enum WoodKind { Forest, Boreal, Palm, Mahogany, Cactus, Ebon, Shade, Ash, Pearl, Dynasty, Spooky, Fey }
+// 0.3.129 木质族 V2：名册缩为 8 把原版木剑；仙人掌剑退出（物品仍在，自动归属 Swift 族）。
+// 王朝/阴森/仙灵三把新增剑的 ModItem 类已彻底删除，旧存档中对应物品退化为 UnloadedItem 占位。
+public enum WoodKind { Forest, Boreal, Palm, Mahogany, Ebon, Shade, Ash, Pearl }
 
-public readonly record struct WoodLoadout(int Mask, int SupportCount)
+// Crown 为圣林归冠标记，由 WoodTypes.Evaluate 与 SoulItem.CombatWood 构造点实时传入
+// WoodCrown.Active(soul)（内部含防循环重入护盾）；其余构造点未传时默认 false，不影响既有行为。
+public readonly record struct WoodLoadout(int Mask, int SupportCount, bool Crown = false)
 {
     public int Count => System.Numerics.BitOperations.PopCount((uint)Mask);
-    public bool Full => Mask == 4095;
+    public bool Full => Mask == 0xFF;
     public bool Has(WoodKind kind) => (Mask & (1 << (int)kind)) != 0;
-    public float Strength => Full ? 3 : Count >= 8 ? 1.75f : Count >= 6 ? 1.5f :
+    // 5 档强度表：1/2/4/6/8 种 → 1.10/1.20/1.35/1.50/2.00；圣林归冠时覆盖为 3.00。
+    public float Strength => Crown ? 3 : Count >= 8 ? 2 : Count >= 6 ? 1.5f :
         Count >= 4 ? 1.35f : Count >= 2 ? 1.2f : Count >= 1 ? 1.1f : 0;
-    public int Life => Full ? 100 : Count >= 8 ? 30 : Count >= 6 ? 20 : Count >= 4 ? 15 : Count >= 2 ? 10 : Count >= 1 ? 5 : 0;
+    // 生命加成 5 档：1/2/4/6/8 种 → +5/+10/+15/+25/+40；圣林归冠时覆盖为 +100。
+    public int Life => Crown ? 100 : Count >= 8 ? 40 : Count >= 6 ? 25 : Count >= 4 ? 15 : Count >= 2 ? 10 : Count >= 1 ? 5 : 0;
 }
 
 public static class WoodTypes
 {
     private static int[] types;
     public static int[] Types => types ??= [ItemID.WoodenSword, ItemID.BorealWoodSword, ItemID.PalmWoodSword,
-        ItemID.RichMahoganySword, ItemID.CactusSword, ItemID.EbonwoodSword, ItemID.ShadewoodSword,
-        ItemID.AshWoodSword, ItemID.PearlwoodSword, ModContent.ItemType<DynastyWoodSword>(),
-        ModContent.ItemType<SpookyWoodSword>(), ModContent.ItemType<FeyWoodSword>()];
-    public static readonly string[] Names = ["木剑", "针叶木剑", "棕榈木剑", "红木剑", "仙人掌剑", "乌木剑",
-        "暗影木剑", "灰烬木剑", "珍珠木剑", "王朝木剑", "阴森木剑", "仙灵木剑"];
-    public static readonly string[] Effects = ["森息", "霜寂", "盐蚀", "瘴毒", "裂伤", "蚀枯", "血馥", "烬燃", "净辉", "御令", "悼魂", "孢光"];
+        ItemID.RichMahoganySword, ItemID.EbonwoodSword, ItemID.ShadewoodSword,
+        ItemID.AshWoodSword, ItemID.PearlwoodSword];
+    // 手写译名：新增条目必须核对原版 zh-Hans 译名。Ash Wood Sword 为「白蜡木剑」，
+    // 「灰烬」是地狱地形/AshBlock 的译名，不是木材名。
+    public static readonly string[] Names = ["木剑", "针叶木剑", "棕榈木剑", "红木剑", "乌木剑",
+        "暗影木剑", "白蜡木剑", "珍珠木剑"];
+    public static readonly string[] Effects = ["森息", "霜寂", "盐蚀", "瘴毒", "蚀枯", "血馥", "烬燃", "净辉"];
     public static int Index(int type) => Array.IndexOf(Types, type);
     public static bool IsWood(int type) => Index(type) >= 0;
-    public static Color SwordTint(int type) => Index(type) switch {
-        9 => new Color(240, 160, 100), 10 => new Color(185, 125, 240), 11 => new Color(125, 235, 210), _ => Color.White
-    };
+    // 0.3.129 起仅 8 把原版木剑为木质族成员；旧新增剑退出后不再有专属剑影着色，恒返回白色。
+    public static Color SwordTint(int type) => Color.White;
     public static int Mask(IEnumerable<Item> items)
     {
         int mask = 0;
@@ -45,9 +51,11 @@ public static class WoodTypes
     public static WoodLoadout Evaluate(SoulItem soul)
     {
         if (!soul.Attached) return default;
-        return new(Mask(SoulSupport.SetItems(soul)),soul.SupportCapacity);
+        // 归冠判定在构造处完成，供 Strength/Life 覆盖读取；Evaluate 与 CombatWood 构造点均接入 WoodCrown.Active 实时判定。
+        // 族内计数＝主攻槽＋已生效支援槽＋森林/圣林奖励槽＋传奇位（FamilyItems）；奖励位不设例外。
+        return new(Mask(SoulSupport.FamilyItems(soul)), soul.SupportCapacity, WoodCrown.Active(soul));
     }
-    // Kept as a compatibility entry point for existing callers.
+    // 保留给既有调用方的兼容入口。
     public static bool CanSupport(Item item) => SoulSupport.CanSupport(item);
     public static string Description(int type)
     {
@@ -57,49 +65,17 @@ public static class WoodTypes
             1 => "霜寂：4秒标记，普通敌人减速4%×S，主攻增伤1%×S；Boss不减速",
             2 => "盐蚀：4秒标记，主攻固定穿甲＋2×S",
             3 => "瘴毒：4秒毒伤，每秒(1＋0.02P)×S；遵循中毒免疫",
-            4 => "裂伤：5秒流血，每层每秒(0.5＋0.015P)×S，最多3层",
-            5 => "蚀枯：4秒标记，自有持续伤害＋2%×S",
-            6 => "血馥：6秒内剑魂直接治疗效果＋4%×S；不增加治疗额度",
-            7 => "烬燃：4秒火伤，每秒(1＋0.025P)×S；遵循着火免疫",
-            8 => "净辉：4秒标记，主攻伤害＋1.5%×S",
-            9 => "御令：6秒内新受指定减益持续时间缩短4%×S",
-            10 => "悼魂：6秒自有持续伤害＋10%×S；死亡传播剩余预算25%×S，360像素内至多2敌平分",
-            11 => "孢光：新施加或刷新的自有持续伤害延长0.5×S秒，上限8秒",
+            4 => "蚀枯：4秒标记，自有持续伤害＋2%×S",
+            5 => "血馥：6秒内剑魂直接治疗效果＋4%×S；不增加治疗额度",
+            6 => "烬燃：4秒火伤，每秒(1＋0.025P)×S；遵循着火免疫",
+            7 => "净辉：4秒标记，主攻伤害＋1.5%×S",
             _ => HardOreTypes.IsOre(type) ? HardOreTypes.Description(type) : WeaponFamilies.Description(type)
         };
     }
 }
 
-public abstract class NewWoodSword : ModItem
-{
-    public override string Texture => "Terraria/Images/Item_" + ItemID.WoodenSword;
-    protected abstract int BaseDamage { get; }
-    protected virtual int Interval => 20;
-    public override void SetDefaults()
-    {
-        Item.CloneDefaults(ItemID.WoodenSword);
-        Item.damage = BaseDamage; Item.useTime = Item.useAnimation = Interval;
-        Item.knockBack = this is SpookyWoodSword ? 6 : this is FeyWoodSword ? 3 : 4;
-        Item.color = this is SpookyWoodSword ? new Color(185, 125, 240) : this is FeyWoodSword ? new Color(125, 235, 210) : new Color(240, 160, 100);
-        Item.rare = this is SpookyWoodSword ? ItemRarityID.Yellow : ItemRarityID.White;
-    }
-}
-public class DynastyWoodSword : NewWoodSword
-{
-    protected override int BaseDamage => 12;
-    public override void AddRecipes() => CreateRecipe().AddIngredient(ItemID.DynastyWood, 7).AddTile(TileID.WorkBenches).Register();
-}
-public class SpookyWoodSword : NewWoodSword
-{
-    protected override int BaseDamage => 90;
-    protected override int Interval => 18;
-    public override void AddRecipes() => CreateRecipe().AddIngredient(ItemID.SpookyWood, 7).AddTile(TileID.WorkBenches).Register();
-}
-public class FeyWoodSword : NewWoodSword
-{
-    protected override int BaseDamage => 10;
-    public override void AddRecipes() => CreateRecipe().AddIngredient(ItemID.Wood, 7).AddIngredient(ItemID.Mushroom).AddTile(TileID.LivingLoom).Register();
-}
+// 三把新增木剑已彻底删除（不再注册物品，无法创造菜单/作弊获取）；
+// 旧存档中的对应物品由 tModLoader 转为 UnloadedItem 占位，取出后无法再放回。
 public class WoodSwordTooltips : GlobalItem
 {
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
@@ -107,6 +83,6 @@ public class WoodSwordTooltips : GlobalItem
         int index = WoodTypes.Index(item.type);
         if (index < 0) return;
         tooltips.Add(new(Mod, "WoodSoul", "剑魂寄宿·木质族：" + WoodTypes.Description(item.type)));
-        tooltips.Add(new(Mod, "WoodScale", "S随木剑种类提高：1/2/4/6/8/全套＝1.10/1.20/1.35/1.50/1.75/3倍；P为实际主剑影伤害"));
+        tooltips.Add(new(Mod, "WoodScale", "S随木剑种类提高：1/2/4/6/8把＝1.10/1.20/1.35/1.50/2.00倍；圣林归冠时3.00倍；P为实际主剑影伤害"));
     }
 }

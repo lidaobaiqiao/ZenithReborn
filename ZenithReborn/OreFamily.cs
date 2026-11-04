@@ -100,7 +100,9 @@ public static class OreFamily
 
     public static Item Representative(SoulItem soul, int material)
     {
+        // 圣林槽位为真实剑位，激活时同样可作为矿石材质的代表物。
         foreach (var item in soul.Hosts.Take(soul.Capacity).Concat(soul.ForestHosts.Take(soul.BonusCapacity))
+            .Concat(soul.CrownHosts.Take(soul.CrownCapacity))
             .Concat(soul.Supports))
             if (!item.IsAir && MaterialOf(item.type) == material) return item;
         return new Item(DefaultType[material]);

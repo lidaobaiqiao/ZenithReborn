@@ -38,10 +38,12 @@ public static class FlyingBladeFamily
     public const int StepCap=10;
 
     public static bool IsMember(int type)=>Array.IndexOf(Weapons,type)>=0;
-    // 族内有效武器数量 = 主槽 + 已开启的支援槽。
+    // 族内有效武器数量 = 主槽 + 已开启的支援槽（Active 本身已含传奇位）。
     // 刻意不走 TraitItems：切换诅咒的"仅首把主剑特性生效"限制的是单把武器特性，
     // 不该把族内配备数量一起砍成 1，否则未解咒前"达到 N 把进下一阶"永远做不到。
     // 同种武器唯一已由 SoulItem.TrySwapHost 保证，因此按把数统计不会重复吃倍数。
+    // 口径说明：Active 含森林/圣林奖励位与传奇位；SoulSupport.FamilyItems 同样取 Active∪Supports，
+    // 故本族与木质/矿石族的族内计数集合完全同构。
     public static int Count(SoulItem soul)=>soul.Attached?soul.Active.Concat(soul.Supports).Count(i=>IsMember(i.type)):0;
 
     // 当前阶级：0 表示族内还没有有效武器。主槽与支援槽都计入，与矿石族阶梯口径一致。

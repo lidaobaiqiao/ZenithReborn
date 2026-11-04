@@ -6,10 +6,6 @@ namespace ZenithReborn;
 // 剑阵中央的羁绊核心：实时显示主导羁绊的阶段、颜色与数量，满羁绊时呈棱彩。
 public partial class SoulUI
 {
-    // 阶段名称，索引与BondState.Tier一致。
-    private static readonly string[] BondTierNames =
-        ["未 激 活", "一 阶", "二 阶", "三 阶", "四 阶", "五 阶", "满 羁 绊"];
-
     private static void DrawBondCore(SoulItem soul, Vector2 c, Rectangle chosen, float time, float opening)
     {
         var bonds = BondSnapshot.Evaluate(soul);
@@ -44,16 +40,17 @@ public partial class SoulUI
         // 外发光。
         Glow(core, max ? 118f : 96f, colorAt(), max ? .34f : .24f);
 
-        // 阶段环：6段弧和6个节点，从顶部开始顺时针。
-        for (int i = 0; i < 6; i++)
+        // 阶段环：木质 5 段、矿石 6 段，都从顶部开始顺时针；段数与各自档位上限一致。
+        int segments = leading.Kind == BondKind.Wood ? 5 : 6;
+        for (int i = 0; i < segments; i++)
         {
-            float a0 = -MathHelper.PiOver2 + MathHelper.TwoPi * i / 6f;
-            float a1 = -MathHelper.PiOver2 + MathHelper.TwoPi * (i + 1) / 6f;
+            float a0 = -MathHelper.PiOver2 + MathHelper.TwoPi * i / segments;
+            float a1 = -MathHelper.PiOver2 + MathHelper.TwoPi * (i + 1) / segments;
             bool lit = leading.Tier >= i + 1;
             Arc(core, ringR, a0 + .07f, (a1 - a0) - .14f,
-                lit ? colorAt(i / 6f) * .85f : new Color(52, 62, 72) * .6f, lit ? 2.4f : 1.4f);
+                lit ? colorAt(i / (float)segments) * .85f : new Color(52, 62, 72) * .6f, lit ? 2.4f : 1.4f);
             Vector2 node = core + a0.ToRotationVector2() * ringR;
-            ArmoryDiamond(node, lit ? 5.5f : 4f, lit ? colorAt(i / 6f) : new Color(78, 90, 100) * .6f, 1.2f);
+            ArmoryDiamond(node, lit ? 5.5f : 4f, lit ? colorAt(i / (float)segments) : new Color(78, 90, 100) * .6f, 1.2f);
         }
 
         // 核心内圈与族徽。
@@ -76,10 +73,10 @@ public partial class SoulUI
         // 文字：族名、阶段、数量；未激活时不显示具体族名。
         CenterText(active ? leading.DisplayName : "等 待 觉 醒", new(c.X, core.Y - ringR - 18f), colorAt(), .62f);
         if(compactCore)
-            CenterText($"{BondTierNames[leading.Tier]} · {leading.Count}/{leading.MaxCount}",new(c.X,core.Y+ringR+12f),colorAt(),.61f);
+            CenterText($"{leading.StageName} · {leading.Count}/{leading.MaxCount}",new(c.X,core.Y+ringR+12f),colorAt(),.61f);
         else
         {
-            CenterText(BondTierNames[leading.Tier], new(c.X, core.Y + 70f), colorAt(), .74f);
+            CenterText(leading.StageName, new(c.X, core.Y + 70f), colorAt(), .74f);
             CenterText($"{leading.Count} / {leading.MaxCount}", new(c.X, core.Y + 90f),max ? colorAt() : InfoWhite, .66f);
         }
     }

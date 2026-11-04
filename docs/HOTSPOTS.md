@@ -152,9 +152,9 @@
 | 版本号源头 | `ZenithReborn/build.txt:3` | `version = 0.3.130` | 每次发版 | 与 `:1` `displayName` 一起决定包名与备份名 |
 | 版本索引 | `docs/CHANGELOG.md:8` | 表格首行（倒序） | 新增一行 | 版本号**不保证单调**（0.3.118 的安装晚于 119） |
 | 结构图基线 | `docs/CODEBASE_MAP.md:3` | `> 基线版本：...0.3.130` | 发版同步 | 本文与 `PROBLEM_INDEX.md` 的行号也依赖它 |
-| 协作上下文 | `AGENTS.md:3` | "当前正式安装0.3.130…" | 写验证结论/未验证项 | `CODEBUDDY.md:14`（当前仍写 0.3.128，已滞后） |
+| 协作上下文 | `AGENTS.md:3` | "当前正式安装0.3.130…" | 写验证结论/未验证项 | `CODEBUDDY.md:14`（当前 0.3.130，已同步） |
 | 版本记录文件 | `docs/0.3.130-木质族V2重做与口径统一.md:1` | 每版一篇 | 新建 `docs/<ver>-<主题>.md` | 被 `CHANGELOG.md` 链接 |
-| 改这类东西必看 | — | — | 改版本要同步 5 处：`build.txt:3`、`docs/CHANGELOG.md:8`、`docs/CODEBASE_MAP.md:3`、`AGENTS.md:3`、新版本记录 md；另需补 `CODEBUDDY.md:14`。文档里写"通过"必须区分 源码/已编译/夹具/实机 四档 | `artifacts/install-result.json` |
+| 改这类东西必看 | — | — | 改版本要同步 6 处：`build.txt:3`、`docs/CHANGELOG.md:8`、`docs/CODEBASE_MAP.md:3`、`AGENTS.md:3`、`CODEBUDDY.md:14`、新版本记录 md。文档里写"通过"必须区分 源码/已编译/夹具/实机 四档 | `artifacts/install-result.json` |
 
 ---
 

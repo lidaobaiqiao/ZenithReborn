@@ -94,11 +94,14 @@ public static class VfxIsolation
         for (int i = 0; i < Branches.Length; i++) Branches[i].Set(value && Branches[i].Allowed);
     }
 
-    // ================= 二、带面构成逐项开关 P01~P25 =================
-    // 每一项对应 ZRSwordFlow.fx 中一个独立的 float uPartXxx：1 = 生效，0 = 从画面摘除。
-    // 全部为 1 时与生产形态完全一致（着色器里每一项都只是原有表达式乘自己）。
+    // ================= 二、带面构成逐项开关 P01~P26 =================
+    // 警告：这些 uniform 目前没有 shader 消费者——打包的 ZRSwordFlow.fx 未声明 uPart*，
+    // 生产代码里没有 PartValue 调用方，所以改值只影响调试面板显示，不影响画面。
+    // 不删除条目是为了后续把着色器重连回来时，仍有一套稳定的 uniform 名与默认值可用。
+    // 全部为 1 时代表"假设着色器已重连"的生产形态，与当前实际画面无关。
     // 程序构成默认全开并允许逐项切换，外部输入项保持禁用。
-    // 顺序必须与 ZRSwordFlow.fx 的声明顺序一致，热键按此顺序逐项切换。
+    // 顺序即调试面板的显示序号（P01~P26），热键按此顺序逐项切换；
+    // 当前 .fx 里没有对应 uniform 声明，将来重连着色器时再对齐两边顺序。
     public readonly record struct Part(string Uniform, string Label, float Default, bool UsesExternalInput=false)
     {
         public bool Allowed => !PureCodeOnly || !UsesExternalInput;
@@ -222,7 +225,9 @@ public static class VfxIsolation
         for (int i = 0; i < Details.Length; i++) Details[i].Set(value && Details[i].Allowed);
     }
 
-    // B7 玻璃屏幕滤镜：构成项在 ZRGlassScreen.fx 里，由 GlassScreenData.Apply 下发
+    // B7 玻璃屏幕滤镜的构成项：同样没有 shader 消费者——打包的 ZRGlassScreen.fx 未声明 uGlassPart*，
+    // 也没有 GlassPartValues 的调用方，按下只改调试面板显示，不影响画面。
+    // 保留这 7 条是为了后续重连时仍有稳定的 uniform 名，而不是让面板看起来"有开关就等于有效果"。
     public static readonly Part[] GlassParts =
     {
         new("uGlassPartCoverage",      "B7-1 覆盖度（玻璃是否存在）", 1f),

@@ -106,8 +106,9 @@ public class UiFixture : ModSystem
         p.inventory[1]=new Item(ItemID.GoldBroadsword);
         var soul=(SoulItem)new Item(ModContent.ItemType<SoulItem>()).ModItem;
         soul.Attached=true;soul.KingMemory=true;soul.Kills=SoulProgress.All;soul.Cores=63;
-        for(int i=0;i<7;i++) soul.Hosts[i]=new Item(WoodTypes.Types[i]);
-        for(int i=0;i<5;i++) soul.SupportHosts[i]=new Item(WoodTypes.Types[i+7]);
+        // 旧口径：7 主槽 + 5 支援槽共 12 木；现名册 8 把 → 6 主槽 + 2 支援槽。
+        for(int i=0;i<6;i++) soul.Hosts[i]=new Item(WoodTypes.Types[i]);
+        for(int i=0;i<2;i++) soul.SupportHosts[i]=new Item(WoodTypes.Types[i+6]);
         for(int i=0;i<3;i++) soul.Hosts[i+7]=new Item(HardOreTypes.Types[i]);
         soul.ForestHosts[0]=new Item(ItemID.TerraBlade);soul.ForestHosts[1]=new Item(ItemID.StarWrath);
         soul.RefreshStats();p.inventory[0]=soul.Item;p.selectedItem=0;

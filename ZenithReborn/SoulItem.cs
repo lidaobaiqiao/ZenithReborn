@@ -11,21 +11,27 @@ namespace ZenithReborn;
 public partial class SoulItem : ModItem
 {
     public Item[] Hosts = Enumerable.Range(0, 12).Select(_ => new Item()).ToArray();
-    public Item[] SupportHosts = EmptySlots(11), ForestHosts = EmptySlots(2);
+    public Item[] SupportHosts = EmptySlots(11), ForestHosts = EmptySlots(2), CrownHosts = EmptySlots(2);
     public List<Item> AdditionalSupports=[];
     public Item LegendaryHost = new();
     public const int LegendarySlotId = 34;
     public bool LegendaryOn => Attached && SoulDifficulty.Legendary;
-    private IEnumerable<Item> LegendarySlots => LegendaryOn && !LegendaryHost.IsAir ? [LegendaryHost] : [];
+    // internal：供 SoulSupport.FamilyItems 做族判定；支援解锁与种族授予不得使用（否则传奇位白送支援格）。
+    internal IEnumerable<Item> LegendarySlots => LegendaryOn && !LegendaryHost.IsAir ? [LegendaryHost] : [];
     public IEnumerable<Item> AllSupportSlots=>SupportHosts.Take(5).Concat(AdditionalSupports);
+    // 圣林归冠双槽编号紧随传奇槽之后；追加支援的编号在跳过传奇槽的基础上再跳过圣林段，保证双向映射一一对应。
+    // 0-9 普通、10-14 基础支援、15-16 全收集奖励、17-24 旧版取回（存档兼容不可动）、34 传奇、35-36 圣林之冠。
+    public const int CrownSlotBase = 35, CrownSlotCount = 2;
+    public static bool IsCrownSlot(int slot) => slot is >= CrownSlotBase and < CrownSlotBase + CrownSlotCount;
     public static int SupportSlotId(int ordinal)
-    {int id=ordinal<5?10+ordinal:25+ordinal-5;return id>=LegendarySlotId?id+1:id;}
-    public static int SupportOrdinal(int slot)=>slot==LegendarySlotId?-1:slot is >=10 and <15?slot-10:
-        slot>=25?(slot>LegendarySlotId?slot-1:slot)-25+5:-1;
+    {int id=ordinal<5?10+ordinal:25+ordinal-5;return id>=LegendarySlotId?id+1+CrownSlotCount:id;}
+    public static int SupportOrdinal(int slot)=>slot==LegendarySlotId||IsCrownSlot(slot)?-1:slot is >=10 and <15?slot-10:
+        slot>=25?(slot>LegendarySlotId?slot-1-CrownSlotCount:slot)-25+5:-1;
     public int VisibleSupportCount=>Math.Max(5,Math.Max(SupportCapacity,5+AdditionalSupports.Count));
     public IEnumerable<int> VisibleSlotIds=>Enumerable.Range(0,17)
         .Concat(Enumerable.Range(5,VisibleSupportCount-5).Select(SupportSlotId))
-        .Concat(LegendaryOn || !LegendaryHost.IsAir ? [LegendarySlotId] : []);
+        .Concat(LegendaryOn || !LegendaryHost.IsAir ? [LegendarySlotId] : [])
+        .Concat(CrownCapacity>0 || CrownHosts.Any(i=>!i.IsAir) ? new[]{CrownSlotBase,CrownSlotBase+1} : []);
     public bool AwakeningMemory;
     public int OreCollectionMask;
     public int YujianCharge;
@@ -46,9 +52,17 @@ public partial class SoulItem : ModItem
     // 扩展数组只用于取回0.3.9和0.3.10存入的物品。
     // 这些物品不提供生效槽位，也不计入战斗和套装数量。
     public bool HasLegacyExpansion => Hosts.Skip(10).Concat(SupportHosts.Skip(5)).Any(i => !i.IsAir);
-    public int BonusCapacity => Attached && (Wood.Full || OreMastered) ? 2 : 0;
-    public IEnumerable<Item> Stored => Hosts.Concat(SupportHosts).Concat(ForestHosts).Concat(AdditionalSupports)
+    // V2：木质族 8 木全收集不再直接给这 2 格（奖励转移给圣林归冠组合），仅矿石圆满保留；
+    // 旧存档已放入 ForestHosts 的物品因 Take(0) 自然暂停并保留，空手仍可取回。
+    public int BonusCapacity => Attached && OreMastered ? 2 : 0;
+    // 圣林归冠组合（8 木＋泰拉刃寄宿，判定见 WoodCrown）激活时的 2 个真实主攻剑位；
+    // 组合失效时槽位暂停、物品与词缀保留，与 ForestHosts 行为一致。
+    public int CrownCapacity => Attached && WoodCrown.Active(this) ? 2 : 0;
+    public IEnumerable<Item> Stored => Hosts.Concat(SupportHosts).Concat(ForestHosts).Concat(CrownHosts).Concat(AdditionalSupports)
         .Concat(LegendaryHost.IsAir ? [] : [LegendaryHost]);
+    // 去重口径：仅当双方都是有效物品类型时才视为同种。旧存档中被删除模组物品留下的
+    // UnloadedItem 占位（无对应 ModItem）不参与比较，避免两个不同占位物品互相误判为同种。
+    private static bool ValidHostType(int type) => type > 0 && (type < ItemID.Count || ItemLoader.GetItem(type) != null);
     public IEnumerable<Item> Supports => AllSupportSlots.Take(SupportCapacity).Where(i => !i.IsAir);
     public Item ItemAt(int slot) =>
         slot < 10 ? Hosts[slot] :
@@ -57,13 +71,16 @@ public partial class SoulItem : ModItem
         slot < 19 ? Hosts[10 + slot - 17] :
         slot < 25 ? SupportHosts[5 + slot - 19] :
         slot == LegendarySlotId ? LegendaryHost :
+        IsCrownSlot(slot) ? CrownHosts[slot - CrownSlotBase] :
         AdditionalSupports.ElementAtOrDefault(SupportOrdinal(slot)-5)??new Item();
-    public Item[] SlotItems() => Enumerable.Range(0,Math.Max(LegendarySlotId+1,SupportSlotId(VisibleSupportCount-1)+1)).Select(ItemAt).ToArray();
+    public Item[] SlotItems() => Enumerable.Range(0,Math.Max(CrownSlotBase+CrownSlotCount,
+        Math.Max(LegendarySlotId+1,SupportSlotId(VisibleSupportCount-1)+1))).Select(ItemAt).ToArray();
     private static Item[] EmptySlots(int count) => Enumerable.Range(0, count).Select(_ => new Item()).ToArray();
     public string SoulId = Guid.NewGuid().ToString("N");
     public int Kills, Cores;
     public bool Attached, KingMemory;
-    public IEnumerable<Item> Active => Hosts.Take(Capacity).Concat(ForestHosts.Take(BonusCapacity)).Concat(LegendarySlots)
+    public IEnumerable<Item> Active => Hosts.Take(Capacity).Concat(ForestHosts.Take(BonusCapacity))
+        .Concat(CrownHosts.Take(CrownCapacity)).Concat(LegendarySlots)
         .Where(i => !i.IsAir);
     public int Stage => SoulProgress.Milestones(Kills);
     public bool Awakened => AwakeningMemory || CanAwaken;
@@ -78,7 +95,7 @@ public partial class SoulItem : ModItem
     public bool TrySwapHost(int slot, ref Item cursor, out string error)
     {
         error = "";
-        if (slot < 0 || slot>=25 && slot!=LegendarySlotId &&
+        if (slot < 0 || slot>=25 && slot!=LegendarySlotId && !IsCrownSlot(slot) &&
             (SupportOrdinal(slot)<5 || SupportOrdinal(slot)>=VisibleSupportCount)) return false;
         if (slot == LegendarySlotId)
         {
@@ -91,6 +108,20 @@ public partial class SoulItem : ModItem
             { error = "同种武器最多寄宿一把。"; return false; }
             Item outgoingLegendary = LegendaryHost; LegendaryHost = cursor; cursor = outgoingLegendary;
             RefreshStats(); return true;
+        }
+        if(IsCrownSlot(slot))
+        {
+            // 解锁判定用圣林生效数 CrownCapacity（WoodCrown.Active），与 BonusCapacity 无关。
+            int localCrown=slot-CrownSlotBase;
+            int incomingCrownType=cursor.type;
+            if(!cursor.IsAir && localCrown>=CrownCapacity)
+            {error="圣林归冠未激活；剑位暂停，物品仍可空手取回。";return false;}
+            if(!cursor.IsAir && !CanHost(cursor))
+            {error="请放入不可堆叠的近战武器；工具、消耗武器和天顶剑不可寄宿。";return false;}
+            if(!cursor.IsAir && Stored.Any(i=>!i.IsAir && i.type==incomingCrownType && !ReferenceEquals(i,CrownHosts[localCrown])))
+            {error="同种武器最多寄宿一把。";return false;}
+            Item outgoingCrown=CrownHosts[localCrown];CrownHosts[localCrown]=cursor;cursor=outgoingCrown;
+            RefreshStats();return true;
         }
         if(slot>=25)
         {
@@ -126,7 +157,8 @@ public partial class SoulItem : ModItem
                 error = "支援槽可放所有可寄宿的近战武器；工具、消耗武器和天顶剑不可放入。";
             else
             {
-                int same = Stored.Count(h => !h.IsAir && h.type == incomingType);
+                int same = ValidHostType(incomingType)
+                    ? Stored.Count(h => ValidHostType(h.type) && h.type == incomingType) : 0;
                 if (!slots[local].IsAir && slots[local].type == incomingType) same--;
                 if (same > 0) error = "同种武器最多寄宿一把。";
             }
@@ -143,7 +175,7 @@ public partial class SoulItem : ModItem
     {
         SoulId = Guid.NewGuid().ToString("N");
         Hosts = Enumerable.Range(0, 12).Select(_ => new Item()).ToArray();
-        SupportHosts = EmptySlots(11); ForestHosts = EmptySlots(2); AwakeningMemory = false;
+        SupportHosts = EmptySlots(11); ForestHosts = EmptySlots(2); CrownHosts = EmptySlots(2); AwakeningMemory = false;
         AdditionalSupports=[]; LegendaryHost = new();
         EnvironmentCollection=EnvironmentBlessings=0;DomainEnvironment=SwordEnvironment.None;
         Kills = Cores = OreCollectionMask = Seals = LegacyReleased = YujianCharge = 0;
@@ -164,6 +196,7 @@ public partial class SoulItem : ModItem
         copy.Hosts = Hosts.Select(i => i.Clone()).ToArray();
         copy.SupportHosts = SupportHosts.Select(i => i.Clone()).ToArray();
         copy.ForestHosts = ForestHosts.Select(i => i.Clone()).ToArray();
+        copy.CrownHosts = CrownHosts.Select(i => i.Clone()).ToArray();
         copy.AdditionalSupports=AdditionalSupports.Select(i=>i.Clone()).ToList();
         copy.LegendaryHost = LegendaryHost.Clone();
         return copy;
@@ -178,7 +211,7 @@ public partial class SoulItem : ModItem
     // 即使重新加载替换了物品实例，
     // 也要保留剑魂中的完整数据。
     private static Item[] reforgeHosts;
-    private static Item[] reforgeSupports, reforgeForest;
+    private static Item[] reforgeSupports, reforgeForest, reforgeCrown;
     private static List<Item> reforgeAdditional;
     private static Item reforgeLegendary;
     private static bool reforgeAwakened;
@@ -196,6 +229,7 @@ public partial class SoulItem : ModItem
         reforgeHosts = Hosts.Select(i => i.Clone()).ToArray();
         reforgeSupports = SupportHosts.Select(i => i.Clone()).ToArray();
         reforgeForest = ForestHosts.Select(i => i.Clone()).ToArray();
+        reforgeCrown = CrownHosts.Select(i => i.Clone()).ToArray();
         reforgeAdditional=AdditionalSupports.Select(i=>i.Clone()).ToList();
         reforgeLegendary=LegendaryHost.Clone();
         reforgeAwakened = Awakened;
@@ -227,6 +261,7 @@ public partial class SoulItem : ModItem
             Attached = reforgeAttached; KingMemory = reforgeMemory;
             SupportHosts = reforgeSupports.Select(i => i.Clone()).ToArray();
             ForestHosts = reforgeForest.Select(i => i.Clone()).ToArray();
+            CrownHosts = reforgeCrown.Select(i => i.Clone()).ToArray();
             AdditionalSupports=reforgeAdditional.Select(i=>i.Clone()).ToList();
             LegendaryHost=reforgeLegendary.Clone();
             AwakeningMemory = reforgeAwakened;
@@ -238,7 +273,7 @@ public partial class SoulItem : ModItem
             Seals=reforgeSeals;LegacyReleased=reforgeLegacy;
         }
         reforgeHosts = null;
-        reforgeSupports = reforgeForest = null;
+        reforgeSupports = reforgeForest = reforgeCrown = null;
         reforgeAdditional=null; reforgeLegendary=null;
         reforgeSoulId = null;
         RefreshStats();
@@ -264,6 +299,7 @@ public partial class SoulItem : ModItem
         tag["hosts"] = Hosts.Select(ItemIO.Save).ToList();
         tag["supports"] = SupportHosts.Select(ItemIO.Save).ToList();
         tag["forestHosts"] = ForestHosts.Select(ItemIO.Save).ToList();
+        tag["crownHosts"] = CrownHosts.Select(ItemIO.Save).ToList();
         tag["additionalSupports"]=AdditionalSupports.Select(ItemIO.Save).ToList();
         tag["legendaryHost"]=ItemIO.Save(LegendaryHost);
         tag["awakenedMemory"] = AwakeningMemory;
@@ -280,6 +316,7 @@ public partial class SoulItem : ModItem
         KingMemory = tag.GetBool("kingMemory");
         SupportHosts = LoadSlots(tag, "supports", 11);
         ForestHosts = LoadSlots(tag, "forestHosts", 2);
+        CrownHosts = LoadSlots(tag, "crownHosts", 2);
         AdditionalSupports=tag.GetList<TagCompound>("additionalSupports").Select(ItemIO.Load).ToList();
         LegendaryHost = tag.ContainsKey("legendaryHost") ? ItemIO.Load(tag.GetCompound("legendaryHost")) : new Item();
         AwakeningMemory = tag.GetBool("awakenedMemory") || CanAwaken;
@@ -302,7 +339,7 @@ public partial class SoulItem : ModItem
         writer.Write(SoulId); writer.Write(Kills); writer.Write(Cores);
         writer.Write(Attached); writer.Write(KingMemory);
         writer.Write(Awakened);
-        foreach (var host in Hosts.Concat(SupportHosts).Concat(ForestHosts)) ItemIO.Send(host, writer, writeStack: true, writeFavorite: true);
+        foreach (var host in Hosts.Concat(SupportHosts).Concat(ForestHosts).Concat(CrownHosts)) ItemIO.Send(host, writer, writeStack: true, writeFavorite: true);
         writer.Write(OreCollectionMask);
         SendCurses(writer);
         writer.Write(AdditionalSupports.Count);
@@ -320,6 +357,7 @@ public partial class SoulItem : ModItem
         Hosts = Enumerable.Range(0, 12).Select(_ => ItemIO.Receive(reader, readStack: true, readFavorite: true)).ToArray();
         SupportHosts = Enumerable.Range(0, 11).Select(_ => ItemIO.Receive(reader, readStack: true, readFavorite: true)).ToArray();
         ForestHosts = Enumerable.Range(0, 2).Select(_ => ItemIO.Receive(reader, readStack: true, readFavorite: true)).ToArray();
+        CrownHosts = Enumerable.Range(0, 2).Select(_ => ItemIO.Receive(reader, readStack: true, readFavorite: true)).ToArray();
         OreCollectionMask=reader.ReadInt32() & OreFamily.AllMaterials;
         ReceiveCurses(reader);
         int count=reader.ReadInt32();if(count<0 || count>4096)throw new InvalidDataException("Invalid support slot count");
@@ -374,7 +412,8 @@ public partial class SoulItem : ModItem
     public override float UseSpeedMultiplier(Player player)
     {
         // 旧机械迟滞与流转祝福已由六种诅咒取代。
-        return (1 + player.GetModPlayer<WoodPlayer>().LayersFor(this) * .02f) /
+        // 森林之力出剑速度成长（基础每层+1%、圣林之冠每层+2%），不乘环境倍率S；其余各族加成不变。
+        return (1 + ForestPower.SpeedBonus(player)) /
             (TraitSupports.Any(i => WeaponFamilies.Of(i.type) == BladeFamily.Swift) ? .85f : 1);
     }
     public float Reach(Player player)
@@ -410,7 +449,8 @@ public partial class SoulItem : ModItem
         if (delta.Length() > reach) delta = Vector2.Normalize(delta) * reach;
         if (delta.LengthSquared() < 2500) delta = delta.SafeNormalize(Vector2.UnitX * player.direction) * 50;
         int baseHostDamage = BladeDamage(player, host);
-        int hostDamage = Math.Max(1, (int)(baseHostDamage * (1 + player.GetModPlayer<WoodPlayer>().LayersFor(this) * .03f)));
+        // 森林之力主剑影伤害成长（基础每层+2%、圣林之冠每层+3%），不乘环境倍率S。
+        int hostDamage = Math.Max(1, (int)(baseHostDamage * (1 + ForestPower.DamageBonus(player))));
         float hostKnockback = player.GetWeaponKnockback(host);
         int index = Projectile.NewProjectile(player.GetSource_ItemUse(Item), player.Center, Vector2.Zero, ModContent.ProjectileType<SoulBlade>(),
             hostDamage, hostKnockback*(TraitEnabled(host.type)&&WeaponFamilies.Of(host.type)==BladeFamily.Solid ||
@@ -440,7 +480,7 @@ public partial class SoulItem : ModItem
         // 物品提示保持简短，避免随寄宿配置无限增长。
         // 完整效果、条件和进度在可滚动界面中查看。
         tooltips.Add(new(Mod,"SoulControl","按P或手持右键打开剑魂窗口"));
-        tooltips.Add(new(Mod,"SoulStats",$"主攻 {Active.Count()}/{Capacity+BonusCapacity+(LegendaryOn?1:0)} · 支援 {Supports.Count()}/{SupportCapacity}"));
+        tooltips.Add(new(Mod,"SoulStats",$"主攻 {Active.Count()}/{Capacity+BonusCapacity+CrownCapacity+(LegendaryOn?1:0)} · 支援 {Supports.Count()}/{SupportCapacity}"));
         tooltips.Add(new(Mod,"TraitCodex","特性与成长详情请在窗口内查看"));
         if(!Attached) tooltips.Add(new(Mod,"Unstable","尚未附着：与友善史莱姆王对话"));
     }

@@ -83,7 +83,8 @@ public partial class SoulItem
     public IEnumerable<Item> TraitMains=>Active.Where(i=>TraitEnabled(i.type));
     public IEnumerable<Item> TraitSupports=>Supports.Where(i=>TraitEnabled(i.type));
     public IEnumerable<Item> TraitItems=>TraitMains.Concat(TraitSupports);
-    public WoodLoadout CombatWood=>new(WoodTypes.Mask(SoulSupport.SetItems(this).Where(i=>TraitEnabled(i.type))),SupportCapacity);
+    // 族内计数口径：主攻槽＋已生效支援槽＋森林/圣林奖励位＋传奇位（FamilyItems）；特性仍按 TraitEnabled 过滤。
+    public WoodLoadout CombatWood=>new(WoodTypes.Mask(SoulSupport.FamilyItems(this).Where(i=>TraitEnabled(i.type))),SupportCapacity,WoodCrown.Active(this));
     public void SaveCurses(TagCompound tag){tag["curseSchema"]=1;tag["seals"]=Seals;tag["legacyReleased"]=LegacyReleased;}
     public void LoadCurses(TagCompound tag)
     {

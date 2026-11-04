@@ -11,9 +11,9 @@ public class SoulVisuals : ModSystem
 {
     private readonly VertexPositionColorTexture[] vertices=new VertexPositionColorTexture[SoulMaterialTrail.MaxLayeredVertices];
 
-    private static readonly Color[] woodColors = [new(112,202,78), new(150,219,247), new(74,213,196),
-        new(58,174,118), new(193,218,52), new(142,93,213), new(219,78,112), new(237,124,65),
-        new(244,180,224), new(239,184,101), new(176,111,239), new(120,242,210)];
+    // 8 项配色与 WoodTypes 名册同序：木剑绿、针叶冷白、棕榈沙黄、红木红棕、乌木紫黑、暗影绯红、灰烬橙灰、珍珠粉白。
+    private static readonly Color[] woodColors = [new(112,202,78), new(176,214,224), new(233,203,132),
+        new(176,86,66), new(94,72,120), new(196,58,86), new(170,140,120), new(244,214,226)];
     private static readonly Dictionary<int, Color> palette = new()
     {
         [ItemID.CopperShortsword]=new(230,145,91), [ItemID.CopperBroadsword]=new(201,116,72),

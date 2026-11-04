@@ -2,7 +2,8 @@ $ErrorActionPreference='Stop'
 $taskRoot=Split-Path $PSScriptRoot -Parent
 $version=((Get-Content "$taskRoot/ZenithReborn/build.txt" | Where-Object {$_ -match '^version\s*='}) -split '=',2)[1].Trim()
 $profile=Join-Path $taskRoot "artifacts/information-ui-profile-$version"
-$output=Join-Path $taskRoot "artifacts/boss-unlocks-$version/gpu"
+# 输出目录默认按版本命名；也可用环境变量 ZENITH_GPU_OUTPUT 指定本次任务的专用目录
+$output=if($env:ZENITH_GPU_OUTPUT){ $env:ZENITH_GPU_OUTPUT } else { Join-Path $taskRoot "artifacts/boss-unlocks-$version/gpu" }
 New-Item -ItemType Directory -Force -Path "$profile/Mods",$output | Out-Null
 # 清空旧的输出，避免把上一次结果误当成本次结果；个别日志句柄可能短暂未释放，跳过即可
 Get-ChildItem $output -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
