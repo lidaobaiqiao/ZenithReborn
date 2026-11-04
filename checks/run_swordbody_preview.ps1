@@ -12,18 +12,22 @@ $itemName=($entry.source.key -split '/')[-1]
 if($itemName -notlike 'ItemID.*'){throw "Sword $Sword has no vanilla ItemID source ($($entry.source.key)); autoFit needs the original sprite."}
 $itemName=$itemName -replace '^ItemID\.',''
 $recipeDir=Join-Path $taskRoot "VfxLibrary/Masks/SwordBody/$Sword/$Revision"
+# 打包走独立目录：写 build-profile 会刷新正式包 mtime，破坏 package_install 的时序断言。
+$buildDir=Join-Path $taskRoot 'swordbody-preview-build-profile'
 $loader='E:/SteamLibrary/steamapps/common/tModLoader'
 $dotnet='C:/Program Files/dotnet/dotnet.exe'
-New-Item -ItemType Directory -Force -Path "$profile/Mods",$output | Out-Null
+$taskProduction=if($Candidate){Join-Path $taskRoot 'build-profile/Mods/ZenithReborn.tmod'}else{'C:/Users/15537/Documents/My Games/Terraria/tModLoader/Mods/ZenithReborn.tmod'}
+New-Item -ItemType Directory -Force -Path "$profile/Mods","$buildDir/Mods",$output | Out-Null
+# 夹具的 modReferences 需要主模组包；复制（不移动）本轮要预览的那一份，构建期与运行期保持一致。
+Copy-Item -LiteralPath $taskProduction -Destination "$buildDir/Mods/ZenithReborn.tmod" -Force
 & $dotnet build "$PSScriptRoot/ZenithPrototypeCheck/ZenithPrototypeCheck.csproj" -c Release --nologo *> "$output/build.log"
 if($LASTEXITCODE -ne 0){Get-Content "$output/build.log";throw 'Preview build failed'}
 Push-Location $loader
 try {
-    & $dotnet ./tModLoader.dll -server -build "$PSScriptRoot/ZenithPrototypeCheck" -eac "$PSScriptRoot/ZenithPrototypeCheck/bin/Release/net8.0/ZenithPrototypeCheck.dll" -tmlsavedirectory "$taskRoot/build-profile" *> "$output/pack.log"
+    & $dotnet ./tModLoader.dll -server -build "$PSScriptRoot/ZenithPrototypeCheck" -eac "$PSScriptRoot/ZenithPrototypeCheck/bin/Release/net8.0/ZenithPrototypeCheck.dll" -tmlsavedirectory "$buildDir" *> "$output/pack.log"
     if($LASTEXITCODE -ne 0){Get-Content "$output/pack.log";throw 'Preview package failed'}
 } finally {Pop-Location}
-Copy-Item -LiteralPath "$taskRoot/build-profile/Mods/ZenithPrototypeCheck.tmod" -Destination "$profile/Mods/ZenithPrototypeCheck.tmod"
-$taskProduction=if($Candidate){Join-Path $taskRoot 'build-profile/Mods/ZenithReborn.tmod'}else{'C:/Users/15537/Documents/My Games/Terraria/tModLoader/Mods/ZenithReborn.tmod'}
+Copy-Item -LiteralPath "$buildDir/Mods/ZenithPrototypeCheck.tmod" -Destination "$profile/Mods/ZenithPrototypeCheck.tmod"
 Copy-Item -LiteralPath $taskProduction -Destination "$profile/Mods/ZenithReborn.tmod"
 '["ZenithReborn","ZenithPrototypeCheck"]' | Set-Content -Encoding utf8 -LiteralPath "$profile/Mods/enabled.json"
 @{Language='zh-Hans';Fullscreen=$false;WindowBorderless=$false;DisplayWidth=1280;DisplayHeight=720;VolumeMusic=0;VolumeSound=0;VolumeAmbient=0;AutoSave=$false;LastLaunchedVersion=279;LastLaunchedTModLoaderVersion='2026.8.3.0';SeenFirstLaunchModderWelcomeMessage=$true} | ConvertTo-Json | Set-Content -Encoding utf8 -LiteralPath "$profile/config.json"
@@ -46,6 +50,8 @@ $env:SDL_WINDOW_ACTIVATE_WHEN_SHOWN='0'
 $taskStarted=Get-Date
 $process=Start-Process -FilePath $dotnet -ArgumentList @('tModLoader.dll','-nosteam','-tmlsavedirectory',('"{0}"' -f $profile)) -WorkingDirectory $loader -WindowStyle Hidden -PassThru -RedirectStandardOutput "$output/stdout.log" -RedirectStandardError "$output/stderr.log"
 Write-Output "Isolated mask preview PID $($process.Id); sword $Sword ($itemName); output $output"
+# 本轮客户端 PID 落盘：批量脚本据此只终止自己启动的进程，不再按进程名扫全表杀 dotnet。
+Set-Content -LiteralPath (Join-Path $output 'client.pid') -Value $process.Id -Encoding ascii
 if($NoWait){return}
 $process.WaitForExit($TimeoutMs) | Out-Null
 if(-not $process.HasExited){throw "隔离预览超时，客户端 PID $($process.Id) 保留运行；请正常退出后重试。"}
@@ -53,5 +59,6 @@ $gpu=Join-Path $output 'gpu.json'
 if((Test-Path -LiteralPath $gpu) -and (Get-Item -LiteralPath $gpu).LastWriteTime -ge $taskStarted){
     $report=Get-Content -LiteralPath $gpu -Raw | ConvertFrom-Json
     if(-not $report.passed){throw "GPU preview did not pass: $gpu"}
+    Remove-Item -LiteralPath (Join-Path $output 'client.pid') -ErrorAction SilentlyContinue
     Write-Output "GPU preview passed: $Sword/$Revision maskSha256=$($report.maskSha256)"
 } else {throw 'Isolated GPU preview produced no gpu.json'}

@@ -15,9 +15,22 @@ source = root / 'ZenithReborn'
 out = root / 'artifacts'
 built = root / 'build-profile/Mods/ZenithReborn.tmod'
 report = out / 'wood-check.txt'
-report_text = report.read_text(encoding='utf-8')
+# 全量回归标记：只有 checks/run_wood_checks.ps1 在不带 -Glass/-InformationUi/-EchoOre 时才写这一行。
+# 小套件输出同样是 "PASS: N focused checks"，只看前缀会被冒充，所以必须验标记。
+FULL_SUITE_MARKER = 'SUITE=ZENITH_WOOD'
+# 全量项数地板：当前全量 8511 项，取 80% = 6800。GLASS/INFORMATION_UI/ECHO_ORE 小套件只有数十到数百项，
+# 6800 既留出加减断言的空间，又不可能被小套件越过的数量级冒充。
+MIN_FULL_SUITE_CHECKS = 6800
+report_text = report.read_text(encoding='utf-8-sig')
 assert report_text.startswith('PASS: '), report_text[:80]
+assert FULL_SUITE_MARKER in report_text.splitlines(), (
+    f'这份报告不是 ZENITH_WOOD 全量回归产出的，拒绝安装：缺少 "{FULL_SUITE_MARKER}" 标记。'
+    '（-Glass/-InformationUi/-EchoOre 小套件同样打印 PASS: 前缀，但不会有该标记。）'
+    '请用 checks/run_wood_checks.ps1 不带开关重跑。')
 checks = int(report_text.split()[1])
+assert checks >= MIN_FULL_SUITE_CHECKS, (
+    f'这份报告只有 {checks} 项，低于全量地板 {MIN_FULL_SUITE_CHECKS} 项，拒绝安装：'
+    '小套件不能冒充 ZENITH_WOOD 全量回归。')
 declared = next((line.split('=',1)[1].strip() for line in (source/'build.txt').read_text(encoding='utf-8').splitlines() if line.strip().startswith('modReferences')), '')
 required_mods = [value.strip().split('@')[0] for value in declared.split(',') if value.strip()]
 dependencies = [prepare_luminance()] if 'Luminance' in required_mods else []
@@ -30,10 +43,19 @@ packed = {e['name']: contents(e) for e in entries}
 vfx_ownership = verify_vfx_ownership(built)
 native_path=out/'native-build-check.json'
 native=json.loads(native_path.read_text(encoding='utf-8-sig')) if native_path.exists() else {}
-if native.get('passed') and native.get('packages',{}).get(name,{}).get('sha256')==hashlib.sha256(built.read_bytes()).hexdigest():
-    assert (root/'wood-check-profile/Mods/ZenithReborn.tmod').read_bytes()==built.read_bytes()
-else:
-    assert packed['ZenithReborn.dll'] == (source / 'bin/Release/net8.0/ZenithReborn.dll').read_bytes()
+built_sha = hashlib.sha256(built.read_bytes()).hexdigest()
+# 时序断言没有宽松分支：报告必须与本次要安装的包逐字节绑定。
+# 旧实现在哈希不符时退化成"包内 DLL == bin/Release DLL"的弱断言，导致漏跑 run_wood_checks.ps1
+# 直接安装仍可能通过，只是失去"这个包被夹具跑过"的证明。这里一律硬失败。
+assert native.get('passed') is True, (
+    '缺少本轮的构建与回归记录 artifacts/native-build-check.json（不存在或 passed=false），拒绝安装：'
+    '请先跑 checks/run_wood_checks.ps1。')
+recorded_sha = native.get('packages', {}).get(name, {}).get('sha256')
+assert recorded_sha == built_sha, (
+    '报告绑定的包哈希与要安装的包不一致：你改完源码后没有重跑 run_wood_checks.ps1。'
+    f'（报告记录={recorded_sha}，待安装={built_sha}）')
+assert (root/'wood-check-profile/Mods/ZenithReborn.tmod').read_bytes()==built.read_bytes(), (
+    '夹具跑过的包与待安装的包不是同一个文件：隔离档里的包被其他脚本替换过，请重跑 run_wood_checks.ps1。')
 own_manifest=source/'Assets/Effects/build-manifest.json'
 own_effects=json.loads(own_manifest.read_text(encoding='utf-8'))['effects']
 for entry in own_effects:
@@ -168,7 +190,7 @@ refraction_report=json.loads(refraction_gpu.read_text(encoding='utf-8')) if soul
 native_refraction_verified=matching_report(f'soul-flight-world-{version}/native-probe.json')
 tree_refraction_verified=matching_report(f'soul-flight-world-{version}/tree-evidence.json')
 refraction_verified=soul_trail_verified and refraction_report.get('refraction',{}).get('Passed') is True and soul_flight_world_verified and native_refraction_verified and tree_refraction_verified
-lab_package=root/'build-profile/Mods/ZenithMaterialLab.tmod'
+lab_package=root/'material-lab-build-profile/Mods/ZenithMaterialLab.tmod'
 lab_path=out/f'material-lab-{version}/gpu.json'
 lab_report=json.loads(lab_path.read_text(encoding='utf-8')) if lab_path.exists() else {}
 lab_sha=hashlib.sha256(lab_package.read_bytes()).hexdigest() if lab_package.exists() else None

@@ -1,11 +1,9 @@
 **/bin/
 **/obj/
-build-profile/
-check-profile/
-wood-check-profile/
-flying-blade-profile/
+# tModLoader 隔离运行/构建目录：这些是运行时产物，不入库。
+# 用后缀通配代替逐个硬编码，避免每新增一个专用 profile 就要回来补一行。
+*-profile/
 stage-one-playtest/
-environment-render-profile/
 martial-playtest/
 .smoke-user-data/
 artifacts/

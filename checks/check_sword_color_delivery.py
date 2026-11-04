@@ -7,7 +7,8 @@ import numpy as np
 from PIL import Image
 
 root=Path(__file__).resolve().parent.parent
-version='0.3.82'
+# 版本号取自 build.txt，不再写死：交付证据必须跟着当前构建走，否则每升一版就失效。
+version=next(line.split('=',1)[1].strip() for line in (root/'ZenithReborn/build.txt').read_text(encoding='utf-8').splitlines() if line.startswith('version'))
 out=root/'artifacts'
 sha=hashlib.sha256((root/'build-profile/Mods/ZenithReborn.tmod').read_bytes()).hexdigest()
 def report(path):

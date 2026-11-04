@@ -7,9 +7,11 @@ Set-Location $taskRoot
 $loader='E:/SteamLibrary/steamapps/common/tModLoader'
 $dotnet='C:/Program Files/dotnet/dotnet.exe'
 $profile=Join-Path $taskRoot 'artifacts/slash-render-profile'
+# 打包走独立目录：写 build-profile 会刷新正式包 mtime，破坏 package_install 的时序断言。
+$buildDir=Join-Path $taskRoot 'surge-preview-profile'
 $version=((Get-Content "$taskRoot/ZenithReborn/build.txt" | Where-Object {$_ -match '^version\s*='}) -split '=',2)[1].Trim()
 $output=Join-Path $taskRoot "artifacts/surge-gpu-$version"
-New-Item -ItemType Directory -Force -Path "$profile/Mods",$output,"$taskRoot/build-profile/Mods" | Out-Null
+New-Item -ItemType Directory -Force -Path "$profile/Mods","$buildDir/Mods",$output | Out-Null
 
 & $dotnet build "$taskRoot/ZenithReborn/ZenithReborn.csproj" -c Release --nologo *> "$output/build-production.log"
 if($LASTEXITCODE -ne 0){Get-Content "$output/build-production.log" -Tail 20;throw 'Production build failed'}
@@ -18,14 +20,14 @@ if($LASTEXITCODE -ne 0){Get-Content "$output/build-check.log" -Tail 20;throw 'Ch
 
 Push-Location $loader
 try {
-    & $dotnet ./tModLoader.dll -server -build "$taskRoot/ZenithReborn" -eac "$taskRoot/ZenithReborn/bin/Release/net8.0/ZenithReborn.dll" -tmlsavedirectory "$taskRoot/build-profile" *> "$output/pack-production.log"
+    & $dotnet ./tModLoader.dll -server -build "$taskRoot/ZenithReborn" -eac "$taskRoot/ZenithReborn/bin/Release/net8.0/ZenithReborn.dll" -tmlsavedirectory "$buildDir" *> "$output/pack-production.log"
     if($LASTEXITCODE -ne 0){Get-Content "$output/pack-production.log" -Tail 15;throw 'Production pack failed'}
-    & $dotnet ./tModLoader.dll -server -build "$taskRoot/checks/ZenithPrototypeCheck" -eac "$taskRoot/checks/ZenithPrototypeCheck/bin/Release/net8.0/ZenithPrototypeCheck.dll" -tmlsavedirectory "$taskRoot/build-profile" *> "$output/pack-check.log"
+    & $dotnet ./tModLoader.dll -server -build "$taskRoot/checks/ZenithPrototypeCheck" -eac "$taskRoot/checks/ZenithPrototypeCheck/bin/Release/net8.0/ZenithPrototypeCheck.dll" -tmlsavedirectory "$buildDir" *> "$output/pack-check.log"
     if($LASTEXITCODE -ne 0){Get-Content "$output/pack-check.log" -Tail 15;throw 'Check pack failed'}
 } finally {Pop-Location}
 
 foreach($name in @('ZenithReborn','ZenithPrototypeCheck')){
-    Copy-Item -LiteralPath "$taskRoot/build-profile/Mods/$name.tmod" -Destination "$profile/Mods/$name.tmod"
+    Copy-Item -LiteralPath "$buildDir/Mods/$name.tmod" -Destination "$profile/Mods/$name.tmod"
 }
 '["ZenithReborn","ZenithPrototypeCheck"]' | Set-Content -Encoding utf8 -LiteralPath "$profile/Mods/enabled.json"
 @{Language='zh-Hans';Fullscreen=$false;WindowBorderless=$false;DisplayWidth=1280;DisplayHeight=720;VolumeMusic=0;VolumeSound=0;VolumeAmbient=0;AutoSave=$false;LastLaunchedVersion=279;LastLaunchedTModLoaderVersion='2026.8.3.0';SeenFirstLaunchModderWelcomeMessage=$true} | ConvertTo-Json | Set-Content -Encoding utf8 -LiteralPath "$profile/config.json"

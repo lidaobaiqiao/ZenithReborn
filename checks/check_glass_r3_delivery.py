@@ -5,7 +5,8 @@ import zipfile
 from pathlib import Path
 
 root=Path(__file__).resolve().parent.parent
-version='0.3.80'
+# 版本号取自 build.txt，不再写死：交付证据必须跟着当前构建走，否则每升一版就失效。
+version=next(line.split('=',1)[1].strip() for line in (root/'ZenithReborn/build.txt').read_text(encoding='utf-8').splitlines() if line.startswith('version'))
 package=root/'build-profile/Mods/ZenithReborn.tmod'
 sha=hashlib.sha256(package.read_bytes()).hexdigest()
 def report(name):
@@ -30,7 +31,7 @@ surface=report(f'soul-flight-world-{version}-surface/world.json')
 assert surface['advancedSurfaceMaterial'] and surface['materialLightCalls']>0
 lab=report(f'material-lab-{version}/gpu.json')
 assert len(lab['cases'])==45 and all(case['passed'] for case in lab['cases'])
-assert lab['labPackageSha256']==hashlib.sha256((root/'build-profile/Mods/ZenithMaterialLab.tmod').read_bytes()).hexdigest()
+assert lab['labPackageSha256']==hashlib.sha256((root/'material-lab-build-profile/Mods/ZenithMaterialLab.tmod').read_bytes()).hexdigest()
 report(f'vfx-ownership-{version}.json')
 
 keep=['SoulBlade.cs','SoulTrailUnits.cs','SoulMaterialTrail.cs','SoulTrailEnding.cs','MartialBlades.cs','VfxSwordMask.cs']

@@ -4,16 +4,22 @@ $taskRoot = Split-Path $PSScriptRoot -Parent
 $loaderRoot = 'E:/SteamLibrary/steamapps/common/tModLoader'
 $dotnet = Join-Path $loaderRoot 'dotnet/dotnet.exe'
 $testProfile = Join-Path $taskRoot 'check-profile'
-New-Item -ItemType Directory -Force -Path "$testProfile/Mods", "$taskRoot/artifacts" | Out-Null
+# 构建走独立目录：写 build-profile 会刷新正式包 mtime，破坏 package_install 的时序断言。
+$surveyBuildDir = Join-Path $taskRoot 'flying-blade-survey-profile'
+New-Item -ItemType Directory -Force -Path "$testProfile/Mods", "$surveyBuildDir/Mods", "$taskRoot/artifacts" | Out-Null
+# 构建期依赖兜底：复制（不移动）第三方包到普查构建目录，防止 build.txt 恢复 modReferences 后缺依赖。
+if (Test-Path -LiteralPath "$taskRoot/build-profile/Mods/Luminance.tmod") {
+    Copy-Item -LiteralPath "$taskRoot/build-profile/Mods/Luminance.tmod" -Destination "$surveyBuildDir/Mods/Luminance.tmod" -Force
+}
 foreach ($name in @('ZenithReborn', 'ZenithPrototypeCheck')) {
     $source = if ($name -eq 'ZenithReborn') { "$taskRoot/ZenithReborn" } else { "$taskRoot/checks/ZenithPrototypeCheck" }
     Push-Location $loaderRoot
     try {
-        # 与其他检查一致：游戏自带编译器，产物只进隔离 build-profile。
-        & $dotnet ./tModLoader.dll -server -build $source -tmlsavedirectory "$taskRoot/build-profile" *> "$taskRoot/artifacts/$name-survey-pack.log"
+        # 与其他检查一致：游戏自带编译器，产物只进本普查专用目录。
+        & $dotnet ./tModLoader.dll -server -build $source -tmlsavedirectory "$surveyBuildDir" *> "$taskRoot/artifacts/$name-survey-pack.log"
         if ($LASTEXITCODE -ne 0) { Get-Content "$taskRoot/artifacts/$name-survey-pack.log"; throw "Packaging failed: $name" }
     } finally { Pop-Location }
-    Copy-Item -LiteralPath "$taskRoot/build-profile/Mods/$name.tmod" -Destination "$testProfile/Mods/$name.tmod"
+    Copy-Item -LiteralPath "$surveyBuildDir/Mods/$name.tmod" -Destination "$testProfile/Mods/$name.tmod"
 }
 '["ZenithReborn","ZenithPrototypeCheck"]' | Set-Content -Encoding utf8 -LiteralPath "$testProfile/Mods/enabled.json"
 $env:ZENITH_CHECK_REPORT = "$taskRoot/artifacts/flying-blade-survey-report.txt"

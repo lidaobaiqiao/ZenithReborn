@@ -6,7 +6,11 @@ $version=((Get-Content "$taskRoot/ZenithReborn/build.txt" | Where-Object {$_ -ma
 $profile=Join-Path $taskRoot $(if($Check){"artifacts/material-lab-profile-check-$version"}else{'artifacts/material-lab-profile'})
 $output=Join-Path $taskRoot "artifacts/material-lab-$version"
 New-Item -ItemType Directory -Force -Path "$profile/Mods",$output | Out-Null
-foreach($name in @('ZenithReborn','ZenithMaterialLab')){Copy-Item -LiteralPath "$taskRoot/build-profile/Mods/$name.tmod" -Destination "$profile/Mods/$name.tmod"}
+foreach($name in @('ZenithReborn','ZenithMaterialLab')){
+    # 制作模组由 build_material_lab.ps1 打到独立目录，主模组包仍来自正式构建目录。
+    $labSource=if($name -eq 'ZenithMaterialLab'){"$taskRoot/material-lab-build-profile/Mods/$name.tmod"}else{"$taskRoot/build-profile/Mods/$name.tmod"}
+    Copy-Item -LiteralPath $labSource -Destination "$profile/Mods/$name.tmod"
+}
 '["ZenithReborn","ZenithMaterialLab"]' | Set-Content -Encoding utf8 "$profile/Mods/enabled.json"
 @{Language='zh-Hans';Fullscreen=$false;WindowBorderless=$false;DisplayWidth=1440;DisplayHeight=900;AutoSave=$false;
   VolumeMusic=0;VolumeSound=0;VolumeAmbient=0;LastLaunchedVersion=279;LastLaunchedTModLoaderVersion='2026.8.3.0';SeenFirstLaunchModderWelcomeMessage=$true} |

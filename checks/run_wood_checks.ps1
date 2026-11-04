@@ -38,7 +38,22 @@ try {
     & $dotnet ./tModLoader.dll -server -nosteam -tmlsavedirectory $testProfile *> "$taskRoot/artifacts/wood-load.log"
     $result = $LASTEXITCODE
 } finally { Pop-Location }
-Get-Content "$taskRoot/artifacts/wood-check.txt"
+# 全量标记：-Glass/-InformationUi/-EchoOre 小套件走的是 Check.cs 里排在前面的分支，
+# 输出同样是 "PASS: N focused checks"，package_install.py 只看前缀分不出来。
+# 所以只在真正没带小套件开关时，往报告里补人读标注和机器标记；两处都必须配套修改。
+$reportPath = "$taskRoot/artifacts/wood-check.txt"
+$fullSuite = -not ($EchoOre -or $InformationUi -or $Glass)
+if ($result -eq 0 -and $fullSuite) {
+    if (-not (Test-Path -LiteralPath $reportPath)) { throw '全量回归已成功但未产出报告 artifacts/wood-check.txt' }
+    $reportText = (Get-Content -LiteralPath $reportPath -Raw).TrimEnd()
+    if ($reportText -notmatch '^PASS: \d+ focused checks') {
+        throw "全量回归报告首行格式异常，拒绝写全量标记：$($reportText.Substring(0, [Math]::Min(80, $reportText.Length)))"
+    }
+    $reportText = $reportText -replace '^(PASS: \d+ focused checks)', '$1 [suite=full ZENITH_WOOD]'
+    Set-Content -LiteralPath $reportPath -Value ($reportText + "`nSUITE=ZENITH_WOOD`n") -Encoding utf8 -NoNewline
+}
+# 打印最终报告：全量跑法这里能看到 [suite=full ZENITH_WOOD] 与 SUITE=ZENITH_WOOD 两处标记。
+if (Test-Path -LiteralPath $reportPath) { Get-Content -LiteralPath $reportPath } else { Write-Output "本轮未产出报告：$reportPath" }
 # 回归结果绑定实际加载的包；失败时也要落盘 passed=false，不能让上一轮的成功记录冒充本次通过。
 @{compiler='tModLoader native';packages=$nativePackages;passed=($result -eq 0)} | ConvertTo-Json -Depth 5 |
     Set-Content -Encoding utf8 "$taskRoot/artifacts/native-build-check.json"

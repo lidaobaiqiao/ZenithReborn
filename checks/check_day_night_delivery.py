@@ -6,6 +6,8 @@ from pathlib import Path
 from tmod_archive import read_archive,contents
 
 root=Path(__file__).resolve().parent.parent
+# 版本号取自 build.txt，不再写死：本轮证据跟着当前构建走；0.3.80 之类是历史基线，另行保留。
+version=next(line.split('=',1)[1].strip() for line in (root/'ZenithReborn/build.txt').read_text(encoding='utf-8').splitlines() if line.startswith('version'))
 package=root/'build-profile/Mods/ZenithReborn.tmod'
 digest=hashlib.sha256(package.read_bytes()).hexdigest()
 def report(relative):
@@ -15,13 +17,13 @@ def report(relative):
     if 'testedPackageSha256' in value:assert value['testedPackageSha256']==digest,relative
     assert path.stat().st_mtime>package.stat().st_mtime,relative
     return value
-gpu=report('soul-trail-gpu-0.3.89/gpu.json')
-day_night=report('soul-trail-gpu-0.3.89/day-night.json')
+gpu=report(f'soul-trail-gpu-{version}/gpu.json')
+day_night=report(f'soul-trail-gpu-{version}/day-night.json')
 assert day_night['DayMaximumDifference']==day_night['MaximumOpticalDifference']==0
 worlds={}
 for suffix in ['full','full-night','full-dusk','full-torch']:
-    world=report(f'soul-flight-world-0.3.89-{suffix}/world.json')
-    native=report(f'soul-flight-world-0.3.89-{suffix}/native-probe.json')
+    world=report(f'soul-flight-world-{version}-{suffix}/world.json')
+    native=report(f'soul-flight-world-{version}-{suffix}/native-probe.json')
     assert native['outsideChangedPixels']==0 and native['actualNativeFilter']
     assert len(world['damagedItems'])==len(world['completedReturnItems'])==3
     worlds[suffix]=dict(passed=True,lightPreset=world['lightPreset'],outsideChangedPixels=0)
@@ -37,19 +39,20 @@ with zipfile.ZipFile(root/'artifacts/vfx-presets/0.3.80/ZenithReborn-0.3.80-sour
             relative=name.removeprefix('ZenithReborn/')
             assert relative in allowed,relative
             changed.append(relative)
-_,name,version,entries=read_archive(package)
-assert name=='ZenithReborn' and version=='0.3.89'
+_,name,packed_version,entries=read_archive(package)
+# 只校验"包内版本与本轮 build.txt 一致"，不再比对写死的历史版本号。
+assert name=='ZenithReborn' and packed_version==version,packed_version
 packed={entry['name']:contents(entry) for entry in entries}
 for relative in changed:
     if relative.endswith('.cs') or relative.endswith('.fxc'):
         assert packed[relative]==(root/'ZenithReborn'/relative).read_bytes(),relative
 metadata=json.loads((root/'ZenithReborn/Assets/Vfx/Materials/SwordFlow/GlassR3/EnvironmentSoftMap.json').read_text(encoding='utf-8'))
 assert metadata['adjacentDifferenceRatio']<.2 and not metadata['originalOverwritten']
-evidence=json.loads((root/'artifacts/soul-trail-gpu-0.3.89-texture-ablation/texture-analysis.json').read_text(encoding='utf-8'))
+evidence=json.loads((root/f'artifacts/soul-trail-gpu-{version}-texture-ablation/texture-analysis.json').read_text(encoding='utf-8'))
 assert evidence['smoothEnvToOriginalRatio']<.7
 result=dict(passed=True,testedPackageSha256=digest,baseline='0.3.80',unchangedBaselineFiles=unchanged,
     changedBaselineFiles=changed,dayMaximumDifference=0,opticalMaximumDifference=0,worlds=worlds,
     textureHighPassRatio=evidence['smoothEnvToOriginalRatio'],originalTexturesKept=True,
     exactUserVideoGridReproduced=False,actualMouseGameplayTested=False,liveMultiplayerTested=False,artApproved=False)
-(root/'artifacts/day-night-delivery-0.3.89.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+(root/f'artifacts/day-night-delivery-{version}.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 print(json.dumps(result,ensure_ascii=False))

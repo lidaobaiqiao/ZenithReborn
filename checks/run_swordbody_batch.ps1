@@ -14,12 +14,32 @@ $swords=@(
     'TungstenBroadsword','GoldShortsword','GoldBroadsword','PlatinumShortsword','PlatinumBroadsword',
     'CobaltSword','PalladiumSword','MythrilSword','OrichalcumSword','AdamantiteSword'
 ) | Where-Object { -not (Test-Path "VfxLibrary/Masks/SwordBody/$_/R2/clip.json") } | Select-Object -First $Take
+# 只终止本轮预览脚本自己记录下来的客户端 PID（run_swordbody_preview.ps1 写出的 client.pid）。
+# 项目硬规则禁止强杀游戏/进程：拿不到自己的进程对象或 PID 记录时，什么也不做，绝不按名字扫全表。
+function Stop-PreviewClient([string]$out){
+    $pidFile=Join-Path $out 'client.pid'
+    if(-not (Test-Path -LiteralPath $pidFile)){return}
+    $clientId=0
+    if(-not [int]::TryParse((Get-Content -LiteralPath $pidFile -Raw).Trim(),[ref]$clientId)){
+        Remove-Item -LiteralPath $pidFile -ErrorAction SilentlyContinue
+        return
+    }
+    $client=Get-Process -Id $clientId -ErrorAction SilentlyContinue
+    if($client -and $client.ProcessName -eq 'dotnet'){
+        Write-Output "清理本轮客户端 PID $clientId"
+        Stop-Process -Id $clientId -Force -ErrorAction SilentlyContinue
+    }
+    Remove-Item -LiteralPath $pidFile -ErrorAction SilentlyContinue
+}
 function Invoke-Preview($sword,$dir,$out){
-    pwsh -NoProfile -File checks/run_swordbody_preview.ps1 -Revision R2 -Sword $sword -Vector -Emissive -Local -TimeoutMs 150000 *> "$out/batch.log"
-    return $LASTEXITCODE -eq 0
+    $pwsh=(Get-Command pwsh -ErrorAction Stop).Source
+    # 记录自己启动的子进程对象；退出码从对象读，收尾也只碰这个对象及其 PID 记录。
+    $proc=Start-Process -FilePath $pwsh -ArgumentList @('-NoProfile','-File','checks/run_swordbody_preview.ps1','-Revision','R2','-Sword',$sword,'-Vector','-Emissive','-Local','-TimeoutMs','150000') -WorkingDirectory $taskRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput "$out/batch.log" -RedirectStandardError "$out/batch.err.log"
+    $proc.WaitForExit()
+    if($proc.ExitCode -ne 0){Stop-PreviewClient $out}
+    return $proc.ExitCode -eq 0
 }
 $done=@()
-Get-Process -Name dotnet -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne $PID } | Stop-Process -Force -ErrorAction SilentlyContinue
 foreach($s in $swords){
     $dir="VfxLibrary/Masks/SwordBody/$s/R2"
     $out="artifacts/swordbody-$s-R2-emissive-local"
@@ -31,7 +51,7 @@ foreach($s in $swords){
     }
     $ok=Invoke-Preview $s $dir $out
     if(-not $ok){
-        Get-Process -Name dotnet -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne $PID } | Stop-Process -Force -ErrorAction SilentlyContinue
+        Stop-PreviewClient $out
         Start-Sleep -Seconds 3
         $ok=Invoke-Preview $s $dir $out
     }
