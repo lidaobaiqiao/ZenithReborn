@@ -4,9 +4,9 @@
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-04 14:36:31
+生成时间 : 2026-11-04 18:38:51
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
-索引条目 : 753 条（去重合并 4 次重复出现；报告未覆盖的人工补写 39 条）
+索引条目 : 754 条（去重合并 4 次重复出现；报告未覆盖的人工补写 40 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
 排除目录 : artifacts/  bin/  obj/  *-profile/  *-playtest/  .git/  编辑器配置目录
 整体记录 : VfxLibrary/（11756 个原版素材，按第六节单独核对）
@@ -533,6 +533,7 @@ I-tools-vfx.md          10      163     1         40        0
 | `docs/0.3.98-全部纯代码选项开启.md` | 版本记录 | 特效/开关 | 28 项纯代码默认全开 | VfxIsolation.cs | 已验证 |
 | `docs/0.3.99-贴图材质全开与昼夜实测.md` | 版本记录 | 特效/开关 | PureCodeOnly=false，56 项全开并测昼夜 | VfxIsolation.cs, GlassMaterialPreset.cs | 已验证 |
 | `docs/AGENTS状态历史.md` | 索引 | 项目状态 | 由 AGENTS.md 迁出的历代状态注记 | CHANGELOG.md | 已验证 |
+| `docs/AI接入指南.md` | Markdown 交接指南 | 导航文档 | 写给外部接手 AI 的自包含接入文档：项目定位、clone 后必改的两处 targets 路径、环境四件套、三条命令、地图选读表、六条硬规则、六个已踩过的坑、提交纪律、设计边界、卡住时的排查表 | docs/CODEBASE_MAP.md、docs/PROBLEM_INDEX.md、ZenithReborn/build.txt | 人工补写 |
 | `docs/ARCHITECTURE.md` | Markdown 架构总览 | 导航文档 | 19 模块边界表（负责/不负责/核心文件）、三条端到端链路（战斗·挥臂到五族派发 / UI·开魂域到改槽同步 / 构建·改源码到安装）、模块级 Mermaid 依赖图、8 条共享状态单一入口、15×11 依赖矩阵、6 条修改爆炸半径、13 条硬坑一行式。核心行号锚点：`SoulItem.cs:82`(Active)、`SoulSupport.cs:43`(FamilyItems)、`VfxIsolation.cs:8`(总闸)、`SoulBlade.cs:14`(SoulSource)、`ZenithReborn.cs:18`(HandlePacket)、`ZenithPrototypeCheck/Check.cs:11`(夹具总调度) | docs/CODEBASE_MAP.md、docs/HOTSPOTS.md、artifacts/codebase-map/ | 人工补写 |
 | `docs/CHANGELOG.md` | 索引 | 版本 | 107 行版本摘要表，倒序，前段指向 archive/ | docs/archive/, docs/0.3.*.md | 已验证 |
 | `docs/CODEBASE_MAP.md` | Markdown 代码地图 | 导航文档 | 全仓结构总图：模块清单、目录职责、文件到模块的归属，是其余导航文档的事实底座 | docs/ARCHITECTURE.md、docs/FILE_INDEX.md | 人工补写 |
@@ -692,7 +693,7 @@ I-tools-vfx.md          10      163     1         40        0
 | `docs/飞刃族F1-掷刃与印记.md` | 设计定稿 | 种族/飞刃 | 掷刃机制已实装，印记为留白核心设计 | FlyingBladeHand.cs, FlyingBladeShot.cs | 已验证 |
 | `docs/飞刃族F2-数量分阶与族显示.md` | 设计定稿 | 种族/飞刃 | 前四把阶梯效果 + 族归属显示 | FlyingBladeFamily.cs, WeaponFamilyTags.cs | 已验证 |
 | `docs/飞刃族FB1-候选名册与攻击方式.md` | 设计草案 | 种族/飞刃 | 引擎普查产出的 31 把名册与攻击方式 | FlyingBladeFamily.Weapons, flying-blade-survey.json | 已验证 |
-| (合计) | 197 条 |  |  |  |  |
+| (合计) | 198 条 |  |  |  |  |
 
 ---
 

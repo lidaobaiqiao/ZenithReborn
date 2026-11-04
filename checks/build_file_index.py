@@ -305,6 +305,9 @@ SUPPLEMENT_ROWS = [
     ("docs/PROBLEM_INDEX.md", "Markdown 问题反向索引",
      "导航文档", "从玩家/开发者看到的现象反查优先检查的符号，并给出能复现或证伪该分支的夹具/脚本",
      "docs/HOTSPOTS.md、checks/ 夹具", "人工补写"),
+    ("docs/AI接入指南.md", "Markdown 交接指南",
+     "导航文档", "写给外部接手 AI 的自包含接入文档：项目定位、clone 后必改的两处 targets 路径、环境四件套、三条命令、地图选读表、六条硬规则、六个已踩过的坑、提交纪律、设计边界、卡住时的排查表",
+     "docs/CODEBASE_MAP.md、docs/PROBLEM_INDEX.md、ZenithReborn/build.txt", "人工补写"),
 ]
 
 # 分组索引：同一目录下同类批量文件，逐行列会淹没索引，改为一行 + 成员清单 txt。
