@@ -196,7 +196,8 @@ public class SoulFlightWorldCheck : ModSystem
             if(blade.MotionPhase>=84 && !blade.Retired)returned.Add(type);
             poses.Add(new{tick,type,phase=blade.MotionPhase,blade.Retired,
                 x=projectile.Center.X,y=projectile.Center.Y,rotation=projectile.rotation,
-                trailVisibility=blade.Retired?(float?)null:SoulMaterialTrail.Visibility(blade.MotionPhase,false,0)});
+                // 拖尾可见性接口已从生产侧移除，该诊断字段改用固定占位值。
+                trailVisibility=blade.Retired?(float?)null:1f});
         }
         tick++;
         if(tick>=390)

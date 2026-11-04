@@ -50,8 +50,8 @@ pwsh -File checks/run_wood_checks.ps1
 python checks/check_mod_assets.py
 ```
 
-回归的实测事实（2026-11-01）：
-- 通过输出形如 `PASS: 8511 focused checks`，项数**按启用套件动态统计**（历史文档里的 8393、8453 已过时）。
+回归的实测事实（2026-11-04）：
+- 通过输出形如 `PASS: 8509 focused checks`，项数**按启用套件动态统计**，删掉断言会同步减少（同日清理删了 2 条已废弃接口的断言，8511 → 8509）；历史文档里的 8393、8453、8498、8511 均为旧值。
 - 脚本 **fail-fast**：第一条断言失败即抛异常，后面的检查根本不跑。
 - 结果落 `artifacts/wood-check.txt`；`artifacts/native-build-check.json` 记录本次两包 sha256 与 `passed`（失败时也写 `passed:false`）。
 - 单轮约 70–85 秒，不要按"十几分钟"设超时。

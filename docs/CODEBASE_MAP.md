@@ -259,7 +259,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 | `Build` | `BondSnapshot.cs:74` | `Math.Clamp(count,0,max)` 会隐藏超额 |
 | `Evaluate` / `Leading` | `BondSnapshot.cs:93` / `:96` | 主导族：先 Tier，再 Count，再 Progress |
 | `BondColors` | `BondSnapshot.cs:112` | 阶段色 / 棱彩 |
-| `NextThreshold` / `PrevThreshold` | `BondSnapshot.cs:23` / `:25` | **全项目零外部引用**（早期设计残留） |
+| `NextThreshold` / `PrevThreshold` | `BondSnapshot.cs:23` / `:25`（历史快照行号，已失效） | 该属性已随死码清理删除（保留历史记录）；原「**全项目零外部引用**（早期设计残留）」为 2026-11-03 调查结论 |
 
 **关键数据流**：`SoulSupport.FamilyItems` → `WoodTypes.Mask` → `PopCount` → `Build` → `BondState` → `SoulUIArmoryBondCore.DrawCoreFlow` / `SoulUIWoodPanel` / `SoulUIArmoryDetails`。
 
@@ -593,7 +593,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 
 | 分类 | 覆盖 | 缺口 |
 |---|---|---|
-| Items | 10 条（`SoulItem`、`GuardianGel`、4 个召唤物、6 个魂芯） | `SlashZenithTest` 中文侧两键被注释 → 走类型名 |
+| Items | 10 条（`SoulItem`、`GuardianGel`、4 个召唤物、6 个魂芯） | 原缺口为 `SlashZenithTest` 中文侧两键被注释 → 走类型名；该遗留测试剑及本地化键已随 T5 删除，缺口已消失（已删除，保留历史记录） |
 | Buffs | 10 条全覆 | — |
 | NPCs | `GuardianSlimeKing.DisplayName` | — |
 | Projectiles | 英文 11 / 中文 5 | **中文缺 `FlyingBladeShot`、`HolyHeavenStar`、`HolyHeavenImpact`、`LivingArmament`、`EnvironmentEffect`、`EnvironmentDomain`** —— 这 6 个都有绘制代码 |

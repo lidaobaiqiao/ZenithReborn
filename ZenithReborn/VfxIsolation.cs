@@ -13,7 +13,6 @@ public static class VfxIsolation
 
     // 当前迁移采用79材质；保留平面试验参数供其他材质接口使用。
     public static bool GlassPlaneOnly => false;
-    public static float GlassOpacity(float normalOpacity) => normalOpacity;
 
     // ================= 一、渲染分支总闸 =================
     // 主飞剑拖尾带面
@@ -96,7 +95,7 @@ public static class VfxIsolation
 
     // ================= 二、带面构成逐项开关 P01~P26 =================
     // 警告：这些 uniform 目前没有 shader 消费者——打包的 ZRSwordFlow.fx 未声明 uPart*，
-    // 生产代码里没有 PartValue 调用方，所以改值只影响调试面板显示，不影响画面。
+    // 生产代码里也没有按 uniform 名回读的入口（原 PartValue 已删），所以改值只影响调试面板显示，不影响画面。
     // 不删除条目是为了后续把着色器重连回来时，仍有一套稳定的 uniform 名与默认值可用。
     // 全部为 1 时代表"假设着色器已重连"的生产形态，与当前实际画面无关。
     // 程序构成默认全开并允许逐项切换，外部输入项保持禁用。
@@ -139,14 +138,6 @@ public static class VfxIsolation
 
     // 与 Parts 一一对应的当前值，下标即序号
     public static readonly float[] PartValues = Parts.Select(part => part.Allowed?part.Default:0f).ToArray();
-
-    // 按 uniform 名取当前值：供不走 Parts 循环的着色器入口（如材质核心）读取同一份开关状态。
-    public static float PartValue(string uniform)
-    {
-        for (int i = 0; i < Parts.Length && i < PartValues.Length; i++)
-            if (Parts[i].Uniform == uniform) return Parts[i].Allowed ? PartValues[i] : 0f;
-        return 0f;
-    }
 
     public static void SetAllParts(float value)
     {

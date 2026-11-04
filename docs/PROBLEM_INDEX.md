@@ -16,7 +16,7 @@
 | 顺序 | 可能模块 | 优先检查 | 关联检查位置 |
 |---|---|---|---|
 | 1 | 木质族手写译名表 | `ZenithReborn/WoodTypes.cs:34`（`Names` 8 项）。历史上首项写作"灰烬木剑"，官方 zh-Hans 为**白蜡木剑**（`ItemID.AshWoodSword` = 5284）；"灰烬"是地狱地形 `AshBlock` 的译名。当前已改对，警示注释留在 `:32-33` | `checks/ZenithPrototypeCheck/Check.cs`（内联本地化断言，全库仅 1 条） |
-| 2 | 物品显示名走 hjson，不走 `.cs` | `ZenithReborn/Localization/zh-Hans.hjson`（Items 仅 10 条）；`SlashZenithTest` 的中文侧两个键被注释 → 直接回落类型名 | `checks/check_mod_assets.py` |
+| 2 | 物品显示名走 hjson，不走 `.cs` | `ZenithReborn/Localization/zh-Hans.hjson`（Items 仅 10 条）；原 `SlashZenithTest` 中文侧两键被注释会回落类型名，该遗留测试剑及本地化键已随 T5 删除，此坑已失效（保留历史记录） | `checks/check_mod_assets.py` |
 | 3 | 族名/特性名硬编码在代码里 | `ZenithReborn/WoodTypes.cs:36`（`Effects`）、`:60`（`Description`）；`ZenithReborn/OreFamily.cs:21-41`（`Names/Tints`） | `checks/ZenithPrototypeCheck/FamilyAudit*` |
 | 4 | 界面文案全部硬编码 | `ZenithReborn/SoulUIPages.cs:8`（"武器寄宿/剑魂特性/成长记忆/环境之力"）。**改界面文案改 `.cs`，改物品名改 hjson** | — |
 | 5 | 弹幕中文名缺口 | `ZenithReborn/Localization/zh-Hans.hjson` 的 `Projectiles` 缺 6 条（`FlyingBladeShot`/`HolyHeavenStar`/`HolyHeavenImpact`/`LivingArmament`/`EnvironmentEffect`/`EnvironmentDomain`），这 6 个都有绘制代码 | — |
@@ -143,7 +143,7 @@
 ### 现象：打包 / 安装失败
 | 顺序 | 可能模块 | 优先检查 | 关联检查位置 |
 |---|---|---|---|
-| 1 | **跑的是小套件，报告却照样放行** | `checks/ZenithPrototypeCheck/Check.cs` 分支顺序 `GLASS:69 → INFORMATION_UI:75 → ECHO_ORE:83 → WOOD:125`（各自 `Environment.Exit(0)`）。设了 `ZENITH_GLASS` 就只跑玻璃套件，而 `checks/package_install.py:19` 只校验 `startswith('PASS: ')` → **静默收窄**，最危险的假绿 | `checks/run_wood_checks.ps1 -EchoOre` |
+| 1 | **（历史）跑的是小套件，报告却照样放行** | 旧行为：`checks/ZenithPrototypeCheck/Check.cs` 分支顺序 `GLASS:69 → INFORMATION_UI:75 → ECHO_ORE:83 → WOOD:125`（各自 `Environment.Exit(0)`）；设了 `ZENITH_GLASS` 就只跑玻璃套件，而 `checks/package_install.py:19` 当时只校验 `startswith('PASS: ')` → 静默收窄，曾是最危险的假绿。**该风险已由 `checks/package_install.py` 新增的 `FULL_SUITE_MARKER`（`SUITE=ZENITH_WOOD`）与 `MIN_FULL_SUITE_CHECKS` 防假绿标记修复**：缺全量套件标记或项数不足即拒绝安装；当前 `artifacts/wood-check.txt` 含 `SUITE=ZENITH_WOOD` 且为 8509 项。此行保留为历史记录 | `checks/run_wood_checks.ps1 -EchoOre` |
 | 2 | 时序断言：报告必须比包新 | `checks/package_install.py:25`（`report.stat().st_mtime > built.stat().st_mtime`）；包被任何脚本重建都会失败 —— 见上条现象第 6 行 | `checks/package_install.py` |
 | 3 | 哈希退化路径 | `checks/package_install.py:31-36`：哈希不匹配时**不直接失败**，退化成"包内 DLL == `bin/Release/net8.0/ZenithReborn.dll"` 弱断言 | `artifacts/native-build-check.json` |
 | 4 | 着色器编译失败即中断 | `checks/run_wood_checks.ps1:17` 调 `checks/compile_effects.py`；`.fx` 改了没同步 `.fxc` 会在这里炸 | `checks/ZenithReborn/Assets/Effects/build-manifest.json` |

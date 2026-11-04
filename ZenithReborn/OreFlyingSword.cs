@@ -11,7 +11,7 @@ namespace ZenithReborn;
 public class OreFlyingSword : ModProjectile
 {
     public const float LungeSpeed=10.5f*1.1f;
-    public const int AppearanceStep=3, GrowFrames=18, ChargeFrames=8;
+    public const int GrowFrames=18, ChargeFrames=8;
     public int GatherFrames=>readyAge;
     public bool WaitingForVolley {get;private set;}
     private int readyAge=GrowFrames+ChargeFrames;

@@ -104,7 +104,7 @@
 - `SoulBlade : ModProjectile`（`SoulBlade.cs:63`）：`ConfigureReborn`（`:81`，设 8 游戏帧命中免疫=16 更新）、`CanDamage`（`:141`）、`TryGetEchoPose`（`:150`）、`CanHitNPC`（`:160`，读 `SoulCurses.HitLimit`）、`AI`（`:171`，椭圆轨迹 + 轨迹历史 + 地形穿透 + 24 帧释放特技）、`ResolveHitUnit`（`:268`，本体优先、其次最近剑影）、`OnHitNPC`（`:294`）、`ModifyHitNPC`（`:333`）、`ReleaseSpecial`/`ReleaseWeaponSpecial`（`:352`/`:363`）、`PreDraw`（`:485`）。
 - `SoulItem.BladeDamage`（`SoulCombat.cs:9`）= `GetWeaponDamage(host) * Potency * OreFamily.MainDamageMultiplier`。
 - `SoulSwingPlayer : ModPlayer`（`SoulSwingPlayer.cs:7`）：`Begin`（`:16`，选本挥所有有效主攻 + 计算 `budget=min(hosts, Blades(soul))` + 归鞘打断旧轮 + 飞刃族互斥 `budget=0`）、`FireHost`（`:39`，≤3 把时每节点一把）、`PostItemCheck`（`:57`，>3 把时均匀分布）、`Valid`（`:35`，每帧校验武器未换/魂域未开）。
-- `WeaponFamilies`（`WeaponFamilies.cs:8`）：`BladeFamily` 六类（`:6`）、`Of`（`:18`，木质/矿石优先短路）、`Name`/`Description`（`:22`/`:25`）、`Interval`（`:32`）、`Range`（`:33`）。
+- `WeaponFamilies`（`WeaponFamilies.cs:8`）：`BladeFamily` 六类（`:6`）、`Of`（`:18`，木质/矿石优先短路）、`Name`/`Description`（`:22`/`:25`）、`Interval`（`:32`）、`Range`（`:33`）。【已删除/历史快照：其中 `Interval`（`:32`）已随 2026-11-04 清理删除；本表为 2026-11-03 调查快照，原文保留】
 
 **关联模块**
 - 上游：`SoulItem.Shoot`（`SoulItem.cs:440`）→ `SoulSwingPlayer.FireHost`；`SoulItem.UseAnimation`（`:437`）→ `Begin`。
@@ -193,7 +193,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 **核心文件**：`BondSnapshot.cs`
 
 **重要类 / 方法 / 入口**
-- `BondKind`（`:6`）、`BondState`（`:9`，`Active`/`NextThreshold`/`PrevThreshold`/`StageName`/`StageCode`/`StageLine`）。
+- `BondKind`（`:6`）、`BondState`（`:9`，`Active`/`NextThreshold`/`PrevThreshold`/`StageName`/`StageCode`/`StageLine`）。【已删除/历史快照：其中 `NextThreshold`/`PrevThreshold` 两个属性已随 2026-11-04 清理删除；本表为 2026-11-03 调查快照，原文保留】
 - `BondSnapshot`（`:35`）：`WoodThresholds=[1,2,4,6,8]`（`:38`）、`OreThresholds=[1,2,4,6,8,10]`（`:40`）、`WoodStageNames`（`:42`，萌芽/生根/繁枝/森罗/森林共鸣）、`StageNameOf`（`:48`）、`StageCodeOf`（`:56`）、`Wood(soul)`（`:59`）、`Ore(soul)`（`:67`）、`Build`（`:74`）、`Evaluate`（`:93`）、`Leading`（`:96`）。
 - `BondColors`（`:112`）：`Base`（`:134`）、`Tier`（`:137`）、`Prismatic`（`:144`）。
 
@@ -266,9 +266,9 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 
 ### 模块 8 · 模组装配、网络中继与存档兼容
 
-**职责一句话**：模组的 `Mod` 入口（键位注册 + 12 种网络包分发）、英雄模组前缀重建的抢救式兼容、旧版武技字段的"只存不用"、全局 using 补齐，以及一个遗留的测试武器。
+**职责一句话**：模组的 `Mod` 入口（键位注册 + 12 种网络包分发）、英雄模组前缀重建的抢救式兼容、旧版武技字段的"只存不用"、全局 using 补齐，以及一个遗留的测试武器（该测试物品已移除）。
 
-**核心文件**：`ZenithReborn.cs`、`HeroPrefixCompat.cs`、`SoulLegacyMartialData.cs`、`GlobalUsings.cs`、`SlashZenithTest.cs`
+**核心文件**：`ZenithReborn.cs`、`HeroPrefixCompat.cs`、`SoulLegacyMartialData.cs`、`GlobalUsings.cs`、`SlashZenithTest.cs`【已删除/历史快照：该测试物品源码与本地化键已随 2026-11-04 清理删除；本表为 2026-11-03 调查快照，原文保留】
 
 **重要类 / 方法 / 入口**
 - `ZenithReborn : Mod`（`ZenithReborn.cs:8`）：`OpenSoul`(P) / `ActivateYujian`(O) 键位（`:10-16`）；`HandlePacket`（`:18`）动作表：
@@ -291,7 +291,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 - `HeroPrefixCompat`（`HeroPrefixCompat.cs:11`）：`Remember`（`:27`，鼠标持有剑魂时缓存全量数据）、`TryRestore`（`:48`，只在"空剑魂 + 全零状态"时回填）、`Clear`（`:73`）。静态缓存包含 `hosts/supports/forest/crown/additional/legendary/soulId/kills/cores/oreCollection/seals/legacy/yujian/martial/environments/domain/attached/memory`。
 - `SoulLegacyMartialData`（`SoulLegacyMartialData.cs:7`）：`LegacyMartialCharge`/`LegacyMartialTier` + `Save/Load/Send/ReceiveLegacyMartial`（`:12-19`）—— 注释明确"不参与任何玩法"。
 - `GlobalUsings.cs:3-9`：补 `System`/`Collections.Generic`/`IO`/`Linq`/`Text`/`Threading`/`Threading.Tasks`。
-- `SlashZenithTest`（`SlashZenithTest.cs:10`）：测试用近战剑，木头 1 个合成；注释写了"正式内容请勿依赖，可整文件删除"。
+- `SlashZenithTest`（`SlashZenithTest.cs:10`）：测试用近战剑，木头 1 个合成；注释写了"正式内容请勿依赖，可整文件删除"。【已删除/历史快照：已随 2026-11-04 清理删除；本表为 2026-11-03 调查快照，原文保留】
 
 **关联模块**：`HandlePacket` 是模块 2/4 的公共入口；`HeroPrefixCompat` 依赖 `SoulItem` 的全部字段与 `SoulLegacyMartialData`。
 
@@ -339,7 +339,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 | `ZenithReborn/HeroPrefixCompat.cs` | internal 静态类 | 存档兼容 | 英雄模组前缀重建时的全量数据抢救缓存与空剑魂回填 | `SoulItem` 全部字段、`SoulItem.ApplyPrefix`、`SoulPlayer.PostUpdate` | 已验证 |
 | `ZenithReborn/SoulLegacyMartialData.cs` | `SoulItem` 分部 | 存档兼容 | 旧版武技字段（充能/阶位）的存档与网络字段，注释明确不参与玩法 | `SoulItem.SaveData/LoadData/NetSend/NetReceive` | 已验证 |
 | `ZenithReborn/GlobalUsings.cs` | 编译配置 | 存档兼容/工程 | 补齐 tModLoader 编译器缺失的 System 系列全局 using | 全项目 | 已验证 |
-| `ZenithReborn/SlashZenithTest.cs` | ModItem | 遗留测试 | 复用天顶剑贴图的普通挥砍测试武器，木头 1 个合成，注释自述可删 | 无（全项目零引用） | 已验证 |
+| `ZenithReborn/SlashZenithTest.cs` | ModItem | 遗留测试 | 复用天顶剑贴图的普通挥砍测试武器，木头 1 个合成，注释自述可删 | 无（全项目零引用） | 已验证【已删除/历史快照：已随 2026-11-04 清理删除；本表为 2026-11-03 调查快照，原文保留】 |
 
 **覆盖：32 / 32**
 
@@ -483,6 +483,6 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 **改动会影响哪些模块**：只有配阵页视觉。但它是"数量口径"的**第三套实现**（`FamilyItems` 计数 vs `SoulItem.Active` vs `SoulCurses.CombatWood` 的 `TraitEnabled` 过滤），三者数值可能不同。
 
 **已知历史包袱**
-1. `BondState.NextThreshold`、`PrevThreshold` 两个属性**全项目零外部引用**（grep 确认，仅自身定义处出现），是早期"显示下一档门槛"设计的残留；`Active`/`StageLine`/`StageName`/`IsMax`/`Progress` 均有实际使用（`SoulUIWoodPanel.cs:74`、`SoulUIArmoryDetails.cs:50`、`SoulUIArmoryBondCore.cs:13/76`）。
+1. `BondState.NextThreshold`、`PrevThreshold` 两个属性**全项目零外部引用**（grep 确认，仅自身定义处出现），是早期"显示下一档门槛"设计的残留；`Active`/`StageLine`/`StageName`/`IsMax`/`Progress` 均有实际使用（`SoulUIWoodPanel.cs:74`、`SoulUIArmoryDetails.cs:50`、`SoulUIArmoryBondCore.cs:13/76`）。【已删除/历史快照：上述两个属性已随 2026-11-04 清理删除；本表为 2026-11-03 调查快照，原文保留】
 2. `Build`（`:74`）的 `Math.Clamp(count,0,max)` 会隐藏超额：木质超过 8 种时 `Count` 被截断为 8，UI 无法显示实际持有数。
 3. `BondSnapshot.Wood` 的注释（`:61-62`）明确"不受切换诅咒过滤"，而 `SoulCurses.CombatWood`（`SoulCurses.cs:87`）**受** `TraitEnabled` 过滤 —— 同一屏内两个数字不一致属预期。

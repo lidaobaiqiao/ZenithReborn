@@ -176,7 +176,7 @@ public class AirflowWorldCheck : ModSystem
                 File.AppendAllText(Path.Combine(root,"lighting.jsonl"),JsonSerializer.Serialize(new{tick,Main.dayTime,Main.time,
                     sky=Main.ColorOfTheSkies.PackedValue,light=light.PackedValue,Main.drawToScreen,Main.screenWidth,Main.screenHeight,
                     targetWidth=Main.screenTarget.Width,targetHeight=Main.screenTarget.Height,
-                    zoom=Main.GameViewMatrix.Zoom.X,padding=BlessingCamera.RequestedPadding,
+                    zoom=Main.GameViewMatrix.Zoom.X,padding=0,
                     blackPixels=pixels.Count(c=>c.R<4&&c.G<4&&c.B<4),totalPixels=pixels.Length})+"\n");
             }
         }

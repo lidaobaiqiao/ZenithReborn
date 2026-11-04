@@ -47,7 +47,6 @@ public partial class SoulItem : ModItem
     public int BaseCapacity => Attached ? Math.Min(10, SoulProgress.Capacity(Kills, Cores)) : 0;
     public int Capacity => BaseCapacity;
     // 仅保留兼容别名；共用机制不再归属于木质族。
-    public int WoodSupportCapacity => SoulSupport.GrantedBy(this,"wood");
     public int SupportCapacity => SoulSupport.Capacity(this);
     // 扩展数组只用于取回0.3.9和0.3.10存入的物品。
     // 这些物品不提供生效槽位，也不计入战斗和套装数量。

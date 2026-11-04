@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
-using Terraria.ModLoader;
 
 namespace ZenithReborn;
 
@@ -51,15 +50,6 @@ public static class OreSwordEffects
             Glow(tint,strength),delta.ToRotation(),new Vector2(0,.5f),new Vector2(length,width),SpriteEffects.None,0);
     }
 
-    public static void Halo(Vector2 at,Color tint,float radius,float strength)
-    {
-        // 自有光斑图片也受纯代码排查限制；不拿别的纹理替代，以免掩盖来源。
-        if(VfxIsolation.PureCodeOnly)return;
-        var texture=ModContent.Request<Texture2D>("ZenithReborn/SwordSpark").Value;
-        Main.spriteBatch.Draw(texture,at-Main.screenPosition,null,Glow(tint,strength),0,
-            texture.Size()*.5f,radius/8,SpriteEffects.None,0);
-    }
-
     public static void Star(Vector2 at,Color tint,float size,float strength,float rotation=0)
     {
         var texture=TextureAssets.Extra[ExtrasID.SharpTears].Value;
@@ -78,20 +68,6 @@ public static class OreSwordEffects
             Vector2 b=(MathHelper.TwoPi*(i+1)/segments).ToRotationVector2()*radius;
             a.Y*=flatten;b.Y*=flatten;
             Line(at+a,at+b,tint,1.5f,strength);
-        }
-    }
-
-    public static void Trail(SwordFlightTrail trail,Color tint,float width)
-    {
-        for(int i=trail.Count-1;i>=1;i--)
-        {
-            Vector2 a=trail.Point(i),b=trail.Point(i-1);
-            if(Vector2.DistanceSquared(a,b)>96*96)continue;
-            float strength=SwordFlightTrail.Strength(i-1,trail.Count);
-            // 只画两层而不是三层：一条主体加一条细亮芯。
-            // 之前那层宽光晕正是把拖尾糊成一片的原因。
-            Line(a,b,tint,width*.34f*strength,.22f*strength);
-            Line(a,b,Color.Lerp(tint,Color.White,.55f),Math.Max(.5f,width*.06f*strength),.3f*strength);
         }
     }
 

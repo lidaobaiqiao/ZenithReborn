@@ -109,11 +109,9 @@ public class SoulBlade : ModProjectile
     private Vector2[] trailPoints;
     private Vector2[] trailCenters;
     private float[] trailRotations;
-    private float[] trailPhases;
     // 原版会为每个历史点保存 oldSpriteDirection；剑飞行途中会翻转朝向，
     // 旧剑影必须用它自己那一帧的朝向，否则镜像和旋转偏移都会错。
     private int[] trailDirections;
-    private const int TrailLength = SoulRibbonMesh.HistoryLength;
     private const int HistoryLength = 96;
     private int trailCount;
     private Vector2 lastTrailAnchor;
@@ -131,7 +129,7 @@ public class SoulBlade : ModProjectile
         oreHitUnits=0;HitUnit=0;
         Blessings=new();
         Vertical = 60f;
-        trailPoints=new Vector2[HistoryLength];trailCenters=new Vector2[HistoryLength];trailRotations=new float[HistoryLength];trailPhases=new float[HistoryLength];trailDirections=new int[HistoryLength];
+        trailPoints=new Vector2[HistoryLength];trailCenters=new Vector2[HistoryLength];trailRotations=new float[HistoryLength];trailDirections=new int[HistoryLength];
         trailCount=0;hasTrailAnchor=false;
         trailEndings=new SoulTrailEnding.Handle[SoulTrailUnits.Count];
     }
@@ -245,9 +243,8 @@ public class SoulBlade : ModProjectile
         int historyLimit=HistoryLength;
         if(trailCount>0 && Vector2.DistanceSquared(Projectile.Center,trailCenters[0])>90000) trailCount=0;
         for(int i=Math.Min(trailCount,historyLimit-1);i>0;i--)
-        { trailPoints[i]=trailPoints[i-1];trailCenters[i]=trailCenters[i-1];trailRotations[i]=trailRotations[i-1];trailPhases[i]=trailPhases[i-1];trailDirections[i]=trailDirections[i-1]; }
+        { trailPoints[i]=trailPoints[i-1];trailCenters[i]=trailCenters[i-1];trailRotations[i]=trailRotations[i-1];trailDirections[i]=trailDirections[i-1]; }
         trailCenters[0]=Projectile.Center;trailRotations[0]=Projectile.rotation;
-        trailPhases[0]=phase;
         trailDirections[0]=Projectile.spriteDirection;
         trailPoints[0]=Projectile.Center+(Projectile.rotation-MathHelper.PiOver4).ToRotationVector2()*26*DisplayScale;
         trailCount=Math.Min(historyLimit,trailCount+1);
@@ -410,18 +407,6 @@ public class SoulBlade : ModProjectile
             Main.projectile[index].netUpdate = true;
         }
     }
-    public int BuildRibbon(VertexPositionColor[] vertices)
-    {
-        if(Projectile.hide || trailCount<2) return 0;
-        int itemType=(int)Projectile.ai[0];
-        if(itemType<=0 || itemType>=ItemLoader.ItemCount) return 0;
-        Main.instance.LoadItem(itemType);
-        Texture2D texture=TextureAssets.Item[itemType].Value;
-        Rectangle frame=Main.itemAnimations[itemType]?.GetFrame(texture)??texture.Frame();
-        float halfLength=frame.Size().Length()*.5f*DisplayScale;
-        return SoulRibbonMesh.Build(trailCenters,trailRotations,Math.Min(trailCount,TrailLength),halfLength,
-            SoulVisuals.Tint(itemType),Projectile.Opacity*(retired?1-retireAge/8f:1),Main.screenPosition,vertices);
-    }
     // 按实际记录的剑身位置和朝向铺材质；不再由玩家中心重新猜一条圆弧。
     private void CaptureTrailEndings(bool force=false)
     {
@@ -448,13 +433,6 @@ public class SoulBlade : ModProjectile
     }
     public override void OnKill(int timeLeft)=>CaptureTrailEndings(true);
 
-    private int FindTrailSample(float samplePhase)
-    {
-        if(samplePhase<0 || trailCount<=0)return -1;
-        int i=0;
-        while(i+1<trailCount && Math.Abs(trailPhases[i+1]-samplePhase)<Math.Abs(trailPhases[i]-samplePhase))i++;
-        return i;
-    }
     public void DrawRibbonShader(VertexPositionColorTexture[] vertices)
     {
         if(Projectile.hide || trailCount<2 || Main.dedServ)return;

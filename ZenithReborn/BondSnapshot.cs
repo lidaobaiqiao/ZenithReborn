@@ -19,10 +19,6 @@ public sealed record BondState(
 {
     // 是否已激活任意羁绊。
     public bool Active => Count > 0;
-    // 当前阶段的下一档阈值；已满时返回最大数量。
-    public int NextThreshold => Tier < Thresholds.Length ? Thresholds[Tier] : MaxCount;
-    // 当前阶段起始阈值；未激活时为0。
-    public int PrevThreshold => Tier >= 1 ? Thresholds[Tier - 1] : 0;
     // 阶段名（木质Ⅰ～Ⅴ，矿石沿用一～五阶与满羁绊），供核心与面板共用。
     public string StageName => BondSnapshot.StageNameOf(Kind, Tier);
     // 阶段罗马数字；矿石无编号，返回空串。

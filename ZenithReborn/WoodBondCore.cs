@@ -77,7 +77,4 @@ public readonly record struct WoodBondHit(
     NPC Target,          // 命中目标
     float D,             // 本次命中实际伤害快照
     bool IsPrimary)      // 是否主命中（派发入口恒为 true；衍生伤害不得以主命中身份回流）
-{
-    // 来源武器物品实例：按槽位取回（需前缀/词缀时使用）；槽位未知时返回空物品。
-    public Item SourceItem => HostSlot >= 0 ? Soul.ItemAt(HostSlot) : new Item();
-}
+{ }

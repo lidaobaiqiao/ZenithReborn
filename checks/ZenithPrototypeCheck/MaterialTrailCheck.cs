@@ -65,11 +65,6 @@ internal static class MaterialTrailCheck
             Vector3.Distance(vertices[i].Position,shifted[i].Position)>.1f),"Inner mask boundary moves at fixed sword poses");
         check(Enumerable.Range(0,count).Where(i=>i%24==18).All(i=>vertices[i].Position==shifted[i].Position),
             "Animated inner boundary does not move real sword-tip edge");
-        check(SoulMaterialTrail.Visibility(0,false,0)==0 && SoulMaterialTrail.Visibility(6,false,0)<SoulMaterialTrail.Visibility(12,false,0),
-            "Trail forms gradually with blade visibility");
-        check(SoulMaterialTrail.Dissolve(60,false,0)==0 && SoulMaterialTrail.Dissolve(72,false,0)>.4f &&
-            SoulMaterialTrail.Visibility(84,false,0)==0 && SoulMaterialTrail.Visibility(30,true,8)==0,
-            "Normal return and early retirement finish without stale material");
         var stationary=Enumerable.Repeat(centers[0],centers.Length).ToArray();
         var fixedRotations=Enumerable.Repeat(rotations[0],rotations.Length).ToArray();
         check(SoulMaterialTrail.Build(stationary,fixedRotations,stationary.Length,32,Vector2.Zero,shifted)==0,

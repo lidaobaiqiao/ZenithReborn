@@ -37,9 +37,12 @@
     ⑥ VfxLibrary（不逐文件，只给分组统计并指向输入目录下的 vfx-library-manifest.txt）
 
 五、覆盖口径与排除规则
-    与 checks/map_audit.py 完全一致——本脚本不定义排除规则，只按磁盘现实收录。
+    排除口径与 checks/map_audit.py 保持同一套（见下方 EXCLUDE_ANY_DIRS /
+    EXCLUDE_FILE_SUFFIXES）：*/__pycache__/ 与 *.pyc 这类 Python 运行时缓存不收进索引。
+    本脚本不扫描全盘做分母，只从报告表格与补写行按磁盘现实生成；glob 展开出的成员
+    会先过一遍排除，避免把运行时缓存混进来。
     VfxLibrary/、artifacts/、*-profile/、*-playtest/、bin/、obj/、tools/{ilspy,xnbcli,xnbcli-binary}
-    不进审计分母；本索引仍然照实收录（这些目录的行不影响覆盖率，只影响可读性）。
+    不进审计分母；报告里针对这些目录的分组/统计行仍照实收录（不影响覆盖率，只影响可读性）。
 
 六、如何更新
     改完源码 / 改完调查报告后：
@@ -78,6 +81,21 @@ DEFAULT_PREFIX = {
 }
 
 ROOT_PREFIXES = ("ZenithReborn/", "checks/", "docs/", "tools/", "VfxLibrary/")
+
+# 与 checks/map_audit.py 的排除口径保持一致：Python 运行时缓存不收进索引。
+# 本脚本不扫描全盘做分母，这里只用于过滤 glob 展开出的成员，避免报告通配行把
+# __pycache__/*.pyc 之类的缓存文件混进 docs/FILE_INDEX.md。
+EXCLUDE_ANY_DIRS = {"__pycache__"}
+EXCLUDE_FILE_SUFFIXES = (".pyc",)
+
+
+def is_excluded_rel(rel: str) -> bool:
+    """判断相对路径是否属于运行时缓存，命中则不应写进索引。"""
+    parts = rel.split("/")
+    if any(name in EXCLUDE_ANY_DIRS for name in parts[:-1]):
+        return True
+    return parts[-1].endswith(EXCLUDE_FILE_SUFFIXES)
+
 
 HEADER_ALIASES = {
     "文件路径": "path",
@@ -308,6 +326,16 @@ SUPPLEMENT_ROWS = [
     ("docs/AI接入指南.md", "Markdown 交接指南",
      "导航文档", "写给外部接手 AI 的自包含接入文档：项目定位、clone 后必改的两处 targets 路径、环境四件套、三条命令、地图选读表、六条硬规则、六个已踩过的坑、提交纪律、设计边界、卡住时的排查表",
      "docs/CODEBASE_MAP.md、docs/PROBLEM_INDEX.md、ZenithReborn/build.txt", "人工补写"),
+    # --- 本轮新增源码（2026-11-04，调查报告归档时尚不存在，按源码逐条核对补写） ---
+    ("ZenithReborn/LivingProxyOwnerState.cs", "C# 源码（状态复制 / ModSystem）",
+     "剑灵·活体武器代理", "活体武器代理的玩家数值复制与蝙蝠棍治疗转发：LivingProxyOwnerState.Copy 把各伤害类的伤害/暴击/攻速/护穿/击退、手套与饰品字段、buff 与 ownedProjectileCounts 数组从真实玩家拷进代理玩家（数组用 Array.Copy 后清尾，不共享可变数组）；LivingProxyHealing 用 On_Player.Heal 钩子把原版蝙蝠棍命中回血从代理转发给真实玩家",
+     "LivingArmament.cs、LivingWeaponProxy.cs、checks/ZenithPrototypeCheck/LivingBatHealCheck.cs", "人工补写"),
+    ("checks/ZenithPrototypeCheck/LivingBatHealCheck.cs", "C# 夹具（静态断言）",
+     "夹具·活体武器代理", "对照原版蝙蝠棍命中回血：独立服务端构造真人与代理两种 Trial，断言真人基准命中回血 1、代理命中后真实玩家回血 1、同一次挥击不重复回血、满血不超上限、无效目标不触发、真实玩家普通使用不受转发影响；用占满 combatText 槽规避无字体资源的绘制",
+     "ZenithReborn/LivingProxyOwnerState.cs（LivingProxyHealing）、Check.cs", "人工补写"),
+    ("checks/ZenithPrototypeCheck/LivingProjectileOwnershipCheck.cs", "C# 夹具（静态断言）",
+     "夹具·活体武器代理", "从生产召唤槽发射真实原版弹幕（铜短剑/长矛/附魔回旋镖/泰拉刃/飞刀/吸血鬼刀），核对代理身份绑定与还原：断言弹幕由召唤体实际生成、依附型身份判定（吸血鬼刀除外）、AI 后恢复真实玩家与鼠标位置、近战弹幕位置依附远处代理、飞刀在召唤体结束后恢复真实玩家回收",
+     "LivingChannelProjectile.cs、LivingArmament.cs、Check.cs", "人工补写"),
 ]
 
 # 分组索引：同一目录下同类批量文件，逐行列会淹没索引，改为一行 + 成员清单 txt。
@@ -377,14 +405,15 @@ def expand_glob(root: Path, pattern: str) -> list[str]:
         hits = [p for p in root.glob(pattern) if p.is_file()]
     except (ValueError, OSError):
         return []
-    return sorted(p.relative_to(root).as_posix() for p in hits)
+    rels = (p.relative_to(root).as_posix() for p in hits)
+    return sorted(rel for rel in rels if not is_excluded_rel(rel))
 
 
 def parse_report(path: Path, root: Path, warn: list[str]) -> tuple[list[dict], dict]:
     """返回 (记录列表, 统计)。记录字段见 STATIC_ROWS。"""
     lines = path.read_text(encoding="utf-8").splitlines()
     records: list[dict] = []
-    stats = {"tables": 0, "rows": 0, "elided": 0, "unresolved": 0, "glob_rows": 0}
+    stats = {"tables": 0, "rows": 0, "elided": 0, "unresolved": 0, "glob_rows": 0, "historical": 0}
     prefix = default_prefix_for(path.name)
 
     i = 0
@@ -410,6 +439,7 @@ def parse_report(path: Path, root: Path, warn: list[str]) -> tuple[list[dict], d
         last_dir = ""
 
         while i < len(lines) and lines[i].strip().startswith("|"):
+            row_line = lines[i].strip()
             cells = split_row(lines[i])
             i += 1
             if is_separator(cells):
@@ -481,6 +511,11 @@ def parse_report(path: Path, root: Path, warn: list[str]) -> tuple[list[dict], d
                 records.append(rec)
                 last_dir = full.rsplit("/", 1)[0] + "/" if "/" in full else ""
             else:
+                # 归档快照里有已标注「已删除/历史快照」的行：文件本来就不该在磁盘上，
+                # 不做存在性校验、不计入失效路径，单列统计。
+                if "已删除/历史快照" in row_line or "历史快照标注" in row_line:
+                    stats["historical"] += 1
+                    continue
                 stats["unresolved"] += 1
                 warn.append("%s: 报告路径在磁盘上不存在 %r" % (path.name, full))
         continue
@@ -632,7 +667,7 @@ def build(root: Path) -> tuple[str, dict]:
     out.append("数据来源 : %s/ 下 %d 份分组调查报告（A~I）的六列索引表" % (src_dir.relative_to(root).as_posix(), len(reports)))
     out.append("索引条目 : %d 条（去重合并 %d 次重复出现；报告未覆盖的人工补写 %d 条）" % (total_rows, dup, added))
     out.append("覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致")
-    out.append("排除目录 : artifacts/  bin/  obj/  *-profile/  *-playtest/  .git/  编辑器配置目录")
+    out.append("排除目录 : artifacts/  bin/  obj/  */__pycache__/  *.pyc  *-profile/  *-playtest/  .git/  编辑器配置目录")
     out.append("整体记录 : VfxLibrary/（11756 个原版素材，按第六节单独核对）")
     out.append("           tools/ilspy/  tools/xnbcli/  tools/xnbcli-binary/（第三方，记“第三方-未深入”）")
     out.append("如何更新 : 改完源码或调查报告后跑  python checks/build_file_index.py && python checks/map_audit.py")
@@ -648,11 +683,11 @@ def build(root: Path) -> tuple[str, dict]:
     out.append("## 抽取统计")
     out.append("")
     out.append("```text")
-    cols = [22, 6, 6, 8, 8, 8]
-    heads = ["报告", "索引表", "原始行", "通配展开", "省略合并", "无法解析"]
+    cols = [22, 6, 6, 8, 8, 8, 8]
+    heads = ["报告", "索引表", "原始行", "通配展开", "省略合并", "无法解析", "历史快照"]
     out.append("".join(pad(h, w) + "  " for h, w in zip(heads, cols)).rstrip())
     for name, s in per_report:
-        vals = [name, str(s["tables"]), str(s["rows"]), str(s["glob_rows"]), str(s["elided"]), str(s["unresolved"])]
+        vals = [name, str(s["tables"]), str(s["rows"]), str(s["glob_rows"]), str(s["elided"]), str(s["unresolved"]), str(s["historical"])]
         out.append("".join(pad(v, w) + "  " for v, w in zip(vals, cols)).rstrip())
     out.append("```")
     out.append("")

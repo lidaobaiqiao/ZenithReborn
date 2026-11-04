@@ -589,7 +589,7 @@ $ grep -rn "Terraria/Images" ZenithReborn --include=*.cs | wc -l
 | 位置 | 引用 | 用途 |
 |---|---|---|
 | `ZenithReborn/OreFlyingSword.cs:61` | `Terraria/Images/Item_` + `ItemID.Zenith` | 飞剑本体用天顶剑贴图 |
-| `ZenithReborn/SlashZenithTest.cs:13` | `Terraria/Images/Item_` + `ItemID.Zenith` | 测试斩击 |
+| `ZenithReborn/SlashZenithTest.cs:13` | `Terraria/Images/Item_` + `ItemID.Zenith` | 测试斩击【已删除/历史快照：已随 2026-11-04 清理删除；本表为 2026-11-03 调查快照，原文保留】 |
 | `ZenithReborn/SoulBlade.cs:121`、`SoulItem.cs:90` | `Terraria/Images/Item_` + `ItemID.Zenith` | 灵魂剑/物品图标 |
 | `ZenithReborn/FlyingBladeShot.cs:16` | `Terraria/Images/Item_` + `ItemID.FlyingKnife` | 飞刀弹幕 |
 | `ZenithReborn/OreSkyfall.cs:39` | `Terraria/Images/Item_` + `ItemID.TitaniumSword` | 天铸巨剑代表武器贴图 |

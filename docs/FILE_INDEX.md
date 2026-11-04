@@ -4,11 +4,11 @@
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-04 18:38:51
+生成时间 : 2026-11-04 23:54:30
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
-索引条目 : 754 条（去重合并 4 次重复出现；报告未覆盖的人工补写 40 条）
+索引条目 : 756 条（去重合并 4 次重复出现；报告未覆盖的人工补写 43 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
-排除目录 : artifacts/  bin/  obj/  *-profile/  *-playtest/  .git/  编辑器配置目录
+排除目录 : artifacts/  bin/  obj/  */__pycache__/  *.pyc  *-profile/  *-playtest/  .git/  编辑器配置目录
 整体记录 : VfxLibrary/（11756 个原版素材，按第六节单独核对）
            tools/ilspy/  tools/xnbcli/  tools/xnbcli-binary/（第三方，记“第三方-未深入”）
 如何更新 : 改完源码或调查报告后跑  python checks/build_file_index.py && python checks/map_audit.py
@@ -24,16 +24,16 @@
 ## 抽取统计
 
 ```text
-报告                    索引表  原始行  通配展开  省略合并  无法解析
-A-soul-core.md          1       32      0         0         0
-B-families.md           1       39      0         0         0
-C-ui.md                 1       22      0         0         0
-D-render-vfx.md         1       49      5         0         0
-E-checks-scripts.md     1       93      0         0         0
-F-checks-fixtures.md    2       113     0         0         0
-G-docs-current.md       1       64      0         0         0
-H-docs-archive.md       7       116     0         0         0
-I-tools-vfx.md          10      163     1         40        0
+报告                    索引表  原始行  通配展开  省略合并  无法解析  历史快照
+A-soul-core.md          1       32      0         0         0         1
+B-families.md           1       39      0         0         0         0
+C-ui.md                 1       22      0         0         0         0
+D-render-vfx.md         1       49      5         0         0         0
+E-checks-scripts.md     1       93      0         0         0         0
+F-checks-fixtures.md    2       113     0         0         0         0
+G-docs-current.md       1       64      0         0         0         0
+H-docs-archive.md       7       116     0         0         0         0
+I-tools-vfx.md          10      163     1         40        0         0
 ```
 
 ---
@@ -74,6 +74,7 @@ I-tools-vfx.md          10      163     1         40        0
 | `ZenithReborn/LivingArmamentFamily.cs` | 静态名册 | 剑灵 | 暂定 4 把候选名册与启用判定 | `SoulCurses.TraitItems`、`WeaponFamilyTags` | 已验证 |
 | `ZenithReborn/LivingArmamentPlayer.cs` | ModPlayer | 剑灵 | 为每个 `TraitMains` 出战槽补生成召唤体（只本地玩家） | `LivingArmament`、`SoulItem.VisibleSlotIds` | 已验证 |
 | `ZenithReborn/LivingChannelProjectile.cs` | GlobalProjectile + ModSystem | 剑灵 | 给 aiStyle 9/15/99 弹幕在 `On_Projectile.AI` 期间临时替换玩家与鼠标 | `LivingWeaponProxy` | 已验证 |
+| `ZenithReborn/LivingProxyOwnerState.cs` | C# 源码（状态复制 / ModSystem） | 剑灵·活体武器代理 | 活体武器代理的玩家数值复制与蝙蝠棍治疗转发：LivingProxyOwnerState.Copy 把各伤害类的伤害/暴击/攻速/护穿/击退、手套与饰品字段、buff 与 ownedProjectileCounts 数组从真实玩家拷进代理玩家（数组用 Array.Copy 后清尾，不共享可变数组）；LivingProxyHealing 用 On_Player.Heal 钩子把原版蝙蝠棍命中回血从代理转发给真实玩家 | LivingArmament.cs、LivingWeaponProxy.cs、checks/ZenithPrototypeCheck/LivingBatHealCheck.cs | 人工补写 |
 | `ZenithReborn/LivingWeaponProxy.cs` | 普通类 | 剑灵 | 每槽独立假 Player；`ItemCheck()` 走引擎物品检查攻击 | `LivingArmament`、`LivingChannelProjectile` | 已验证 |
 | `ZenithReborn/LunarSummonRecovery.cs` | ModSystem + GlobalNPC + ModCommand | 进度解锁 | 四柱→月总召唤的卡死检测与修复（含磁盘 JSON 请求、`/zmoon repair`） | `ZenithReborn.HandlePacket`、`AttachmentStory.Notice` | 已验证 |
 | `ZenithReborn/MaterialInheritance.cs` | C# 静态工具 | 材质 | `"base"` 递归继承（最大 8 层）、未知字段忽略 | `SwordFlowMaterial.Load` | 已验证 |
@@ -89,7 +90,6 @@ I-tools-vfx.md          10      163     1         40        0
 | `ZenithReborn/OreSwordTraits.cs` | 静态判定 | 矿石族 | 铜（回响叠层）/锡（阵内增伤）两条共用特性开关 | `OreFamily.MaterialOf`、`SoulItem.TraitItems` | 已验证 |
 | `ZenithReborn/OreWeaponEnding.cs` | 静态绘制 + 数据类型 | 矿石族 | 武器消散残影（`OreWeaponEnd`/`OreAirFront`/64 条历史/粒子） | `OrePierceFeedback`、`OreSwordEffects.SpectralTexture` | 已验证 |
 | `ZenithReborn/Progression.cs` | 静态类 + ModPlayer + ModSystem + GlobalNPC + ModItem | 进度解锁 | 12 位击杀掩码、`Capacity`/`Next`、玩家冷却与初始物品、战斗参与记录、Boss 授勋、6 种魂芯 | `SoulItem`、`SoulCurses`、`SoulUI`、`AttachmentStory` | 已验证 |
-| `ZenithReborn/SlashZenithTest.cs` | ModItem | 遗留测试 | 复用天顶剑贴图的普通挥砍测试武器，木头 1 个合成，注释自述可删 | 无（全项目零引用） | 已验证 |
 | `ZenithReborn/SlotProgression.cs` | `SoulProgress` + `SlotGates` | 进度解锁 | 9 条槽位门槛表、魂芯受理/补办、槽位提示与缺口文案 | `SoulItem`、`SoulSupport`、`SoulUIMemories` | 已验证 |
 | `ZenithReborn/SoulArmoryLayout.cs` | `readonly record struct` | UI 基础设施 | 纯几何：工作区/剑库/舞台/详情、Compact 切换、槽位坐标、木质面板锚点、列表行、按钮位 | `SoulItem.LegendarySlotId/CrownSlotBase/SupportOrdinal`、`SoulUI*` | 已验证 |
 | `ZenithReborn/SoulArmoryPreview.cs` | `sealed record` | UI 基础设施 | 只读换入评估：克隆剑魂跑 `TrySwapHost`，输出允许/原因/伤害暴击 delta/容量 | `SoulItem.TrySwapHost/ItemAt/Capacity`、`SoulUIArmoryInteraction`/`SoulUIArmoryDetails` | 已验证 |
@@ -142,7 +142,7 @@ I-tools-vfx.md          10      163     1         40        0
 | `ZenithReborn/SurfaceMaterialRenderer.cs` | C# ModSystem(Client) | 材质 | `ZRMaterialSurface` 绘制、UV→切线基、高度图位移 | `SurfaceMaterialDefinition`、`SwordFlowMaterial` | 已验证 |
 | `ZenithReborn/SwordBodyColorNoise.cs` | C# 工具 | 剑体 | 3 层 value noise → 512² 灰度纹理 | `VfxSwordMask.Prepare` | 已验证 |
 | `ZenithReborn/SwordEnchantmentVisuals.cs` | C# GlobalProjectile | 杂项 | 三类飞剑 `noEnchantmentVisuals=true` | `SoulBlade`/`OreFlyingSword`/`OreSkyfall` | 已验证 |
-| `ZenithReborn/SwordFlightTrail.cs` | C# 类 | 拖尾 | 8 点短历史 + `Strength`/`Formation` 曲线 | `OreFlyingSword`、`OreSkyfall`、`HardOreShot`、`OreSwordEffects.Trail` | 已验证 |
+| `ZenithReborn/SwordFlightTrail.cs` | C# 类 | 拖尾 | 8 点短历史 + `Strength`/`Formation` 曲线 | `OreFlyingSword`、`OreSkyfall`、`HardOreShot`；原列 `OreSwordEffects.Trail` 为其使用者，该路径已随 T3 删除 `OreSwordEffects.Trail` 而移除（保留历史记录） | 已验证 |
 | `ZenithReborn/SwordFlowMaterial.cs` | C# ModSystem | 材质 | 效果加载、图集绑定、`Draw` 分流、`ZoneMask.zrdata` 上传、世界光 | `SurfaceMaterialRenderer`、`SoulSceneRefraction`、`Material*` | 已验证 |
 | `ZenithReborn/SwordFlowMeshBasis.cs` | C# 几何 | 材质 | 跨三角形 UV 梯度（并查集加权） | 仅 `SwordFlowMaterial.Unload`→`Clear()`；`Prepare` 无调用者 | 已验证 |
 | `ZenithReborn/SwordFlowPalette.cs` | C# 静态工具 | 材质 | 剑色 → 暗/中/亮三阶，低饱和走冷钢 | `SwordFlowMaterial.Draw` | 已验证 |
@@ -319,7 +319,9 @@ I-tools-vfx.md          10      163     1         40        0
 | `checks/ZenithPrototypeCheck/LiquidGlassTrailMesh.cs` | 网格结构 | L 工具 | 定义拖尾顶点结构与 `VertexDeclaration`（含自定义 `Vertex` 结构），供渲染与几何校验共用 | 被 `LiquidGlassTrailRenderCheck`、`LiquidGlassTrailGeometryCheck` 消费 | 部分待核实 |
 | `checks/ZenithPrototypeCheck/LiquidGlassTrailRenderCheck.cs` | GPU 渲染 ModSystem | K 渲染 | 液态玻璃拖尾：先导 `trail-mesh.json`（逐顶点），再写 `liquid-trail.json` | 依赖 `LiquidGlassTrailMesh`、`LiquidGlassTrailGeometryCheck` | 部分待核实 |
 | `checks/ZenithPrototypeCheck/LivingArmamentCheck.cs` | 静态断言套件 | G 活武 | 活武族（11 条）：新种族与神圣/矿石/木质同时生效、每个有效出战槽各有召唤体、重复更新不重复召唤、出战武器通过玩家近战流程真实命中目标、种子弯刀通过原版物品检查发射、星怒通过原版物品检查发射、飞刀从玩家通道发射、飞刀继续由代理持有并恢复真实玩家、代理结束后保留真实玩家物品/位置/鼠标、失去激活成员时召唤体退出、召唤体消失后飞刀退出代理并恢复真实玩家 | `LivingArmament` 代理玩家；`ZENITH_LIVING_ARMAMENT` | 已验证 |
+| `checks/ZenithPrototypeCheck/LivingBatHealCheck.cs` | C# 夹具（静态断言） | 夹具·活体武器代理 | 对照原版蝙蝠棍命中回血：独立服务端构造真人与代理两种 Trial，断言真人基准命中回血 1、代理命中后真实玩家回血 1、同一次挥击不重复回血、满血不超上限、无效目标不触发、真实玩家普通使用不受转发影响；用占满 combatText 槽规避无字体资源的绘制 | ZenithReborn/LivingProxyOwnerState.cs（LivingProxyHealing）、Check.cs | 人工补写 |
 | `checks/ZenithPrototypeCheck/LivingMeleeMatrix.cs` | 矩阵探针（不判定） | G 活武 | 对同一固定目标与武器，逐项比较"真实玩家"与"生产代理"两条路径，记录未能验证的情况，写 `ZENITH_MELEE_MATRIX_OUTPUT` JSON（`LivingMeleeMatrix.cs:73`）。重置 `Main.rand=UnifiedRandom(318)`、`projectile/npc` 全灭、`netMode=SinglePlayer` 保证可重复 | 需要 `CurseFixture.NeutralDefaults=true`（`Check.cs:53`）；产出 `matrix.json` | 已验证 |
+| `checks/ZenithPrototypeCheck/LivingProjectileOwnershipCheck.cs` | C# 夹具（静态断言） | 夹具·活体武器代理 | 从生产召唤槽发射真实原版弹幕（铜短剑/长矛/附魔回旋镖/泰拉刃/飞刀/吸血鬼刀），核对代理身份绑定与还原：断言弹幕由召唤体实际生成、依附型身份判定（吸血鬼刀除外）、AI 后恢复真实玩家与鼠标位置、近战弹幕位置依附远处代理、飞刀在召唤体结束后恢复真实玩家回收 | LivingChannelProjectile.cs、LivingArmament.cs、Check.cs | 人工补写 |
 | `checks/ZenithPrototypeCheck/Localization/en-US_Mods.ZenithPrototypeCheck.hjson` | 本地化文件（空） | 夹具工程元数据 | 夹具模组的英文本地化表，当前是空文件（2 字节）；夹具文案全部硬编码在 C# 里，不走本地化 | checks/ZenithPrototypeCheck/Localization/ 目录 | 人工补写 |
 | `checks/ZenithPrototypeCheck/LunarCheck.cs` | 静态断言套件 | G 神圣/星辰 | 月亮事件恢复（22 条）：复现原版"无事件标志则无倒计时即使四柱已尽"、三柱不能触发恢复、四柱真实击杀在无原版标志下恢复 60 秒倒计时、既有原版倒计时永不被重置为 60、世界重载恢复剩余倒计时与原最大值、已观测到的月总消耗恢复使 Boss 死后不重生、完成战斗不自动重复、活柱即使历史说四柱全死也阻恢复、恢复等活着的活跃玩家、延迟恢复在玩家活后继续、客户端不能本地起权威 Boss 倒计时、仅历史柱标志永不自动召唤旧世界、手动修复不能绕过未完成柱史、已完成的旧世界显式修复起一次正常倒计时、重复修复不复制不重启待定召唤、原生天界符倒计时被同一持久钩子捕获、新柱循环不继承旧的待定召唤、排队修复夹具限在隔离 profile、排队恢复永不作用于不同 world GUID、匹配世界恢复应用一次后归档、原版倒计时到期真造月总核心 NPC、成功原版生成清持久待定态 | `LunarEvent`、`WorldFileData` GUID、`ZENITH_LUNAR` | 已验证 |
 | `checks/ZenithPrototypeCheck/MaskCompositionPreview.cs` | GPU 预览 ModSystem | K 渲染 | 贴图候选枚举 + 合成预览：先写 `assets.json`，`ZENITH_MASK_ASSETS_ONLY=1` 时只枚举；`ZENITH_MASK_SOURCE` 默认 `Flames`；再写 `preview.json` | `run_mask_preview.ps1`、`prepare_material_maps.py` | 部分待核实 |
@@ -485,7 +487,7 @@ I-tools-vfx.md          10      163     1         40        0
 | `checks/verify_own_effect.py` | py | C 静态检查 | 无第三方素材包与原包 GPU 图逐像素一致 | 产出 soul-trail-gpu-<ver>/independence.json（package_install:156 消费） | 部分待核实 |
 | `checks/vfx_library.py` | py | C 编目校验 | validate：id/类别/目录层级/引用环/清单齐全；search 检索 | VfxLibrary/library.json、run_swordbody_batch 收尾 | 已验证 |
 | (分组) checks/archived-oneoff/（20 个 .py） | 历史归档脚本 | 归档·一次性 | 20 个扁平存放的一次性取证/生成脚本：14 个 `make_*_evidence.py`/`make_*_preview.py`（截图与取证图）、3 个 `make_*`（mask/colorfields/gif 工具）、1 个 `extract_`（从 Calamity 抄剑弧）、1 个 `localize_`（批量改注释语言）。**无一条断言**，只产 png/json 供人看；无 csproj、无执行入口，`run_*.ps1`/`*.py` 全文检索零命中 | 成员清单 `artifacts/codebase-map/archived-oneoff-manifest.txt`；目录成因见 `artifacts/codebase-map/F-checks-fixtures.md` 5.1~5.2 | 已扫描（分组索引） |
-| (合计) | 222 条 |  |  |  |  |
+| (合计) | 224 条 |  |  |  |  |
 
 ---
 

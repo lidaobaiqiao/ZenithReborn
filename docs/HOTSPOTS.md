@@ -78,7 +78,7 @@
 | 圣林归冠 | `ZenithReborn/WoodCrown.cs:20` | `Active`（重入护盾 `evaluating`@`:18`/`:23`） | 改归冠条件 | `SoulItem.CrownCapacity` → `FamilyItems` → `Active` 的唯一环 |
 | 森林之力 | `ZenithReborn/ForestPower.cs:14-15` | `BaseCap=6` / `CrownCap=12` | 调层数上限/衰减 | `WoodPlayer.EffectiveLayers`、`RecentCombat` 300 帧 |
 | 神圣落星 | `ZenithReborn/HolyHeavenProc.cs:11` / `:12` | `StarDamage=1000` 常量 / `CooldownFrames=300` | 调星伤、改冷却 | **不吃任何倍率**；键为 `player:SoulId`，换魂重置 |
-| 改这类东西必看 | — | — | 阈值改动会让 `BondSnapshot.Build` 的 `Clamp` 隐藏超额；`NextThreshold/PrevThreshold`(`:23`/`:25`) 零外部引用，改它们没有效果 | `SoulUIWoodPanel`、`SoulUIArmoryBondCore` |
+| 改这类东西必看 | — | — | 阈值改动会让 `BondSnapshot.Build` 的 `Clamp` 隐藏超额；原 `NextThreshold/PrevThreshold`(`:23`/`:25`) 零外部引用、改它们没有效果，该属性已随死码清理删除（保留历史记录；`:23`/`:25` 为历史快照行号，已失效） | `SoulUIWoodPanel`、`SoulUIArmoryBondCore` |
 
 ## 7. 环境属性
 
@@ -122,7 +122,7 @@
 | 中文条目 | `ZenithReborn/Localization/zh-Hans.hjson`（`Items` 段起 `:2`，`Projectiles`@`:114`） | `Mods.ZenithReborn.Items.*` | 改物品名/说明 | 两文件各 133 行，必须同键同步 |
 | 英文条目 | `ZenithReborn/Localization/en-US.hjson:114` | 同上 | 同上 | 中文 `Projectiles` 缺 6 条（飞刃/星/冲击波/剑灵/环境机制） |
 | 唯一本地化断言 | `checks/ZenithPrototypeCheck/Check.cs:172` | `Assert(...DawnCore.DisplayName == "初光魂芯")` | 验证本地化加载 | 全局只有这 1 条（重要入口，非高频） |
-| 改这类东西必看 | — | — | **界面文字全部硬编码在 `.cs`**（`SoulUIPages.Name`、"武器寄宿"等）：改界面文案改代码，改物品名改 hjson；`SlashZenithTest` 中文侧两键被注释会退回类型名 | `SoulTraits`、`EnvironmentTooltips` 的文案表 |
+| 改这类东西必看 | — | — | **界面文字全部硬编码在 `.cs`**（`SoulUIPages.Name`、"武器寄宿"等）：改界面文案改代码，改物品名改 hjson；原 `SlashZenithTest` 中文侧两键被注释会退回类型名，该遗留测试剑及本地化键已随 T5 删除，此例已失效（已删除，保留历史记录） | `SoulTraits`、`EnvironmentTooltips` 的文案表 |
 
 ## 11. 测试与回归
 

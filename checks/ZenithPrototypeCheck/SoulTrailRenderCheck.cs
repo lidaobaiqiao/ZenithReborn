@@ -49,7 +49,8 @@ public class SoulTrailRenderCheck : ModSystem
             for(int frame=0;frame<18;frame++)
             {
                 Frame($"formation/start-{frame:000}.png",frame/60f,frame,
-                    SoulMaterialTrail.Visibility(frame,false,0),true,history:Math.Min(frame*2,centers.Length));
+                    // 等价复刻已移除的拖尾渐入曲线，保持形成期断言的数值不变。
+                    MathHelper.SmoothStep(0,1,Math.Clamp(frame/12f,0,1)),true,history:Math.Min(frame*2,centers.Length));
                 if(frame==0)formationStart=lastPixels;
                 if(frame==17)formationFinal=lastPixels;
             }

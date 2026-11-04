@@ -13,6 +13,8 @@
 三、为什么这些目录不进分母
     - artifacts/            构建、安装、备份、调查报告产物；每次跑都会变，索引它没有意义。
     - */bin/、*/obj/        编译中间与输出；由源码单方面决定，可随时重建。
+    - */__pycache__/、*.pyc  Python 运行时生成的字节码缓存目录与文件，不是项目资产
+                            （排除口径与 checks/package_install.py 一致）。
     - *-profile/            tModLoader 隔离运行目录（7 个），内含运行时生成的配置与日志。
     - *-playtest/           同上，用于 playtest 存档隔离。
     - .git/                 版本库元数据。
@@ -74,15 +76,23 @@ EXCLUDE_ROOT_DIRS = {
 }
 
 # 任意层级出现即整棵排除的目录名
+# __pycache__ 与 checks/package_install.py 打包时 ('bin','obj','__pycache__') 的口径一致
 EXCLUDE_ANY_DIRS = {
     "bin": "编译输出",
     "obj": "编译中间产物",
+    "__pycache__": "Python 字节码缓存目录（运行时生成）",
 }
 
 # 目录名后缀：tModLoader 隔离运行目录
 EXCLUDE_DIR_SUFFIXES = {
     "-profile": "tModLoader 隔离运行目录（运行时生成配置与日志）",
     "-playtest": "playtest 隔离存档目录",
+}
+
+# 文件名后缀：运行时生成的字节码缓存，单独排除
+# __pycache__/ 里的 .pyc 已被目录规则覆盖，这里再兜住散落在其它目录的 .pyc
+EXCLUDE_FILE_SUFFIXES = {
+    ".pyc": "Python 字节码缓存文件（运行时生成）",
 }
 
 # 相对仓库根的路径前缀：第三方工具，按整体记录，不逐个进分母
@@ -135,6 +145,9 @@ def is_excluded_path(rel: str) -> str:
         for suffix, why in EXCLUDE_DIR_SUFFIXES.items():
             if name.endswith(suffix):
                 return "%s/ —— %s" % (name, why)
+    for suffix, why in EXCLUDE_FILE_SUFFIXES.items():
+        if parts[-1].endswith(suffix):
+            return "*%s —— %s" % (suffix, why)
     for prefix, why in EXCLUDE_PREFIXES.items():
         if rel == prefix or rel.startswith(prefix + "/"):
             return "%s/ —— %s" % (prefix, why)
@@ -270,6 +283,8 @@ def main(argv: list[str] | None = None) -> int:
         print("      排除  %-20s %s" % ("*/" + name + "/", why))
     for suffix, why in EXCLUDE_DIR_SUFFIXES.items():
         print("      排除  %-20s %s" % ("*" + suffix + "/", why))
+    for suffix, why in EXCLUDE_FILE_SUFFIXES.items():
+        print("      排除  %-20s %s" % ("*" + suffix, why))
     for prefix, why in EXCLUDE_PREFIXES.items():
         print("      排除  %-20s %s" % (prefix + "/", why))
     print("    分母之外单独核对：%s/（见第五部分）" % VFX_DIR_REL)

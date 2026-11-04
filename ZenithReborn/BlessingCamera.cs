@@ -16,7 +16,6 @@ public class BlessingCamera : ModSystem
     private ILHook targetHook;
     private static int requestedPadding,requestedLimit;
     private static readonly FieldInfo removeMinimum=typeof(Terraria.ModLoader.ModLoader).GetField("removeForcedMinimumZoom",BindingFlags.Static|BindingFlags.NonPublic|BindingFlags.Public);
-    public static int RequestedPadding=>requestedPadding;
     public static int PaddingFor(int width,int height,float zoom)=>
         Math.Max(192,(int)Math.Ceiling(Math.Max(width,height)*Math.Max(0,1/Math.Max(.1f,zoom)-1)*.5f)+64);
     public static void PatchTargets(ILContext il)

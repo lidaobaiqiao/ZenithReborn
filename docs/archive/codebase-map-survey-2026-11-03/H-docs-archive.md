@@ -247,7 +247,7 @@
 | L8 | `.codebuddy/rules/00-delegation.md` | 存在 |
 | L14 | `ZenithReborn/build.txt` | 存在，但文件中写的版本号是 0.3.128（`build.txt` 实为 0.3.130）→ **已失效** |
 | L25 | `Luminance.dll`、`checks/prepare_luminance.py` | 存在 |
-| L31–L38 | 目录职责表（`ZenithReborn/`、`checks/`、`docs/`、`VfxLibrary/`、`tools/`、`artifacts/`、`*-profile/`、`.workbuddy/`） | 目录均在；但"112 个 `.cs`"实际为 121 个 → **计数过期** |
+| L31–L38 | 目录职责表（`ZenithReborn/`、`checks/`、`docs/`、`VfxLibrary/`、`tools/`、`artifacts/`、`*-profile/`、`.workbuddy/`） | 目录均在；但"112 个 `.cs`"实际为 121 个 → **计数过期**【历史快照标注：本表为 2026-11-03 调查快照（历史快照）；上述"112 个 / 121 个"旧计数为当时快照，保留原数字、不改为新值】 |
 | L47/L50 | `checks/run_wood_checks.ps1`、`checks/check_mod_assets.py` | 存在 |
 | L61–L63 | `docs/CHANGELOG.md`（称 104 条）、`docs/archive/`、`build.txt` | CHANGELOG 实为 107 条 → 计数过期 |
 | L84 | `artifacts/install-result.json` | 存在，`graphics_*_tested` 仍为 `false`（与其自述一致） |

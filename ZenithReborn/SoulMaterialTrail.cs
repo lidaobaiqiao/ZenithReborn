@@ -8,13 +8,10 @@ namespace ZenithReborn;
 public static class SoulMaterialTrail
 {
     public const int HistoryLength=60;   // 与原版 TrailCacheLength 一致
-    public const int EchoLayers=SoulTrailUnits.Count;
     private const int Steps=3;
     private const int Rows=4;
     public const int MaxVertices=(HistoryLength-1)*Steps*Rows*6;
     public const int MaxLayeredVertices=MaxVertices*3;
-    public const float MaterialSpan=1.6f;
-    public const float MaterialThickness=.34f;
 
     // 一条独立短带面的历史窗口；Start 对应剑影，Count 随剑影年龄缩短。
     public readonly record struct TrailLayer(int Start,int Count,float Opacity,bool FullyFormed=false);
@@ -22,16 +19,6 @@ public static class SoulMaterialTrail
     public static void Draw(VertexPositionColorTexture[] vertices,int count,Color tint,float opacity,
         float clock,int? width=null,int? height=null,bool unscaled=false,float dissolve=0,int itemType=0)
         =>SwordFlowMaterial.Draw(vertices,count,tint,opacity,clock,width,height,unscaled,dissolve,itemType);
-
-    // 只控制外观：先随剑体出现，再在返回末段熄灭，不延长攻击或碰撞。
-    public static float Dissolve(float phase,bool retired,int retireAge)
-        =>Math.Clamp(retired?retireAge/8f:(phase-60)/24f,0,1);
-
-    public static float Visibility(float phase,bool retired,int retireAge)
-    {
-        float formation=MathHelper.SmoothStep(0,1,Math.Clamp(phase/12f,0,1));
-        return formation*MathF.Pow(1-Dissolve(phase,retired,retireAge),.65f);
-    }
 
     public static int Build(Vector2[] centers,float[] rotations,int count,float halfLength,
         Vector2 screenPosition,VertexPositionColorTexture[] vertices,float clock=0)

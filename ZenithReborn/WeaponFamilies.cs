@@ -12,9 +12,7 @@ public static class WeaponFamilies
         ItemID.GoldShortsword,ItemID.PlatinumShortsword,ItemID.Terragrim,ItemID.Arkhalis];
     private static readonly HashSet<int> Solid = [ItemID.CopperBroadsword,ItemID.TinBroadsword,
         ItemID.IronBroadsword,ItemID.LeadBroadsword,ItemID.SilverBroadsword,ItemID.TungstenBroadsword,
-        ItemID.GoldBroadsword,ItemID.PlatinumBroadsword,ItemID.BoneSword,ItemID.WoodenSword,
-        ItemID.BorealWoodSword,ItemID.PalmWoodSword,ItemID.RichMahoganySword,ItemID.EbonwoodSword,
-        ItemID.ShadewoodSword,ItemID.CactusSword];
+        ItemID.GoldBroadsword,ItemID.PlatinumBroadsword,ItemID.BoneSword,ItemID.CactusSword];
     public static BladeFamily Of(int type) => WoodTypes.IsWood(type) ? BladeFamily.Plain : Swift.Contains(type) ? BladeFamily.Swift :
         Solid.Contains(type) ? BladeFamily.Solid : type == ItemID.IceBlade ? BladeFamily.Frost :
         type == ItemID.BladeofGrass ? BladeFamily.Nature :
@@ -29,6 +27,5 @@ public static class WeaponFamilies
         BladeFamily.Nature => "命中附加3秒中毒，尊重目标免疫",
         BladeFamily.Arcane => "飞行中释放30%伤害的剑气或落星，每种剑独立45帧间隔，最远400像素",
         _ => "继承武器伤害、攻速、暴击与击退" };
-    public static float Interval(int type) => Of(type) == BladeFamily.Swift ? .85f : 1;
     public static float Range(int type) => Of(type) == BladeFamily.Swift ? .85f : 1;
 }

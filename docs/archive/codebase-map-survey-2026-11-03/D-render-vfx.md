@@ -284,7 +284,7 @@ Filter.Apply → ZRGlassScreen 读 screen/normal/surface(+material) 合成
 | `ZenithReborn/SoulTrailEnding.cs` | C# ModSystem | 拖尾 | 弹幕销毁后 36/24 帧余迹，容量 256，按代际淘汰 | `SoulVisuals`、`SoulSceneRefraction` | 已验证 |
 | `ZenithReborn/SoulVisuals.cs` | C# ModSystem | 拖尾/取色 | `Tint()` 三级取色表 + `PostDrawTiles` 世界层绘制入口 | 全模块取色、`SoulSceneRefraction.CompositingReady` | 已验证 |
 | `ZenithReborn/SoulRibbonMesh.cs` | C# 几何（旧） | 拖尾 | 4 段 × 3 带旧版 ribbon，带亮边流动噪声 | `SoulBlade.BuildRibbon`（无调用者）、`checks/RibbonCheck` | 已验证 |
-| `ZenithReborn/SwordFlightTrail.cs` | C# 类 | 拖尾 | 8 点短历史 + `Strength`/`Formation` 曲线 | `OreFlyingSword`、`OreSkyfall`、`HardOreShot`、`OreSwordEffects.Trail` | 已验证 |
+| `ZenithReborn/SwordFlightTrail.cs` | C# 类 | 拖尾 | 8 点短历史 + `Strength`/`Formation` 曲线 | `OreFlyingSword`、`OreSkyfall`、`HardOreShot`；原列 `OreSwordEffects.Trail` 为其使用者，该路径已随 T3 删除 `OreSwordEffects.Trail` 而移除（保留历史记录） | 已验证 |
 | `ZenithReborn/SwordBodyColorNoise.cs` | C# 工具 | 剑体 | 3 层 value noise → 512² 灰度纹理 | `VfxSwordMask.Prepare` | 已验证 |
 | `ZenithReborn/VfxSwordMask.cs` | C# ModSystem | 剑体 | `Main.OnPreDraw` 离屏合成色场×蒙版（640×256/剑） | `VfxMaskData`、`OreFlyingSword`、`OreWeaponEnding` | 已验证 |
 | `ZenithReborn/VfxMaskData.cs` | C# 生成数据 | 剑体 | 21 把矿石剑的色场配方与几何常量 | `VfxSwordMask.Load`、`checks/emit_vfx_mask_data.py` | 已验证 |
@@ -471,7 +471,7 @@ Filter.Apply → ZRGlassScreen 读 screen/normal/surface(+material) 合成
 
 | 分类 | 有条目的键 | 走默认名（注释掉 / 缺失） |
 |---|---|---|
-| `Items`（11 个） | `GuardianGel`、`SoulItem`、`CrimsonSigil`、`CorruptionLure`、`DawnCore`、`FleshCore`、`MachineCore`、`LifeCore`、`TempleCore`、`CelestialCore` | `SlashZenithTest`（中文侧两个键被注释掉；英文侧有值）→ 中文走类型名 |
+| `Items`（11 个） | `GuardianGel`、`SoulItem`、`CrimsonSigil`、`CorruptionLure`、`DawnCore`、`FleshCore`、`MachineCore`、`LifeCore`、`TempleCore`、`CelestialCore` | 原 `SlashZenithTest`（中文侧两个键被注释掉；英文侧有值）→ 中文走类型名（该测试物品已移除：T5 已删 `SlashZenithTest.cs` 及 hjson 键；此行不再适用，保留 2026-11-03 调查快照记录） |
 | `Buffs`（10 个） | `ForestBreath`、`BloodFragrance`、`ForestPower`、`FrostStill`、`SaltCorrosion`、`JungleToxin`、`WoodWither`、`EmberBurn`、`HallowRadiance`、`SoulBreach` | — |
 | `NPCs`（1 个） | `GuardianSlimeKing.DisplayName` | — |
 | `Projectiles`（中 5 / 英 11） | 中文：`BlessingStrike`、`SoulBlade`、`HardOreShot`、`OreFlyingSword`、`OreSkyfall`；英文额外有 `EnvironmentDomain`、`EnvironmentEffect`、`FlyingBladeShot`、`HolyHeavenImpact`、`HolyHeavenStar`、`LivingArmament` | 中文侧后 6 项被注释（`zh-Hans.hjson:120-125`）→ 中文客户端显示英文/类型名 |
