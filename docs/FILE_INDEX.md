@@ -4,7 +4,7 @@
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-03 23:37:37
+生成时间 : 2026-11-04 14:36:31
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
 索引条目 : 753 条（去重合并 4 次重复出现；报告未覆盖的人工补写 39 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
