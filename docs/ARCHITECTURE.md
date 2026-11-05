@@ -23,14 +23,14 @@ M01 是 CODEBASE_MAP §0/§1 之外补入的"入口层"（`ZenithReborn.cs`）�
 | M09 | 族·矿石 | 14 材质 22 把，按材质去重；首击集结环阵齐射；6 条肉后连击；14 材质奖励位 + 天空落剑 | 不把 `HardOreTypes`（6 把）当族名册 | `OreFamily.cs`、`OreFlyingSword.cs`、`OreSkyfall.cs`、`HardOrePlayer.cs` |
 | M10 | 族·飞刃 | 31 把剑按 0.3s/把蓄能，挥臂一次性掷出并**取代**本体飞剑 | 弹幕不带 `SoulId`，故**不进任何祝福/环境/矿石/木质管线** | `FlyingBladeFamily.cs`、`FlyingBladeHand.cs`、`FlyingBladeShot.cs` |
 | M11 | 族·神圣天堂 | 8 把剑中任一把在 `TraitItems` → 主击 300 帧冷却落星（`StarDamage=1000` 常量） | 不吃任何伤害倍率 | `HolyHeavenFamily.cs`、`HolyHeavenProc.cs`、`HolyHeavenStar.cs` |
-| M12 | 族·剑灵 | 为每个出战主攻槽生成隐形召唤体，伪造 `Player.ItemCheck()` 代打 | 召唤体本身 `CanDamage()=>false` | `LivingArmamentFamily.cs`、`LivingArmamentPlayer.cs`、`LivingWeaponProxy.cs` |
+| M12 | 族·剑灵 | 为每个出战主攻槽生成隐形召唤体，伪造 `Player.ItemCheck()` 代打 | 召唤体本身 `CanDamage()=>false` | `LivingArmamentFamily.cs`、`LivingArmamentPlayer.cs`、`LivingWeaponProxy.cs`、`LivingProxyOwnerState.cs`、`LivingChannelProjectile.cs` |
 | M13 | 族标签 / 特性图鉴 | `WeaponFamilyTags.Of` 是"武器属哪些族"的**唯一展示出口**；`SoulTraits.All` 生成图鉴条目 | 不参与战斗判定；`Active` 多为手写复算，与战斗侧是两份代码 | `WeaponFamilyTags.cs`、`SoulTraits.cs` |
 | M14 | 环境属性 | 21 环境（与族**正交**）、武器静态绑定、收集位图、常驻名额、21 条机制 | 只"收集"不给机制；机制要求祝福/领域/自然三级判定通过 | `EnvironmentAttributes.cs`、`EnvironmentRules.cs`、`EnvironmentPlayer.cs` |
 | M15 | UI 层 | 全屏魂域：配阵/图鉴/成长/环境/旧物；点击隔离；预览克隆 | 不写战斗数值；`DomainMode` 恒 true，浮窗路径为休眠代码 | `SoulUI.cs` + 17 个 `SoulUI*.cs`、`SoulArmoryLayout.cs`、`SoulInput.cs` |
 | M16 | 渲染与特效 | 分支总闸、拖尾/剑体/星芒/玻璃折射/表面材质、逐项调试热键 | 不决定"生不生效"（那是 M04/M05/M08-M14）；不读档 | `VfxIsolation.cs`、`SoulVisuals.cs`、`SoulMaterialTrail.cs`、`SoulSceneRefraction.cs` |
 | M17 | 资产与材质管线（构建期） | `VfxLibrary` → 贴图/常量类/着色器；包审计 | **运行时不读 `VfxLibrary`**；生成文件禁手工改 | `checks/emit_*.py`、`checks/compile_effects.py`、`VfxMaskData.cs` |
 | M18 | 本地化 | `Items/Buffs/NPCs/Projectiles/Keybinds` 五类 hjson | **不含界面文案**（硬编码在 `.cs`） | `Localization/zh-Hans.hjson`、`en-US.hjson` |
-| M19 | 验证体系 | 独立附属模组 `ZenithPrototypeCheck` + 54 py / 37 ps1；服务端夹具 | `-server` 无 GPU，26 个渲染夹具直接 return；真实多人零覆盖 | `checks/ZenithPrototypeCheck/Check.cs`、`checks/*.py`、`checks/*.ps1` |
+| M19 | 验证体系 | 独立附属模组 `ZenithPrototypeCheck` + 58 py / 39 ps1；服务端夹具 | `-server` 无 GPU，26 个渲染夹具直接 return；真实多人零覆盖 | `checks/ZenithPrototypeCheck/Check.cs`、`checks/*.py`、`checks/*.ps1` |
 
 ---
 
@@ -235,7 +235,7 @@ flowchart TD
 - **`SlotGates` 是存档契约**（`SlotProgression.cs:12`）：中间插删直接改老档 `Capacity`。
 - **两套 Boss 位映射**：`SoulCurses.BossSeal`（18 位）vs `SoulProgress.BossBit`（12 位）；`Queen/Empress/Duke/Deer` 只在诅咒位存在 —— 打它们只解诅咒、不给槽位。
 - **`SoulBlade` 服务端/客户端必须走同一 `trailCenters` 分支**（`SoulBlade.cs:244` 附近），否则"看得见打不到"。
-- **`LivingWeaponProxy` 临时替换 `Main.player[owner]`**（`[ThreadStatic]`），`finally` 还原不能丢。
+- **剑灵代理临时上下文**：`LivingWeaponProxy.Tick` 使用 `[ThreadStatic] Current` 并临时设置鼠标；`LivingChannelSystem` 在已绑定代理弹幕的原版 AI 和近战视线检查期间临时替换 `Main.player[owner]`。这些窗口必须 `finally` 恢复。直接 ItemCheck 消费招架时同步清除真人状态；弹幕伤害嵌套消费仍需验证。玩家状态只复制已声明字段，不代表全部第三方状态已兼容。
 - **夹具引的是 Release DLL**（`ZenithPrototypeCheck.csproj` HintPath）：不重建主模组就静默测旧逻辑。
 - **`CurseFixture.NeutralDefaults` 是全局毒开关**：默认 false = 新魂带全六诅咒，`TraitItems` 只返回第一把主攻 → 多剑类断言集体假阴性。
 - **`package_install.py` 时序断言**：`wood-check.txt` 的 mtime 必须晚于 `.tmod`；任何重建包都会让它失败。

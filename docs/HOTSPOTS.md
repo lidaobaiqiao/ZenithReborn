@@ -54,6 +54,8 @@
 | 矿石名册 | `ZenithReborn/OreFamily.cs:43` | `MaterialSwords`（14 材质 22 把） | 加材质/换剑 | `MaterialCount=14`@`:16`、`Mask`@`:70`、`HardOreShot` 的 `Tints` 偏移 |
 | 飞刃名册 | `ZenithReborn/FlyingBladeFamily.cs:19` | `Weapons`（31 把） | 换名册、改阶位 | `Stages`@`:33`、`WeaponFamilyTags.Of`、阶位 tooltip |
 | 神圣/剑灵名册 | `ZenithReborn/HolyHeavenFamily.cs:9`、`ZenithReborn/LivingArmamentFamily.cs:9` | `Weapons`(8) / `Members`(4) | 换成员 | 珍珠木剑**同时属木质**；剑灵两处标注"暂定候选" |
+| 剑灵玩家代理 | `ZenithReborn/LivingWeaponProxy.cs:30`、`ZenithReborn/LivingProxyOwnerState.cs:10` | `Tick` / `Copy` | 武器使用、战斗数值、招架/回血 | 鼠标与 Current 必须恢复；招架只同步直接命中时实际消费，蝙蝠棍治疗由 `LivingProxyHealing` 转发 |
+| 剑灵弹幕与视线 | `ZenithReborn/LivingChannelProjectile.cs:17`、`:49`、`:67` | `OnSpawn` / `RunWithProxy` / `CanHitWithProxy` | 依附型弹幕、持续操控、方块视线 | 仅本地匹配代理期间临时替换 `Main.player[owner]`；AI、视线都需 `finally` 恢复 |
 | 族标签唯一出口 | `ZenithReborn/WeaponFamilyTags.cs:10` | `Of(type)` | 新增族必须在此追加 | 固定顺序：飞刃→神圣→剑灵→木质→矿石 |
 | 改这类东西必看 | — | — | 名册变动要同步"判定位宽 + 枚举 + 三张文案表 + 固定长度循环"：`0xFF`、`SendExtraAI/ReceiveExtraAI` 的 8 次循环、`Clamp(...,0,13)` 之类硬编码 | `SoulTraits`、`EnvironmentTooltips` |
 

@@ -23,15 +23,17 @@
 git clone https://github.com/lidaobaiqiao/ZenithReborn.git
 ```
 
-**必须改三处硬编码**（写死的是原作者机器的路径，不改必然编译失败）：
+**不用再改仓库里的任何文件**。跑一次上手脚本，它会把本机 tModLoader 路径写进 `local.props`（已 gitignore，永不入库），并装好 git 钩子、准备 Luminance、编译一次：
 
-| 文件 | 行 | 内容 |
-|---|---|---|
-| `ZenithReborn/ZenithReborn.csproj` | 6 | `<Import Project="E:/SteamLibrary/steamapps/common/tModLoader/tMLMod.targets" />` |
-| `checks/ZenithPrototypeCheck/ZenithPrototypeCheck.csproj` | 3 | 同上 |
-| `checks/run_wood_checks.ps1` | 4 | `$loaderRoot='E:/SteamLibrary/steamapps/common/tModLoader'`（第三处硬编码，换机器同样要改，不要提交） |
+```bash
+pwsh -File checks/dev_setup.ps1 -LoaderRoot "D:/你的路径/tModLoader"
+```
 
-改成你自己机器的 tModLoader 安装路径。**这三处改动不要提交**，会污染别人的仓库（可用 `git update-index --skip-worktree` 或提交前手动还原）。
+路径解析优先级（三处消费方一致）：环境变量 `ZENITH_TML_ROOT` > `local.props` 的 `TmlRoot` > 默认 `E:/SteamLibrary/steamapps/common/tModLoader`。涉及 `ZenithReborn/ZenithReborn.csproj`、`checks/ZenithPrototypeCheck/ZenithPrototypeCheck.csproj`、`checks/run_wood_checks.ps1`。
+
+`checks/` 下另有三十余个专项探测脚本（GPU 采集、材质实验室）仍写死默认路径，换机后按需本机改，**改完不要提交**。
+
+多人协作的同步流程（分支、PR、冲突高发点）见 [协作开发指南.md](协作开发指南.md)。
 
 ## 3. 环境四件套
 

@@ -93,6 +93,9 @@ EXCLUDE_DIR_SUFFIXES = {
 # __pycache__/ 里的 .pyc 已被目录规则覆盖，这里再兜住散落在其它目录的 .pyc
 EXCLUDE_FILE_SUFFIXES = {
     ".pyc": "Python 字节码缓存文件（运行时生成）",
+    # local.props 是每台机器各不相同的本机 tModLoader 路径配置，由 checks/dev_setup.ps1 生成且不入库，
+    # 因此它不该进覆盖率分母，否则每个开发者本机都会凭空少一条覆盖。
+    ".props": "本机 MSBuild 配置（dev_setup.ps1 生成，不入库）",
 }
 
 # 相对仓库根的路径前缀：第三方工具，按整体记录，不逐个进分母

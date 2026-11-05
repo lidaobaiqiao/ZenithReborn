@@ -3,7 +3,13 @@
     <TargetFramework>net8.0</TargetFramework><LangVersion>12.0</LangVersion>
     <BuildMod>false</BuildMod><ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable>
   </PropertyGroup>
-  <Import Project="E:/SteamLibrary/steamapps/common/tModLoader/tMLMod.targets" />
+  <!-- tModLoader 安装路径可按机器覆盖：优先级为 环境变量 ZENITH_TML_ROOT > 仓库根 local.props 的 TmlRoot > 默认值。 -->
+  <Import Project="$(MSBuildThisFileDirectory)../local.props" Condition="Exists('$(MSBuildThisFileDirectory)../local.props')" />
+  <PropertyGroup>
+    <TmlRoot Condition="'$(ZENITH_TML_ROOT)' != ''">$(ZENITH_TML_ROOT)</TmlRoot>
+    <TmlRoot Condition="'$(TmlRoot)' == ''">E:/SteamLibrary/steamapps/common/tModLoader</TmlRoot>
+  </PropertyGroup>
+  <Import Project="$(TmlRoot)/tMLMod.targets" />
   <ItemGroup>
     <Reference Include="Luminance"><HintPath>../artifacts/dependencies/Luminance/Luminance.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>

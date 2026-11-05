@@ -1,7 +1,28 @@
 param([switch]$EchoOre,[switch]$InformationUi,[switch]$Glass)
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot -Parent
-$loaderRoot = 'E:/SteamLibrary/steamapps/common/tModLoader'
+# tModLoader 安装路径可按机器覆盖，优先级：环境变量 ZENITH_TML_ROOT > 仓库根 local.props 的 TmlRoot > 默认值。
+# local.props 是本机配置文件（不入库），这样第二个开发者换机器时不用改被 git 跟踪的脚本。
+$loaderRoot = $env:ZENITH_TML_ROOT
+if (-not $loaderRoot) {
+    $localProps = Join-Path $taskRoot 'local.props'
+    if (Test-Path -LiteralPath $localProps) {
+        try {
+            [xml]$localPropsXml = Get-Content -LiteralPath $localProps -Raw
+        } catch {
+            throw "读取 local.props 失败：$localProps。请确认它是格式正确的 XML（需要 <Project><PropertyGroup><TmlRoot>...</TmlRoot></PropertyGroup></Project>）。$($_.Exception.Message)"
+        }
+        # PropertyGroup 与 TmlRoot 都可能是数组：跳过空项后取**最后**一个，与 MSBuild「同名属性后者覆盖前者」的语义保持一致。
+        # 取值必须 Trim：XML 里换行缩进会带进空白，直接当路径用会报"名为 '\n  D' 的驱动器不存在"。
+        $tmlRootValue = @($localPropsXml.Project.PropertyGroup) | ForEach-Object { $_.TmlRoot } | Where-Object { $_ } | Select-Object -Last 1
+        if ($tmlRootValue) {
+            $loaderRoot = ([string]$tmlRootValue).Trim()
+        } else {
+            Write-Warning "local.props 未设置 TmlRoot，回退默认路径：$localProps"
+        }
+    }
+}
+if (-not $loaderRoot) { $loaderRoot = 'E:/SteamLibrary/steamapps/common/tModLoader' }
 $dotnet = Join-Path $loaderRoot 'dotnet/dotnet.exe'
 $testProfile = Join-Path $taskRoot 'wood-check-profile'
 $nativePackages=@{}

@@ -26,3 +26,5 @@ tools/decomp/
 tools/xnbcli-binary/
 tools/xnbcli-windows-x64.zip
 .workbuddy/
+# 本机 tModLoader 安装路径：由 checks/dev_setup.ps1 生成，每台机器各不相同，不入库
+local.props

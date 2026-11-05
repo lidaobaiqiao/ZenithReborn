@@ -80,7 +80,15 @@ Boss 进度不直接给数值，而是逐道**解除限制**：
 
 ## 构建与验证
 
-需要 .NET 8 SDK 与本地 tModLoader。项目当前引用 `E:/SteamLibrary/steamapps/common/tModLoader/tMLMod.targets`；安装路径不同请调整两个 `.csproj` 的 `Import` 及 `checks/run_wood_checks.ps1`。
+需要 .NET 8 SDK、PowerShell 7、Python 3 与本地 tModLoader 1.4.4。**tModLoader 安装路径不再写死在仓库里**：按环境变量 `ZENITH_TML_ROOT` > 仓库根 `local.props`（已 gitignore）> 默认 `E:/SteamLibrary/steamapps/common/tModLoader` 依次解析。
+
+新机器上手一条命令（写 `local.props`、装 git 钩子、准备 Luminance、编译）：
+
+```
+pwsh -File checks/dev_setup.ps1 -LoaderRoot "D:/你的路径/tModLoader"
+```
+
+多人协作的同步流程见 [docs/协作开发指南.md](docs/协作开发指南.md)。
 
 ```bash
 dotnet build ZenithReborn/ZenithReborn.csproj -c Release   # 编译

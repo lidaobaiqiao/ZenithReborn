@@ -349,6 +349,19 @@ SUPPLEMENT_ROWS = [
     ("checks/hooks/pre-commit", "sh 钩子模板",
      "建图维护", "提交前跑 checks/map_freshness.py，地图落后即阻断提交（git commit --no-verify 可绕过）；优先用项目约定的 runtime python，缺失时回退 PATH 上的 python",
      "checks/map_freshness.py、checks/install_git_hooks.ps1", "人工补写"),
+    # --- 多人协作与本机上手（2026-11-05 新增） ---
+    ("checks/dev_setup.ps1", "PowerShell 脚本（上手配置）",
+     "协作与上手", "新克隆仓库的一键配置：按 -LoaderRoot > ZENITH_TML_ROOT > local.props > 默认值确定 tModLoader 路径，写 local.props、装 git 钩子、准备 Luminance、编译；幂等可重跑，配合 docs/协作开发指南.md",
+     "local.props、checks/install_git_hooks.ps1、checks/prepare_luminance.py、docs/协作开发指南.md", "人工补写"),
+    ("docs/协作开发指南.md", "Markdown 流程文档",
+     "协作与上手", "两人及以上共写时的同步流程：权限开放方式、首次上手、分支 + PR 节奏、冲突高发点与处理、不可提交清单、换行符与证据分级约定",
+     "docs/AI接入指南.md、checks/dev_setup.ps1、.gitignore", "人工补写"),
+    ("checks/ZenithPrototypeCheck/LivingParryCheck.cs", "C# 夹具（剑灵招架）",
+     "验证体系", "对照真人与剑灵代理的真实近战命中与一次性招架增益，断言两者命中判定一致",
+     "LivingWeaponProxy.cs、LivingArmamentCheck.cs", "人工补写"),
+    ("checks/ZenithPrototypeCheck/LivingWallCollisionCheck.cs", "C# 夹具（视线遮挡）",
+     "验证体系", "用真实方块与弹幕伤害路径比较玩家与剑灵代理的视线判定，防止代理穿墙出手",
+     "LivingWeaponProxy.cs、LivingParryCheck.cs", "人工补写"),
 ]
 
 # 分组索引：同一目录下同类批量文件，逐行列会淹没索引，改为一行 + 成员清单 txt。

@@ -18,7 +18,7 @@
 | 着色器 | 3 个 `.fx`（`ZRSwordFlow` / `ZRGlassScreen` / `ZRMaterialSurface`）+ 3 个同名 `.fxc` 对照产物 | `ZenithReborn/Assets/Effects/` |
 | 资产 | 52 张 PNG（矿石剑身图集 21 / 材质贴图 12 / Boss 立绘 19）+ `SwordSpark.png` + `ZoneMask.zrdata` | 见 §15 |
 | 本地化 | `zh-Hans.hjson` / `en-US.hjson`，各 133 行，仅覆盖 `Items/Buffs/NPCs/Projectiles/Keybinds` | `ZenithReborn/Localization/` |
-| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（96 个 `.cs`）+ `checks/*.py` 58 个 + `checks/*.ps1` 38 个 | §17 |
+| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（98 个 `.cs`）+ `checks/*.py` 58 个 + `checks/*.ps1` 39 个 | §17 |
 | 打包排除 | `docs` / `checks` / `VfxLibrary` / `tools` 四目录不进成品包 | `checks/package_install.py:70` |
 
 ### 验证等级约定（全文通用）
@@ -42,9 +42,9 @@
 | `ZenithReborn/Assets/Effects/` | 3 `.fx` + 3 `.fxc` + 4 `.fxh` + `build-manifest.json` | 着色器与编译对照。4 个 `.fxh` 是**双重孤儿**（无 `#include`，且被 `buildIgnore` 排除） | 是（`.fxh` 被排除） |
 | `ZenithReborn/Assets/Vfx/` | `SwordBody/*.png` 21 张、`Materials/SwordFlow/*` 13 个 | 运行时贴图源（`ModContent.Request` 直接读） | 是 |
 | `ZenithReborn/Assets/UI/BossPortraits/` | 19 张 PNG + `sources.json` | Boss 动态头像图集 | 是 |
-| `checks/ZenithPrototypeCheck/` | 96 `.cs` + `Assets/` + `Localization/` | 独立验收模组，`modReferences = ZenithReborn`，用 **HintPath 引 Release DLL** | 否 |
-| `checks/*.py` / `checks/*.ps1` | 58 / 38 | 构建期代码生成（`emit_*`）、资产校验、GPU 采集启动、打包安装 | 否 |
-| `docs/` | 70 顶层 `.md` + `docs/archive/` 126 `.md` | 版本记录 / 设计定稿 / 参考表 / 索引 | 否 |
+| `checks/ZenithPrototypeCheck/` | 98 `.cs` + `Assets/` + `Localization/` | 独立验收模组，`modReferences = ZenithReborn`，用 **HintPath 引 Release DLL** | 否 |
+| `checks/*.py` / `checks/*.ps1` | 58 / 39 | 构建期代码生成（`emit_*`）、资产校验、GPU 采集启动、打包安装 | 否 |
+| `docs/` | 71 顶层 `.md` + `docs/archive/` 126 `.md` | 版本记录 / 设计定稿 / 参考表 / 索引 | 否 |
 | `tools/` | 222 文件 | 制作端：`ZenithMaterialLab`（独立模组）、`ilspy`、`decomp`、`xnbcli` 源码与二进制 | 部分（`tools` 目录被排除，但 `ZenithMaterialLab` 源码入库） |
 | `VfxLibrary/` | 11756 文件 | 制作端素材库 + 原版特效浏览器。`library.json` 自报 `runtimeIntegrated: false` | 否 |
 | `artifacts/` | 约 16 GB | 构建产物、备份、安装记录、调查产物。**整目录被 `.gitignore` 忽略** | 否 |
@@ -393,22 +393,27 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 
 ## 11. 族·剑灵
 
-**职责**：族内至少 1 把（附魔剑/飞刀/波涌之刃/无头骑士剑）+ 有有效出战主剑时，为**每个出战主攻槽**生成隐形召唤体，自动索敌 900px 内最近目标，用该槽武器实际"挥砍"（伪造一个 Player 跑 `ItemCheck()`）。
+**职责**：族内至少 1 把（附魔剑/飞刀/波涌之刃/无头骑士剑）+ 有有效出战主剑时，为每个有效出战主攻槽生成召唤体，寻找玩家周围 900px 内目标，由独立玩家代理使用原寄宿武器。武器贴图可见，代理玩家身体不可见；召唤体本身不造成接触伤害。候选名册与具体数值仍非用户定案。
 
-**核心文件**：`LivingArmamentFamily.cs`（13）、`LivingArmamentPlayer.cs`、`LivingArmament.cs`、`LivingWeaponProxy.cs`、`LivingChannelProjectile.cs`
+**核心文件**：`LivingArmamentFamily.cs`、`LivingArmamentPlayer.cs`、`LivingArmament.cs`、`LivingWeaponProxy.cs`、`LivingProxyOwnerState.cs`、`LivingChannelProjectile.cs`。
 
 | 入口 | 位置 | 说明 |
 |---|---|---|
-| `Members` | `LivingArmamentFamily.cs:9` | 4 把，两处标注"暂定候选" |
-| `LivingArmamentPlayer` | `LivingArmamentPlayer.cs:9` | 按 `VisibleSlotIds` 补生成 |
-| `LivingArmament` | `LivingArmament.cs:11` | 召唤体本身 `CanDamage()=>false` |
-| `LivingWeaponProxy.Tick` | `LivingWeaponProxy.cs:28` 附近 | 临时替换 `Main.mouseX/Y` + `player.ItemCheck()` |
-| `LivingChannelProjectile` | `LivingChannelProjectile.cs:8` 附近 | 给 aiStyle 9/15/99 的弹幕换代理玩家 |
+| `Members` | `LivingArmamentFamily.cs:9` | 四把暂定候选；激活后作用于有效出战武器，不限族成员。 |
+| `LivingArmamentPlayer` | `LivingArmamentPlayer.cs:9` | 本地持有剑魂时按有效主槽补齐召唤体。 |
+| `LivingArmament` | `LivingArmament.cs:11` | 索敌、移动与武器显示；`CanDamage()=>false`。 |
+| `LivingWeaponProxy.Tick` | `LivingWeaponProxy.cs:30` | 复制真实玩家状态后临时设置鼠标与线程内 `Current`，调用代理 `Player.ItemCheck()`，`finally` 恢复；原版直接近战实际消费招架时再同步清除真人增益。 |
+| `LivingProxyOwnerState.Copy` | `LivingProxyOwnerState.cs:10` | 按伤害类别复制伤害/暴击/攻速/破甲/击退，以及部分原版状态和数组值；不等于所有玩家/模组状态。 |
+| `LivingProxyHealing` | `LivingProxyOwnerState.cs:52` | 仅在代理用蝙蝠棍的 `ItemCheck` 内，将该代理的 `Player.Heal` 定向转发给真实玩家。 |
+| `LivingChannelProjectile.OnSpawn` | `LivingChannelProjectile.cs:17` | 依靠实际物品来源与归属，为持按或依附玩家的弹幕绑定槽位代理；符合条件的子弹幕可沿父源继承。 |
+| `LivingChannelSystem.RunWithProxy` | `LivingChannelProjectile.cs:49` | 仅在本地代理弹幕原版 AI 调用期间替换 `Main.player[owner]` 与鼠标，`finally` 恢复。 |
+| `LivingChannelSystem.CanHitWithProxy` | `LivingChannelProjectile.cs:67` | 原版近战弹幕检查方块视线时临时读取相同代理，结束后 `finally` 恢复真人。 |
 
-**修改影响提醒**：`LivingWeaponProxy` 是**全局 `Main.player[owner]` 临时替换 + `[ThreadStatic]`**，该窗口内任何读取 `Main.player[owner]` 的代码都会看到假玩家；改 `Tick` 必须保留 `finally` 还原。
+**验证归属**：`LivingArmamentCheck.cs` 检查基础召唤；`LivingProjectileOwnershipCheck.cs` 检查典型武器的弹幕归属；`LivingBatHealCheck.cs` 检查蝙蝠棍回血；`LivingParryCheck.cs` 检查直接近战招架；`LivingWallCollisionCheck.cs` 检查代理视线。`LivingMeleeMatrix.cs` 是逐物品攻击冒烟对照，不证明每把武器所有后续机制。上述文件存在仅说明检查入口，具体通过状态以本次测试结果为准。
+
+**修改影响提醒**：`LivingWeaponProxy.Tick` 自身只临时覆盖鼠标和 `Current`；`Main.player[owner]` 的临时替换属于 `LivingChannelSystem` 的 AI 和视线回调，两个窗口内其他读取同一玩家数组的逻辑也会看到代理，必须保持 `finally` 恢复。招架当前仅处理代理直接 `ItemCheck` 消费；弹幕伤害内的嵌套消费、完整第三方 `ModPlayer` 状态、客户端画面及真实多人仍需分别验证，不把通用兼容当作已完成。
 
 ---
-
 ## 12. 族归属标签与特性图鉴
 
 **职责**：`WeaponFamilyTags` 是"这把武器属于哪些族"的**唯一展示出口**；`SoulTraits` 生成"当前生效/未生效的全部特性条目"（图鉴数据源）。
@@ -620,7 +625,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 | 总回归入口 | `ZENITH_WOOD`（`Check.cs:125` 区块）串联 29 个套件 |
 | 断言原语 | `Check.cs:15` `Assert(bool,string)` —— 失败即抛异常，**快速失败**；`PASS: N` 是成功数不是总数 |
 | 第二调度体系 | 49 个文件不经过 `Check.cs`，各自在 `ModSystem` 钩子里读 `ZENITH_*_RENDER/GPU/GUI`，由 `checks/run_*.ps1` 启动 |
-| 脚本 | `checks/*.py` 58 个（生成/校验/采集）、`checks/*.ps1` 38 个（构建/启动） |
+| 脚本 | `checks/*.py` 58 个（生成/校验/采集）、`checks/*.ps1` 39 个（构建/启动/上手配置） |
 | 打包安装 | `checks/package_install.py:70` 排除 `docs/checks/VfxLibrary/tools`；`:73` `tools` 下额外排除 dll/exe/pdb/zip/tmod |
 
 **⚠ 夹具体系的 6 个陷阱（写新夹具或排查假阴性必读）**
