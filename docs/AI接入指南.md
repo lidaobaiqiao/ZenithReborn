@@ -78,13 +78,21 @@ python checks/check_mod_assets.py
 三条使用纪律：
 
 1. **地图是快照，源码是事实。** 冲突时按代码做，并顺手修正索引。
-2. 先按地图定位，再读实际源码确认。**不要一上来全库 grep**，那是最慢的路径。
+2. 先按地图定位，再读实际源码确认。**不要一上来全库 grep**，那是最慢的路径——用检索命令代替：
+   ```bash
+   python checks/map_query.py 飞刃            # 一步给「模块 / 文件 / 职责」，源码排在文档前
+   python checks/map_query.py --module 木质族  # 看某模块下全部文件
+   ```
 3. 文件新增、删除、重命名后必须跑：
    ```bash
-   python checks/build_file_index.py
-   python checks/map_audit.py
+   python checks/build_file_index.py     # 重生成 docs/FILE_INDEX.md（生成物，不许手改）
+   python checks/map_audit.py            # 覆盖率审计，<100% 或失效路径非 0 退出
+   python checks/map_freshness.py        # 索引新鲜度 + 文件:行号 + 版本号 + 计数一致性
    ```
-   覆盖率 < 100% 或出现失效路径时退出码非 0。
+
+`map_freshness.py` 已挂进 `.git/hooks/pre-commit`（`pwsh -File checks/install_git_hooks.ps1` 安装，钩子不入库，新克隆要重跑一次）：地图落后于源码会**直接拦住提交**，确需绕过用 `git commit --no-verify` 并在提交说明里写原因。它拦得住索引过期、行号越界、版本号与计数不符；**拦不住模块职责描述是否仍然准确**——那部分只能靠改代码的人在同一个提交里更新。
+
+判定口径：`map_freshness.py` 退出码 0 才代表地图可用；`map_audit.py` 100% 只代表"每个文件都被索引过"，两者不互相替代。
 
 ## 6. 六条硬规则（违反会返工）
 
@@ -130,8 +138,9 @@ python checks/check_mod_assets.py
 
 **地图维护**：新增/删除/重命名文件、模块职责变化、跨模块依赖变化后，跑
 ```bash
-python checks/build_file_index.py && python checks/map_audit.py
+python checks/build_file_index.py && python checks/map_freshness.py && python checks/map_audit.py
 ```
+三条全绿再提交；pre-commit 钩子会对前两条做同样的把关。
 
 ## 9. 设计边界（不要自作主张）
 

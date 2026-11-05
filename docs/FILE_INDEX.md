@@ -4,9 +4,9 @@
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-04 23:54:30
+生成时间 : 2026-11-05 13:03:01
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
-索引条目 : 756 条（去重合并 4 次重复出现；报告未覆盖的人工补写 43 条）
+索引条目 : 760 条（去重合并 4 次重复出现；报告未覆盖的人工补写 47 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
 排除目录 : artifacts/  bin/  obj/  */__pycache__/  *.pyc  *-profile/  *-playtest/  .git/  编辑器配置目录
 整体记录 : VfxLibrary/（11756 个原版素材，按第六节单独核对）
@@ -427,9 +427,13 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/encode_swordbody_preview.ps1` | ps1 | G 报告 | ffmpeg 把 5 个片段帧序列编 mp4 | artifacts/preview-tools/imageio_ffmpeg | 已验证 |
 | `checks/evolve_swordbody_rhythm.py` | py | F 素材制作 | 按剑性格演化 R2 蒙版节奏（美术决策脚本） | VfxLibrary/Masks/SwordBody | 部分待核实 |
 | `checks/generate_noise.py` | py | F 素材制作 | 纯 Python 生成可平铺噪声 → NoiseSeamless.png | 直接写生产资产 | 部分待核实 |
+| `checks/hooks/pre-commit` | sh 钩子模板 | 建图维护 | 提交前跑 checks/map_freshness.py，地图落后即阻断提交（git commit --no-verify 可绕过）；优先用项目约定的 runtime python，缺失时回退 PATH 上的 python | checks/map_freshness.py、checks/install_git_hooks.ps1 | 人工补写 |
 | `checks/import_material_export.py` | py | F 素材制作 | 核对实验室导出并按剑名接入（默认 dry-run，`--apply` 才写） | tools/ZenithMaterialLab 导出物 | 部分待核实 |
+| `checks/install_git_hooks.ps1` | PowerShell 脚本（安装） | 建图维护 | 把 checks/hooks/pre-commit 复制到 .git/hooks/pre-commit；钩子本身不入库，新克隆的仓库要重跑一次 | checks/hooks/pre-commit | 人工补写 |
 | `checks/make_autofit_recipe.py` | py | F 素材制作 | 为一把剑生成 R2 autoFit 配方 | run_swordbody_batch | 部分待核实 |
 | `checks/map_audit.py` | 审计脚本（Python 标准库） | 索引 | 索引覆盖率审计：磁盘分母 vs docs/FILE_INDEX.md 已索引集合，报覆盖率、未索引清单、失效路径；并核对 VfxLibrary 清单 | docs/FILE_INDEX.md、docs/archive/codebase-map-survey-2026-11-03/vfx-library-manifest.txt | 已验证 |
+| `checks/map_freshness.py` | Python 脚本（校验） | 建图维护 | 五项校验：A 索引与磁盘是否一致（调 build_file_index --check）、B 文档里 `文件:行号` 是否存在与越界、C CODEBASE_MAP 基线版本 vs build.txt、D 源码/夹具/checks 脚本计数、E 回归项数 vs wood-check.txt（只警告）；有 ERROR 退出码 1，供 pre-commit 与回归使用 | checks/build_file_index.py、checks/hooks/pre-commit、docs/CODEBASE_MAP.md | 人工补写 |
+| `checks/map_query.py` | Python 脚本（只读检索） | 建图维护 | 按关键词检索 docs/FILE_INDEX.md 六列索引，输出「模块 / 文件 / 职责」；路径 3 分、模块 2 分、职责关联 1 分，并按目录优先级把源码排在文档前；支持 --module / --file / --json / --limit，用来替代全库 grep | docs/FILE_INDEX.md、.codebuddy/rules/01-codebase-map.md | 人工补写 |
 | `checks/mark_swordbody_entries.py` | py | F 素材制作 | 标记 21 把矿石剑为 review-candidate R2 | VfxLibrary entry.json | 部分待核实 |
 | `checks/pack_swordbody_mask.py` | py | F 素材制作 | 抽 alpha 单元并登记尖端，不重绘 | register_swordbody_vector | 部分待核实 |
 | `checks/package_install.py` | py | D 打包安装 | 校验报告/包身份后原子安装、备份、写 install-result.json | wood-check.txt、check_vfx_ownership、prepare_luminance、tmod_archive、artifacts/backups | 已验证 |
@@ -487,7 +491,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/verify_own_effect.py` | py | C 静态检查 | 无第三方素材包与原包 GPU 图逐像素一致 | 产出 soul-trail-gpu-<ver>/independence.json（package_install:156 消费） | 部分待核实 |
 | `checks/vfx_library.py` | py | C 编目校验 | validate：id/类别/目录层级/引用环/清单齐全；search 检索 | VfxLibrary/library.json、run_swordbody_batch 收尾 | 已验证 |
 | (分组) checks/archived-oneoff/（20 个 .py） | 历史归档脚本 | 归档·一次性 | 20 个扁平存放的一次性取证/生成脚本：14 个 `make_*_evidence.py`/`make_*_preview.py`（截图与取证图）、3 个 `make_*`（mask/colorfields/gif 工具）、1 个 `extract_`（从 Calamity 抄剑弧）、1 个 `localize_`（批量改注释语言）。**无一条断言**，只产 png/json 供人看；无 csproj、无执行入口，`run_*.ps1`/`*.py` 全文检索零命中 | 成员清单 `artifacts/codebase-map/archived-oneoff-manifest.txt`；目录成因见 `artifacts/codebase-map/F-checks-fixtures.md` 5.1~5.2 | 已扫描（分组索引） |
-| (合计) | 224 条 |  |  |  |  |
+| (合计) | 228 条 |  |  |  |  |
 
 ---
 

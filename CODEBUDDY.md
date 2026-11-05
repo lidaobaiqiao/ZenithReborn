@@ -70,6 +70,7 @@ python checks/check_mod_assets.py
 4. 检查脚本只用隔离目录，**不碰** `My Games/Terraria/tModLoader/` 下的正式人物与世界；只替换目标 `.tmod`，先备份，文件被锁时等玩家退出，**不得强杀游戏**。
 5. 大改动前提醒用户先落 git 提交点。
 6. 证据分级：隔离夹具 < 图形客户端 < 真实多人。**服务端夹具看不到图形资产**——新增 Mod 类型必须有贴图或显式 `Texture` override，否则客户端加载即崩（0.3.127 热修的真实教训）。
+7. **定位先查地图**：`python checks/map_query.py <关键词>` 一步给模块与文件，不要一上手全库 grep（会漏跨模块影响）。改完代码同一提交里更新地图，pre-commit 会拦过期索引。
 
 ## 协作偏好摘要（完整版在 `.workbuddy/memory/MEMORY.md`）
 
@@ -88,6 +89,19 @@ python checks/check_mod_assets.py
 
 ## 指针
 
+**定位任何代码前先查地图**（规则见 `.codebuddy/rules/01-codebase-map.md`，`alwaysApply`）：
+
+```bash
+python checks/map_query.py <关键词>     # 一步得到 模块/文件/职责/关联，替代全库 grep
+python checks/map_freshness.py          # 校验地图是否跟得上源码（已挂 pre-commit）
+python checks/build_file_index.py       # 源码变动后重生成 docs/FILE_INDEX.md（生成物，不许手改）
+```
+
+- 代码地图（模块划分、依赖方向、波及面）→ `docs/CODEBASE_MAP.md`
+- 手上有现象（不生效 / 数值不对 / 回归失败）→ `docs/PROBLEM_INDEX.md`
+- 已知要改什么、要行号入口 → `docs/HOTSPOTS.md`
+- 文件归属与职责速查 → `docs/FILE_INDEX.md`（生成物，用上面的 query 命令检索）
+- 跨模块依赖与共享状态 → `docs/ARCHITECTURE.md`
 - 功能全貌与核心数值表 → `README.md`
 - 硬规则、版本状态段、历史决策 → `AGENTS.md`（已由本文件顶部导入）
 - 长期结论与用户偏好 → `.workbuddy/memory/MEMORY.md`（本地、不自动加载）

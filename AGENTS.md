@@ -42,9 +42,14 @@
 地图维护命令（改完源码或新增文件后跑，第二条会报出未索引/失效路径）：
 
 ```bash
+python checks/map_query.py <关键词>   # 检索：模块/文件/职责/关联，替代全库 grep
 python checks/build_file_index.py     # 重新生成 docs/FILE_INDEX.md
+python checks/build_file_index.py --check   # 只比对不写盘，过期返回非 0
+python checks/map_freshness.py        # 索引新鲜度 + 文件:行号失效 + 版本号/计数一致性（已挂 pre-commit）
 python checks/map_audit.py            # 覆盖率审计，<100% 或存在失效路径时退出码非 0
 ```
+
+> 上述「先查地图再读源码」已升级为常驻规则 `.codebuddy/rules/01-codebase-map.md`（`alwaysApply`）：定位类任务未查地图即视为不合格，改代码须同一提交内更新地图，pre-commit 钩子会拦住过期索引。
 
 ## 长期开发硬规则：模块职责与代码归属
 

@@ -2,7 +2,7 @@
 
 > 基线版本：`ZenithReborn/build.txt` → `version = 0.3.130`（`displayName = 天顶复苏 · 诅咒残魂`）
 > 本文所有 `文件:行号` 均已对照当前工作区源码抽查核验；与既有调查稿不一致处以源码为准（差异清单见文末）。
-> 工作区处于「木质族 V2」未提交改动状态，本文按**当前磁盘内容**描述。
+> 描述的是 2026-11-04 清理提交 `e59f29bd` 之后的磁盘内容；此后每次提交都会由 pre-commit 钩子核对索引新鲜度、行号越界、版本号与源码计数，**但模块职责的描述准确度仍需改代码的人在同一提交里更新**。
 
 ---
 
@@ -18,7 +18,7 @@
 | 着色器 | 3 个 `.fx`（`ZRSwordFlow` / `ZRGlassScreen` / `ZRMaterialSurface`）+ 3 个同名 `.fxc` 对照产物 | `ZenithReborn/Assets/Effects/` |
 | 资产 | 52 张 PNG（矿石剑身图集 21 / 材质贴图 12 / Boss 立绘 19）+ `SwordSpark.png` + `ZoneMask.zrdata` | 见 §15 |
 | 本地化 | `zh-Hans.hjson` / `en-US.hjson`，各 133 行，仅覆盖 `Items/Buffs/NPCs/Projectiles/Keybinds` | `ZenithReborn/Localization/` |
-| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（94 个 `.cs`）+ `checks/*.py` 54 个 + `checks/*.ps1` 37 个 | §17 |
+| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（96 个 `.cs`）+ `checks/*.py` 58 个 + `checks/*.ps1` 38 个 | §17 |
 | 打包排除 | `docs` / `checks` / `VfxLibrary` / `tools` 四目录不进成品包 | `checks/package_install.py:70` |
 
 ### 验证等级约定（全文通用）
@@ -42,9 +42,9 @@
 | `ZenithReborn/Assets/Effects/` | 3 `.fx` + 3 `.fxc` + 4 `.fxh` + `build-manifest.json` | 着色器与编译对照。4 个 `.fxh` 是**双重孤儿**（无 `#include`，且被 `buildIgnore` 排除） | 是（`.fxh` 被排除） |
 | `ZenithReborn/Assets/Vfx/` | `SwordBody/*.png` 21 张、`Materials/SwordFlow/*` 13 个 | 运行时贴图源（`ModContent.Request` 直接读） | 是 |
 | `ZenithReborn/Assets/UI/BossPortraits/` | 19 张 PNG + `sources.json` | Boss 动态头像图集 | 是 |
-| `checks/ZenithPrototypeCheck/` | 94 `.cs` + `Assets/` + `Localization/` | 独立验收模组，`modReferences = ZenithReborn`，用 **HintPath 引 Release DLL** | 否 |
-| `checks/*.py` / `checks/*.ps1` | 54 / 37 | 构建期代码生成（`emit_*`）、资产校验、GPU 采集启动、打包安装 | 否 |
-| `docs/` | 64 顶层 `.md` + `docs/archive/` 116 `.md` | 版本记录 / 设计定稿 / 参考表 / 索引 | 否 |
+| `checks/ZenithPrototypeCheck/` | 96 `.cs` + `Assets/` + `Localization/` | 独立验收模组，`modReferences = ZenithReborn`，用 **HintPath 引 Release DLL** | 否 |
+| `checks/*.py` / `checks/*.ps1` | 58 / 38 | 构建期代码生成（`emit_*`）、资产校验、GPU 采集启动、打包安装 | 否 |
+| `docs/` | 70 顶层 `.md` + `docs/archive/` 126 `.md` | 版本记录 / 设计定稿 / 参考表 / 索引 | 否 |
 | `tools/` | 222 文件 | 制作端：`ZenithMaterialLab`（独立模组）、`ilspy`、`decomp`、`xnbcli` 源码与二进制 | 部分（`tools` 目录被排除，但 `ZenithMaterialLab` 源码入库） |
 | `VfxLibrary/` | 11756 文件 | 制作端素材库 + 原版特效浏览器。`library.json` 自报 `runtimeIntegrated: false` | 否 |
 | `artifacts/` | 约 16 GB | 构建产物、备份、安装记录、调查产物。**整目录被 `.gitignore` 忽略** | 否 |
@@ -612,7 +612,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 
 | 项 | 内容 |
 |---|---|
-| 文件数 | **94** 个 `.cs`（不是 100） |
+| 文件数 | **96** 个 `.cs`（不是 100） |
 | 引用方式 | `HintPath = ../../ZenithReborn/bin/Release/net8.0/ZenithReborn.dll` —— **引的是上次构建产物**，不是源码 |
 | 硬编码路径 | `<Import Project="E:/SteamLibrary/.../tMLMod.targets" />` → **不可移植** |
 | 调度入口 | `Check.cs:11` `class Check : ModSystem`；`PostAddRecipes`（服务端）/ `PostUpdateEverything`（客户端） |
@@ -620,7 +620,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 | 总回归入口 | `ZENITH_WOOD`（`Check.cs:125` 区块）串联 29 个套件 |
 | 断言原语 | `Check.cs:15` `Assert(bool,string)` —— 失败即抛异常，**快速失败**；`PASS: N` 是成功数不是总数 |
 | 第二调度体系 | 49 个文件不经过 `Check.cs`，各自在 `ModSystem` 钩子里读 `ZENITH_*_RENDER/GPU/GUI`，由 `checks/run_*.ps1` 启动 |
-| 脚本 | `checks/*.py` 54 个（生成/校验/采集）、`checks/*.ps1` 37 个（构建/启动） |
+| 脚本 | `checks/*.py` 58 个（生成/校验/采集）、`checks/*.ps1` 38 个（构建/启动） |
 | 打包安装 | `checks/package_install.py:70` 排除 `docs/checks/VfxLibrary/tools`；`:73` `tools` 下额外排除 dll/exe/pdb/zip/tmod |
 
 **⚠ 夹具体系的 6 个陷阱（写新夹具或排查假阴性必读）**

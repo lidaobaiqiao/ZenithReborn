@@ -1,0 +1,24 @@
+#!/bin/sh
+# 提交前校验：docs/ 下的代码地图是否仍跟得上源码。
+# 由 checks/install_git_hooks.ps1 安装到 .git/hooks/pre-commit。
+# 失败会阻断提交；确需绕过用 git commit --no-verify，并在提交说明里写原因。
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+
+# 优先用项目约定的运行时 python，读不到再退回 PATH 上的 python。
+py="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe"
+if [ ! -x "$py" ]; then
+  py=$(command -v python 2>/dev/null || command -v python3 2>/dev/null)
+fi
+if [ -z "$py" ] || [ ! -x "$py" ]; then
+  echo "[pre-commit] 找不到 python，跳过地图校验"
+  exit 0
+fi
+
+if ! "$py" "$root/checks/map_freshness.py"; then
+  echo ""
+  echo "[pre-commit] 地图与源码不同步，提交已阻止。"
+  echo "  重生成索引：python checks/build_file_index.py"
+  echo "  仅本次绕过：git commit --no-verify"
+  exit 1
+fi
+exit 0

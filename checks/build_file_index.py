@@ -336,6 +336,19 @@ SUPPLEMENT_ROWS = [
     ("checks/ZenithPrototypeCheck/LivingProjectileOwnershipCheck.cs", "C# 夹具（静态断言）",
      "夹具·活体武器代理", "从生产召唤槽发射真实原版弹幕（铜短剑/长矛/附魔回旋镖/泰拉刃/飞刀/吸血鬼刀），核对代理身份绑定与还原：断言弹幕由召唤体实际生成、依附型身份判定（吸血鬼刀除外）、AI 后恢复真实玩家与鼠标位置、近战弹幕位置依附远处代理、飞刀在召唤体结束后恢复真实玩家回收",
      "LivingChannelProjectile.cs、LivingArmament.cs、Check.cs", "人工补写"),
+    # --- 建图维护链（2026-11-05 新增：让地图被自动使用并保持新鲜） ---
+    ("checks/map_query.py", "Python 脚本（只读检索）",
+     "建图维护", "按关键词检索 docs/FILE_INDEX.md 六列索引，输出「模块 / 文件 / 职责」；路径 3 分、模块 2 分、职责关联 1 分，并按目录优先级把源码排在文档前；支持 --module / --file / --json / --limit，用来替代全库 grep",
+     "docs/FILE_INDEX.md、.codebuddy/rules/01-codebase-map.md", "人工补写"),
+    ("checks/map_freshness.py", "Python 脚本（校验）",
+     "建图维护", "五项校验：A 索引与磁盘是否一致（调 build_file_index --check）、B 文档里 `文件:行号` 是否存在与越界、C CODEBASE_MAP 基线版本 vs build.txt、D 源码/夹具/checks 脚本计数、E 回归项数 vs wood-check.txt（只警告）；有 ERROR 退出码 1，供 pre-commit 与回归使用",
+     "checks/build_file_index.py、checks/hooks/pre-commit、docs/CODEBASE_MAP.md", "人工补写"),
+    ("checks/install_git_hooks.ps1", "PowerShell 脚本（安装）",
+     "建图维护", "把 checks/hooks/pre-commit 复制到 .git/hooks/pre-commit；钩子本身不入库，新克隆的仓库要重跑一次",
+     "checks/hooks/pre-commit", "人工补写"),
+    ("checks/hooks/pre-commit", "sh 钩子模板",
+     "建图维护", "提交前跑 checks/map_freshness.py，地图落后即阻断提交（git commit --no-verify 可绕过）；优先用项目约定的 runtime python，缺失时回退 PATH 上的 python",
+     "checks/map_freshness.py、checks/install_git_hooks.ps1", "人工补写"),
 ]
 
 # 分组索引：同一目录下同类批量文件，逐行列会淹没索引，改为一行 + 成员清单 txt。
@@ -743,6 +756,56 @@ def build(root: Path) -> tuple[str, dict]:
                                             "reports": per_report}
 
 
+def normalize_for_check(text: str) -> list[str]:
+    """比对用的规范化：丢掉每次都会变的「生成时间」行与行尾空白。
+
+    生成时间是 `datetime.now()`，不丢会让 --check 永远判过期；行尾空白只是
+    编辑器/换行策略差异，不影响索引内容。
+    """
+    lines = [ln.rstrip() for ln in text.splitlines() if not ln.startswith("生成时间 :")]
+    while lines and not lines[-1]:
+        lines.pop()
+    return lines
+
+
+def diff_lines(old: list[str], new: list[str], limit: int = 20) -> list[str]:
+    """极简行级 diff：裁掉公共前后缀，中间那段按「- 磁盘 / + 新生成」整块列出。
+
+    生成物是按固定顺序拼出来的，真正的差异通常只有一两行；不需要 LCS。
+    """
+    head = 0
+    while head < min(len(old), len(new)) and old[head] == new[head]:
+        head += 1
+    tail = 0
+    while tail < min(len(old), len(new)) - head and old[-1 - tail] == new[-1 - tail]:
+        tail += 1
+    old_mid = old[head:len(old) - tail]
+    new_mid = new[head:len(new) - tail]
+
+    out: list[str] = []
+    for ln in old_mid:
+        out.append("- 磁盘   | " + ln)
+    for ln in new_mid:
+        out.append("+ 新生成 | " + ln)
+    return out[:limit]
+
+
+def check_index(root: Path) -> tuple[bool, list[str]]:
+    """比对「现在重建出来的文本」与磁盘上的 docs/FILE_INDEX.md。
+
+    返回 (是否一致, 差异摘要行)。本函数不写盘、不打印，供 map_freshness.py 复用。
+    """
+    text, _info = build(root)
+    target = root / OUT_REL
+    if not target.is_file():
+        return False, ["（磁盘上不存在 %s）" % OUT_REL]
+    old = normalize_for_check(target.read_text(encoding="utf-8"))
+    new = normalize_for_check(text)
+    if old == new:
+        return True, []
+    return False, diff_lines(old, new)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="合并建图调查报告的索引表 → docs/FILE_INDEX.md（优先 docs/archive/codebase-map-survey-2026-11-03/，回退 artifacts/codebase-map/）")
     parser.add_argument("--root", default=str(Path(__file__).resolve().parent.parent), help="仓库根")
@@ -757,11 +820,16 @@ def main(argv: list[str] | None = None) -> int:
         print("[警告] " + w, file=sys.stderr)
 
     if args.check:
-        drop = lambda t: "\n".join(ln for ln in t.splitlines() if not ln.startswith("生成时间 :"))
-        old = target.read_text(encoding="utf-8") if target.is_file() else ""
-        same = drop(old) == drop(text)
-        print("[索引生成] --check：%s" % ("一致" if same else "不一致，需要重跑生成"))
-        return 0 if same else 1
+        same, diff = check_index(root)
+        if same:
+            print("[索引检查] 与磁盘一致")
+            return 0
+        print("[索引检查] 已过期，需要重跑 python checks/build_file_index.py")
+        if diff:
+            print("  差异摘要（最多 20 行）：")
+            for ln in diff:
+                print("  " + ln)
+        return 1
 
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(text, encoding="utf-8")

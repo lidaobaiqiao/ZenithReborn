@@ -9,6 +9,9 @@ New-Item -ItemType Directory -Force -Path "$testProfile/Mods", "$taskRoot/artifa
 # 只编译项目自有着色器；微软编译器只在开发时使用，不新增玩家依赖。
 $python=Join-Path $env:USERPROFILE '.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe'
 if(-not(Test-Path $python)){$python=(Get-Command python -ErrorAction Stop).Source}
+# 地图新鲜度：只提示不阻断（提交时由 pre-commit 钩子强制），避免改代码期间反复卡回归。
+& $python "$taskRoot/checks/map_freshness.py" *> "$taskRoot/artifacts/map-freshness.log"
+if($LASTEXITCODE -ne 0){Write-Warning '代码地图落后于源码：细节见 artifacts/map-freshness.log，提交前必须修（pre-commit 会拦）'}
 # 资产完整性先跑：服务端夹具不加载图形资产，新增 Mod 类型缺同名 png 或缺 Texture override 只会在客户端崩溃。
 & $python "$taskRoot/checks/check_mod_assets.py"
 if($LASTEXITCODE -ne 0){throw '资产完整性检查失败：新增 Mod 类型必须有同名 png 或显式 Texture override'}
