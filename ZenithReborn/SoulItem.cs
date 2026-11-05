@@ -410,9 +410,15 @@ public partial class SoulItem : ModItem
     }
     public override float UseSpeedMultiplier(Player player)
     {
-        // 旧机械迟滞与流转祝福已由六种诅咒取代。
+        // 机械组「迟滞械缓」：Flow 是连续出手积攒的流转值（0~1，闲置衰减）。
+        // 三个机械组没解除前，Flow 越高出手越慢（最多 -35%）；全部解除后转为加速（最多 +20%）。
+        // 0.3.123 删「旧机械迟滞与流转祝福」时把这个消费端一起删了，Flow 只剩写入、攻速只剩森林成长，
+        // 于是开局就是原版天顶剑的 10 帧满速、全程没有成长——这里按 0.3.2 起的既有曲线恢复。
+        float flow = player.GetModPlayer<SoulPlayer>().Flow;
+        int remaining = 3 - SoulProgress.Mechs(Kills);
+        float baseSpeed = remaining == 0 ? 1 + .2f * flow : 1 - .35f * remaining / 3 * flow;
         // 森林之力出剑速度成长（基础每层+1%、圣林之冠每层+2%），不乘环境倍率S；其余各族加成不变。
-        return (1 + ForestPower.SpeedBonus(player)) /
+        return baseSpeed * (1 + ForestPower.SpeedBonus(player)) /
             (TraitSupports.Any(i => WeaponFamilies.Of(i.type) == BladeFamily.Swift) ? .85f : 1);
     }
     public float Reach(Player player)

@@ -4,9 +4,9 @@
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-05 15:10:33
+生成时间 : 2026-11-05 19:38:58
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
-索引条目 : 764 条（去重合并 4 次重复出现；报告未覆盖的人工补写 51 条）
+索引条目 : 768 条（去重合并 4 次重复出现；报告未覆盖的人工补写 55 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
 排除目录 : artifacts/  bin/  obj/  */__pycache__/  *.pyc  *-profile/  *-playtest/  .git/  编辑器配置目录
 整体记录 : VfxLibrary/（11756 个原版素材，按第六节单独核对）
@@ -320,6 +320,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/ZenithPrototypeCheck/LiquidGlassTrailRenderCheck.cs` | GPU 渲染 ModSystem | K 渲染 | 液态玻璃拖尾：先导 `trail-mesh.json`（逐顶点），再写 `liquid-trail.json` | 依赖 `LiquidGlassTrailMesh`、`LiquidGlassTrailGeometryCheck` | 部分待核实 |
 | `checks/ZenithPrototypeCheck/LivingArmamentCheck.cs` | 静态断言套件 | G 活武 | 活武族（11 条）：新种族与神圣/矿石/木质同时生效、每个有效出战槽各有召唤体、重复更新不重复召唤、出战武器通过玩家近战流程真实命中目标、种子弯刀通过原版物品检查发射、星怒通过原版物品检查发射、飞刀从玩家通道发射、飞刀继续由代理持有并恢复真实玩家、代理结束后保留真实玩家物品/位置/鼠标、失去激活成员时召唤体退出、召唤体消失后飞刀退出代理并恢复真实玩家 | `LivingArmament` 代理玩家；`ZENITH_LIVING_ARMAMENT` | 已验证 |
 | `checks/ZenithPrototypeCheck/LivingBatHealCheck.cs` | C# 夹具（静态断言） | 夹具·活体武器代理 | 对照原版蝙蝠棍命中回血：独立服务端构造真人与代理两种 Trial，断言真人基准命中回血 1、代理命中后真实玩家回血 1、同一次挥击不重复回血、满血不超上限、无效目标不触发、真实玩家普通使用不受转发影响；用占满 combatText 槽规避无字体资源的绘制 | ZenithReborn/LivingProxyOwnerState.cs（LivingProxyHealing）、Check.cs | 人工补写 |
+| `checks/ZenithPrototypeCheck/LivingChildSightCheck.cs` | C# 夹具 + 独立服务端入口 | 验证体系 / 剑灵 | 剑灵代理子代弹幕的视线判定隔离夹具；由 PostAddRecipes 读 ZENITH_CHILD_SIGHT_REPORT 单独启动，落 PASS/FAIL 后退出，不进主套件 | LivingWeaponProxy.cs、checks/ZenithPrototypeCheck/Check.cs | 人工补写 |
 | `checks/ZenithPrototypeCheck/LivingMeleeMatrix.cs` | 矩阵探针（不判定） | G 活武 | 对同一固定目标与武器，逐项比较"真实玩家"与"生产代理"两条路径，记录未能验证的情况，写 `ZENITH_MELEE_MATRIX_OUTPUT` JSON（`LivingMeleeMatrix.cs:73`）。重置 `Main.rand=UnifiedRandom(318)`、`projectile/npc` 全灭、`netMode=SinglePlayer` 保证可重复 | 需要 `CurseFixture.NeutralDefaults=true`（`Check.cs:53`）；产出 `matrix.json` | 已验证 |
 | `checks/ZenithPrototypeCheck/LivingParryCheck.cs` | C# 夹具（剑灵招架） | 验证体系 | 对照真人与剑灵代理的真实近战命中与一次性招架增益，断言两者命中判定一致 | LivingWeaponProxy.cs、LivingArmamentCheck.cs | 人工补写 |
 | `checks/ZenithPrototypeCheck/LivingProjectileOwnershipCheck.cs` | C# 夹具（静态断言） | 夹具·活体武器代理 | 从生产召唤槽发射真实原版弹幕（铜短剑/长矛/附魔回旋镖/泰拉刃/飞刀/吸血鬼刀），核对代理身份绑定与还原：断言弹幕由召唤体实际生成、依附型身份判定（吸血鬼刀除外）、AI 后恢复真实玩家与鼠标位置、近战弹幕位置依附远处代理、飞刀在召唤体结束后恢复真实玩家回收 | LivingChannelProjectile.cs、LivingArmament.cs、Check.cs | 人工补写 |
@@ -359,6 +360,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/ZenithPrototypeCheck/SwordFlowMeshBasisCheck.cs` | 静态断言套件 | M 数学 | 网格基 6 条：连续朝向不移动顶点/不改 UV/不改逐顶点覆盖度、共享顶点的全部三角形副本朝向完全一致、连续朝向单位化且无非法数值、观察矩阵旋转正确传到屏幕空间朝向、空间重合但 UV 不同的表面不被错误焊接、退化尾尖用稳定中性朝向不除零 | `SwordFlow` 网格；`SwordFlowMeshBasis` 生产侧 | 已验证 |
 | `checks/ZenithPrototypeCheck/SwordFlowPaletteCheck.cs` | 静态断言套件 | M 数学 | 调色板 4 条：剑色明暗锚点有限且在有效色域、暗部/中间调/高光感知亮度依次递增、有色剑三锚点都保留色彩而非叠白、不同剑色生成各自明暗阶 | `SwordFlowPalette` 生产侧；`check_sword_color_delivery.py` | 已验证 |
 | `checks/ZenithPrototypeCheck/SwordHighlightRenderCheck.cs` | 渲染（静态） | K 渲染 | `Run(Func<string,int,int,Color[]> render)` 高光渲染对照，返回 `Result` | 被 `SwordSpaceDistortionRenderCheck` 同族调用 | 部分待核实 |
+| `checks/ZenithPrototypeCheck/SwordMatrixCheck.cs` | C# 只读普查 | 验证体系 / 数值 | 遍历全部原版可寄宿近战物品，逐项记录 damage/useTime/useAnimation/knockBack/crit/shoot 与族归属，输出 sword-matrix.json；只读引擎数据，不改游戏行为与存档，供攻速与数值曲线推演 | checks/run_sword_matrix.ps1、docs/攻速成长曲线-起草稿.md | 人工补写 |
 | `checks/ZenithPrototypeCheck/SwordSpaceDistortionCheck.cs` | 静态断言套件 | M 数学 | 空间扭曲几何 6 条：位移有界且小于影响半径、非法时钟/相机输入不产偏移、相机原点与时间相位显式传递且不改强度、屏幕缩放经逆变换还原世界相位坐标、奇异观察矩阵安全关闭扭曲、独立开关且受纯代码屏幕输入限制 | 配对 `SwordSpaceDistortionRenderCheck`、`SpaceWarpRegionCheck` | 已验证 |
 | `checks/ZenithPrototypeCheck/SwordSpaceDistortionRenderCheck.cs` | 渲染（静态） | K 渲染 | `Run(output, coverage, width, height)` 空间扭曲渲染对照 | 配对 `SwordSpaceDistortionCheck` 的几何断言；`run_surge_preview.ps1` | 部分待核实 |
 | `checks/ZenithPrototypeCheck/SwordTrailHeadJoinRenderCheck.cs` | GPU 渲染 ModSystem | K 渲染 | 剑尾头部接合实拍，写 `head-join.json` | `run_sword_head_join.ps1`；配对 `SwordTrailInnerContourCheck` | 部分待核实 |
@@ -483,6 +485,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/run_soul_trail_render.ps1` | ps1 | B 图形夹具 | 主飞剑拖尾 GPU（-WithoutThirdParty 重建隔离包、-TextureAblation） | artifacts/soul-trail-gpu-<ver> | 已验证 |
 | `checks/run_surge_preview.ps1` | ps1 | B 图形夹具 | 重建两包→等 preview.json（失败强杀） | 硬编码 taskRoot | 已验证 |
 | `checks/run_sword_head_join.ps1` | ps1 | B 图形夹具 | 指定包 + 夹具包做刀身接合检查 | head-join.json | 已验证 |
+| `checks/run_sword_matrix.ps1` | PowerShell 编排（隔离 profile） | 验证体系 / 数值 | 用隔离 profile 加载源码包跑剑矩阵普查（ZENITH_SWORD_MATRIX=1），输出 JSON；只读引擎数据，不触碰正式存档；tModLoader 路径按 ZENITH_TML_ROOT > local.props > 默认值解析 | checks/ZenithPrototypeCheck/SwordMatrixCheck.cs、checks/ZenithPrototypeCheck/Check.cs | 人工补写 |
 | `checks/run_swordbody_batch.ps1` | ps1 | B 批量 | 20 把矿剑 R2 断点续跑，一次重试，收尾 vfx_library validate | 开头强杀所有 dotnet | 已验证 |
 | `checks/run_swordbody_preview.ps1` | ps1 | B 图形夹具 | 单剑单修订版蒙版 GPU 导出（被三个批量脚本调用） | VfxLibrary/library.json、ZENITH_SWORDBODY_* 8 个变量 | 已验证 |
 | `checks/run_textured_sword_material.ps1` | ps1 | B 图形夹具 | 完整贴图材质检查 | textured-material.json | 已验证 |
@@ -494,7 +497,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/verify_own_effect.py` | py | C 静态检查 | 无第三方素材包与原包 GPU 图逐像素一致 | 产出 soul-trail-gpu-<ver>/independence.json（package_install:156 消费） | 部分待核实 |
 | `checks/vfx_library.py` | py | C 编目校验 | validate：id/类别/目录层级/引用环/清单齐全；search 检索 | VfxLibrary/library.json、run_swordbody_batch 收尾 | 已验证 |
 | (分组) checks/archived-oneoff/（20 个 .py） | 历史归档脚本 | 归档·一次性 | 20 个扁平存放的一次性取证/生成脚本：14 个 `make_*_evidence.py`/`make_*_preview.py`（截图与取证图）、3 个 `make_*`（mask/colorfields/gif 工具）、1 个 `extract_`（从 Calamity 抄剑弧）、1 个 `localize_`（批量改注释语言）。**无一条断言**，只产 png/json 供人看；无 csproj、无执行入口，`run_*.ps1`/`*.py` 全文检索零命中 | 成员清单 `artifacts/codebase-map/archived-oneoff-manifest.txt`；目录成因见 `artifacts/codebase-map/F-checks-fixtures.md` 5.1~5.2 | 已扫描（分组索引） |
-| (合计) | 231 条 |  |  |  |  |
+| (合计) | 234 条 |  |  |  |  |
 
 ---
 
@@ -681,6 +684,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `docs/协作开发指南.md` | Markdown 流程文档 | 协作与上手 | 两人及以上共写时的同步流程：权限开放方式、首次上手、分支 + PR 节奏、冲突高发点与处理、不可提交清单、换行符与证据分级约定 | docs/AI接入指南.md、checks/dev_setup.ps1、.gitignore | 人工补写 |
 | `docs/原版天顶飞剑源码.md` | 参考表 | 参考资料 | Projectile 933 FinalFractal 反编译摘录与复现命令 | SoulBlade.cs | 已验证 |
 | `docs/战斗乘区总表与减益覆盖审计.md` | 参考表 | 战斗设计 | 12 大类 61 维度乘区目录 + 减益覆盖审计 | SoulCombat.cs, SoulTraits.cs | 部分待核实 |
+| `docs/攻速成长曲线-起草稿.md` | Markdown 设计草案（待勾） | 设计草案 / 攻速 | 状态：草案未实装。查实事实（正式存档仍是旧包、开局 30 帧挥臂/10 帧间隔、Flow 初值 0 与衰减、工作区草稿恢复了机械迟滞曲线但起点仍满速）；方案 A 起步压速+按机械三组单调成长（推荐）/ B 保留草稿曲线先装包看手感 / C 用户自填；待勾参数与验证边界 | ZenithReborn/SoulItem.cs（UseSpeedMultiplier）、docs/archive/0.3.26-原版攻速与飞行粒子.md | 人工补写 |
 | `docs/新种族-召唤出战武器候选.md` | 设计草案 | 种族/剑灵 | 剑灵候选武器表（附魔剑/飞刀/波涌/无头骑士） | LivingArmamentFamily.cs | 已验证 |
 | `docs/新种族-召唤出战武器设计草案.md` | 设计草案 | 种族/剑灵 | 剑灵核心机制草案：代理玩家走原版攻击通道 | LivingArmament*.cs, LivingWeaponProxy.cs | 已验证 |
 | `docs/木质族D2-环境特性与森林之力.md` | 已撤销 | 种族/木质 | 12 种木质族 + 森林之力 6 属性成长设计 | WoodTypes.cs, ForestPower.cs | 已验证 |
@@ -703,7 +707,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `docs/飞刃族F1-掷刃与印记.md` | 设计定稿 | 种族/飞刃 | 掷刃机制已实装，印记为留白核心设计 | FlyingBladeHand.cs, FlyingBladeShot.cs | 已验证 |
 | `docs/飞刃族F2-数量分阶与族显示.md` | 设计定稿 | 种族/飞刃 | 前四把阶梯效果 + 族归属显示 | FlyingBladeFamily.cs, WeaponFamilyTags.cs | 已验证 |
 | `docs/飞刃族FB1-候选名册与攻击方式.md` | 设计草案 | 种族/飞刃 | 引擎普查产出的 31 把名册与攻击方式 | FlyingBladeFamily.Weapons, flying-blade-survey.json | 已验证 |
-| (合计) | 199 条 |  |  |  |  |
+| (合计) | 200 条 |  |  |  |  |
 
 ---
 

@@ -13,7 +13,7 @@
 | 项 | 值 |
 |---|---|
 | 版本 | `0.3.130`（以 `ZenithReborn/build.txt` 为准） |
-| 回归基线 | 8511 项（2026-11-05 全量重跑），以 `artifacts/wood-check.txt` 首行为准；项数随夹具断言增删变化，`install-result.json` 的 8511 是 11-04 安装时的旧记录，数值巧合相同 |
+| 回归基线 | 8516 项（2026-11-05 全量重跑），以 `artifacts/wood-check.txt` 首行为准；项数随夹具断言增删变化，`install-result.json` 的 8511 是 11-04 安装时的旧记录 |
 | 仓库 | `https://github.com/lidaobaiqiao/ZenithReborn.git` |
 | 源码规模 | `ZenithReborn/` 121 个 `.cs`，平铺根目录、单命名空间 |
 
@@ -60,7 +60,7 @@ python checks/check_mod_assets.py
 回归的性质：
 
 - **fail-fast**：第一条断言失败就抛异常，后面的检查根本不跑。看到"只跑了 300 项就失败"不是套件少，是第一条就挂了。
-- 项数**动态统计**（当前 8511），历史文档里的 8393 / 8453 / 8498 / 8509 均已过时。
+- 项数**动态统计**（当前 8516），历史文档里的 8393 / 8453 / 8498 / 8509 / 8511 均已过时。
 - 耗时约 70–85 秒，不要按"十几分钟"设超时。
 - 结果落 `artifacts/wood-check.txt`（首行 `PASS: N focused checks [suite=full ZENITH_WOOD]`，末行 `SUITE=ZENITH_WOOD`）；`artifacts/native-build-check.json` 记录两包 sha256 与 `passed`。
 - 全量回归由脚本用 tModLoader 自带 dotnet 重新打包（`run_wood_checks.ps1:24`，`dotnet ./tModLoader.dll -server -build`），与 §4 的 `dotnet build` 是两条独立链路；§7.1 关于夹具引用 `bin/Release` 旧 DLL 的告警只针对手动编译夹具。

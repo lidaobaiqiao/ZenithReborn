@@ -362,6 +362,19 @@ SUPPLEMENT_ROWS = [
     ("checks/ZenithPrototypeCheck/LivingWallCollisionCheck.cs", "C# 夹具（视线遮挡）",
      "验证体系", "用真实方块与弹幕伤害路径比较玩家与剑灵代理的视线判定，防止代理穿墙出手",
      "LivingWeaponProxy.cs、LivingParryCheck.cs", "人工补写"),
+    # --- 2026-11-05 新增：攻速普查、剑灵子代视线与攻速设计起草 ---
+    ("checks/ZenithPrototypeCheck/LivingChildSightCheck.cs", "C# 夹具 + 独立服务端入口",
+     "验证体系 / 剑灵", "剑灵代理子代弹幕的视线判定隔离夹具；由 PostAddRecipes 读 ZENITH_CHILD_SIGHT_REPORT 单独启动，落 PASS/FAIL 后退出，不进主套件",
+     "LivingWeaponProxy.cs、checks/ZenithPrototypeCheck/Check.cs", "人工补写"),
+    ("checks/ZenithPrototypeCheck/SwordMatrixCheck.cs", "C# 只读普查",
+     "验证体系 / 数值", "遍历全部原版可寄宿近战物品，逐项记录 damage/useTime/useAnimation/knockBack/crit/shoot 与族归属，输出 sword-matrix.json；只读引擎数据，不改游戏行为与存档，供攻速与数值曲线推演",
+     "checks/run_sword_matrix.ps1、docs/攻速成长曲线-起草稿.md", "人工补写"),
+    ("checks/run_sword_matrix.ps1", "PowerShell 编排（隔离 profile）",
+     "验证体系 / 数值", "用隔离 profile 加载源码包跑剑矩阵普查（ZENITH_SWORD_MATRIX=1），输出 JSON；只读引擎数据，不触碰正式存档；tModLoader 路径按 ZENITH_TML_ROOT > local.props > 默认值解析",
+     "checks/ZenithPrototypeCheck/SwordMatrixCheck.cs、checks/ZenithPrototypeCheck/Check.cs", "人工补写"),
+    ("docs/攻速成长曲线-起草稿.md", "Markdown 设计草案（待勾）",
+     "设计草案 / 攻速", "状态：草案未实装。查实事实（正式存档仍是旧包、开局 30 帧挥臂/10 帧间隔、Flow 初值 0 与衰减、工作区草稿恢复了机械迟滞曲线但起点仍满速）；方案 A 起步压速+按机械三组单调成长（推荐）/ B 保留草稿曲线先装包看手感 / C 用户自填；待勾参数与验证边界",
+     "ZenithReborn/SoulItem.cs（UseSpeedMultiplier）、docs/archive/0.3.26-原版攻速与飞行粒子.md", "人工补写"),
 ]
 
 # 分组索引：同一目录下同类批量文件，逐行列会淹没索引，改为一行 + 成员清单 txt。

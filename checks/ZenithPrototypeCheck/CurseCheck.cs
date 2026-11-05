@@ -115,8 +115,26 @@ internal static class CurseCheck
         check(!frozen.HasBuff(BuffID.Frostburn),"Actual secondary sword hit cannot bypass switching to apply its debuff");
         s.Seals=SoulCurses.Brain;ice=Blade(p,s,ItemID.IceBlade);ice.AI();Hit(ice,frozen);
         check(frozen.HasBuff(BuffID.Frostburn),"First switching-group boss restores the secondary sword's actual debuff");
-        NativeBlessing(check);Terrain(check);Persistence(check);Credit(check);
+        AttackSpeed(check);NativeBlessing(check);Terrain(check);Persistence(check);Credit(check);
         foreach(var proj in Main.projectile)proj.active=false;foreach(var n in Main.npc)n.active=false;
+    }
+    // 攻速成长曲线：Flow=1 且三组机械未记录时出手变慢，三组齐后转为加速，Flow=0 恒为原速。
+    private static void AttackSpeed(Action<bool,string> check)
+    {
+        var(p,s)=Setup();
+        // 森林层数显式归零（ForestPower.Reset 是 internal，这里按同口径反射清零），避免前序用例残留层数污染 SpeedBonus。
+        var wood=p.GetModPlayer<WoodPlayer>();
+        var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.NonPublic;
+        foreach(var name in new[]{"Layers","CombatFrames","RecentCombat","Decay"})typeof(WoodPlayer).GetProperty(name,flags).SetMethod.Invoke(wood,[0]);
+        typeof(WoodPlayer).GetProperty("CurrentSoul",flags).SetMethod.Invoke(wood,[""]);
+        var flowField=typeof(SoulPlayer).GetField("Flow",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic);
+        var soulPlayer=p.GetModPlayer<SoulPlayer>();
+        flowField.SetValue(soulPlayer,1f);s.Kills=0;
+        check(Math.Abs(s.UseSpeedMultiplier(p)-.65f)<.001f,"Full flow with no mechanical group slows the swing to 65%");
+        s.Kills=SoulProgress.Destroyer|SoulProgress.Retinazer|SoulProgress.Spazmatism|SoulProgress.Prime;
+        check(Math.Abs(s.UseSpeedMultiplier(p)-1.2f)<.001f,"All three mechanical groups turn full flow into a 20% blessing");
+        flowField.SetValue(soulPlayer,0f);
+        check(Math.Abs(s.UseSpeedMultiplier(p)-1f)<.001f,"Zero flow stays exactly neutral at zero forest layers");
     }
     private static void NativeBlessing(Action<bool,string> check)
     {

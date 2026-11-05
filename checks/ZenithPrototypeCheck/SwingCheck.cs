@@ -46,6 +46,33 @@ internal static class SwingCheck
         return Trace.ToList();
     }
 
+    // 真运行时验证：关掉归一化，让 SoulItem.UseSpeedMultiplier 的倍率真正进入原版 ItemCheck。
+    // 用单剑配置，SoulPlayer.Cycle(1) 不会推高 Flow，保证两次试验只有 Flow 这一个变量不同。
+    internal static (int AnimationMax, int Shots) HookTrial(int kills, float flow)
+    {
+        var (player, soul) = Setup(1);
+        soul.Kills = kills; soul.RefreshStats();
+        var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+        typeof(SoulPlayer).GetField("Flow", flags).SetValue(player.GetModPlayer<SoulPlayer>(), flow);
+        player.GetAttackSpeed(DamageClass.Melee) = 1f;
+        player.controlUseItem = player.releaseUseItem = true;
+        Main.GameViewMatrix ??= new Terraria.Graphics.SpriteViewMatrix(null);
+        Main.mouseX = 1240; Main.mouseY = 1040; Main.screenPosition = Vector2.Zero;
+        Main.screenWidth = 1920; Main.screenHeight = 1080;
+        Trace = []; Recording = true; NormalizeTraits = false;
+        int max = 0;
+        try
+        {
+            for (Tick = 0; Tick < 150; Tick++)
+            {
+                player.ItemCheck();
+                if (max == 0 && player.itemAnimation > 0) max = player.itemAnimationMax;
+            }
+        }
+        finally { Recording = false; }
+        return (max, Trace.Count);
+    }
+
     internal static void Run(Action<bool,string> check)
     {
         var reports=new List<object>();
@@ -93,6 +120,13 @@ internal static class SwingCheck
         s2.RefreshStats();check(s2.Item.useTime==useTime && s2.Item.useAnimation==animation,"Inventory refresh preserves prefix timing");
         int[] themed=WoodTypes.Types.Concat(SoulProgress.ZenithWeapons).Concat(HardOreTypes.Types).Distinct().ToArray();
         check(themed.Select(SoulVisuals.Tint).Distinct().Count()==themed.Length,"Existing per-sword palette is retained");
+        // 攻速倍率必须真的改变原版节奏，而不只是公式算得对：三组机械未解时 Flow=1 应把 30 帧动画拉长。
+        var neutralClock = HookTrial(0, 0f);
+        var slowedClock = HookTrial(0, 1f);
+        check(neutralClock.AnimationMax > 0 && slowedClock.AnimationMax > 0,
+            "Both cadence trials started a real item animation");
+        check(slowedClock.AnimationMax > neutralClock.AnimationMax,
+            "UseSpeedMultiplier actually lengthens the native animation under the mechanical curse");
         string report=Environment.GetEnvironmentVariable("ZENITH_CHECK_REPORT");
         System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(report),"native-cadence.json"),JsonSerializer.Serialize(reports,new JsonSerializerOptions{WriteIndented=true}));
         foreach(var p in Main.projectile)p.active=false;
@@ -110,7 +144,7 @@ public class NativeCadenceProbe : GlobalProjectile
 
 public class NativeCadenceTraits : GlobalItem
 {
-    // Controlled comparison isolates the base native clock from the soul's
-    // deliberately retained mechanical/wood/support trait speed modifiers.
+    // 对照试验专用：把剑魂自身保留的机械/木质/支援攻速修正归一化掉，只比原版时钟。
+    // NormalizeTraits 为 false 时返回 1，让真实倍率进入 ItemCheck（见 HookTrial）。
     public override float UseSpeedMultiplier(Item item,Player player)=>SwingCheck.NormalizeTraits && item.ModItem is SoulItem soul?1/soul.UseSpeedMultiplier(player):1;
 }
