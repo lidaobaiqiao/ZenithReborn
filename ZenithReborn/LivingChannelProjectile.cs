@@ -36,8 +36,16 @@ public class LivingChannelProjectile : GlobalProjectile
 // 只在依附型弹幕的原版AI调用期间提供代理，结束后立即恢复真实玩家和鼠标。
 public class LivingChannelSystem : ModSystem
 {
-    public override void Load()=>On_Projectile.AI+=RunWithProxy;
-    public override void Unload()=>On_Projectile.AI-=RunWithProxy;
+    public override void Load()
+    {
+        On_Projectile.AI+=RunWithProxy;
+        On_Projectile.CanHitWithMeleeWeapon+=CanHitWithProxy;
+    }
+    public override void Unload()
+    {
+        On_Projectile.AI-=RunWithProxy;
+        On_Projectile.CanHitWithMeleeWeapon-=CanHitWithProxy;
+    }
     private static void RunWithProxy(On_Projectile.orig_AI original,Projectile projectile)
     {
         var proxy=projectile.GetGlobalProjectile<LivingChannelProjectile>().Proxy;
@@ -53,5 +61,17 @@ public class LivingChannelSystem : ModSystem
             original(projectile);
         }
         finally {Main.player[owner]=real;Main.mouseX=oldX;Main.mouseY=oldY;}
+    }
+
+    // 近战弹幕在 AI 之外检查方块视线，应从同一把武器的代理位置检查。
+    private static bool CanHitWithProxy(On_Projectile.orig_CanHitWithMeleeWeapon original,Projectile projectile,Entity target)
+    {
+        var proxy=projectile.GetGlobalProjectile<LivingChannelProjectile>().Proxy;
+        int owner=projectile.owner;
+        if(proxy==null || !proxy.Active || owner!=Main.myPlayer || owner<0 || owner>=Main.maxPlayers)
+            return original(projectile,target);
+        Player real=Main.player[owner];
+        try {Main.player[owner]=proxy.Player;return original(projectile,target);}
+        finally {Main.player[owner]=real;}
     }
 }

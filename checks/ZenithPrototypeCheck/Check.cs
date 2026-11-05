@@ -56,7 +56,7 @@ public class Check : ModSystem
             }
             if(Environment.GetEnvironmentVariable("ZENITH_LIVING_ARMAMENT")=="1")
             {
-                CurseFixture.NeutralDefaults=true;LivingArmamentCheck.Run(Assert);LivingBatHealCheck.Run(Assert);LivingProjectileOwnershipCheck.Run(Assert);
+                CurseFixture.NeutralDefaults=true;LivingArmamentCheck.Run(Assert);LivingBatHealCheck.Run(Assert);LivingProjectileOwnershipCheck.Run(Assert);LivingWallCollisionCheck.Run(Assert);LivingParryCheck.Run(Assert);
                 File.WriteAllText(path,$"PASS: {checks} living armament checks; isolated fixture only, no live gameplay or multiplayer.\n");
                 Console.WriteLine("ZENITH_LIVING_ARMAMENT_PASS "+checks);Environment.Exit(0);return;
             }

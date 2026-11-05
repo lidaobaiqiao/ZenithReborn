@@ -32,6 +32,8 @@ internal static class LivingProxyOwnerState
         proxy.yoyoGlove=owner.yoyoGlove;
         proxy.counterWeight=owner.counterWeight;
         proxy.gravDir=owner.gravDir;
+        proxy.parryDamageBuff=owner.parryDamageBuff;
+
         proxy.statLife=owner.statLife;
         proxy.statLifeMax2=owner.statLifeMax2;
         CopyValues(owner.buffType,proxy.buffType);

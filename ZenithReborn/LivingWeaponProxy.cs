@@ -30,6 +30,8 @@ internal sealed class LivingWeaponProxy
     public void Tick(Vector2 position,Vector2 target)
     {
         LivingProxyOwnerState.Copy(owner,player);
+        bool hadParry=player.parryDamageBuff;
+
         Target=target;player.Center=position;player.direction=target.X>=position.X?1:-1;
         player.controlUseItem=true;player.releaseUseItem=true;
         int oldX=Main.mouseX,oldY=Main.mouseY;var previous=Current;
@@ -39,6 +41,12 @@ internal sealed class LivingWeaponProxy
             Main.mouseY=(int)(target.Y-Main.screenPosition.Y);
             Current=this;player.ItemCheck();
         }
-        finally {Current=previous;Main.mouseX=oldX;Main.mouseY=oldY;}
+        finally
+        {
+            Current=previous;Main.mouseX=oldX;Main.mouseY=oldY;
+            // 原版近战命中会消费招架加成，只将实际消费同步回真实玩家。
+            if(hadParry && !player.parryDamageBuff && owner.parryDamageBuff)
+            {owner.parryDamageBuff=false;owner.ClearBuff(BuffID.ParryDamageBuff);}
+        }
     }
 }
