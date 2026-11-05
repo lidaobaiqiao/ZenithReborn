@@ -117,7 +117,8 @@ public class WoodCombat : GlobalNPC
         // 特性强度只取 S（wood.Strength）。原实现额外乘了 TraitPower 接力倍率（1~1.5），
         // 那是「切换」诅咒下的祝福接力增伤，属祝福伤害通道（SoulBlessings/HardOrePlayer 侧结算），
         // 不应放大木质特性，故在此处断开；接力机制本身未改动。
-        float strength = wood.Strength, p = Math.Max(1, primaryDamage);
+        // 哪些剑的特性开火看 CombatWood（受切换诅咒压制）；特性强度 S 是族倍率，属数值口径，取 HostedWood。
+        float strength = soul.HostedWood.Strength, p = Math.Max(1, primaryDamage);
         bool changed = false;
         // 标记先于持续伤害通道施加，保证本跳命中时所有通道看到同一增幅。
         int[] order = [1, 2, 4, 7, 3, 6];

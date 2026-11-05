@@ -20,15 +20,18 @@ public static class SoulTraits
         var support=soul.Attached?soul.TraitSupports.ToArray():[];
         var equipped=main.Concat(support).ToArray();
         bool hasMain=main.Length>0;
+        // 自然之力/森林之力属数值口径，按「有效寄宿」计，不受切换诅咒过滤；
+        // 逐把木剑条目属特性口径，仍用 CombatWood（被压制的剑不显示为生效）。
+        var hosted=soul.HostedWood;
         var wood=soul.CombatWood;
         void Add(string key,string title,string description,string requirement,TraitCategory category,bool active) =>
             result.Add(new(key,title,description,requirement,category,active));
-        Add("wood-set","自然之力",wood.Count>0?
-            $"木质族 {wood.Count}/8 · 环境效果 {wood.Strength:0.##}倍 · 最大生命 +{wood.Life}":
+        Add("wood-set","自然之力",hosted.Count>0?
+            $"木质族 {hosted.Count}/8 · 环境效果 {hosted.Strength:0.##}倍 · 最大生命 +{hosted.Life}":
             "1/2/4/6/8种有效木剑对应1.10/1.20/1.35/1.50/2.00倍环境效果、5/10/15/25/40生命；圣林归冠时环境效果3.00倍、生命+100。支援槽已改为独立通用机制。",
-            "获得附着，将木剑放入有效普通槽；有效支援槽、森林/圣林奖励位与传奇位中的木剑也计入种类。",TraitCategory.Wood,wood.Count>0);
+            "获得附着，将木剑放入有效普通槽；有效支援槽、森林/圣林奖励位与传奇位中的木剑也计入种类。",TraitCategory.Wood,hosted.Count>0);
         Add("forest","森林之力","8种木剑全部有效寄宿时激活：环境效果达到2.00倍，最大生命+40；圣林归冠激活后覆盖为3.00倍、+100。成长上限：基础6层（有效战斗30秒），圣林归冠12层（60秒）。每层按当前表计算——基础：伤害+2%、速度+1%、防御+2、回复+0.3/秒、自有持续伤害+3%、减伤+0.5个百分点；归冠：伤害+3%、速度+2%、防御+3、回复+0.5/秒、DoT+5%、减伤+1个百分点。",
-            "8种木剑同时放在基础普通、有效支援槽、森林/圣林奖励位与传奇位中，支持共用支援池的不同排布。取下失效；奖励位同样计入，不设例外。",TraitCategory.Wood,wood.Full);
+            "8种木剑同时放在基础普通、有效支援槽、森林/圣林奖励位与传奇位中，支持共用支援池的不同排布。取下失效；奖励位同样计入，不设例外。",TraitCategory.Wood,hosted.Full);
         for(int i=0;i<WoodTypes.Types.Length;i++)
             Add("wood-"+i,WoodTypes.Names[i]+" · "+WoodTypes.Effects[i],WoodTypes.Description(WoodTypes.Types[i]),
                 "该木剑处于有效普通、支援、森林/圣林奖励位或传奇位。S为当前木族倍率，P为实际主剑影伤害；命中后触发，持续时间与目标免疫仍适用。",TraitCategory.Wood,(wood.Mask&(1<<i))!=0);

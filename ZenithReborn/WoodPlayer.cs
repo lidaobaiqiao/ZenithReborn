@@ -45,7 +45,8 @@ public class WoodPlayer : ModPlayer
     {
         AdvanceGrowth();
         WoodLoadout wood = Loadout;
-        if (wood.Full) Player.AddBuff(ModContent.BuffType<ForestPower>(), 2);
+        // 森林之力 buff 属数值口径（Full 判定不看切换诅咒）；森息/血馥 buff 的清除属特性口径，仍按 CombatWood。
+        if (HeldSoul?.HostedWood.Full == true) Player.AddBuff(ModContent.BuffType<ForestPower>(), 2);
         else Player.ClearBuff(ModContent.BuffType<ForestPower>());
         if (!wood.Has(WoodKind.Forest)) Player.ClearBuff(ModContent.BuffType<ForestBreath>());
         if (!wood.Has(WoodKind.Shade)) Player.ClearBuff(ModContent.BuffType<BloodFragrance>());
@@ -58,7 +59,7 @@ public class WoodPlayer : ModPlayer
     {
         var soul = HeldSoul;
         if (soul == null) return;
-        Player.statLifeMax2 += soul.CombatWood.Life;
+        Player.statLifeMax2 += soul.HostedWood.Life;
         Player.statDefense += ForestPower.DefenseBonus(Player);
         Player.endurance += ForestPower.DamageReduction(Player);
     }
@@ -67,7 +68,7 @@ public class WoodPlayer : ModPlayer
         var soul = HeldSoul;
         float perSecond = soul == null ? 0 : ForestPower.RegenBonus(Player);
         if (soul != null && soul.CombatWood.Has(WoodKind.Forest) && Player.HasBuff(ModContent.BuffType<ForestBreath>()))
-            perSecond += .25f * soul.CombatWood.Strength;
+            perSecond += .25f * soul.HostedWood.Strength;
         // Fractional lifeRegen units accumulate; no per-frame minimum heal and no Heal hook.
         if (perSecond <= 0) { regenRemainder = 0; return; }
         regenRemainder += perSecond * 2;
@@ -78,7 +79,7 @@ public class WoodPlayer : ModPlayer
     public int BoostSoulHealing(SoulItem soul, int baseAmount, int remainingBudget)
     {
         // S 与战斗侧同源：取该剑魂自身的 CombatWood.Strength，而不是手持 Loadout 的缓存值。
-        float bonus = soul.CombatWood.Has(WoodKind.Shade) && Player.HasBuff(ModContent.BuffType<BloodFragrance>()) ? .04f * soul.CombatWood.Strength : 0;
+        float bonus = soul.CombatWood.Has(WoodKind.Shade) && Player.HasBuff(ModContent.BuffType<BloodFragrance>()) ? .04f * soul.HostedWood.Strength : 0;
         return Math.Clamp((int)(baseAmount * (1 + bonus)*Player.GetModPlayer<EnvironmentPlayer>().HealingMultiplier), 0, Math.Max(0, remainingBudget));
     }
     // Shared entry for direct-healing sword traits. Never scales unrelated potions or global life steal.

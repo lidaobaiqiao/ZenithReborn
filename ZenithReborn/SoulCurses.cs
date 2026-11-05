@@ -83,7 +83,10 @@ public partial class SoulItem
     public IEnumerable<Item> TraitMains=>Active.Where(i=>TraitEnabled(i.type));
     public IEnumerable<Item> TraitSupports=>Supports.Where(i=>TraitEnabled(i.type));
     public IEnumerable<Item> TraitItems=>TraitMains.Concat(TraitSupports);
-    // 族内计数口径：主攻槽＋已生效支援槽＋森林/圣林奖励位＋传奇位（FamilyItems）；特性仍按 TraitEnabled 过滤。
+    // 两套口径必须分开，别合并：
+    // HostedWood＝有效寄宿（主攻槽＋已生效支援槽＋奖励位＋传奇位），**不受切换诅咒过滤**，供阶段/生命/倍率/Full/森林/归冠使用；
+    // CombatWood＝特性口径，带 TraitEnabled 过滤（未解切换只认第一把），只用于决定「哪些剑的特性开火」。
+    public WoodLoadout HostedWood=>new(WoodTypes.Mask(SoulSupport.FamilyItems(this)),SupportCapacity,WoodCrown.Active(this));
     public WoodLoadout CombatWood=>new(WoodTypes.Mask(SoulSupport.FamilyItems(this).Where(i=>TraitEnabled(i.type))),SupportCapacity,WoodCrown.Active(this));
     public void SaveCurses(TagCompound tag){tag["curseSchema"]=1;tag["seals"]=Seals;tag["legacyReleased"]=LegacyReleased;}
     public void LoadCurses(TagCompound tag)

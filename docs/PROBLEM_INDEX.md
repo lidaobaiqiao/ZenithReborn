@@ -34,7 +34,7 @@
 | 顺序 | 可能模块 | 优先检查 | 关联检查位置 |
 |---|---|---|---|
 | 1 | 飞刃族三条件 | `ZenithReborn/FlyingBladeFamily.cs:70` `Enabled = Attached && TraitMains.Any() && Activated` | `checks/ZenithPrototypeCheck/FlyingBladeCheck.cs` |
-| 2 | 木质族被切换诅咒过滤 | `ZenithReborn/SoulCurses.cs:86`（`CombatWood` 的 `.Where(TraitEnabled)`）。未解除切换时只认**第一把**有效主攻 | `checks/ZenithPrototypeCheck/CurseCheck.cs` |
+| 2 | 木质族——**特性**被切换诅咒过滤（**已修正数值侧**） | 2026-11-05 前：`CombatWood` 的 `.Where(TraitEnabled)` 被数值侧复用，未解切换时阶段/倍率/生命一起被压成第一把。现拆成两套口径：`HostedWood`（`SoulCurses.cs:89`，未过滤，供阶段/生命/倍率/Full/森林/归冠）与 `CombatWood`（`:90`，仍过滤，只管哪些剑的特性开火）。看到「8 把却只 1 把」先确认是哪一侧：倍率/生命应按 `HostedWood`，特性条数仍会被压制，解除切换后全开 | `checks/ZenithPrototypeCheck/WoodCheck.cs`、`CurseCheck.cs` |
 | 3 | 矿石族入场资格 | `ZenithReborn/OreFamily.cs:85`（`TriggerEligible`：`PrimaryOrdinal>=0` 且 `Count>0`）；未解除切换时 `OreFlightMains` 只取前 4 把（`ZenithReborn/SoulCurses.cs:81`） | `checks/ZenithPrototypeCheck/OreCheck.cs` |
 | 4 | 神圣天堂门槛 | `ZenithReborn/HolyHeavenFamily.cs:13` `Enabled` 要求至少一把在 `TraitItems` | `checks/ZenithPrototypeCheck/HolyHeavenCheck.cs`（`Check.cs:63`） |
 | 5 | 剑灵族 | `ZenithReborn/LivingArmamentFamily.cs:9`（4 把，两处标注"暂定候选"） | `checks/ZenithPrototypeCheck/LivingArmamentCheck.cs`（`Check.cs:57`） |

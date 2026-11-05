@@ -244,5 +244,18 @@ internal static class WoodCheck
         check(player.HasBuff(ModContent.BuffType<ForestPower>()), "Full set grants the forest power buff");
         soul.Hosts[0].TurnToAir(); soul.RefreshStats(); woodPlayer.PreUpdateBuffs();
         check(!player.HasBuff(ModContent.BuffType<ForestPower>()), "Missing wood source revokes the forest power buff");
+
+        // —— 口径分裂：切换诅咒只压制特性，不压制数值（2026-11-05 修正） ——
+        // 用无进度剑魂：Kills=0 时六诅咒都停在「诅咒中」，切换诅咒必然压制。
+        // 还要清 LegacyReleased——夹具造魂经兼容路径会把它置 63，那是「旧档已解除」标记，会掩盖压制。
+        // 不断言绝对数量——无进度时普通槽容量本身很小——只断言两套口径的分裂关系：
+        // 数值口径（HostedWood）与羁绊计数同源且严格大于特性口径（CombatWood）。
+        var cursed = Soul(fullProgress: false); FullWood(cursed);
+        cursed.Seals = 0; cursed.LegacyReleased = 0; cursed.RefreshStats();
+        check(cursed.HostedWood.Count == BondSnapshot.Wood(cursed).Count &&
+            cursed.HostedWood.Count > cursed.CombatWood.Count,
+            $"Hosted wood ignores the switching curse while combat wood does not (hosted={cursed.HostedWood.Count}, bond={BondSnapshot.Wood(cursed).Count}, combat={cursed.CombatWood.Count}, stage={(int)cursed.Curse(SoulCurse.Switching)})");
+        check(cursed.CombatWood.Count == 1 && cursed.TraitItems.Count() == 1 && !cursed.CombatWood.Full,
+            "Switching curse still suppresses every trait but the first sword");
     }
 }

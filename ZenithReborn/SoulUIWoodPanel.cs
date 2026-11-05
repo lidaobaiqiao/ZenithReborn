@@ -36,8 +36,8 @@ public partial class SoulUI
         if (r.IsEmpty) return;
         float time = (float)UiTime;
 
-        // 两套口径分开：hostedMask 是全部已寄宿木剑（未过滤，含森林/圣林与传奇等奖励位，用于阶段与收集展示），
-        // CombatWood.Mask 是特性实际生效的木剑（切换诅咒会压制，用于特性与倍率）。
+        // 两套口径分开：hostedMask 是全部已寄宿木剑（未过滤，含森林/圣林与传奇等奖励位，用于阶段、倍率、生命与收集展示），
+        // CombatWood.Mask 是特性实际生效的木剑（切换诅咒会压制，只用于剑格子与特性列表）。
         int hostedMask = WoodTypes.Mask(SoulSupport.FamilyItems(soul));
         WoodLoadout activeWood = soul.CombatWood;
         int activeMask = activeWood.Mask;
@@ -88,12 +88,14 @@ public partial class SoulUI
             y += Math.Max(0, gap - 2);
 
             // 4. 关键数值：2 列 2 行，倍率、生命、支援、森林。
+            // 倍率与生命属数值口径，按有效寄宿计，不受切换诅咒过滤（与 WoodPlayer 的实际加成同源）。
+            WoodLoadout hostedWood = soul.HostedWood;
             int forestCap = crown ? ForestPower.CrownCap : ForestPower.BaseCap;
             int forestLayers = ForestPower.Layers(Main.LocalPlayer);
             (string Label, string Value)[] metrics =
             [
-                ("倍率", "×" + activeWood.Strength.ToString("0.##")),
-                ("生命", "+" + activeWood.Life),
+                ("倍率", "×" + hostedWood.Strength.ToString("0.##")),
+                ("生命", "+" + hostedWood.Life),
                 ("支援", activeWood.SupportCount + "/" + soul.SupportCapacity),
                 ("森林", forestLayers + "/" + forestCap),
             ];
