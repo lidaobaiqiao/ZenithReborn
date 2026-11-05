@@ -1,6 +1,6 @@
 # 天顶复苏 · 诅咒残魂 — 代码地图
 
-> 基线版本：`ZenithReborn/build.txt` → `version = 0.3.130`（`displayName = 天顶复苏 · 诅咒残魂`）
+> 基线版本：`ZenithReborn/build.txt` → `version = 0.3.131`（`displayName = 天顶复苏 · 诅咒残魂`）
 > 本文所有 `文件:行号` 均已对照当前工作区源码抽查核验；与既有调查稿不一致处以源码为准（差异清单见文末）。
 > 描述的是 2026-11-04 清理提交 `e59f29bd` 之后的磁盘内容；此后每次提交都会由 pre-commit 钩子核对索引新鲜度、行号越界、版本号与源码计数，**但模块职责的描述准确度仍需改代码的人在同一提交里更新**。
 
@@ -14,11 +14,11 @@
 |---|---|---|
 | 目标框架 | `net8.0`，`LangVersion 12`，`BuildMod=false` | `ZenithReborn/ZenithReborn.csproj` |
 | tML 版本 | 1.4.4（`tMLMod.targets`），引用 `Luminance` 做 primitive 渲染 | 同上 |
-| 代码规模 | `ZenithReborn/*.cs` = **121** 个，平铺在根目录（无子命名空间分层） | `ls ZenithReborn/*.cs \| wc -l` |
+| 代码规模 | `ZenithReborn/*.cs` = **122** 个，平铺在根目录（无子命名空间分层） | `ls ZenithReborn/*.cs \| wc -l` |
 | 着色器 | 3 个 `.fx`（`ZRSwordFlow` / `ZRGlassScreen` / `ZRMaterialSurface`）+ 3 个同名 `.fxc` 对照产物 | `ZenithReborn/Assets/Effects/` |
 | 资产 | 52 张 PNG（矿石剑身图集 21 / 材质贴图 12 / Boss 立绘 19）+ `SwordSpark.png` + `ZoneMask.zrdata` | 见 §15 |
 | 本地化 | `zh-Hans.hjson` / `en-US.hjson`，各 133 行，仅覆盖 `Items/Buffs/NPCs/Projectiles/Keybinds` | `ZenithReborn/Localization/` |
-| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（100 个 `.cs`）+ `checks/*.py` 58 个 + `checks/*.ps1` 40 个 | §17 |
+| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（101 个 `.cs`）+ `checks/*.py` 58 个 + `checks/*.ps1` 40 个 | §17 |
 | 打包排除 | `docs` / `checks` / `VfxLibrary` / `tools` 四目录不进成品包 | `checks/package_install.py:70` |
 
 ### 验证等级约定（全文通用）
@@ -38,11 +38,11 @@
 
 | 路径 | 规模 | 职责 | 是否进成品包 |
 |---|---|---|---|
-| `ZenithReborn/` | 121 `.cs` + Assets + Localization | 主模组全部运行时代码；文件平铺，靠文件名前缀表达归属（`Soul*`=剑魂核心/UI，`Wood*`/`Ore*`/`FlyingBlade*`/`HolyHeaven*`/`Living*`/`Environment*`=各族，`Vfx*`/`Sword*`=渲染） | 是 |
+| `ZenithReborn/` | 122 `.cs` + Assets + Localization | 主模组全部运行时代码；文件平铺，靠文件名前缀表达归属（`Soul*`=剑魂核心/UI，`Wood*`/`Ore*`/`FlyingBlade*`/`HolyHeaven*`/`Living*`/`Environment*`=各族，`Vfx*`/`Sword*`=渲染） | 是 |
 | `ZenithReborn/Assets/Effects/` | 3 `.fx` + 3 `.fxc` + 4 `.fxh` + `build-manifest.json` | 着色器与编译对照。4 个 `.fxh` 是**双重孤儿**（无 `#include`，且被 `buildIgnore` 排除） | 是（`.fxh` 被排除） |
 | `ZenithReborn/Assets/Vfx/` | `SwordBody/*.png` 21 张、`Materials/SwordFlow/*` 13 个 | 运行时贴图源（`ModContent.Request` 直接读） | 是 |
 | `ZenithReborn/Assets/UI/BossPortraits/` | 19 张 PNG + `sources.json` | Boss 动态头像图集 | 是 |
-| `checks/ZenithPrototypeCheck/` | 100 `.cs` + `Assets/` + `Localization/` | 独立验收模组，`modReferences = ZenithReborn`，用 **HintPath 引 Release DLL** | 否 |
+| `checks/ZenithPrototypeCheck/` | 101 `.cs` + `Assets/` + `Localization/` | 独立验收模组，`modReferences = ZenithReborn`，用 **HintPath 引 Release DLL** | 否 |
 | `checks/*.py` / `checks/*.ps1` | 58 / 39 | 构建期代码生成（`emit_*`）、资产校验、GPU 采集启动、打包安装 | 否 |
 | `docs/` | 73 顶层 `.md` + `docs/archive/` 126 `.md` | 版本记录 / 设计定稿 / 参考表 / 索引 | 否 |
 | `tools/` | 222 文件 | 制作端：`ZenithMaterialLab`（独立模组）、`ilspy`、`decomp`、`xnbcli` 源码与二进制 | 部分（`tools` 目录被排除，但 `ZenithMaterialLab` 源码入库） |

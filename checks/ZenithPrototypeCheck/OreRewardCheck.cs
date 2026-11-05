@@ -141,11 +141,18 @@ internal static class OreRewardCheck
     {
         var(p,s,n)=Setup(10);s.LegacyReleased=0;s.Seals&=~(SoulCurses.Brain|SoulCurses.Cultist);
         int capacity=s.SupportCapacity;
-        check(s.OreFlightMains.Count()==4 && OreFamily.Count(s)==4 && s.TraitMains.Count()==1,
-            "Switching caps ore primaries at four while ordinary traits remain first-primary only");
+        check(s.OreFlightMains.Count()==4 && s.TraitMains.Count()==s.Active.Count() &&
+            s.TraitSupports.Count()==s.Supports.Count(),
+            "Deviation caps ore primaries at four while every primary and support keeps its trait");
         for(int i=0;i<10;i++)Primary(p,s,i,n,false);
-        check(Flights().Length==4 && Flights().All(f=>f.SetCount==4),
-            "Ten distinct primaries hitting in one game frame produce only four cursed flying swords without shared cooldown");
+        // 偏锋替换后 TraitSupports 不再被压成首把，支援槽矿材也计入种类；飞剑数按当前矿材种类数，
+        // 而不是硬编码 4。前 4 把主剑的入场限制仍由上一条 OreFlightMains 断言覆盖。
+        // 偏锋替换后 TraitSupports 不再被压成首把，支援槽矿材也计入种类：
+        // 飞剑数仍由 OreFlightMains 的前 4 把主剑封顶，但每组齐射的 SetCount 变成全部矿材种类。
+        int kinds=OreFamily.Count(s);
+        var flights=Flights();
+        check(flights.Length==s.OreFlightMains.Count() && flights.All(f=>f.SetCount==kinds),
+            "Four primaries still cap flight count while every ore material joins each set without shared cooldown");
         check(s.SupportCapacity==capacity && s.Active.Count()==10,
             "Flight restriction leaves structural supports and all direct-damage primaries active");
         s.Seals|=SoulCurses.Brain;
@@ -169,9 +176,9 @@ internal static class OreRewardCheck
         }
         s.Hosts[0].TurnToAir();Primary(p,s,4,n,false);
         check(Flights().Length==2,"Empty normal slots do not consume one of the four effective primary positions");
-        check(SoulCurses.Description(s,SoulCurse.Switching).Contains("前4把") &&
+        check(SoulCurses.Description(s,SoulCurse.Switching).Contains("目标位置") &&
             SoulTraits.All(s).Single(t=>t.Key=="ore-wave").Requirement.Contains("前4把"),
-            "Curse and codex both explain the four-primary exception");
+            "Curse explains target deviation while the codex keeps the four-primary exception");
     }
     private static void Skyfall(Action<bool,string> check)
     {

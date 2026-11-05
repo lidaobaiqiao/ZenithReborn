@@ -16,7 +16,7 @@ public static partial class SoulCurses
         bool free=stage>=CurseStage.Released;
         string effect=curse switch{
             SoulCurse.Binding=>stage==CurseStage.Blessed?"御剑距离不再设上限，仍可鼠标自由选点。":free?"御剑距离最少到屏幕左右边界，保留正常鼠标选点。":"御剑距离最少能打到屏幕左右边界的中点；仍可鼠标自由选点。",
-            SoulCurse.Switching=>free?"所有有效寄宿武器的特性正常生效，全部有效主剑可参与百炼飞剑。":"普通特性仅首把主剑生效；百炼飞剑例外允许前4把有效主剑计入矿材并各自首击积攒，其余主剑仍保留独立伤害。支援仍受普通特性限制。",
+            SoulCurse.Switching=>"剑锋失准，而非剑锋失控：只让飞剑的目标位置产生偏移，不改变伤害、攻速、出剑数、命中次数、地形穿透与武器特性；当前阶段最大偏移"+SoulDeviation.MaxOffsetAt(stage).ToString("0.##")+"像素。",
             SoulCurse.Sheathing=>free?"新轮不打断旧轮，主剑各自完成攻击。":"开始新轮时，旧轮主剑提前停止攻击并淡出；不锁攻击键。",
             SoulCurse.Barrier=>free?"主剑正常穿越实体地形。":$"每段连续实体地形可穿过{TerrainAllowanceAtStage(stage)}像素，超出则退出攻击；背景墙、平台不阻断。",
             SoulCurse.Solitude=>$"每轮最多{BladesAtStage(soul,stage)}把主剑，不足留空。",

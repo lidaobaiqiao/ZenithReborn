@@ -64,6 +64,8 @@ public class SoulBlade : ModProjectile
 {
     private SoulTrailEnding.Handle[] trailEndings=new SoulTrailEnding.Handle[SoulTrailUnits.Count];
     public Vector2 TargetOffset;
+    // 偏锋诅咒的瞄准偏移：与 TargetOffset 独立，只叠加到目标点，不影响 velocity.Length()。
+    public Vector2 CurseOffset;
     public float SwordScale = 1;
     // 剑体、剑影、拖尾与粒子统一放大；碰撞和来源尺寸仍读取原始 Projectile.scale。
     public float DisplayScale => Projectile.scale * 1.6f;
@@ -128,6 +130,7 @@ public class SoulBlade : ModProjectile
         Reborn = false;age=0;released=false;retired=terrainArmed=false;retireAge=0;terrainDepth=0;targetHits=[];
         oreHitUnits=0;HitUnit=0;
         Blessings=new();
+        CurseOffset=Vector2.Zero;
         Vertical = 60f;
         trailPoints=new Vector2[HistoryLength];trailCenters=new Vector2[HistoryLength];trailRotations=new float[HistoryLength];trailDirections=new int[HistoryLength];
         trailCount=0;hasTrailAnchor=false;
@@ -163,9 +166,9 @@ public class SoulBlade : ModProjectile
         return targetHits.GetValueOrDefault(key)>=SoulCurses.HitLimit(soul)?false:null;
     }
     public override void SendExtraAI(BinaryWriter writer)
-    { writer.Write(TargetOffset.X); writer.Write(TargetOffset.Y); writer.Write(SwordScale); writer.Write(Vertical); writer.Write(SpecialDamage); writer.Write(Reborn);writer.Write(retired);writer.Write(retireAge); }
+    { writer.Write(TargetOffset.X); writer.Write(TargetOffset.Y); writer.Write(SwordScale); writer.Write(Vertical); writer.Write(SpecialDamage); writer.Write(Reborn);writer.Write(retired);writer.Write(retireAge);writer.Write(CurseOffset.X);writer.Write(CurseOffset.Y); }
     public override void ReceiveExtraAI(BinaryReader reader)
-    { TargetOffset = new(reader.ReadSingle(), reader.ReadSingle()); SwordScale = reader.ReadSingle(); Vertical = reader.ReadSingle(); SpecialDamage = reader.ReadInt32(); ConfigureReborn(reader.ReadBoolean());retired=reader.ReadBoolean();retireAge=Math.Clamp(reader.ReadInt32(),0,8); }
+    { TargetOffset = new(reader.ReadSingle(), reader.ReadSingle()); SwordScale = reader.ReadSingle(); Vertical = reader.ReadSingle(); SpecialDamage = reader.ReadInt32(); ConfigureReborn(reader.ReadBoolean());retired=reader.ReadBoolean();retireAge=Math.Clamp(reader.ReadInt32(),0,8);CurseOffset = new(reader.ReadSingle(), reader.ReadSingle()); }
     public override void AI()
     {
         Player player = Main.player[Projectile.owner];
@@ -201,7 +204,7 @@ public class SoulBlade : ModProjectile
         float orbit = MathHelper.Pi + dir * lerp * MathHelper.TwoPi;
         float radius = Math.Max(60f, velocity.Length() +
             MathHelper.Lerp(0f, 40f, Utils.GetLerpValue(.5f, 1f, lerp, true)));
-        Vector2 target = player.MountedCenter + velocity;
+        Vector2 target = player.MountedCenter + velocity + CurseOffset;
         Vector2 spinning = orbit.ToRotationVector2() * new Vector2(radius, num3 * MathHelper.Lerp(2f, 1f, distanceFactor));
         Vector2 small = (1f - Utils.GetLerpValue(0f, .5f, lerp, true)) *
             new Vector2(dir * -radius * .1f, -num3 * .3f);

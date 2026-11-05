@@ -30,7 +30,6 @@ from pathlib import Path
 INDEX_REL = "docs/FILE_INDEX.md"
 BUILD_TXT_REL = "ZenithReborn/build.txt"
 MAP_REL = "docs/CODEBASE_MAP.md"
-GUIDE_REL = "docs/AI接入指南.md"
 REPORT_REL = "artifacts/wood-check.txt"
 
 # 参与「文件:行号」校验的文档
@@ -175,7 +174,7 @@ def check_counts(root: Path, errors: list[str]) -> tuple[int, int, int]:
         (re.compile(r"版本索引（(\d+) 条"), "CHANGELOG 条目", count_changelog_entries(root)),
     ]
     checked = failed = 0
-    for rel in (MAP_REL, GUIDE_REL, "CODEBUDDY.md"):
+    for rel in (MAP_REL, "CODEBUDDY.md"):
         path = root / rel
         if not path.is_file():
             continue
@@ -213,7 +212,7 @@ def check_report_count(root: Path, warns: list[str]) -> str:
     if not m:
         return "跳过（报告首行无项数）"
     actual = m.group(1)
-    for rel in (MAP_REL, GUIDE_REL, "CODEBUDDY.md"):
+    for rel in (MAP_REL, "CODEBUDDY.md"):
         path = root / rel
         if not path.is_file():
             continue

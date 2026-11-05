@@ -27,7 +27,7 @@
 
 - 新增 / 删除 / 重命名文件、模块职责变化、核心入口变化、跨模块依赖变化 → 同一提交内更新 `docs/CODEBASE_MAP.md`、`docs/HOTSPOTS.md`，并重跑 `python checks/build_file_index.py` 重生成 `docs/FILE_INDEX.md`（**该文件是生成物，不许手改**）。
 - 提交前跑 `python checks/map_freshness.py`：校验索引是否最新、`文件:行号` 是否失效、版本号与源码计数是否一致。该检查已挂 pre-commit 钩子，失败会拦住提交（确需绕过的用 `git commit --no-verify`，并在提交说明里写原因）。
-- 计数类事实（源码文件数、回归项数、版本号）一律以脚本输出为准，不凭记忆写。改动计数后同步 `CODEBUDDY.md` 与 `docs/AI接入指南.md` 里对应的数字。
+- 计数类事实（源码文件数、回归项数、版本号）一律以脚本输出为准，不凭记忆写。改动计数后同步 `CODEBUDDY.md` 里对应的数字。
 
 ## 5. 报告要求
 

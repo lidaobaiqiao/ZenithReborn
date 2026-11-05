@@ -55,7 +55,7 @@ public static class BondSnapshot
     public static BondState Wood(SoulItem soul)
     {
         // 与战斗侧口径一致：主攻槽＋已生效支援槽＋森林/圣林奖励槽＋传奇位（FamilyItems），
-        // 奖励位同样计入，不设例外；也不受切换诅咒过滤。
+        // 奖励位同样计入，不设例外；偏锋只偏移飞剑目标位置，不改变有效寄宿的统计口径。
         int count = System.Numerics.BitOperations.PopCount((uint)WoodTypes.Mask(SoulSupport.FamilyItems(soul)));
         return Build(BondKind.Wood, "木质族", count, 8, WoodThresholds);
     }

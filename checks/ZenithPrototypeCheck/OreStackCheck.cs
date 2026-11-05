@@ -91,8 +91,8 @@ internal static class OreStackCheck
                 "没有锡质特性时多把飞剑保留原伤害，不获得叠层提亮");
 
             (p,s,n)=Setup(ItemID.IronBroadsword,ItemID.CopperBroadsword,ItemID.TinBroadsword);s.LegacyReleased=0;s.Seals=0;
-            check(!OreSwordTraits.EchoStacking(s)&&!OreSwordTraits.StackDamage(s)&&OreFamily.Count(s)==3,
-                "切换诅咒的前四矿材例外不会放开铜锡普通特性");
+            check(OreSwordTraits.EchoStacking(s)&&OreSwordTraits.StackDamage(s)&&OreFamily.Count(s)==3,
+                "偏锋不再压制铜锡普通特性，所有有效主剑特性正常触发");
             s.LegacyReleased=63;s.Hosts[1].TurnToAir();s.Hosts[2].TurnToAir();
             s.SupportHosts[0]=new Item(ItemID.CopperShortsword);s.SupportHosts[1]=new Item(ItemID.TinShortsword);s.RefreshStats();
             check(OreSwordTraits.EchoStacking(s)&&OreSwordTraits.StackDamage(s),"有效支援中的铜锡短剑也可提供同材质联动");

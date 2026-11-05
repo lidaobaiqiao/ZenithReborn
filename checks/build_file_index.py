@@ -205,7 +205,7 @@ SURVEY_ARCHIVE_ROWS = [
         "path": REPORT_DIR_REL + "/G-docs-current.md",
         "type": "调查报告（Markdown，319 行）",
         "module": "建图调查归档",
-        "duty": "G：`docs/` 顶层 64 篇现行文档的现状建图（不含 `docs/archive/` 的 116 篇），源码基线 `build.txt` = 0.3.130",
+        "duty": "G：`docs/` 顶层 64 篇现行文档的现状建图（不含 `docs/archive/` 的 116 篇），源码基线 `build.txt` = 0.3.131",
         "rel": "docs/FILE_INDEX.md 第四节、docs/",
         "status": "归档副本·只读",
     },
@@ -265,7 +265,7 @@ SUPPLEMENT_ROWS = [
      "与 checks/map_audit.py 的排除规则必须一致", "人工补写"),
     # --- 模组元数据 ---
     ("ZenithReborn/description.txt", "tModLoader 模组描述",
-     "工程元数据", "模组列表里显示的描述文本，随版本手写更新（当前停在 0.3.112 的玻璃材质说明，落后于 build.txt 的 0.3.130）",
+     "工程元数据", "模组列表里显示的描述文本，随版本手写更新（当前停在 0.3.112 的玻璃材质说明，落后于 build.txt 的 0.3.131）",
      "ZenithReborn/build.txt（版本号在此）、README.md", "人工补写"),
     # --- 夹具工程资产 ---
     ("checks/ZenithPrototypeCheck/Assets/Baselines/SwordFlow0379.fxc", "编译后的像素着色器（二进制）",
@@ -323,9 +323,6 @@ SUPPLEMENT_ROWS = [
     ("docs/PROBLEM_INDEX.md", "Markdown 问题反向索引",
      "导航文档", "从玩家/开发者看到的现象反查优先检查的符号，并给出能复现或证伪该分支的夹具/脚本",
      "docs/HOTSPOTS.md、checks/ 夹具", "人工补写"),
-    ("docs/AI接入指南.md", "Markdown 交接指南",
-     "导航文档", "写给外部接手 AI 的自包含接入文档：项目定位、clone 后必改的两处 targets 路径、环境四件套、三条命令、地图选读表、六条硬规则、六个已踩过的坑、提交纪律、设计边界、卡住时的排查表",
-     "docs/CODEBASE_MAP.md、docs/PROBLEM_INDEX.md、ZenithReborn/build.txt", "人工补写"),
     # --- 本轮新增源码（2026-11-04，调查报告归档时尚不存在，按源码逐条核对补写） ---
     ("ZenithReborn/LivingProxyOwnerState.cs", "C# 源码（状态复制 / ModSystem）",
      "剑灵·活体武器代理", "活体武器代理的玩家数值复制与蝙蝠棍治疗转发：LivingProxyOwnerState.Copy 把各伤害类的伤害/暴击/攻速/护穿/击退、手套与饰品字段、buff 与 ownedProjectileCounts 数组从真实玩家拷进代理玩家（数组用 Array.Copy 后清尾，不共享可变数组）；LivingProxyHealing 用 On_Player.Heal 钩子把原版蝙蝠棍命中回血从代理转发给真实玩家",
@@ -355,7 +352,7 @@ SUPPLEMENT_ROWS = [
      "local.props、checks/install_git_hooks.ps1、checks/prepare_luminance.py、docs/协作开发指南.md", "人工补写"),
     ("docs/协作开发指南.md", "Markdown 流程文档",
      "协作与上手", "两人及以上共写时的同步流程：权限开放方式、首次上手、分支 + PR 节奏、冲突高发点与处理、不可提交清单、换行符与证据分级约定",
-     "docs/AI接入指南.md、checks/dev_setup.ps1、.gitignore", "人工补写"),
+     "CODEBUDDY.md、checks/dev_setup.ps1、.gitignore", "人工补写"),
     ("checks/ZenithPrototypeCheck/LivingParryCheck.cs", "C# 夹具（剑灵招架）",
      "验证体系", "对照真人与剑灵代理的真实近战命中与一次性招架增益，断言两者命中判定一致",
      "LivingWeaponProxy.cs、LivingArmamentCheck.cs", "人工补写"),
@@ -375,6 +372,18 @@ SUPPLEMENT_ROWS = [
     ("docs/攻速成长曲线-起草稿.md", "Markdown 设计草案（待勾）",
      "设计草案 / 攻速", "状态：草案未实装。查实事实（正式存档仍是旧包、开局 30 帧挥臂/10 帧间隔、Flow 初值 0 与衰减、工作区草稿恢复了机械迟滞曲线但起点仍满速）；方案 A 起步压速+按机械三组单调成长（推荐）/ B 保留草稿曲线先装包看手感 / C 用户自填；待勾参数与验证边界",
      "ZenithReborn/SoulItem.cs（UseSpeedMultiplier）、docs/archive/0.3.26-原版攻速与飞行粒子.md", "人工补写"),
+    ("ZenithReborn/SoulDeviation.cs", "C# 静态类（偏锋诅咒）",
+     "诅咒/难度", "偏锋的数值与随机入口：MaxOffset 按个人 Boss 记录数分三档（0→48、1→24、≥2→0）并尊重 LegacyReleased；MaxOffsetAt 供 UI 阶段说明取同一组常量；NextOffset 用 Main.rand 生成圆形分布 radius=Max*(0.35+0.65*sqrt(u))、角度 0~2π，每把飞剑生成时调用一次",
+     "SoulItem.EmitBlade、SoulBlade.CurseOffset、SoulCurseDescriptions.cs", "人工补写"),
+    ("checks/ZenithPrototypeCheck/DeviationCheck.cs", "C# 夹具（偏锋）",
+     "验证体系 / 偏锋", "隔离夹具：三档上限与旧档兼容、256 次采样的半径环与四象限覆盖、每剑独立性、CurseOffset 的 SendExtraAI/ReceiveExtraAI 往返、TraitEnabled 恒 true 后全部主剑特性生效、AI 前后运动参数不变",
+     "SoulDeviation.cs、SoulBlade.cs、checks/ZenithPrototypeCheck/Check.cs", "人工补写"),
+    ("docs/0.3.131-偏锋诅咒.md", "Markdown 版本记录",
+     "版本记录 / 偏锋", "0.3.131 实装记录：设计定义、替换范围、保留枚举整数/按 Boss 记录数三档/独立 CurseOffset 字段/多人同步四项实现决策、验证结果与待实战调参说明",
+     "ZenithReborn/SoulDeviation.cs、ZenithReborn/SoulCurses.cs、docs/CHANGELOG.md", "人工补写"),
+    ("docs/剑灵衍生弹幕视线修复-开发记录.md", "Markdown 开发记录（候选）",
+     "版本记录 / 剑灵", "剑灵代理发射原版 933 衍生剑气的视线判定修复记录：LivingChannelProjectile 拆分 Origin/Proxy 身份、伤害回调期间建立可嵌套来源上下文、CanHitWithMeleeWeapon 检查时临时切到代理；文档自述为开发候选，未打包安装、未经自然游玩验收",
+     "ZenithReborn/LivingChannelProjectile.cs、checks/ZenithPrototypeCheck/LivingChildSightCheck.cs", "人工补写"),
 ]
 
 # 分组索引：同一目录下同类批量文件，逐行列会淹没索引，改为一行 + 成员清单 txt。

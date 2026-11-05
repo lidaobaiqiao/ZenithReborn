@@ -4,9 +4,9 @@
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-05 19:38:58
+生成时间 : 2026-11-05 22:21:55
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
-索引条目 : 768 条（去重合并 4 次重复出现；报告未覆盖的人工补写 55 条）
+索引条目 : 771 条（去重合并 4 次重复出现；报告未覆盖的人工补写 58 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
 排除目录 : artifacts/  bin/  obj/  */__pycache__/  *.pyc  *-profile/  *-playtest/  .git/  编辑器配置目录
 整体记录 : VfxLibrary/（11756 个原版素材，按第六节单独核对）
@@ -102,6 +102,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `ZenithReborn/SoulCombat.cs` | `SoulItem` 分部 | 战斗 | 单把宿主的真实伤害 = 武器伤害 × `Potency` × 矿石主剑倍率 | `SoulItem`、`OreFamily` | 已验证 |
 | `ZenithReborn/SoulCurseDescriptions.cs` | `SoulCurses` 分部 | 诅咒/难度 | 诅咒与祝福的阶段说明/需求文案，UI 与图鉴共用 | `SoulCurses`、`SoulBossUnlocks`、`SoulUIArchive` | 已验证 |
 | `ZenithReborn/SoulCurses.cs` | 静态类 + `SoulItem` 分部 | 诅咒/难度 | 18 位铭刻、6 组诅咒分级、出剑数/命中期/穿地上限、特性开关、诅咒存档网络、地形穿透判定 | `SoulBossCredit`、`SoulSwingPlayer`、`SoulBlade`、`SoulTraits`、`SoulBossUnlocks` | 已验证 |
+| `ZenithReborn/SoulDeviation.cs` | C# 静态类（偏锋诅咒） | 诅咒/难度 | 偏锋的数值与随机入口：MaxOffset 按个人 Boss 记录数分三档（0→48、1→24、≥2→0）并尊重 LegacyReleased；MaxOffsetAt 供 UI 阶段说明取同一组常量；NextOffset 用 Main.rand 生成圆形分布 radius=Max*(0.35+0.65*sqrt(u))、角度 0~2π，每把飞剑生成时调用一次 | SoulItem.EmitBlade、SoulBlade.CurseOffset、SoulCurseDescriptions.cs | 人工补写 |
 | `ZenithReborn/SoulDifficulty.cs` | ModSystem | 诅咒/难度 | 传奇难度开关：`GameMode==2 && getGoodWorld`，真实改写世界难度并持久化 | `SoulItem.LegendaryOn`、`SoulDomainUI` | 已验证 |
 | `ZenithReborn/SoulDomainUI.cs` | partial 分部 | 域界面 | `DomainMode`、`DomainWorkBounds`、`RingViewport`、`SelectSlot`、`LibraryItems`、`EquipFromInventory`、`ReturnSelected`、背景/页头/难度按钮 | `SoulArmoryLayout`、`SoulDifficulty`、`SoulInput` | 已验证 |
 | `ZenithReborn/SoulEchoDamage.cs` | 静态类 | 诅咒/难度 | 断锋诅咒 → 剑影伤害倍率（1 / 0.8^unit / 0.20） | `SoulBlade.ModifyHitNPC`、`SoulTrailUnits` | 已验证 |
@@ -165,7 +166,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `ZenithReborn/WoodPlayer.cs` | ModPlayer + ModBuff ×2 | 木质族 | 成长字段与同步（action 4）、生命/防御/减伤/回复、治疗预算、`Ready` 冷却 | `ForestPower`、`WoodCombat`、`EnvironmentPlayer` | 已验证 |
 | `ZenithReborn/WoodTypes.cs` | 静态表 + GlobalItem | 木质族 | 8 把名册、`WoodLoadout`（S/生命）、掩码、`Evaluate`、八条特性文案、tooltip | `SoulSupport.FamilyItems`、`WoodCrown`、`HardOreTypes`/`WeaponFamilies` 兜底文案 | 已验证 |
 | `ZenithReborn/ZenithReborn.cs` | Mod 入口类 | 装配/网络 | 注册 P/O 键位；`HandlePacket` 分发 action 1-12 到 9 个业务模块 | `AttachmentStory`、`SoulProgress`、`SoulBossCredit`、`BlessingPlayer`、`LunarSummonRecovery`、`WoodCombat`、`EnvironmentPlayer` | 已验证 |
-| (合计) | 121 条 |  |  |  |  |
+| (合计) | 122 条 |  |  |  |  |
 
 ---
 
@@ -251,7 +252,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `ZenithReborn/SwordSpark.png` | PNG（模组根，**不在 Assets 下**） | 资产 | 16×16 光斑，被 `SwordSpark`/`SoulFlowSpark` 引用 | `SwordSpark.cs:10`、`SoulFlowParticles.cs:77` | 已验证 |
 | `ZenithReborn/ZenithReborn.csproj` | 构建配置 | 配置 | net8.0 / LangVersion12 / `BuildMod=false` / 引 Luminance | 构建 | 已验证 |
 | `ZenithReborn/build.txt` | 构建配置 | 配置 | `buildIgnore = bin/*, obj/*, *.csproj, Assets/Effects/*.fxh` | 打包 | 已验证 |
-| `ZenithReborn/description.txt` | tModLoader 模组描述 | 工程元数据 | 模组列表里显示的描述文本，随版本手写更新（当前停在 0.3.112 的玻璃材质说明，落后于 build.txt 的 0.3.130） | ZenithReborn/build.txt（版本号在此）、README.md | 人工补写 |
+| `ZenithReborn/description.txt` | tModLoader 模组描述 | 工程元数据 | 模组列表里显示的描述文本，随版本手写更新（当前停在 0.3.112 的玻璃材质说明，落后于 build.txt 的 0.3.131） | ZenithReborn/build.txt（版本号在此）、README.md | 人工补写 |
 | (合计) | 77 条 |  |  |  |  |
 
 ---
@@ -293,6 +294,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/ZenithPrototypeCheck/CombatFixture.cs` | ModSystem 实机夹具 | A 调度 | 只在 `ZENITH_COMBAT_GUI=1` 且 `SavePath` 含 `stage-one-playtest` 时启用；`PostUpdateWorld` 第 60 tick 造 5 把矿剑剑魂 + 20 万血木桩，摆好光照/时间，产出两个确定性视觉检查点（bloom → 穿透飞行），Esc 切换 | 依赖 `OreFamily.DefaultType`、`SoulProgress.All/Cores`；纯客户端 | 已验证 |
 | `checks/ZenithPrototypeCheck/CurseCheck.cs` | 静态断言套件 + GlobalItem | C 诅咒 | 文件内含 `CurseFixture : GlobalItem`（`NeutralDefaults` 开关，见 1.3）；六组诅咒全谱：新魂默认六诅咒且不看世界标志/兼容豁免（48 条）：阶段判定任意顺序、同一 Boss 不重复推进、单双子不算机械王、双双子算 1、外围 Boss 只记独立胜利不解咒、眼单独解绑且射程≥屏幕中点且不超已解射程、空封印仍算诅咒、切换只留第一个有效主剑、Brain 恢复全部特性不改独立伤害/不要求邪教徒、第一回归组 Boss 允许旧波继续、诅咒手势让旧主剑退役不删宿主、退役主剑视觉淡出无吸收、独行预算 2/3/常态4/祝福4、真实手势发射对应预算、祝福手势间隔可超 3 至 10、真实伤害路径限制 3/5/已解 重复命中、同刃可打不同敌人、每把新主剑独立命中字典、副剑命中不能绕过切换施加减益、第一切换组 Boss 恢复副剑减益、祝福下真实 ItemCheck 永不瞬时批量、祝福用唯一宿主并延续游标、原生手势 30 帧且稀疏宿主至 10、诅咒屏障挖约 2 格、弱化 4 格、扫掠地形不能穿墙、诅咒/弱化屏障挡住超 64 像素墙、已解恢复完整地形穿透、平台不静默挡剑、超额度立即截停、封印与显式遗留豁免持久不伪造击杀、全魂网络包保留诅咒记录且终点精确、克隆进度独立、旧魂可玩且不给 Brain/Eater 二义位、空旧残魂仍以新诅咒起步、哥布林重铸保封印与兼容态、真实前缀重建经 HERO 钩子恢复进度、真实遭遇区分 Brain/Eater、可选 Boss 进真实封印组、第二丛林 Boss 在 Golem 前完全移除屏障、第三丛林 Boss 记独立祝福阶段、外围胜利独立记录、剩余虫段阻止提前记账与重复交叉召唤、末段给待定个人封印并放行交叉召唤 | `SoulProgress`、`SoulCurse`、`CrossSummonDrops`、HERO 钩子 | 已验证 |
 | `checks/ZenithPrototypeCheck/DamageBalanceCheck.cs` | 静态断言套件 | B 核心 | 伤害分配：初始阶段保 65% 宿主伤害、进度不能替代十材质觉醒、觉醒铜剑无共享天顶伤害地板、加强宿主不摊薄弱宿主、宿主伤害只加自己那把、面板/前缀不能替代宿主伤害、发射剑用自己伤害且不按槽数均分、暴击逐剑（含前缀）、击退逐剑、原生飞行时钟替代宿主速度且每帧跑两次、模型放大 60% 但碰撞尺度保持、玩家攻速不重缩放 AI、重生态与命中间隔过网络、非重生 8 帧间隔、引擎强制同刃间隔、他刃独立命中、弱刃冷却后可再命中、附魔剑与星怒同帧触发、特殊弹幕伤害各自取源、各自冷却 45 帧 | `SoulBlade`、`SoulPlayer.Flow` | 已验证 |
+| `checks/ZenithPrototypeCheck/DeviationCheck.cs` | C# 夹具（偏锋） | 验证体系 / 偏锋 | 隔离夹具：三档上限与旧档兼容、256 次采样的半径环与四象限覆盖、每剑独立性、CurseOffset 的 SendExtraAI/ReceiveExtraAI 往返、TraitEnabled 恒 true 后全部主剑特性生效、AI 前后运动参数不变 | SoulDeviation.cs、SoulBlade.cs、checks/ZenithPrototypeCheck/Check.cs | 人工补写 |
 | `checks/ZenithPrototypeCheck/DomainCheck.cs` | 静态断言套件 | I UI | 全屏配阵/领域（29 条）：剑库只读真实合格背包武器（排除弓/工具/递归剑魂）、独立场景覆盖完整 UI 视口、配阵主页宽屏三区分开窄屏同区切换全在视口内、世界难度与退出控件可达、碎片导航不撞背包或难度控件、全屏场景移除隐藏背景悬停产生者但保留原生鼠标文本、真实原版光标层在全屏场景之上保原像素比例、手持光标物品在原生光标之上可见但不恢复隐藏背包、直接存入转移精确带前缀物品不克隆、替换把出向剑原子回原背包位、锁定主槽拒收剑库存入且不动源、剑库不能重开退役扩展槽、重复宿主校验也作用于快速装备、手持光标物品不能被剑库操作覆盖、空手星图点击只选择不抽进隐藏背包、起飞把精确剑还给真实背包、满包拒绝起飞不掉不删、遗留回收仍走新背包路径还给物品、剑库选择并存入真实第 6 个已得共享支援、切页保持活跃新支援选择而不与退役存储混淆、满领域能把暂停新支援带前缀还给真实背包、既有原生传奇世界不被误降级、难度按钮改真实原版 master/FTW 世界标志、存档保还原出处、二次点击还原精确原始难度与 FTW、旅程世界保其原生世界类型、客户端不能静默改多人世界、既有 Boss 战不能中途换属性基线、待定月总事件也阻切换 | `SoulUI.DomainMode`、`WorldGen` 标志位 | 已验证 |
 | `checks/ZenithPrototypeCheck/EchoDamageCheck.cs` | 静态断言套件 | B 核心 | 三剑影伤害资格：本体停伤后剑影仍可攻、专用服务端能查到相同 3 个攻击姿态、单元比例、切剑影不绕冷却、剑影间空隙无整片拖尾伤害、本体+3 剑影各自消耗矿石首击、3 剑影共用锋钝每目标上限、熄灯后消散材质无伤、提前归鞘立即全关 | `SoulBlade` echo 段、`OreStack` 首击资格 | 已验证 |
 | `checks/ZenithPrototypeCheck/EchoPhaseProbe.cs` | 探针（只测不判） | C 诅咒 | 实测"剑影亮灭时间窗"与"真实历史年龄"的偏差，用于确认与原版 933 一致。按 `SoulTrailUnits.Spacing=15` 采样、可见度按 `phase - index*Spacing`；每次更新推进 0.7~2 而非 1，故恒有偏差。文件头（`EchoPhaseProbe.cs:6-13`）明确写"这是原版行为不是缺陷，不要修" | 引用 `docs/原版天顶飞剑源码.md:111-113,400-405`；`AI_182_FinalFractal` | 已验证 |
@@ -497,7 +499,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/verify_own_effect.py` | py | C 静态检查 | 无第三方素材包与原包 GPU 图逐像素一致 | 产出 soul-trail-gpu-<ver>/independence.json（package_install:156 消费） | 部分待核实 |
 | `checks/vfx_library.py` | py | C 编目校验 | validate：id/类别/目录层级/引用环/清单齐全；search 检索 | VfxLibrary/library.json、run_swordbody_batch 收尾 | 已验证 |
 | (分组) checks/archived-oneoff/（20 个 .py） | 历史归档脚本 | 归档·一次性 | 20 个扁平存放的一次性取证/生成脚本：14 个 `make_*_evidence.py`/`make_*_preview.py`（截图与取证图）、3 个 `make_*`（mask/colorfields/gif 工具）、1 个 `extract_`（从 Calamity 抄剑弧）、1 个 `localize_`（批量改注释语言）。**无一条断言**，只产 png/json 供人看；无 csproj、无执行入口，`run_*.ps1`/`*.py` 全文检索零命中 | 成员清单 `artifacts/codebase-map/archived-oneoff-manifest.txt`；目录成因见 `artifacts/codebase-map/F-checks-fixtures.md` 5.1~5.2 | 已扫描（分组索引） |
-| (合计) | 234 条 |  |  |  |  |
+| (合计) | 235 条 |  |  |  |  |
 
 ---
 
@@ -537,6 +539,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `docs/0.3.128-族归属显示与数量分阶.md` | 版本记录 | 种族/UI | tooltip+界面三处族名；飞刃族 1/2/4/6/8/10 分阶 | WeaponFamilies.Name, WeaponFamilyTags.cs, FlyingBladeFamily.cs | 已验证 |
 | `docs/0.3.129-木质族V2与复合羁绊.md` | 版本记录 | 种族/木质 | 名册 12→8，森林之力重构，四复合羁绊，圣林归冠 | WoodTypes.cs, WoodBond*.cs, WoodCrown.cs | 已验证 |
 | `docs/0.3.130-木质族V2重做与口径统一.md` | 版本记录 | 种族/木质 | 删残留木剑类、补属性面板、统一有效寄宿口径、三羁绊服务端重校验 | WoodTypes.cs, BondSnapshot.cs, SoulUIWoodPanel.cs | 已验证 |
+| `docs/0.3.131-偏锋诅咒.md` | Markdown 版本记录 | 版本记录 / 偏锋 | 0.3.131 实装记录：设计定义、替换范围、保留枚举整数/按 Boss 记录数三档/独立 CurseOffset 字段/多人同步四项实现决策、验证结果与待实战调参说明 | ZenithReborn/SoulDeviation.cs、ZenithReborn/SoulCurses.cs、docs/CHANGELOG.md | 人工补写 |
 | `docs/0.3.93-纯代码特效隔离与贴图独立验证.md` | 版本记录 | 特效/材质 | 建立 PureCodeOnly 统一输入限制策略 | VfxIsolation.cs, SwordFlowMaterial.cs | 已验证 |
 | `docs/0.3.94-P18宽高光扇形格纹隔离.md` | 版本记录 | 特效/材质 | 关 P18 做扇形格纹消融，结论被 95 纠正 | VfxIsolation Parts, 0.3.95 | 已验证 |
 | `docs/0.3.95-共享顶点连续朝向与棱纹修订.md` | 版本记录 | 特效/几何 | 定位棱纹根因为三角形朝向不连续 | SwordFlowMeshBasis.cs, SoulRibbonMesh.cs | 已验证 |
@@ -545,7 +548,6 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `docs/0.3.98-全部纯代码选项开启.md` | 版本记录 | 特效/开关 | 28 项纯代码默认全开 | VfxIsolation.cs | 已验证 |
 | `docs/0.3.99-贴图材质全开与昼夜实测.md` | 版本记录 | 特效/开关 | PureCodeOnly=false，56 项全开并测昼夜 | VfxIsolation.cs, GlassMaterialPreset.cs | 已验证 |
 | `docs/AGENTS状态历史.md` | 索引 | 项目状态 | 由 AGENTS.md 迁出的历代状态注记 | CHANGELOG.md | 已验证 |
-| `docs/AI接入指南.md` | Markdown 交接指南 | 导航文档 | 写给外部接手 AI 的自包含接入文档：项目定位、clone 后必改的两处 targets 路径、环境四件套、三条命令、地图选读表、六条硬规则、六个已踩过的坑、提交纪律、设计边界、卡住时的排查表 | docs/CODEBASE_MAP.md、docs/PROBLEM_INDEX.md、ZenithReborn/build.txt | 人工补写 |
 | `docs/ARCHITECTURE.md` | Markdown 架构总览 | 导航文档 | 19 模块边界表（负责/不负责/核心文件）、三条端到端链路（战斗·挥臂到五族派发 / UI·开魂域到改槽同步 / 构建·改源码到安装）、模块级 Mermaid 依赖图、8 条共享状态单一入口、15×11 依赖矩阵、6 条修改爆炸半径、13 条硬坑一行式。核心行号锚点：`SoulItem.cs:82`(Active)、`SoulSupport.cs:43`(FamilyItems)、`VfxIsolation.cs:8`(总闸)、`SoulBlade.cs:14`(SoulSource)、`ZenithReborn.cs:18`(HandlePacket)、`ZenithPrototypeCheck/Check.cs:11`(夹具总调度) | docs/CODEBASE_MAP.md、docs/HOTSPOTS.md、artifacts/codebase-map/ | 人工补写 |
 | `docs/CHANGELOG.md` | 索引 | 版本 | 107 行版本摘要表，倒序，前段指向 archive/ | docs/archive/, docs/0.3.*.md | 已验证 |
 | `docs/CODEBASE_MAP.md` | Markdown 代码地图 | 导航文档 | 全仓结构总图：模块清单、目录职责、文件到模块的归属，是其余导航文档的事实底座 | docs/ARCHITECTURE.md、docs/FILE_INDEX.md | 人工补写 |
@@ -652,7 +654,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `docs/archive/codebase-map-survey-2026-11-03/D-render-vfx.md` | 调查报告（Markdown，509 行） | 建图调查归档 | D：渲染 / 特效 / 着色器 / 资产——32 个渲染相关 `.cs` + `Assets/**` + `Localization/*.hjson` + `build.txt` + csproj，按特效总闸等组划分 | docs/FILE_INDEX.md 第一、二节、docs/武器分类表-常规与非常规.md | 归档副本·只读 |
 | `docs/archive/codebase-map-survey-2026-11-03/E-checks-scripts.md` | 调查报告（Markdown，566 行） | 建图调查归档 | E：`checks/` 编排脚本与静态检查 93 项（37 `.ps1` + 54 `.py` + 2 个项目文件）；含覆盖统计、逐条索引、主线与 5 个核心脚本的调用/断言顺序、9 条坑 | docs/FILE_INDEX.md 第三节、checks/、AGENTS.md | 归档副本·只读 |
 | `docs/archive/codebase-map-survey-2026-11-03/F-checks-fixtures.md` | 调查报告（Markdown，451 行） | 建图调查归档 | F：`checks/ZenithPrototypeCheck/` 夹具体系 94 个 `.cs` 的逐条索引，条目取自各检查的 `check(...)` 描述串；开篇纠正「100 个 `.cs`」的误计 | docs/FILE_INDEX.md 第三节、checks/ZenithPrototypeCheck/ | 归档副本·只读 |
-| `docs/archive/codebase-map-survey-2026-11-03/G-docs-current.md` | 调查报告（Markdown，319 行） | 建图调查归档 | G：`docs/` 顶层 64 篇现行文档的现状建图（不含 `docs/archive/` 的 116 篇），源码基线 `build.txt` = 0.3.130 | docs/FILE_INDEX.md 第四节、docs/ | 归档副本·只读 |
+| `docs/archive/codebase-map-survey-2026-11-03/G-docs-current.md` | 调查报告（Markdown，319 行） | 建图调查归档 | G：`docs/` 顶层 64 篇现行文档的现状建图（不含 `docs/archive/` 的 116 篇），源码基线 `build.txt` = 0.3.131 | docs/FILE_INDEX.md 第四节、docs/ | 归档副本·只读 |
 | `docs/archive/codebase-map-survey-2026-11-03/H-docs-archive.md` | 调查报告（Markdown，312 行） | 建图调查归档 | H：`docs/archive/` 116 篇历史归档的索引 + 仓库根 5 个文件（`AGENTS.md`/`README.md`/`CODEBUDDY.md`/`.gitignore`/`.gitattributes`）；归档类型统一记「历史归档」 | docs/FILE_INDEX.md 第二节第四小节、docs/archive/ | 归档副本·只读 |
 | `docs/archive/codebase-map-survey-2026-11-03/I-tools-vfx.md` | 调查报告（Markdown，632 行） | 建图调查归档 | I：`tools/`（222 文件、5 个子目录）与 `VfxLibrary/`（11756 文件）；文件数与分组统计全部由 shell 命令生成，同目录 vfx-library-manifest.txt 是它的产物 | docs/FILE_INDEX.md 第五、六节、vfx-library-manifest.txt | 归档副本·只读 |
 | `docs/archive/codebase-map-survey-2026-11-03/README.md` | Markdown 目录说明 | 建图调查归档 | 本目录的说明与纪律：2026-11-03 首次建图的原始调查报告为什么从 artifacts/ 复制入库、为什么只读不得修改、以及克隆仓库后如何复现 docs/FILE_INDEX.md | checks/build_file_index.py、checks/map_audit.py、docs/FILE_INDEX.md | 归档副本·只读 |
@@ -681,7 +683,8 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `docs/archive/需求-天顶飞剑拖尾与剑影形态.md` | 历史归档 | 需求 / 特效 | 面向外部模型的需求书：只写现状与期望、不给实现建议，含 116 行现状描述 | SoulTrailUnits.cs | 已扫描 |
 | `docs/archive/验证记录-v0.3.11.md` | 历史归档 | 验证 | 0.3.11 的编译/夹具证据清单（零警告、生产与检查项目） | checks/ | 已扫描 |
 | `docs/六祝福-机制定稿与御剑爆发.md` | 设计定稿 | 战斗/祝福 | 六祝福机制表 + 御剑蓄条爆发定稿 | SoulCurses.cs, SoulBlessings.cs, BlessingCamera.cs | 已验证 |
-| `docs/协作开发指南.md` | Markdown 流程文档 | 协作与上手 | 两人及以上共写时的同步流程：权限开放方式、首次上手、分支 + PR 节奏、冲突高发点与处理、不可提交清单、换行符与证据分级约定 | docs/AI接入指南.md、checks/dev_setup.ps1、.gitignore | 人工补写 |
+| `docs/剑灵衍生弹幕视线修复-开发记录.md` | Markdown 开发记录（候选） | 版本记录 / 剑灵 | 剑灵代理发射原版 933 衍生剑气的视线判定修复记录：LivingChannelProjectile 拆分 Origin/Proxy 身份、伤害回调期间建立可嵌套来源上下文、CanHitWithMeleeWeapon 检查时临时切到代理；文档自述为开发候选，未打包安装、未经自然游玩验收 | ZenithReborn/LivingChannelProjectile.cs、checks/ZenithPrototypeCheck/LivingChildSightCheck.cs | 人工补写 |
+| `docs/协作开发指南.md` | Markdown 流程文档 | 协作与上手 | 两人及以上共写时的同步流程：权限开放方式、首次上手、分支 + PR 节奏、冲突高发点与处理、不可提交清单、换行符与证据分级约定 | CODEBUDDY.md、checks/dev_setup.ps1、.gitignore | 人工补写 |
 | `docs/原版天顶飞剑源码.md` | 参考表 | 参考资料 | Projectile 933 FinalFractal 反编译摘录与复现命令 | SoulBlade.cs | 已验证 |
 | `docs/战斗乘区总表与减益覆盖审计.md` | 参考表 | 战斗设计 | 12 大类 61 维度乘区目录 + 减益覆盖审计 | SoulCombat.cs, SoulTraits.cs | 部分待核实 |
 | `docs/攻速成长曲线-起草稿.md` | Markdown 设计草案（待勾） | 设计草案 / 攻速 | 状态：草案未实装。查实事实（正式存档仍是旧包、开局 30 帧挥臂/10 帧间隔、Flow 初值 0 与衰减、工作区草稿恢复了机械迟滞曲线但起点仍满速）；方案 A 起步压速+按机械三组单调成长（推荐）/ B 保留草稿曲线先装包看手感 / C 用户自填；待勾参数与验证边界 | ZenithReborn/SoulItem.cs（UseSpeedMultiplier）、docs/archive/0.3.26-原版攻速与飞行粒子.md | 人工补写 |
@@ -707,7 +710,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `docs/飞刃族F1-掷刃与印记.md` | 设计定稿 | 种族/飞刃 | 掷刃机制已实装，印记为留白核心设计 | FlyingBladeHand.cs, FlyingBladeShot.cs | 已验证 |
 | `docs/飞刃族F2-数量分阶与族显示.md` | 设计定稿 | 种族/飞刃 | 前四把阶梯效果 + 族归属显示 | FlyingBladeFamily.cs, WeaponFamilyTags.cs | 已验证 |
 | `docs/飞刃族FB1-候选名册与攻击方式.md` | 设计草案 | 种族/飞刃 | 引擎普查产出的 31 把名册与攻击方式 | FlyingBladeFamily.Weapons, flying-blade-survey.json | 已验证 |
-| (合计) | 200 条 |  |  |  |  |
+| (合计) | 201 条 |  |  |  |  |
 
 ---
 

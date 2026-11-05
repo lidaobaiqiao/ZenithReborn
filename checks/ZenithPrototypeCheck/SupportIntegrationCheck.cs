@@ -109,16 +109,17 @@ internal static class SupportIntegrationCheck
         check(paused.SupportCapacity==3 && OreFamily.Count(paused)==3 && !paused.SupportHosts[4].IsAir,
             "Least active prefix includes only three reachable supports and safely retains later paused items");
         paused.Seals&=~(SoulCurses.Brain|SoulCurses.Cultist);
-        check(paused.SupportCapacity==3 && OreFamily.Count(paused)==0 && !OreFamily.TriggerEligible(paused,ItemID.EnchantedSword),
-            "Switching curse suppresses support combat traits without destroying structural support unlocks");
+        check(paused.SupportCapacity==3 && OreFamily.Count(paused)>0,
+            "Deviation no longer suppresses support traits while structural support unlocks stay intact");
         var forest=Soul();forest.OreCollectionMask=OreFamily.AllMaterials;
         // 裁决：奖励位本身是给玩家的回报，不设例外——森林奖励槽同样计入族数量。
         // 森林槽由矿石圆满解锁（BonusCapacity=OreMastered），与木质数量无关，因此不存在自举。
         for(int i=0;i<6;i++)forest.Hosts[i]=new Item(WoodTypes.Types[i]);
         forest.ForestHosts[0]=new Item(WoodTypes.Types[6]);forest.ForestHosts[1]=new Item(WoodTypes.Types[7]);
         check(forest.Wood.Full,"Forest reward slots count toward the family total with no reward-slot exception");
+        // 口径合一：TraitEnabled 恒 true，特性计数不再依赖偏锋诅咒是否解除，始终与数值口径一致。
         forest.Seals=SoulCurses.Brain|SoulCurses.Cultist;
-        check(forest.CombatWood.Full,"Combat counting agrees with the full set once the switching curse is released");
+        check(forest.CombatWood.Full,"Combat counting agrees with the full set while traits are unconditional");
         check(OreFamily.PerSwordDamage(100,1)==150 && OreFamily.PerSwordDamage(100,10)==326 &&
             OreFamily.PerSwordDamage(100,14,true)==482,"Confirmed independent flight snapshots are 150, 326 and 482 for a 100-damage source");
     }

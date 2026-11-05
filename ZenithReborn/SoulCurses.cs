@@ -6,6 +6,8 @@ using Terraria.ModLoader.IO;
 
 namespace ZenithReborn;
 
+// Switching 的整数值 1 与顺序不可变：存档/网络只存 Seals 位掩码与 LegacyReleased 位，
+// Groups/Names/BossNames 都按整数索引；该诅咒的用户可见名为「偏锋」，Blessings 同索引的祝福名保持不变。
 public enum SoulCurse { Binding, Switching, Sheathing, Barrier, Solitude, Bluntness }
 public enum CurseStage { Cursed, Weakened, Released, Blessed }
 
@@ -14,7 +16,7 @@ public static partial class SoulCurses
     public const int All=(1<<18)-1, AllReleased=63;
     public const int Eye=1,Brain=2,Eater=4,Skeleton=8,Cultist=16,Moon=32,Bee=64,Flower=128,Temple=256,
         Destroyer=512,Retinazer=1024,Spazmatism=2048,Prime=4096,Flesh=8192,Queen=16384,Empress=32768,Duke=65536,Deer=131072;
-    public static readonly string[] Names=["缚身","切换","归鞘","阻隔","独行","断锋"];
+    public static readonly string[] Names=["缚身","偏锋","归鞘","阻隔","独行","断锋"];
     public static readonly string[] Blessings=["御剑","切换","轮转","穿界","独行","连斩"];
     public static readonly int[][] Groups=[[Eye,Moon],[Brain,Cultist],[Eater,Skeleton],
         [Bee,Flower,Temple],[Destroyer,Retinazer|Spazmatism,Prime],[Flesh,Queen,Empress]];
@@ -79,13 +81,14 @@ public partial class SoulItem
     public CurseStage Curse(SoulCurse curse)=>SoulCurses.Stage(this,curse);
     public const int CursedFlightMainLimit=4;
     public IEnumerable<Item> OreFlightMains=>Curse(SoulCurse.Switching)>=CurseStage.Released?Active:Active.Take(CursedFlightMainLimit);
-    public bool TraitEnabled(int type)=>Curse(SoulCurse.Switching)>=CurseStage.Released || Active.FirstOrDefault()?.type==type;
+    // 旧「未解除只认第一把」限制已随偏锋替换取消，所有武器特性正常触发；保留方法签名与全部调用点。
+    public bool TraitEnabled(int type)=>true;
     public IEnumerable<Item> TraitMains=>Active.Where(i=>TraitEnabled(i.type));
     public IEnumerable<Item> TraitSupports=>Supports.Where(i=>TraitEnabled(i.type));
     public IEnumerable<Item> TraitItems=>TraitMains.Concat(TraitSupports);
     // 两套口径必须分开，别合并：
-    // HostedWood＝有效寄宿（主攻槽＋已生效支援槽＋奖励位＋传奇位），**不受切换诅咒过滤**，供阶段/生命/倍率/Full/森林/归冠使用；
-    // CombatWood＝特性口径，带 TraitEnabled 过滤（未解切换只认第一把），只用于决定「哪些剑的特性开火」。
+    // HostedWood＝有效寄宿（主攻槽＋已生效支援槽＋奖励位＋传奇位），供阶段/生命/倍率/Full/森林/归冠使用；
+    // 偏锋替换后 TraitEnabled 恒 true，CombatWood 与 HostedWood 数值相同，但两个属性仍不合并（口径分离留作后续机制使用）。
     public WoodLoadout HostedWood=>new(WoodTypes.Mask(SoulSupport.FamilyItems(this)),SupportCapacity,WoodCrown.Active(this));
     public WoodLoadout CombatWood=>new(WoodTypes.Mask(SoulSupport.FamilyItems(this).Where(i=>TraitEnabled(i.type))),SupportCapacity,WoodCrown.Active(this));
     public void SaveCurses(TagCompound tag){tag["curseSchema"]=1;tag["seals"]=Seals;tag["legacyReleased"]=LegacyReleased;}

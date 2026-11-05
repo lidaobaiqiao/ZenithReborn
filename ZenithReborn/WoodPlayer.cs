@@ -45,7 +45,7 @@ public class WoodPlayer : ModPlayer
     {
         AdvanceGrowth();
         WoodLoadout wood = Loadout;
-        // 森林之力 buff 属数值口径（Full 判定不看切换诅咒）；森息/血馥 buff 的清除属特性口径，仍按 CombatWood。
+        // 森林之力 buff 属数值口径（Full 判定按有效寄宿计，不受特性过滤影响）；森息/血馥 buff 的清除属特性口径，仍按 CombatWood；偏锋只偏移飞剑目标位置，所有武器特性正常触发。
         if (HeldSoul?.HostedWood.Full == true) Player.AddBuff(ModContent.BuffType<ForestPower>(), 2);
         else Player.ClearBuff(ModContent.BuffType<ForestPower>());
         if (!wood.Has(WoodKind.Forest)) Player.ClearBuff(ModContent.BuffType<ForestBreath>());

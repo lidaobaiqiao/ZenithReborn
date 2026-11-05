@@ -146,8 +146,8 @@ internal static class WoodV2Check
             {
                 Main.GameMode = 2; Main.getGoodWorld = true;   // SoulDifficulty.Legendary = 大师(2) 且 getGoodWorld
                 // 主攻槽放 7 把不同木剑，传奇位放第 8 种（珍珠木剑）。
-                // 同时解除切换诅咒：CombatWood 会按 TraitEnabled 过滤，未解除时只保留首把主剑的特性，
-                // 木族倍率会被砍成 1.10，测不出归冠覆盖。
+                // 口径合一后 TraitEnabled 恒 true：CombatWood 不再被偏锋诅咒过滤，是否解除都不影响木族倍率；
+                // 这里仍显式解除诅咒只为沿用原有场景，不再是为了放开首把主剑的特性。
                 var legend = Soul(); Host(legend, 0, 1, 2, 3, 4, 5, 6);
                 legend.Seals = SoulCurses.Brain | SoulCurses.Cultist;
                 int baseCount = BondSnapshot.Wood(legend).Count;

@@ -87,7 +87,7 @@ public static class OreFamily
             soul.OreFlightMains.ElementAtOrDefault(primaryOrdinal)?.type==weapon) && Count(soul)>0;
     public static bool CanFlightTrait(SoulItem soul,int weapon)=>Count(soul)>=8 && OreItems(soul).Any(i=>i.type==weapon);
 
-    // 前四把主剑例外只用于百炼飞剑；普通特性和支援仍按切换诅咒过滤。
+    // 前四把主剑计入矿材的例外只用于百炼飞剑（0.3.37 定稿保留）；偏锋只偏移飞剑目标位置，普通特性与支援均正常生效、不再受过滤。
     public static int Count(SoulItem soul)=>PopCount(Mask(OreItems(soul)));
 
     public static IEnumerable<Item> OreItems(SoulItem soul)=>soul.OreFlightMains.Concat(soul.TraitSupports);

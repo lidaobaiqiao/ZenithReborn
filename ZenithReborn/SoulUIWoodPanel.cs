@@ -37,7 +37,7 @@ public partial class SoulUI
         float time = (float)UiTime;
 
         // 两套口径分开：hostedMask 是全部已寄宿木剑（未过滤，含森林/圣林与传奇等奖励位，用于阶段、倍率、生命与收集展示），
-        // CombatWood.Mask 是特性实际生效的木剑（切换诅咒会压制，只用于剑格子与特性列表）。
+        // CombatWood.Mask 是特性口径的木剑（只用于剑格子与特性列表）；偏锋替换后 TraitEnabled 恒 true，与 hostedMask 数值相同，两套口径仍保留分离。
         int hostedMask = WoodTypes.Mask(SoulSupport.FamilyItems(soul));
         WoodLoadout activeWood = soul.CombatWood;
         int activeMask = activeWood.Mask;
@@ -88,7 +88,7 @@ public partial class SoulUI
             y += Math.Max(0, gap - 2);
 
             // 4. 关键数值：2 列 2 行，倍率、生命、支援、森林。
-            // 倍率与生命属数值口径，按有效寄宿计，不受切换诅咒过滤（与 WoodPlayer 的实际加成同源）。
+            // 倍率与生命属数值口径，按有效寄宿计（与 WoodPlayer 的实际加成同源）；不再受诅咒过滤。
             WoodLoadout hostedWood = soul.HostedWood;
             int forestCap = crown ? ForestPower.CrownCap : ForestPower.BaseCap;
             int forestLayers = ForestPower.Layers(Main.LocalPlayer);
@@ -172,7 +172,7 @@ public partial class SoulUI
                 CenterText(WoodTypes.Effects[i], new(cell.Center.X, cell.Bottom - 9),
                     hosted ? InfoWhite : InfoQuiet, .38f);
 
-                // 已寄宿但特性被切换诅咒压制时，右上角加小锁标记。
+                // 已寄宿但特性被压制时右上角加小锁；偏锋替换后 TraitEnabled 恒 true，此分支不再触发，代码保留待后续清理。
                 if (hosted && !active)
                     Glyph(SoulGlyph.Lock, new(cell.Right - 5, cell.Y + 5), 9, Champagne);
 

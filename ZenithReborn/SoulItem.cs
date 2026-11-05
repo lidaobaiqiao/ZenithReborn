@@ -464,6 +464,7 @@ public partial class SoulItem : ModItem
         var blade = (SoulBlade)Main.projectile[index].ModProjectile;
         blade.ConfigureReborn(Awakened);
         blade.TargetOffset = delta.RotatedBy((ordinal - (hostCount - 1) * .5f) * .06f);
+        blade.CurseOffset = SoulDeviation.NextOffset(this);
         blade.SwordScale = host.scale*(1+player.GetModPlayer<EnvironmentPlayer>().Stat("Size"));
         blade.SpecialDamage = baseHostDamage;
         // 原版天顶弹幕使用一条椭圆轨迹，纵向参数取随机整数。
@@ -472,7 +473,7 @@ public partial class SoulItem : ModItem
         Main.projectile[index].GetGlobalProjectile<SoulSource>().SoulId = SoulId;
         Main.projectile[index].GetGlobalProjectile<SoulSource>().SourceWeapon = host.type;
         // 使用实际生效主攻槽位，而不是挥动时的发射节点或
-        // 物品类型，避免第四把之后的重复剑绕过切换限制。
+        // 物品类型，避免第四把之后的重复剑绕过出剑数限制。
         Main.projectile[index].GetGlobalProjectile<SoulSource>().PrimaryOrdinal =
             Array.FindIndex(Active.ToArray(),item=>ReferenceEquals(item,host));
         Main.projectile[index].GetGlobalProjectile<SoulSource>().HostSlot=VisibleSlotIds.FirstOrDefault(slot=>ReferenceEquals(ItemAt(slot),host),-1);

@@ -75,9 +75,9 @@ internal static class CurseCheck
         check(bound>=midpoint-.01f && bound<=freeReach+.01f,
             "Binding guarantees at least the screen midpoint without exceeding the released reach");
         check(s.Curse(SoulCurse.Binding)==CurseStage.Cursed,"Empty seals are still cursed");
-        s.Seals=0;check(s.TraitItems.Count()==1 && s.TraitEnabled(s.Hosts[0].type) && !s.TraitEnabled(s.Hosts[1].type),"Switching actually filters all trait sources to the first effective primary");
+        s.Seals=0;check(s.TraitItems.Count()==s.Active.Count() && s.Active.All(i=>s.TraitEnabled(i.type)),"Every effective primary keeps its trait after the switching curse stops filtering sources");
         int damage=s.BladeDamage(p,s.Hosts[1]);s.Seals=SoulCurses.Brain;
-        check(s.TraitItems.Count()==4 && s.BladeDamage(p,s.Hosts[1])==damage,"Brain restores all traits without changing independent damage or requiring Cultist");
+        check(s.TraitItems.Count()==s.Active.Count() && s.BladeDamage(p,s.Hosts[1])==damage,"Brain no longer changes the trait roster or independent damage once traits are unconditional");
         s.Seals=0;var allowed=Blade(p,s,ItemID.CopperShortsword);allowed.TargetOffset=new(200,0);allowed.Vertical=10;allowed.AI();
         s.Seals=SoulCurses.Eater;
         p.itemAnimation=p.itemAnimationMax=30;s.UseAnimation(p);
@@ -112,9 +112,9 @@ internal static class CurseCheck
         }
         (p,s)=Setup();s.Hosts[1]=new Item(ItemID.IceBlade);
         var ice=Blade(p,s,ItemID.IceBlade);ice.AI();var frozen=Target(p);Hit(ice,frozen);
-        check(!frozen.HasBuff(BuffID.Frostburn),"Actual secondary sword hit cannot bypass switching to apply its debuff");
+        check(frozen.HasBuff(BuffID.Frostburn),"Every primary keeps its trait after the switching curse stops filtering sources");
         s.Seals=SoulCurses.Brain;ice=Blade(p,s,ItemID.IceBlade);ice.AI();Hit(ice,frozen);
-        check(frozen.HasBuff(BuffID.Frostburn),"First switching-group boss restores the secondary sword's actual debuff");
+        check(frozen.HasBuff(BuffID.Frostburn),"Boss progress no longer changes which sword traits fire");
         AttackSpeed(check);NativeBlessing(check);Terrain(check);Persistence(check);Credit(check);
         foreach(var proj in Main.projectile)proj.active=false;foreach(var n in Main.npc)n.active=false;
     }
