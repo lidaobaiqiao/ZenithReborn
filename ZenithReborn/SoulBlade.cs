@@ -66,6 +66,10 @@ public class SoulBlade : ModProjectile
     public Vector2 TargetOffset;
     // 偏锋诅咒的瞄准偏移：与 TargetOffset 独立，只叠加到目标点，不影响 velocity.Length()。
     public Vector2 CurseOffset;
+    // 薄刃诅咒的残缺标记：true 表示该飞剑残缺，不能形成有效命中。
+    // 刻意用「残缺」而非「有效」语义：SetDefaults() 清零为 false 天然代表正常，
+    // 未显式赋值的弹幕（夹具手工构造、网络 extra AI 到达前的远端）不会被误判成残缺。
+    public bool ThinbladeDisabled;
     public float SwordScale = 1;
     // 剑体、剑影、拖尾与粒子统一放大；碰撞和来源尺寸仍读取原始 Projectile.scale。
     public float DisplayScale => Projectile.scale * 1.6f;
@@ -94,7 +98,6 @@ public class SoulBlade : ModProjectile
     public int HitUnit {get;private set;}
     private bool retired,terrainArmed;
     private int retireAge;
-    private float terrainDepth;
     private Vector2 previousCenter;
     private Dictionary<long,int> targetHits=[];
     private SoulItem SourceSoul=>Projectile.owner>=0 && Projectile.owner<Main.maxPlayers?
@@ -127,7 +130,7 @@ public class SoulBlade : ModProjectile
         Projectile.penetrate = -1; Projectile.timeLeft = 120;
         Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = 16;
         Projectile.extraUpdates=1;
-        Reborn = false;age=0;released=false;retired=terrainArmed=false;retireAge=0;terrainDepth=0;targetHits=[];
+        Reborn = false;age=0;released=false;retired=terrainArmed=false;retireAge=0;ThinbladeDisabled=false;targetHits=[];
         oreHitUnits=0;HitUnit=0;
         Blessings=new();
         CurseOffset=Vector2.Zero;
@@ -160,15 +163,19 @@ public class SoulBlade : ModProjectile
     }
     public override bool? CanHitNPC(NPC target)
     {
+        // 残缺飞剑在此统一拦截：tML 下 CanHitNPC 返回 false 会跳过 Projectile.Damage()，
+        // 不构造 HitInfo、不写 NPC 免疫、不调用 ModifyHitNPC/OnHitNPC，
+        // 因此 targetHits、穿透与命中后武器效果都不会被触发或消耗。
+        if(ThinbladeDisabled)return false;
         var soul=SourceSoul;
         if(soul==null)return null;
         long key=WoodCombat.Root(target).GetGlobalNPC<HardOreTarget>().Id;
         return targetHits.GetValueOrDefault(key)>=SoulCurses.HitLimit(soul)?false:null;
     }
     public override void SendExtraAI(BinaryWriter writer)
-    { writer.Write(TargetOffset.X); writer.Write(TargetOffset.Y); writer.Write(SwordScale); writer.Write(Vertical); writer.Write(SpecialDamage); writer.Write(Reborn);writer.Write(retired);writer.Write(retireAge);writer.Write(CurseOffset.X);writer.Write(CurseOffset.Y); }
+    { writer.Write(TargetOffset.X); writer.Write(TargetOffset.Y); writer.Write(SwordScale); writer.Write(Vertical); writer.Write(SpecialDamage); writer.Write(Reborn);writer.Write(retired);writer.Write(retireAge);writer.Write(CurseOffset.X);writer.Write(CurseOffset.Y);writer.Write(ThinbladeDisabled); }
     public override void ReceiveExtraAI(BinaryReader reader)
-    { TargetOffset = new(reader.ReadSingle(), reader.ReadSingle()); SwordScale = reader.ReadSingle(); Vertical = reader.ReadSingle(); SpecialDamage = reader.ReadInt32(); ConfigureReborn(reader.ReadBoolean());retired=reader.ReadBoolean();retireAge=Math.Clamp(reader.ReadInt32(),0,8);CurseOffset = new(reader.ReadSingle(), reader.ReadSingle()); }
+    { TargetOffset = new(reader.ReadSingle(), reader.ReadSingle()); SwordScale = reader.ReadSingle(); Vertical = reader.ReadSingle(); SpecialDamage = reader.ReadInt32(); ConfigureReborn(reader.ReadBoolean());retired=reader.ReadBoolean();retireAge=Math.Clamp(reader.ReadInt32(),0,8);CurseOffset = new(reader.ReadSingle(), reader.ReadSingle());ThinbladeDisabled=reader.ReadBoolean(); }
     public override void AI()
     {
         Player player = Main.player[Projectile.owner];
@@ -213,7 +220,6 @@ public class SoulBlade : ModProjectile
         if(sourceSoul!=null && !retired && phase<60)
         {
             if(terrainArmed)Blessings.CrossedSolid(Projectile,previousCenter,Projectile.Center);
-            if(terrainArmed && SoulTerrain.Sweep(previousCenter,Projectile.Center,SoulCurses.TerrainAllowance(sourceSoul),ref terrainDepth))Retire();
             if(!SoulTerrain.SolidAt(Projectile.Center) && phase>=6)terrainArmed=true;
         }
         Projectile.rotation = orbit + aim + MathHelper.PiOver4;

@@ -384,6 +384,16 @@ SUPPLEMENT_ROWS = [
     ("docs/剑灵衍生弹幕视线修复-开发记录.md", "Markdown 开发记录（候选）",
      "版本记录 / 剑灵", "剑灵代理发射原版 933 衍生剑气的视线判定修复记录：LivingChannelProjectile 拆分 Origin/Proxy 身份、伤害回调期间建立可嵌套来源上下文、CanHitWithMeleeWeapon 检查时临时切到代理；文档自述为开发候选，未打包安装、未经自然游玩验收",
      "ZenithReborn/LivingChannelProjectile.cs、checks/ZenithPrototypeCheck/LivingChildSightCheck.cs", "人工补写"),
+    # --- 0.3.132 薄刃诅咒（2026-11-06 新增） ---
+    ("ZenithReborn/SoulThinblade.cs", "C# 静态类（薄刃诅咒）",
+     "诅咒/难度", "第四道诅咒的概率与随机入口：EffectiveChance 按 CurseStage 给 Cursed .70 / Weakened .90 / 解除与祝福 1；Roll 在每把飞剑生成时掷一次 Main.rand.NextFloat()，只读本魂阶段，无保底与动态补偿",
+     "SoulItem.EmitBlade、SoulBlade.ThinbladeDisabled、SoulCurseDescriptions.cs", "人工补写"),
+    ("docs/0.3.132-薄刃诅咒.md", "Markdown 版本记录",
+     "版本记录 / 薄刃", "0.3.132 实装记录：设计定义、替换阻隔的范围、枚举改名但整数位置不变、四阶段全可达、CanHitNPC 统一命中资格拦截、残缺语义字段、多人同步、地形惩罚移除与穿界祝福解耦、验证结果与待实战调参说明",
+     "ZenithReborn/SoulThinblade.cs、ZenithReborn/SoulBlade.cs、docs/CHANGELOG.md", "人工补写"),
+    ("checks/ZenithPrototypeCheck/ThinbladeCheck.cs", "C# 夹具（薄刃）",
+     "验证体系 / 薄刃", "隔离夹具：四阶段有效概率与 Boss 位对应、2000 次固定种子采样的比例与每剑独立性、CanHitNPC 一票否决且不消耗命中次数、ThinbladeDisabled 默认值与 extra AI 往返、与偏锋 CurseOffset 共存、地形惩罚移除后不再 Retire、穿界祝福链在改名后仍可达",
+     "ZenithReborn/SoulThinblade.cs、ZenithReborn/SoulBlade.cs、checks/ZenithPrototypeCheck/Check.cs", "人工补写"),
 ]
 
 # 分组索引：同一目录下同类批量文件，逐行列会淹没索引，改为一行 + 成员清单 txt。

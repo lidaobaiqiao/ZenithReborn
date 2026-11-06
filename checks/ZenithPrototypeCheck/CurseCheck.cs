@@ -102,7 +102,7 @@ internal static class CurseCheck
         }
         foreach(int records in new[]{0,SoulCurses.Flesh,SoulCurses.Flesh|SoulCurses.Queen})
         {
-            (p,s)=Setup();s.Seals=records;s.LegacyReleased=(1<<(int)SoulCurse.Barrier)|(1<<(int)SoulCurse.Sheathing);
+            (p,s)=Setup();s.Seals=records;s.LegacyReleased=(1<<(int)SoulCurse.Thinblade)|(1<<(int)SoulCurse.Sheathing);
             var blade=Blade(p,s,ItemID.CopperShortsword);blade.AI();var n=Target(p);int hits=0;
             for(int attempt=0;attempt<6;attempt++){int hp=n.life;Hit(blade,n);if(n.life<hp)hits++;}
             check(hits==(records==0?3:records==SoulCurses.Flesh?5:6),"Real damage path enforces 3/5/released repeated hits per primary and target");
@@ -160,12 +160,11 @@ internal static class CurseCheck
         for(int x=70;x<75;x++){var t=Main.tile[x,70];t.ClearEverything();t.HasTile=true;t.TileType=TileID.Stone;}
         float depth=0;
         var(p0,s0)=Setup();
-        check(SoulCurses.TerrainAllowance(s0)==32,"Cursed barrier digs through about two tiles");
-        s0.Seals=SoulCurses.Bee;check(SoulCurses.TerrainAllowance(s0)==64,"Weakened barrier widens to about four tiles");
+        // 阻隔诅咒的 32/64 像素地形上限随薄刃替换移除；概率断言见 ThinbladeCheck
         check(SoulTerrain.Sweep(new(1100,1128),new(1210,1128),0,ref depth),"Swept terrain path cannot tunnel through a solid wall");
-        depth=0;check(SoulTerrain.Sweep(new(1100,1128),new(1210,1128),32,ref depth),"Cursed barrier still blocks a wall thicker than its allowance");
-        depth=0;check(SoulTerrain.Sweep(new(1100,1128),new(1210,1128),64,ref depth),"Weakened barrier still blocks a wall thicker than 64 pixels");
-        depth=0;check(!SoulTerrain.Sweep(new(1100,1128),new(1210,1128),int.MaxValue,ref depth),"Released barrier restores full native terrain passage");
+        depth=0;check(SoulTerrain.Sweep(new(1100,1128),new(1210,1128),32,ref depth),"32-pixel allowance still blocks a wall thicker than its allowance");
+        depth=0;check(SoulTerrain.Sweep(new(1100,1128),new(1210,1128),64,ref depth),"64-pixel allowance still blocks a wall thicker than 64 pixels");
+        depth=0;check(!SoulTerrain.Sweep(new(1100,1128),new(1210,1128),int.MaxValue,ref depth),"unlimited allowance restores full native terrain passage");
         for(int x=70;x<75;x++)Main.tile[x,70].TileType=TileID.Platforms;
         depth=0;check(!SoulTerrain.Sweep(new(1100,1128),new(1210,1128),0,ref depth),"Platforms do not silently block sword flight");
         for(int x=70;x<75;x++)Main.tile[x,70].ClearEverything();
@@ -177,9 +176,9 @@ internal static class CurseCheck
             for(int k=0;k<4;k++)blade.AI();
             for(int x=55;x<90;x++)for(int y=55;y<80;y++)
             {var t=Main.tile[x,y];t.HasTile=true;t.TileType=TileID.Stone;}
-            // 阻隔诅咒允许先啃掉约2格厚度；连续推进直到累积穿透超过上限。
+            // 薄刃替换后地形惩罚已移除，飞剑应能持续飞过实体地形；连续推进验证不会因地形被 Retire。
             for(int k=0;k<8 && !blade.Retired;k++)blade.AI();
-            check(blade.Retired!=released && (released || blade.CanDamage()==false),"Real native curve is stopped once terrain penetration exceeds the cursed allowance");
+            check(!blade.Retired,"Terrain no longer retires blades after the barrier curse is replaced");
             for(int x=55;x<90;x++)for(int y=55;y<80;y++)Main.tile[x,y].ClearEverything();
         }
     }
@@ -217,9 +216,9 @@ internal static class CurseCheck
         Defeat(NPCID.BrainofCthulhu);
         check((s.Seals&SoulCurses.Brain)!=0 && (s.Seals&SoulCurses.Eater)==0 && s.Curse(SoulCurse.Switching)==CurseStage.Released && s.Curse(SoulCurse.Sheathing)==CurseStage.Cursed,
             "Actual encounter kill distinguishes Brain from Eater despite shared old slot bit");
-        Defeat(NPCID.QueenBee);check(s.Curse(SoulCurse.Barrier)==CurseStage.Weakened,"Optional Boss participates in its real seal group");
-        Defeat(NPCID.Plantera);check(s.Curse(SoulCurse.Barrier)==CurseStage.Released,"Second jungle boss fully removes barrier before Golem");
-        Defeat(NPCID.Golem);check(s.Curse(SoulCurse.Barrier)==CurseStage.Blessed,"Third jungle boss records the distinct blessing stage");
+        Defeat(NPCID.QueenBee);check(s.Curse(SoulCurse.Thinblade)==CurseStage.Weakened,"Optional Boss participates in its real seal group");
+        Defeat(NPCID.Plantera);check(s.Curse(SoulCurse.Thinblade)==CurseStage.Released,"Second jungle boss fully removes thinblade before Golem");
+        Defeat(NPCID.Golem);check(s.Curse(SoulCurse.Thinblade)==CurseStage.Blessed,"Third jungle boss records the distinct blessing stage");
         Defeat(NPCID.Deerclops);check((s.Seals&SoulCurses.Deer)!=0,"Outer victory is recorded independently");
         var worm=new NPC();worm.SetDefaults(NPCID.EaterofWorldsBody);worm.whoAmI=91;worm.active=true;Main.npc[91]=worm;
         Defeat(NPCID.EaterofWorldsHead);

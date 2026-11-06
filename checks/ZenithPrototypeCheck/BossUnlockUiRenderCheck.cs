@@ -31,7 +31,7 @@ internal static class BossUnlockUiRenderCheck
             soul.Seals=SoulCurses.Brain;Capture("boss-switching-brain-first",SoulCurse.Switching);
             soul.Seals=SoulCurses.Cultist;Capture("boss-switching-cultist-first",SoulCurse.Switching);
             soul.Seals=SoulCurses.Retinazer;Capture("boss-twins-half",SoulCurse.Solitude);
-            soul.Seals=SoulCurses.Bee;Capture("boss-barrier-weakened",SoulCurse.Barrier);
+            soul.Seals=SoulCurses.Bee;Capture("boss-barrier-weakened",SoulCurse.Thinblade);
             soul.Seals=0;soul.LegacyReleased=1<<(int)SoulCurse.Switching;
             Capture("boss-legacy-release",SoulCurse.Switching);soul.LegacyReleased=0;
             soul.Seals=SoulCurses.All;soul.Attached=false;

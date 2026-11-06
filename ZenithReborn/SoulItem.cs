@@ -465,6 +465,7 @@ public partial class SoulItem : ModItem
         blade.ConfigureReborn(Awakened);
         blade.TargetOffset = delta.RotatedBy((ordinal - (hostCount - 1) * .5f) * .06f);
         blade.CurseOffset = SoulDeviation.NextOffset(this);
+        blade.ThinbladeDisabled = !SoulThinblade.Roll(this);
         blade.SwordScale = host.scale*(1+player.GetModPlayer<EnvironmentPlayer>().Stat("Size"));
         blade.SpecialDamage = baseHostDamage;
         // 原版天顶弹幕使用一条椭圆轨迹，纵向参数取随机整数。

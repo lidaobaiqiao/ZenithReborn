@@ -157,6 +157,7 @@ public class Check : ModSystem
                 CurseFixture.NeutralDefaults=false;
                 CurseCheck.Run(Assert);
                 DeviationCheck.Run(Assert);
+                ThinbladeCheck.Run(Assert);
                 DomainCheck.Run(Assert);
                 LegendaryCheck.Run(Assert);
                 FollowupCheck.Run(Assert);

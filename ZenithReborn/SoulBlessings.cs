@@ -143,7 +143,7 @@ public sealed class BladeBlessings
     }
     public void CrossedSolid(Projectile p,Vector2 from,Vector2 to)
     {
-        if(breachSpent || breachPending || !State(p).ValidSource(p,out var soul) || !BlessingTuning.Blessed(soul,SoulCurse.Barrier))return;
+        if(breachSpent || breachPending || !State(p).ValidSource(p,out var soul) || !BlessingTuning.Blessed(soul,SoulCurse.Thinblade))return;
         float distance=Vector2.Distance(from,to);int steps=Math.Max(1,(int)Math.Ceiling(distance/3));
         for(int i=1;i<=steps;i++)if(SoulTerrain.SolidAt(Vector2.Lerp(from,to,i/(float)steps))){breachPending=true;break;}
     }
@@ -162,7 +162,7 @@ public sealed class BladeBlessings
         if(breachPending && !breachSpent)
         {
             breachSpent=true;breachPending=false;
-            if(BlessingTuning.Blessed(soul,SoulCurse.Barrier))
+            if(BlessingTuning.Blessed(soul,SoulCurse.Thinblade))
             {root.AddBuff(ModContent.BuffType<SoulBreach>(),BlessingTuning.BreachFrames);root.netUpdate=true;}
         }
     }

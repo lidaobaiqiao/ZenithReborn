@@ -6,9 +6,10 @@ using Terraria.ModLoader.IO;
 
 namespace ZenithReborn;
 
-// Switching 的整数值 1 与顺序不可变：存档/网络只存 Seals 位掩码与 LegacyReleased 位，
-// Groups/Names/BossNames 都按整数索引；该诅咒的用户可见名为「偏锋」，Blessings 同索引的祝福名保持不变。
-public enum SoulCurse { Binding, Switching, Sheathing, Barrier, Solitude, Bluntness }
+// 枚举整数值与成员顺序不可变：存档/网络只存 Seals 位掩码与按 1<<(int)curse 的 LegacyReleased 位，
+// Names/Blessings/Groups/BossNames 都按整数索引，改名不影响旧档。整数值 3 的诅咒用户可见名为「薄刃」，
+// 同索引祝福「穿界」保持不变；整数值 1 的 Switching 仍沿用上轮「偏锋」命名。
+public enum SoulCurse { Binding, Switching, Sheathing, Thinblade, Solitude, Bluntness }
 public enum CurseStage { Cursed, Weakened, Released, Blessed }
 
 public static partial class SoulCurses
@@ -16,7 +17,7 @@ public static partial class SoulCurses
     public const int All=(1<<18)-1, AllReleased=63;
     public const int Eye=1,Brain=2,Eater=4,Skeleton=8,Cultist=16,Moon=32,Bee=64,Flower=128,Temple=256,
         Destroyer=512,Retinazer=1024,Spazmatism=2048,Prime=4096,Flesh=8192,Queen=16384,Empress=32768,Duke=65536,Deer=131072;
-    public static readonly string[] Names=["缚身","偏锋","归鞘","阻隔","独行","断锋"];
+    public static readonly string[] Names=["缚身","偏锋","归鞘","薄刃","独行","断锋"];
     public static readonly string[] Blessings=["御剑","切换","轮转","穿界","独行","连斩"];
     public static readonly int[][] Groups=[[Eye,Moon],[Brain,Cultist],[Eater,Skeleton],
         [Bee,Flower,Temple],[Destroyer,Retinazer|Spazmatism,Prime],[Flesh,Queen,Empress]];
@@ -60,9 +61,6 @@ public static partial class SoulCurses
         _=> (soul.Seals&Moon)!=0?10:(soul.Seals&Cultist)!=0?8:(soul.Seals&Temple)!=0?7:(soul.Seals&Flower)!=0?6:4};
     public static int HitLimit(SoulItem soul)=>HitLimitAtStage(Stage(soul,SoulCurse.Bluntness));
     public static int HitLimitAtStage(CurseStage stage)=>stage switch{CurseStage.Cursed=>3,CurseStage.Weakened=>5,_=>int.MaxValue};
-    // 阻隔：诅咒态允许穿过约2格厚的实体地形，削弱态约4格，解除后不再阻断。
-    public static int TerrainAllowance(SoulItem soul)=>TerrainAllowanceAtStage(Stage(soul,SoulCurse.Barrier));
-    public static int TerrainAllowanceAtStage(CurseStage stage)=>stage switch{CurseStage.Cursed=>32,CurseStage.Weakened=>64,_=>int.MaxValue};
     // 只迁移能明确辨认的个人击杀记录；旧邪恶标记无法区分脑和世吞，不分配给任一铭刻。
     public static int FromOldKills(int kills)
     {

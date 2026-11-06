@@ -4,9 +4,9 @@
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-05 22:21:55
+生成时间 : 2026-11-06 18:57:35
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
-索引条目 : 771 条（去重合并 4 次重复出现；报告未覆盖的人工补写 58 条）
+索引条目 : 774 条（去重合并 4 次重复出现；报告未覆盖的人工补写 61 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
 排除目录 : artifacts/  bin/  obj/  */__pycache__/  *.pyc  *-profile/  *-playtest/  .git/  编辑器配置目录
 整体记录 : VfxLibrary/（11756 个原版素材，按第六节单独核对）
@@ -116,6 +116,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `ZenithReborn/SoulSceneRefraction.cs` | C# ModSystem(Client) | 折射 | 滤镜注册、normal/surface RT、`PrepareNormals`、`GlassScreenData` | `ZRGlassScreen.fx`、`SwordFlowMaterial`、`SoulVisuals` | 已验证 |
 | `ZenithReborn/SoulSupport.cs` | 静态类 | 数据模型 | 支援格通用奖励池：两条 `SupportGrant`、不动点迭代求 `Capacity`、`FamilyItems` 族判定集合 | `SoulItem`、`WoodTypes`、`OreFamily`、`WoodCrown`、`BondSnapshot` | 已验证 |
 | `ZenithReborn/SoulSwingPlayer.cs` | ModPlayer | 战斗 | 挥砍发射调度：选出本轮主攻、按独行上限分配节点、归鞘打断、飞刃族互斥 | `SoulItem.UseAnimation/Shoot/EmitBlade`、`SoulCurses.Blades`、`FlyingBladeHand` | 已验证 |
+| `ZenithReborn/SoulThinblade.cs` | C# 静态类（薄刃诅咒） | 诅咒/难度 | 第四道诅咒的概率与随机入口：EffectiveChance 按 CurseStage 给 Cursed .70 / Weakened .90 / 解除与祝福 1；Roll 在每把飞剑生成时掷一次 Main.rand.NextFloat()，只读本魂阶段，无保底与动态补偿 | SoulItem.EmitBlade、SoulBlade.ThinbladeDisabled、SoulCurseDescriptions.cs | 人工补写 |
 | `ZenithReborn/SoulTrailEnding.cs` | C# ModSystem | 拖尾 | 弹幕销毁后 36/24 帧余迹，容量 256，按代际淘汰 | `SoulVisuals`、`SoulSceneRefraction` | 已验证 |
 | `ZenithReborn/SoulTrailMotion.cs` | C# 工具 | 拖尾 | 残影历史随主人位移平移；90000 平方距离上限 | `SoulBlade` | 已验证 |
 | `ZenithReborn/SoulTrailUnits.cs` | C# 常量 | 拖尾 | 本体 + 3 残影的 `(start, samples, opacity)` 窗口 | `SoulBlade.DrawRibbonShader`、`SoulTrailEnding.CaptureUnit` | 已验证 |
@@ -166,7 +167,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `ZenithReborn/WoodPlayer.cs` | ModPlayer + ModBuff ×2 | 木质族 | 成长字段与同步（action 4）、生命/防御/减伤/回复、治疗预算、`Ready` 冷却 | `ForestPower`、`WoodCombat`、`EnvironmentPlayer` | 已验证 |
 | `ZenithReborn/WoodTypes.cs` | 静态表 + GlobalItem | 木质族 | 8 把名册、`WoodLoadout`（S/生命）、掩码、`Evaluate`、八条特性文案、tooltip | `SoulSupport.FamilyItems`、`WoodCrown`、`HardOreTypes`/`WeaponFamilies` 兜底文案 | 已验证 |
 | `ZenithReborn/ZenithReborn.cs` | Mod 入口类 | 装配/网络 | 注册 P/O 键位；`HandlePacket` 分发 action 1-12 到 9 个业务模块 | `AttachmentStory`、`SoulProgress`、`SoulBossCredit`、`BlessingPlayer`、`LunarSummonRecovery`、`WoodCombat`、`EnvironmentPlayer` | 已验证 |
-| (合计) | 122 条 |  |  |  |  |
+| (合计) | 123 条 |  |  |  |  |
 
 ---
 
@@ -368,6 +369,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/ZenithPrototypeCheck/SwordTrailHeadJoinRenderCheck.cs` | GPU 渲染 ModSystem | K 渲染 | 剑尾头部接合实拍，写 `head-join.json` | `run_sword_head_join.ps1`；配对 `SwordTrailInnerContourCheck` | 部分待核实 |
 | `checks/ZenithPrototypeCheck/SwordTrailInnerContourCheck.cs` | 静态断言套件 | M 数学 | 内缘轮廓 3 条：头到旧尾连续变窄不形成先缩后鼓的多余扇面、头部保留刀身连接长度（不撑到整把武器外）、内缘曲线由几何统一负责不再用接合权重覆盖材质边界 | 配对 `SwordTrailHeadJoinRenderCheck` | 已验证 |
 | `checks/ZenithPrototypeCheck/TexturedSwordMaterialRenderCheck.cs` | GPU 渲染 ModSystem | K 渲染 | 贴图剑材质合成实拍，写 `textured-material.json`（缩进格式） | `run_textured_sword_material.ps1` | 部分待核实 |
+| `checks/ZenithPrototypeCheck/ThinbladeCheck.cs` | C# 夹具（薄刃） | 验证体系 / 薄刃 | 隔离夹具：四阶段有效概率与 Boss 位对应、2000 次固定种子采样的比例与每剑独立性、CanHitNPC 一票否决且不消耗命中次数、ThinbladeDisabled 默认值与 extra AI 往返、与偏锋 CurseOffset 共存、地形惩罚移除后不再 Retire、穿界祝福链在改名后仍可达 | ZenithReborn/SoulThinblade.cs、ZenithReborn/SoulBlade.cs、checks/ZenithPrototypeCheck/Check.cs | 人工补写 |
 | `checks/ZenithPrototypeCheck/TraitCheck.cs` | 静态断言套件 | I UI | 特性与图鉴（25 条）：未附着预览永不显示活跃特性、图鉴在无装备时保全部 8 木 + 6 实现困难矿效果、每条图鉴有唯一 key/当前描述/激活条件、有效木主剑 + 钴支援激活对应效果、一个活跃矿支援经共享机制解锁飞行且不发明满森林或缺木、六个当前诅咒态替换过时机械诅咒条目、锁定的重复矿主不改变合法支援提供的 1 材质、已解锁矿主激活波且兼容态恢复正常能力不发明个人祝福、回收存储与暂停森林槽不把效果漏进摘要、有效支援族出现在活跃摘要、失木解锁立即暂停冰支援、满有效木集显示 8 效果与森林之力、满森林装配只留 3 行紧凑 tooltip（详细在 UI）、每条自定义 tooltip 短且单行、长宿主名不撑大剑魂 tooltip、去木在真实 tooltip 隐藏其效果与森林之力但保留图鉴链接、图鉴分类筛选返回正确实现条目、生效筛选只显示当前实际生效条目、同一工作区可恢复全部特性及激活条件、浏览筛选图鉴不改存储物品或进度、目录不能吃槽点击或存光标物品、有旧物时也不加主导航（回收由配剑区提示进入）、配剑区回收视图保旧物原引用（取空后不再有旧物）、脱离的存储进度永不宣称可用能力、未附着 tooltip 只加一条短"下一步"提示 | `SoulTrait` 图鉴、`SoulItem` 特性摘要 | 已验证 |
 | `checks/ZenithPrototypeCheck/UiCheck.cs` | 静态断言套件 | I UI | 面板布局与点击（18 条）：轨道导航在裁剪宿主画布内、关闭按钮留屏、槽水平边界与可用目标、槽永不重叠、10 主槽共享一条圆轨道、森林奖励槽占左上弧、支援槽占右下弧、碎片导航不重叠任何武器或碎片目标、真实可见 handler 在缩放下插入并保前缀、真实 handler 返回预览武器、被拒物品留光标、隐藏槽不能吃其他页点击、体外不能换武器、17 个槽索引都能正确取回暂停项、Tab 导航消费点击不关编辑器、导航永不存光标物品、关闭按钮不动光标物品 | `SoulUI.SlotBounds/TryClickHost`、`Main.UIScale` | 已验证 |
 | `checks/ZenithPrototypeCheck/UiFixture.cs` | ModSystem 实机夹具 | A 调度 | 三条互斥路径：①`ZENITH_DRAG_REPLAY=1` 第 120-140 帧合成拖拽并写 `window-drag-replay.json`（注释明确声明"非 OS 拖拽证据"）；②`ZENITH_UI_GUI`/`ZENITH_ORE_GUI`/`ZENITH_VISUAL_GUI` 驱动真实面板点击；③`ZENITH_DOMAIN_GUI` 驱动全屏配阵 | 直接调 `SoulUI.PanelBounds/HandleWindowDrag`；写 `Main.SavePath` | 已验证 |
@@ -499,7 +501,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/verify_own_effect.py` | py | C 静态检查 | 无第三方素材包与原包 GPU 图逐像素一致 | 产出 soul-trail-gpu-<ver>/independence.json（package_install:156 消费） | 部分待核实 |
 | `checks/vfx_library.py` | py | C 编目校验 | validate：id/类别/目录层级/引用环/清单齐全；search 检索 | VfxLibrary/library.json、run_swordbody_batch 收尾 | 已验证 |
 | (分组) checks/archived-oneoff/（20 个 .py） | 历史归档脚本 | 归档·一次性 | 20 个扁平存放的一次性取证/生成脚本：14 个 `make_*_evidence.py`/`make_*_preview.py`（截图与取证图）、3 个 `make_*`（mask/colorfields/gif 工具）、1 个 `extract_`（从 Calamity 抄剑弧）、1 个 `localize_`（批量改注释语言）。**无一条断言**，只产 png/json 供人看；无 csproj、无执行入口，`run_*.ps1`/`*.py` 全文检索零命中 | 成员清单 `artifacts/codebase-map/archived-oneoff-manifest.txt`；目录成因见 `artifacts/codebase-map/F-checks-fixtures.md` 5.1~5.2 | 已扫描（分组索引） |
-| (合计) | 235 条 |  |  |  |  |
+| (合计) | 236 条 |  |  |  |  |
 
 ---
 
@@ -540,6 +542,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `docs/0.3.129-木质族V2与复合羁绊.md` | 版本记录 | 种族/木质 | 名册 12→8，森林之力重构，四复合羁绊，圣林归冠 | WoodTypes.cs, WoodBond*.cs, WoodCrown.cs | 已验证 |
 | `docs/0.3.130-木质族V2重做与口径统一.md` | 版本记录 | 种族/木质 | 删残留木剑类、补属性面板、统一有效寄宿口径、三羁绊服务端重校验 | WoodTypes.cs, BondSnapshot.cs, SoulUIWoodPanel.cs | 已验证 |
 | `docs/0.3.131-偏锋诅咒.md` | Markdown 版本记录 | 版本记录 / 偏锋 | 0.3.131 实装记录：设计定义、替换范围、保留枚举整数/按 Boss 记录数三档/独立 CurseOffset 字段/多人同步四项实现决策、验证结果与待实战调参说明 | ZenithReborn/SoulDeviation.cs、ZenithReborn/SoulCurses.cs、docs/CHANGELOG.md | 人工补写 |
+| `docs/0.3.132-薄刃诅咒.md` | Markdown 版本记录 | 版本记录 / 薄刃 | 0.3.132 实装记录：设计定义、替换阻隔的范围、枚举改名但整数位置不变、四阶段全可达、CanHitNPC 统一命中资格拦截、残缺语义字段、多人同步、地形惩罚移除与穿界祝福解耦、验证结果与待实战调参说明 | ZenithReborn/SoulThinblade.cs、ZenithReborn/SoulBlade.cs、docs/CHANGELOG.md | 人工补写 |
 | `docs/0.3.93-纯代码特效隔离与贴图独立验证.md` | 版本记录 | 特效/材质 | 建立 PureCodeOnly 统一输入限制策略 | VfxIsolation.cs, SwordFlowMaterial.cs | 已验证 |
 | `docs/0.3.94-P18宽高光扇形格纹隔离.md` | 版本记录 | 特效/材质 | 关 P18 做扇形格纹消融，结论被 95 纠正 | VfxIsolation Parts, 0.3.95 | 已验证 |
 | `docs/0.3.95-共享顶点连续朝向与棱纹修订.md` | 版本记录 | 特效/几何 | 定位棱纹根因为三角形朝向不连续 | SwordFlowMeshBasis.cs, SoulRibbonMesh.cs | 已验证 |
@@ -710,7 +713,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `docs/飞刃族F1-掷刃与印记.md` | 设计定稿 | 种族/飞刃 | 掷刃机制已实装，印记为留白核心设计 | FlyingBladeHand.cs, FlyingBladeShot.cs | 已验证 |
 | `docs/飞刃族F2-数量分阶与族显示.md` | 设计定稿 | 种族/飞刃 | 前四把阶梯效果 + 族归属显示 | FlyingBladeFamily.cs, WeaponFamilyTags.cs | 已验证 |
 | `docs/飞刃族FB1-候选名册与攻击方式.md` | 设计草案 | 种族/飞刃 | 引擎普查产出的 31 把名册与攻击方式 | FlyingBladeFamily.Weapons, flying-blade-survey.json | 已验证 |
-| (合计) | 201 条 |  |  |  |  |
+| (合计) | 202 条 |  |  |  |  |
 
 ---
 

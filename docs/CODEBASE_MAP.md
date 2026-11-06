@@ -1,6 +1,6 @@
 # 天顶复苏 · 诅咒残魂 — 代码地图
 
-> 基线版本：`ZenithReborn/build.txt` → `version = 0.3.131`（`displayName = 天顶复苏 · 诅咒残魂`）
+> 基线版本：`ZenithReborn/build.txt` → `version = 0.3.132`（`displayName = 天顶复苏 · 诅咒残魂`）
 > 本文所有 `文件:行号` 均已对照当前工作区源码抽查核验；与既有调查稿不一致处以源码为准（差异清单见文末）。
 > 描述的是 2026-11-04 清理提交 `e59f29bd` 之后的磁盘内容；此后每次提交都会由 pre-commit 钩子核对索引新鲜度、行号越界、版本号与源码计数，**但模块职责的描述准确度仍需改代码的人在同一提交里更新**。
 
@@ -14,11 +14,11 @@
 |---|---|---|
 | 目标框架 | `net8.0`，`LangVersion 12`，`BuildMod=false` | `ZenithReborn/ZenithReborn.csproj` |
 | tML 版本 | 1.4.4（`tMLMod.targets`），引用 `Luminance` 做 primitive 渲染 | 同上 |
-| 代码规模 | `ZenithReborn/*.cs` = **122** 个，平铺在根目录（无子命名空间分层） | `ls ZenithReborn/*.cs \| wc -l` |
+| 代码规模 | `ZenithReborn/*.cs` = **123** 个，平铺在根目录（无子命名空间分层） | `ls ZenithReborn/*.cs \| wc -l` |
 | 着色器 | 3 个 `.fx`（`ZRSwordFlow` / `ZRGlassScreen` / `ZRMaterialSurface`）+ 3 个同名 `.fxc` 对照产物 | `ZenithReborn/Assets/Effects/` |
 | 资产 | 52 张 PNG（矿石剑身图集 21 / 材质贴图 12 / Boss 立绘 19）+ `SwordSpark.png` + `ZoneMask.zrdata` | 见 §15 |
 | 本地化 | `zh-Hans.hjson` / `en-US.hjson`，各 133 行，仅覆盖 `Items/Buffs/NPCs/Projectiles/Keybinds` | `ZenithReborn/Localization/` |
-| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（101 个 `.cs`）+ `checks/*.py` 58 个 + `checks/*.ps1` 40 个 | §17 |
+| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（102 个 `.cs`）+ `checks/*.py` 58 个 + `checks/*.ps1` 40 个 | §17 |
 | 打包排除 | `docs` / `checks` / `VfxLibrary` / `tools` 四目录不进成品包 | `checks/package_install.py:70` |
 
 ### 验证等级约定（全文通用）
@@ -38,13 +38,13 @@
 
 | 路径 | 规模 | 职责 | 是否进成品包 |
 |---|---|---|---|
-| `ZenithReborn/` | 122 `.cs` + Assets + Localization | 主模组全部运行时代码；文件平铺，靠文件名前缀表达归属（`Soul*`=剑魂核心/UI，`Wood*`/`Ore*`/`FlyingBlade*`/`HolyHeaven*`/`Living*`/`Environment*`=各族，`Vfx*`/`Sword*`=渲染） | 是 |
+| `ZenithReborn/` | 123 `.cs` + Assets + Localization | 主模组全部运行时代码；文件平铺，靠文件名前缀表达归属（`Soul*`=剑魂核心/UI，`Wood*`/`Ore*`/`FlyingBlade*`/`HolyHeaven*`/`Living*`/`Environment*`=各族，`Vfx*`/`Sword*`=渲染） | 是 |
 | `ZenithReborn/Assets/Effects/` | 3 `.fx` + 3 `.fxc` + 4 `.fxh` + `build-manifest.json` | 着色器与编译对照。4 个 `.fxh` 是**双重孤儿**（无 `#include`，且被 `buildIgnore` 排除） | 是（`.fxh` 被排除） |
 | `ZenithReborn/Assets/Vfx/` | `SwordBody/*.png` 21 张、`Materials/SwordFlow/*` 13 个 | 运行时贴图源（`ModContent.Request` 直接读） | 是 |
 | `ZenithReborn/Assets/UI/BossPortraits/` | 19 张 PNG + `sources.json` | Boss 动态头像图集 | 是 |
-| `checks/ZenithPrototypeCheck/` | 101 `.cs` + `Assets/` + `Localization/` | 独立验收模组，`modReferences = ZenithReborn`，用 **HintPath 引 Release DLL** | 否 |
+| `checks/ZenithPrototypeCheck/` | 102 `.cs` + `Assets/` + `Localization/` | 独立验收模组，`modReferences = ZenithReborn`，用 **HintPath 引 Release DLL** | 否 |
 | `checks/*.py` / `checks/*.ps1` | 58 / 39 | 构建期代码生成（`emit_*`）、资产校验、GPU 采集启动、打包安装 | 否 |
-| `docs/` | 73 顶层 `.md` + `docs/archive/` 126 `.md` | 版本记录 / 设计定稿 / 参考表 / 索引 | 否 |
+| `docs/` | 74 顶层 `.md` + `docs/archive/` 126 `.md` | 版本记录 / 设计定稿 / 参考表 / 索引 | 否 |
 | `tools/` | 222 文件 | 制作端：`ZenithMaterialLab`（独立模组）、`ilspy`、`decomp`、`xnbcli` 源码与二进制 | 部分（`tools` 目录被排除，但 `ZenithMaterialLab` 源码入库） |
 | `VfxLibrary/` | 11756 文件 | 制作端素材库 + 原版特效浏览器。`library.json` 自报 `runtimeIntegrated: false` | 否 |
 | `artifacts/` | 约 16 GB | 构建产物、备份、安装记录、调查产物。**整目录被 `.gitignore` 忽略** | 否 |
@@ -115,15 +115,15 @@
 |---|---|---|
 | `SoulCurse` / `CurseStage` 枚举 | `SoulCurses.cs:9` / `:10` | 六诅咒 × 四档 |
 | 铭刻位 `Eye..Deer`、`All=(1<<18)-1` | `SoulCurses.cs:14-15` | 18 位 |
-| `Groups[6][]` | `SoulCurses.cs:19` | 每诅咒的 Boss 组；长度决定四档阈值 |
-| `BossSeal(int)` | `SoulCurses.cs:24` | 18 位映射（与 `SoulProgress.BossBit` 12 位是两套） |
-| `Count` / `RecordedStage` / `Stage` | `SoulCurses.cs:31` / `:32` / `:38` | `Stage` 会被 `LegacyReleased` 抬到 Released |
-| `StageForCount` | `SoulCurses.cs:37` | 1→Weakened、n-1→Released、n→Blessed |
-| `ScreenEdge` | `SoulCurses.cs:46` | 人物到屏幕左右边界距离，无图形环境退回 960 |
-| `Blades` / `BladesAtStage` | `SoulCurses.cs:55` / `:56` | 独行诅咒：2/3/4/…/10 |
-| `HitLimit` / `TerrainAllowance` | `SoulCurses.cs:59` / `:62` | 断锋 3/5/∞；屏障 32/64/∞ |
-| `TraitEnabled(type)` | `SoulCurses.cs:82` | 切换诅咒未解时只认**第一把**有效主攻 |
-| `CombatWood` | `SoulCurses.cs:87` | `FamilyItems` 再过 `TraitEnabled` 的木质快照 |
+| `Groups[6][]` | `SoulCurses.cs:22` | 每诅咒的 Boss 组；长度决定四档阈值 |
+| `BossSeal(int)` | `SoulCurses.cs:27` | 18 位映射（与 `SoulProgress.BossBit` 12 位是两套） |
+| `Count` / `RecordedStage` / `Stage` | `SoulCurses.cs:34` / `:35` / `:41` | `Stage` 会被 `LegacyReleased` 抬到 Released |
+| `StageForCount` | `SoulCurses.cs:40` | 1→Weakened、n-1→Released、n→Blessed |
+| `ScreenEdge` | `SoulCurses.cs:49` | 人物到屏幕左右边界距离，无图形环境退回 960 |
+| `Blades` / `BladesAtStage` | `SoulCurses.cs:58` / `:59` | 独行诅咒：2/3/4/…/10 |
+| `HitLimit` / `HitLimitAtStage` | `SoulCurses.cs:62` / `:63` | 断锋有效命中次数 3/5/∞；`TerrainAllowance` 已随 0.3.132 薄刃替换删除 |
+| `TraitEnabled(type)` | `SoulCurses.cs:83` | 0.3.131 偏锋替换后恒 true，所有武器特性正常触发 |
+| `HostedWood` / `CombatWood` | `SoulCurses.cs:90` / `:91` | 数值口径（有效寄宿）与特性口径分开；`TraitEnabled` 恒 true 后数值相同但属性不合并 |
 | `SoulEchoDamage.Multiplier` | `SoulEchoDamage.cs:7` | 祝福 1 / 解除 `0.8^unit` / 其余 `0.20` |
 | `BlessingTuning` | `SoulBlessings.cs:17` | `ChargeFrames=900, BurstFrames=600, CombatGrace=45` |
 | `BlessingPlayer.TryActivate` | `SoulBlessings.cs:51` | 按 O；要求手持剑魂 + 缚身已祝福 + 满充能 |
@@ -132,7 +132,7 @@
 | `SoulDifficulty.Legendary` | `SoulDifficulty.cs:14` | `GameMode==2 && getGoodWorld` |
 | `SoulDifficulty.Toggle` | `SoulDifficulty.cs:25` | **真实改写 `Main.GameMode`/`getGoodWorld` 并写世界存档** |
 
-**关键数据流**：`SoulBossCredit.OnKill` → `Seals |= seal` → `Count` → `StageForCount` → `Blades/HitLimit/TerrainAllowance/Reach`。祝福：`TryActivate` → `BurstLeft=600` → `Reach` 的 `Unbounded` 分支 + `SoulSource.ModifyHitNPC` 的距离/环境乘区。
+**关键数据流**：`SoulBossCredit.OnKill` → `Seals |= seal` → `Count` → `StageForCount` → `Blades/HitLimit/Reach`（薄刃概率另走 `SoulThinblade.EffectiveChance`）。祝福：`TryActivate` → `BurstLeft=600` → `Reach` 的 `Unbounded` 分支 + `SoulSource.ModifyHitNPC` 的距离/环境乘区。
 
 **常见问题定位入口**
 - "诅咒没解除"：先看 `SoulBossCredit.OnKill`（`Progression.cs:136`）是否拿到参与者（`SoulEncounters.Hits`），再看 `Groups` 是否双 Boss 需两个 bit。

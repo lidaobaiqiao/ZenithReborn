@@ -18,7 +18,7 @@ public static partial class SoulCurses
             SoulCurse.Binding=>stage==CurseStage.Blessed?"御剑距离不再设上限，仍可鼠标自由选点。":free?"御剑距离最少到屏幕左右边界，保留正常鼠标选点。":"御剑距离最少能打到屏幕左右边界的中点；仍可鼠标自由选点。",
             SoulCurse.Switching=>"剑锋失准，而非剑锋失控：只让飞剑的目标位置产生偏移，不改变伤害、攻速、出剑数、命中次数、地形穿透与武器特性；当前阶段最大偏移"+SoulDeviation.MaxOffsetAt(stage).ToString("0.##")+"像素。",
             SoulCurse.Sheathing=>free?"新轮不打断旧轮，主剑各自完成攻击。":"开始新轮时，旧轮主剑提前停止攻击并淡出；不锁攻击键。",
-            SoulCurse.Barrier=>free?"主剑正常穿越实体地形。":$"每段连续实体地形可穿过{TerrainAllowanceAtStage(stage)}像素，超出则退出攻击；背景墙、平台不阻断。",
+            SoulCurse.Thinblade=>$"剑形犹在，锋芒已失：每把飞剑生成时独立判定，有效概率{SoulThinblade.EffectiveChance(stage):P0}；残缺飞剑照常生成、飞行、消失，但无法造成有效命中、不触发命中后武器效果、不消耗命中次数与穿透、不施加免疫。不改变飞剑数量、轨迹、碰撞、伤害数值与正常飞剑特性。",
             SoulCurse.Solitude=>$"每轮最多{BladesAtStage(soul,stage)}把主剑，不足留空。",
             _=>stage==CurseStage.Blessed?"本体和三个剑影每次均造成100%伤害，按正常8帧间隔重复命中。":free?
                 "本体100%；三个剑影逐次乘0.8，分别为80%、64%、51.2%伤害，按正常8帧间隔重复命中。":
@@ -27,7 +27,7 @@ public static partial class SoulCurses
             SoulCurse.Binding=>"战斗约15秒蓄满御剑条，满条保留；按独立御剑键（默认O）手动开启10秒，视野翻倍，按命中距离最高独立增伤50%。",
             SoulCurse.Switching=>"百刃接力：不同寄宿主剑首击同一敌人接力，每层强化后续首击特性10%，最多5层；3秒断连清空，同剑帧伤不叠层。",
             SoulCurse.Sheathing=>"归鞘留锋：主剑完整往返后为自身存1次强化，下次登场首击释放50%自身伤害的短距离斩痕。",
-            SoulCurse.Barrier=>"破障：每把主剑穿过实体后，下次命中附加4秒破甲（15护甲穿透），每剑只触发一次。",
+            SoulCurse.Thinblade=>"破障：每把主剑穿过实体后，下次命中附加4秒破甲（15护甲穿透），每剑只触发一次。",
             SoulCurse.Bluntness=>"连斩：剑影不再衰减，所有伤害单元保持所属主剑的全量伤害。",
             _=>""});
         if(stage==CurseStage.Blessed && curse==SoulCurse.Solitude)effect+=" 三王后4把，世花6、石巨人7、教徒8、月总10；只取此剑魂铭刻。";
