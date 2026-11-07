@@ -7,7 +7,7 @@
 ## 读表前必须知道的三件事
 
 1. **本仓库的"通过"只到源码 + 已编译 + 夹具**。`artifacts/install-result.json` 里 `graphics_*_tested` 仍为 `false`，视觉与真实多人从未被自动验证。
-2. **族计数有三套口径**，同屏不同值属预期而非 bug（见现象 4）。
+2. **族计数须区分用途**：木质战斗与面板对同一有效寄宿集合当前应一致；支援格授予另有范围（见「族计数不对」）。
 3. **渲染开关有两类**：一类真生效（绘制前 `if` 判断），一类只是调试面板里的数字（见现象 11）。
 
 ---
@@ -34,7 +34,7 @@
 | 顺序 | 可能模块 | 优先检查 | 关联检查位置 |
 |---|---|---|---|
 | 1 | 飞刃族三条件 | `ZenithReborn/FlyingBladeFamily.cs:70` `Enabled = Attached && TraitMains.Any() && Activated` | `checks/ZenithPrototypeCheck/FlyingBladeCheck.cs` |
-| 2 | 木质族——**特性**被切换诅咒过滤（**已修正数值侧**） | 2026-11-05 前：`CombatWood` 的 `.Where(TraitEnabled)` 被数值侧复用，未解切换时阶段/倍率/生命一起被压成第一把。现拆成两套口径：`HostedWood`（`SoulCurses.cs:89`，未过滤，供阶段/生命/倍率/Full/森林/归冠）与 `CombatWood`（`:90`，仍过滤，只管哪些剑的特性开火）。看到「8 把却只 1 把」先确认是哪一侧：倍率/生命应按 `HostedWood`，特性条数仍会被压制，解除切换后全开 | `checks/ZenithPrototypeCheck/WoodCheck.cs`、`CurseCheck.cs` |
+| 2 | 木质族有效寄宿与特性 | `HostedWood`（`SoulCurses.cs:90`）供阶段/生命/倍率/Full/森林/归冠，`CombatWood`（`:91`）供战斗特性；二者保留独立入口，但 0.3.131 偏锋替换后 `TraitEnabled` 恒为 true，特性不会再因旧切换诅咒只认第一把。看到「8 把却只 1 把」先核对同一剑魂的有效主槽、已生效支援槽及两处实际输入 | `checks/ZenithPrototypeCheck/WoodCheck.cs`、`CurseCheck.cs` |
 | 3 | 矿石族入场资格 | `ZenithReborn/OreFamily.cs:85`（`TriggerEligible`：`PrimaryOrdinal>=0` 且 `Count>0`）；未解除切换时 `OreFlightMains` 只取前 4 把（`ZenithReborn/SoulCurses.cs:81`） | `checks/ZenithPrototypeCheck/OreCheck.cs` |
 | 4 | 神圣天堂门槛 | `ZenithReborn/HolyHeavenFamily.cs:13` `Enabled` 要求至少一把在 `TraitItems` | `checks/ZenithPrototypeCheck/HolyHeavenCheck.cs`（`Check.cs:63`） |
 | 5 | 剑灵族 | `ZenithReborn/LivingArmamentFamily.cs:9`（4 把，两处标注"暂定候选"） | `checks/ZenithPrototypeCheck/LivingArmamentCheck.cs`（`Check.cs:57`） |
@@ -43,10 +43,10 @@
 ### 现象：族计数不对（面板显示 N/M，但实际寄宿数不一样）
 | 顺序 | 可能模块 | 优先检查 | 关联检查位置 |
 |---|---|---|---|
-| 1 | **战斗侧口径**（过滤诅咒） | `ZenithReborn/SoulCurses.cs:86`：`FamilyItems` 再过 `TraitEnabled`，未解除切换时塌到 1 | `checks/ZenithPrototypeCheck/CurseCheck.cs` |
+| 1 | **战斗侧口径** | `ZenithReborn/SoulCurses.cs:91`：`CombatWood` 的 `FamilyItems` 仍经过 `TraitEnabled`，但该方法当前恒为 true；不应因偏锋塌到 1 | `checks/ZenithPrototypeCheck/CurseCheck.cs` |
 | 2 | **族内真源口径**（不过滤） | `ZenithReborn/SoulSupport.cs:43`：`FamilyItems = Active ∪ Supports`，含森林/圣林奖励位与传奇位 | `checks/ZenithPrototypeCheck/WoodCheck.cs` |
-| 3 | **UI 口径** | `ZenithReborn/BondSnapshot.cs:59`（`Wood`）直接数 `FamilyItems`，与第 1 行**可能同屏不同值**，属预期 | — |
-| 4 | 支援格授予用的是第三套（不含奖励位） | `ZenithReborn/SoulSupport.cs:45`（`GrantedBy` 只用 `SetItems`）；`ZenithReborn/SoulSupport.cs:38`（`SetItems` = 主攻 + 支援）。放奖励位的剑**不该反向解锁更多格子** | — |
+| 3 | **UI 口径** | `ZenithReborn/BondSnapshot.cs:59`（`Wood`）直接数 `FamilyItems`；对同一剑魂和有效寄宿集合，当前木质计数应与战斗侧一致 | — |
+| 4 | 支援格授予范围 | `ZenithReborn/SoulSupport.cs:45`（`GrantedBy`）：木质只用 `SetItems`，矿石还并入已生效的全收集奖励槽与圣林槽；两者都不靠传奇槽自举支援格 | — |
 | 5 | 矿石按**材质**去重，不是按把数 | `ZenithReborn/OreFamily.cs:91`（`Count` → `OreItems`）；短/阔剑同材质只算 1 | `checks/ZenithPrototypeCheck/OreCheck.cs` |
 | 6 | 超额被 `Clamp` 吞掉 | `ZenithReborn/BondSnapshot.cs:74`（`Math.Clamp(count,0,max)`），9 把木剑也只显示 8/8 | — |
 
@@ -133,7 +133,7 @@
 ### 现象：改完代码跑回归失败 / 回归假绿
 | 顺序 | 可能模块 | 优先检查 | 关联检查位置 |
 |---|---|---|---|
-| 1 | **`CurseFixture.NeutralDefaults` 是全局毒开关** | `checks/ZenithPrototypeCheck/CurseCheck.cs:15-19`（默认 false = 新魂带全六诅咒 → `TraitItems` 只返回第一把主攻）；`checks/ZenithPrototypeCheck/Check.cs:127` 置 true、`:150` 置回 false，**顺序不可颠倒**。否则所有"多剑生效"类断言集体假阴性 | `checks/ZenithPrototypeCheck/Check.cs` |
+| 1 | **`CurseFixture.NeutralDefaults` 会改变新剑魂的诅咒基线** | `checks/ZenithPrototypeCheck/CurseCheck.cs:15-19`：true 为新剑魂设置 `LegacyReleased=63`，至少按已解除处理，不自动授予祝福；false 使用真实默认诅咒。全量套件前段设 true，进入诅咒专项前设回 false；检查受独行、薄刃等影响的断言时先核对开关 | `checks/ZenithPrototypeCheck/Check.cs` |
 | 2 | **HintPath 引 Release DLL** | `checks/ZenithPrototypeCheck/ZenithPrototypeCheck.csproj:4`（`../../ZenithReborn/bin/Release/net8.0/ZenithReborn.dll`）→ 改主模组**不重新 `-build`** 就静默测旧逻辑 | `checks/run_wood_checks.ps1`（脚本纪律：先重建） |
 | 3 | **`-server` 下 26 个渲染夹具直接 return** | 所有 `*RenderCheck` 的 `Enabled` 都带 `!Main.dedServ`；`checks/ZenithPrototypeCheck/Check.cs:26` 的 `PostAddRecipes` 是唯一自动化入口。`-server` 的 `PASS` **完全不能证明画面正确** | `checks/run_*.ps1`（图形夹具 27 个） |
 | 4 | `Main.UIScale` 跨断言污染 | 循环中途抛异常会停在 2f，后续 UI 断言坐标全错，且报错指向别处 | `checks/ZenithPrototypeCheck/Check.cs`（UI 分支） |

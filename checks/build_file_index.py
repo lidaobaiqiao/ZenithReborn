@@ -82,6 +82,11 @@ DEFAULT_PREFIX = {
 
 ROOT_PREFIXES = ("ZenithReborn/", "checks/", "docs/", "tools/", "VfxLibrary/")
 
+# 调查报告是只读历史快照；源码变化后的职责修订集中放这里，再生成索引。
+CURRENT_DUTY_OVERRIDES = {
+    "ZenithReborn/SoulCurses.cs": "18 位个人铭刻、6 组诅咒分级、出剑数与命中次数、特性入口、诅咒存档网络及通用地形几何；旧穿地深度惩罚已删除，偏锋与薄刃分别由独立模块负责",
+}
+
 # 与 checks/map_audit.py 的排除口径保持一致：Python 运行时缓存不收进索引。
 # 本脚本不扫描全盘做分母，这里只用于过滤 glob 展开出的成员，避免报告通配行把
 # __pycache__/*.pyc 之类的缓存文件混进 docs/FILE_INDEX.md。
@@ -705,6 +710,7 @@ def build(root: Path) -> tuple[str, dict]:
 
     buckets: dict[str, list[dict]] = {k: [] for k, _, _ in SECTION_TITLES}
     for rec in merged:
+        rec["duty"] = CURRENT_DUTY_OVERRIDES.get(rec["path"], rec["duty"])
         buckets[section_of(rec["path"])].append(rec)
     for k in buckets:
         buckets[k].sort(key=lambda r: r["path"])
@@ -717,7 +723,7 @@ def build(root: Path) -> tuple[str, dict]:
 
     out.append("# 文件索引（FILE_INDEX）")
     out.append("")
-    out.append("> **本文件由脚本生成，不要手改。**修改会被下一次生成覆盖，正确做法是改调查报告或源码后重跑。")
+    out.append("> **本文件由脚本生成，不要手改。**历史调查报告保持只读；职责过时的修订写入 `checks/build_file_index.py` 的 `CURRENT_DUTY_OVERRIDES` 后重跑。")
     out.append("")
     out.append("```text")
     out.append("生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）")

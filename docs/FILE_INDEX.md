@@ -1,10 +1,10 @@
 # 文件索引（FILE_INDEX）
 
-> **本文件由脚本生成，不要手改。**修改会被下一次生成覆盖，正确做法是改调查报告或源码后重跑。
+> **本文件由脚本生成，不要手改。**历史调查报告保持只读；职责过时的修订写入 `checks/build_file_index.py` 的 `CURRENT_DUTY_OVERRIDES` 后重跑。
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-06 18:57:35
+生成时间 : 2026-11-06 19:10:05
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
 索引条目 : 774 条（去重合并 4 次重复出现；报告未覆盖的人工补写 61 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
@@ -101,7 +101,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `ZenithReborn/SoulBossUnlocks.cs` | 静态类 + 3 record | 进度解锁 | 只读展示模型：每诅咒的 Boss 目标、四档奖励与当前/旧档状态 | `SoulCurses`、`SoulUIBossUnlocks`、`SoulUICurseUnlocks`、`SoulUIArchive` | 已验证 |
 | `ZenithReborn/SoulCombat.cs` | `SoulItem` 分部 | 战斗 | 单把宿主的真实伤害 = 武器伤害 × `Potency` × 矿石主剑倍率 | `SoulItem`、`OreFamily` | 已验证 |
 | `ZenithReborn/SoulCurseDescriptions.cs` | `SoulCurses` 分部 | 诅咒/难度 | 诅咒与祝福的阶段说明/需求文案，UI 与图鉴共用 | `SoulCurses`、`SoulBossUnlocks`、`SoulUIArchive` | 已验证 |
-| `ZenithReborn/SoulCurses.cs` | 静态类 + `SoulItem` 分部 | 诅咒/难度 | 18 位铭刻、6 组诅咒分级、出剑数/命中期/穿地上限、特性开关、诅咒存档网络、地形穿透判定 | `SoulBossCredit`、`SoulSwingPlayer`、`SoulBlade`、`SoulTraits`、`SoulBossUnlocks` | 已验证 |
+| `ZenithReborn/SoulCurses.cs` | 静态类 + `SoulItem` 分部 | 诅咒/难度 | 18 位个人铭刻、6 组诅咒分级、出剑数与命中次数、特性入口、诅咒存档网络及通用地形几何；旧穿地深度惩罚已删除，偏锋与薄刃分别由独立模块负责 | `SoulBossCredit`、`SoulSwingPlayer`、`SoulBlade`、`SoulTraits`、`SoulBossUnlocks` | 已验证 |
 | `ZenithReborn/SoulDeviation.cs` | C# 静态类（偏锋诅咒） | 诅咒/难度 | 偏锋的数值与随机入口：MaxOffset 按个人 Boss 记录数分三档（0→48、1→24、≥2→0）并尊重 LegacyReleased；MaxOffsetAt 供 UI 阶段说明取同一组常量；NextOffset 用 Main.rand 生成圆形分布 radius=Max*(0.35+0.65*sqrt(u))、角度 0~2π，每把飞剑生成时调用一次 | SoulItem.EmitBlade、SoulBlade.CurseOffset、SoulCurseDescriptions.cs | 人工补写 |
 | `ZenithReborn/SoulDifficulty.cs` | ModSystem | 诅咒/难度 | 传奇难度开关：`GameMode==2 && getGoodWorld`，真实改写世界难度并持久化 | `SoulItem.LegendaryOn`、`SoulDomainUI` | 已验证 |
 | `ZenithReborn/SoulDomainUI.cs` | partial 分部 | 域界面 | `DomainMode`、`DomainWorkBounds`、`RingViewport`、`SelectSlot`、`LibraryItems`、`EquipFromInventory`、`ReturnSelected`、背景/页头/难度按钮 | `SoulArmoryLayout`、`SoulDifficulty`、`SoulInput` | 已验证 |

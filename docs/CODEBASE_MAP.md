@@ -107,9 +107,9 @@
 
 ## 3. 诅咒与难度
 
-**职责**：把"打到过哪些 Boss"翻译成六条能力轴上的四档等级（诅咒中→已削弱→已解除→已祝福），再翻译成出剑把数、每目标命中期数、穿地深度、射程下限与剑影伤害倍率；并实现御剑爆发与四类祝福运行时。
+**职责**：把剑魂个人 Boss 铭刻翻译成六条能力轴上的阶段，再用于出剑把数、每目标命中次数、射程和剑影伤害等规则；偏锋按 Boss 记录数单独计算目标偏移，薄刃按阶段判定主飞剑命中资格，旧穿地深度惩罚已删除。相关模块还实现御剑爆发与祝福运行时。
 
-**核心文件**：`SoulCurses.cs`（121）、`SoulCurseDescriptions.cs`、`SoulEchoDamage.cs`（17）、`SoulBlessings.cs`（257）、`SoulDifficulty.cs`
+**核心文件**：`SoulCurses.cs`、`SoulDeviation.cs`、`SoulThinblade.cs`、`SoulCurseDescriptions.cs`、`SoulEchoDamage.cs`、`SoulBlessings.cs`、`SoulDifficulty.cs`
 
 | 入口 | 位置 | 说明 |
 |---|---|---|
@@ -118,7 +118,7 @@
 | `Groups[6][]` | `SoulCurses.cs:22` | 每诅咒的 Boss 组；长度决定四档阈值 |
 | `BossSeal(int)` | `SoulCurses.cs:27` | 18 位映射（与 `SoulProgress.BossBit` 12 位是两套） |
 | `Count` / `RecordedStage` / `Stage` | `SoulCurses.cs:34` / `:35` / `:41` | `Stage` 会被 `LegacyReleased` 抬到 Released |
-| `StageForCount` | `SoulCurses.cs:40` | 1→Weakened、n-1→Released、n→Blessed |
+| `StageForCount` | `SoulCurses.cs:40` | 三 Boss 组 0/1/2/3 对应诅咒/削弱/解除/祝福；两 Boss 组记录 1 位即显示解除。偏锋偏移按记录数另算 |
 | `ScreenEdge` | `SoulCurses.cs:49` | 人物到屏幕左右边界距离，无图形环境退回 960 |
 | `Blades` / `BladesAtStage` | `SoulCurses.cs:58` / `:59` | 独行诅咒：2/3/4/…/10 |
 | `HitLimit` / `HitLimitAtStage` | `SoulCurses.cs:62` / `:63` | 断锋有效命中次数 3/5/∞；`TerrainAllowance` 已随 0.3.132 薄刃替换删除 |
@@ -296,7 +296,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 4. 木质族**不产生弹幕**，全部作用于既有 `SoulBlade` 与 DoT 通道。
 
 **常见问题定位入口**
-- "木质不生效"：`CombatWood`（`SoulCurses.cs:87`）的 `TraitEnabled` 过滤 → 表现为"只有第一把生效"。
+- "木质不生效"：先检查 `SoulSupport.FamilyItems` 的有效主槽和支援槽，再比较 `HostedWood` / `CombatWood`（`SoulCurses.cs:90` / `:91`）；偏锋替换后 `TraitEnabled` 恒为 true，不应再把特性压成第一把。
 - "森林之力不涨"：`WoodPlayer.AdvanceGrowth` 在 `HeldSoul==null` 直接 return；`EffectiveLayers` 还要求 `CurrentSoul==soul.SoulId`。
 - "羁绊不触发"：`WoodBondCore` 三条额外条件（棕榈+铜/铁阔剑、红木+乌木+魔光/永夜、红木+灰烬+火山）。
 - "归冠不开"：泰拉刃必须在**非 CrownHosts** 的有效槽，圣林槽自举被重入护盾拦掉。
@@ -437,7 +437,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 
 | 族/口径 | 计数表达式 | 位置 | 含奖励位/传奇位 |
 |---|---|---|---|
-| 木质（族内/战斗） | `PopCount(WoodTypes.Mask(FamilyItems))`，战斗再叠 `TraitEnabled` | `WoodTypes.cs:56`；`SoulCurses.cs:87` | 是 |
+| 木质（族内/战斗） | `PopCount(WoodTypes.Mask(FamilyItems))`；战斗仍经 `TraitEnabled`，当前恒为 true | `WoodTypes.cs:56`；`SoulCurses.cs:90` / `:91` | 是 |
 | 木质（支援格授予） | `GrantedBy("wood")` 用 `SetItems` | `SoulSupport.cs:45` | **否** |
 | 矿石（族内） | `PopCount(OreFamily.Mask(OreItems))`，按**材质**去重 | `OreFamily.cs:91` | 是 |
 | 矿石（支援格授予） | `SetItems ∪ 森林奖励 ∪ 圣林` | `SoulSupport.cs:31` | 部分（否传奇） |
@@ -632,7 +632,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 
 | # | 陷阱 | 证据 |
 |---|---|---|
-| 1 | **`CurseFixture.NeutralDefaults` 是全局毒开关**：默认 false = 新魂带全六诅咒，此时 `TraitItems` 只返回第一把主攻 → 所有"多剑生效"类断言集体假阴性 | `Check.cs:115`/`:127` 置 true，`:150` 置回 false；顺序不可颠倒 |
+| 1 | **`CurseFixture.NeutralDefaults` 改变新剑魂的诅咒基线**：true 设置 `LegacyReleased=63`，让旧套件按至少已解除处理；false 使用真实默认诅咒。偏锋替换后 `TraitItems` 不再只返回第一把 | `CurseCheck.cs:15`；`Check.cs` 的全量套件前段设 true，诅咒专项前设 false |
 | 2 | **HintPath 引 Release DLL**：改主模组不重新 `-build`，夹具会**静默测旧逻辑** | `.csproj:4`；靠 `run_wood_checks.ps1` 的脚本纪律（先重建）绕开 |
 | 3 | **服务端 26 个渲染夹具直接 return**：`-server` 的 PASS **完全不能证明画面正确** | 所有 `*RenderCheck` 的 `Enabled` 都带 `!Main.dedServ` |
 | 4 | `Main.UIScale` 跨断言污染：循环中途抛异常会停在 2f，后续 UI 断言坐标全错且报错指向别处 | `Check.cs` UI 分支 |

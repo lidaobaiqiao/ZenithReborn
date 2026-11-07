@@ -41,8 +41,8 @@
 | Boss 组表 | `ZenithReborn/SoulCurses.cs:19` | `Groups[6][]` | 加 Boss、调四档阈值 | `StageForCount`、`SoulBossUnlocks.Read` 奖励行数 |
 | 铭刻映射 | `ZenithReborn/SoulCurses.cs:24` | `BossSeal(int)` | 18 位封印扩位 | `SoulCurses.All`、`SaveCurses/LoadCurses`、网络包 |
 | 出剑把数 | `ZenithReborn/SoulCurses.cs:55` / `:56` | `Blades` / `BladesAtStage` | 调"独行"上限（2/3/4…10） | `SoulSwingPlayer` 的 `budget` |
-| 特性开关 | `ZenithReborn/SoulCurses.cs:82` | `TraitEnabled(type)` | 切换诅咒未解时只认**第一把**主攻 | `TraitMains/TraitSupports/TraitItems` |
-| 受诅咒过滤的战斗口径 | `ZenithReborn/SoulCurses.cs:87` | `CombatWood`（注释在 `:86`） | 木质战斗用哪套计数 | `SoulSupport.FamilyItems` + `TraitEnabled`；与 `BondSnapshot.Wood` 差一份数据属预期 |
+| 特性开关 | `ZenithReborn/SoulCurses.cs:83` | `TraitEnabled(type)` | 偏锋替换后恒为 true；检查武器特性为何未触发 | `TraitMains/TraitSupports/TraitItems` |
+| 木质数值与战斗口径 | `ZenithReborn/SoulCurses.cs:90` / `:91` | `HostedWood` / `CombatWood` | 检查有效寄宿和特性应用 | 两者分开保留；`TraitEnabled` 当前恒为 true，按同一 `FamilyItems` 计算时数值相同 |
 | 难度开关 | `ZenithReborn/SoulDifficulty.cs:25` | `Toggle` | 传奇/FTW 切换 | **真实改写 `Main.GameMode`/`getGoodWorld` 并写世界存档**，联机必须拒绝 |
 | 改这类东西必看 | — | — | 三套并行 Boss 位映射不可混用：`BossSeal`(18 位) / `SoulProgress.BossBit`(12 位) / 头像图集 key；`Queen/Empress/Duke/Deer` 只解诅咒不给槽位 | `Progression.cs`、`SoulCurseDescriptions.cs` |
 
@@ -68,7 +68,7 @@
 | 木质支援不动点 | `ZenithReborn/SoulSupport.cs:16` | `Capacity`（上界 `MaximumGrants=11`） | 支援格算法调整 | 与 `Capacity`/`GrantedBy` 互为输入，2–3 轮收敛 |
 | 剑伤公式 | `ZenithReborn/SoulCombat.cs:9` | `BladeDamage = GetWeaponDamage × Potency × MainDamageMultiplier` | 调伤害 | 唯一伤害入口；`Potency` 在 `SoulItem.cs:89` |
 | 矿石倍率 | `ZenithReborn/OreFamily.cs:83` | `MainDamageMultiplier` | 改 2/4 材质加成 | 同时影响成员伤害与 `DamageShare` |
-| 展示口径 | `ZenithReborn/BondSnapshot.cs:59` / `:67` | `Wood(soul)` / `Ore(soul)` | 面板数字对不上战斗 | `Wood` 不过滤诅咒（第三套口径），与 `CombatWood` 同屏不同值属预期 |
+| 展示口径 | `ZenithReborn/BondSnapshot.cs:59` / `:67` | `Wood(soul)` / `Ore(soul)` | 面板数字对不上战斗 | `Wood` 使用 `FamilyItems`；当前 `TraitEnabled` 恒为 true，同一剑魂的木质战斗计数应一致 |
 | 改这类东西必看 | — | — | 木质存在 **三套并行计数**（族内 / 战斗 / 支援授予），改一套必须三套同改；`UnlockCount`(`:44`) 生产零调用，别拿它当口径 | `EnvironmentRules.cs:15` 的收集位换算同理 |
 
 ## 6. 羁绊与门槛
@@ -164,7 +164,7 @@
 
 1. `SoulItem.cs:82` `Active` —— 几乎所有派生值的上游。
 2. `SoulSupport.cs:43` `FamilyItems` —— 族计数唯一入口。
-3. `SoulCurses.cs:87` `CombatWood` —— 战斗口径（过滤）vs 面板口径（不过滤）。
+3. `SoulCurses.cs:90` / `:91` `HostedWood` / `CombatWood` —— 两套口径分开保留，当前 `TraitEnabled` 恒为 true。
 4. `SoulItem.cs:95` `TrySwapHost` —— 唯一寄宿写入。
 5. `SoulBlade.cs:294` `OnHitNPC` —— 五族命中唯一扇出点，隐式优先级链。
 6. `VfxIsolation.cs:63` `Branches` 真生效 / `:107` `Parts` 空开关。
