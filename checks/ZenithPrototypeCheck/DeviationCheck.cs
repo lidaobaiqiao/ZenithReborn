@@ -47,6 +47,7 @@ internal static class DeviationCheck
             RoundTrip(check);
             Traits(check);
             Motion(check);
+            Descriptions(check);
         }
         finally
         {
@@ -164,5 +165,43 @@ internal static class DeviationCheck
                 unchanged = false;
         }
         check(unchanged, "CurseOffset never changes TargetOffset, Vertical or projectile velocity across AI");
+    }
+
+    // 文案口径回归：当前阶段说明必须取实战真值（含旧档 LegacyReleased 压制），
+    // 未来阶段预览只读目标阶段、不受当前剑魂状态影响；缚身文案保留「最少」下限语义。
+    private static void Descriptions(Action<bool, string> check)
+    {
+        var (_, soul) = Setup();
+
+        // 1. 当前说明随 Boss 记录数取实战真值：0→48、1→24、≥2→0 像素。
+        soul.Seals = 0;
+        check(SoulCurses.Description(soul, SoulCurse.Switching).Contains($"最大偏移{48:0.##}像素"),
+            "Current deviation description shows the 48px battle-truth offset with no boss seals");
+        soul.Seals = SoulCurses.Brain;
+        check(SoulCurses.Description(soul, SoulCurse.Switching).Contains($"最大偏移{24:0.##}像素"),
+            "Current deviation description shows the 24px battle-truth offset with one boss seal");
+        soul.Seals = SoulCurses.Brain | SoulCurses.Cultist;
+        check(SoulCurses.Description(soul, SoulCurse.Switching).Contains($"最大偏移{0:0.##}像素"),
+            "Current deviation description shows the 0px battle-truth offset with both boss seals");
+
+        // 2. 关键回归点：旧档该位命中时当前说明仍按实战真值归零，
+        //    修复前被「已解除」阶段带出 24 像素，断言同时排除该旧值。
+        soul.Seals = 0;
+        soul.LegacyReleased = 1 << (int)SoulCurse.Switching;
+        string legacy = SoulCurses.Description(soul, SoulCurse.Switching);
+        check(legacy.Contains("最大偏移0像素") && !legacy.Contains("最大偏移24像素"),
+            "Legacy-released saves show 0px and never the stale 24px in the current deviation description");
+        soul.LegacyReleased = 0;
+
+        // 3. 当前为 Cursed（Seals=0），未来阶段预览只读目标阶段、不被剑魂状态污染。
+        soul.Seals = 0;
+        check(SoulCurses.StageDescription(soul, SoulCurse.Switching, CurseStage.Blessed).Contains("最大偏移0像素"),
+            "Blessed-stage preview shows 0px regardless of the current cursed state");
+        check(SoulCurses.StageDescription(soul, SoulCurse.Switching, CurseStage.Weakened).Contains("最大偏移24像素"),
+            "Weakened-stage preview shows 24px regardless of the current cursed state");
+
+        // 4. 缚身文案保底语义：保留「最少」下限表述，防止回退成「只到一半」的封顶表述。
+        check(SoulCurses.Description(soul, SoulCurse.Binding).Contains("最少"),
+            "Binding description keeps the 'at least' lower-bound wording");
     }
 }

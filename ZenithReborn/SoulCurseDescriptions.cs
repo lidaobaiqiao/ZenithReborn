@@ -16,7 +16,9 @@ public static partial class SoulCurses
         bool free=stage>=CurseStage.Released;
         string effect=curse switch{
             SoulCurse.Binding=>stage==CurseStage.Blessed?"御剑距离不再设上限，仍可鼠标自由选点。":free?"御剑距离最少到屏幕左右边界，保留正常鼠标选点。":"御剑距离最少能打到屏幕左右边界的中点；仍可鼠标自由选点。",
-            SoulCurse.Switching=>"剑锋失准，而非剑锋失控：只让飞剑的目标位置产生偏移，不改变伤害、攻速、出剑数、命中次数、地形穿透与武器特性；当前阶段最大偏移"+SoulDeviation.MaxOffsetAt(stage).ToString("0.##")+"像素。",
+            // 当前阶段说明取实战真值（覆盖旧档兼容位）；Boss 解锁界面的未来阶段预览仍按 stage 预测。
+            SoulCurse.Switching=>"剑锋失准，而非剑锋失控：只让飞剑的目标位置产生偏移，不改变伤害、攻速、出剑数、命中次数、地形穿透与武器特性；当前阶段最大偏移"+
+                (stage==Stage(soul,curse)?SoulDeviation.MaxOffset(soul):SoulDeviation.MaxOffsetAt(stage)).ToString("0.##")+"像素。",
             SoulCurse.Sheathing=>free?"新轮不打断旧轮，主剑各自完成攻击。":"开始新轮时，旧轮主剑提前停止攻击并淡出；不锁攻击键。",
             SoulCurse.Thinblade=>$"剑形犹在，锋芒已失：每把飞剑生成时独立判定，有效概率{SoulThinblade.EffectiveChance(stage):P0}；残缺飞剑照常生成、飞行、消失，但无法造成有效命中、不触发命中后武器效果、不消耗命中次数与穿透、不施加免疫。不改变飞剑数量、轨迹、碰撞、伤害数值与正常飞剑特性。",
             SoulCurse.Solitude=>$"每轮最多{BladesAtStage(soul,stage)}把主剑，不足留空。",

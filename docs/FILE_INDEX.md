@@ -4,7 +4,7 @@
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-06 19:10:05
+生成时间 : 2026-11-07 14:19:09
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
 索引条目 : 774 条（去重合并 4 次重复出现；报告未覆盖的人工补写 61 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
@@ -102,7 +102,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `ZenithReborn/SoulCombat.cs` | `SoulItem` 分部 | 战斗 | 单把宿主的真实伤害 = 武器伤害 × `Potency` × 矿石主剑倍率 | `SoulItem`、`OreFamily` | 已验证 |
 | `ZenithReborn/SoulCurseDescriptions.cs` | `SoulCurses` 分部 | 诅咒/难度 | 诅咒与祝福的阶段说明/需求文案，UI 与图鉴共用 | `SoulCurses`、`SoulBossUnlocks`、`SoulUIArchive` | 已验证 |
 | `ZenithReborn/SoulCurses.cs` | 静态类 + `SoulItem` 分部 | 诅咒/难度 | 18 位个人铭刻、6 组诅咒分级、出剑数与命中次数、特性入口、诅咒存档网络及通用地形几何；旧穿地深度惩罚已删除，偏锋与薄刃分别由独立模块负责 | `SoulBossCredit`、`SoulSwingPlayer`、`SoulBlade`、`SoulTraits`、`SoulBossUnlocks` | 已验证 |
-| `ZenithReborn/SoulDeviation.cs` | C# 静态类（偏锋诅咒） | 诅咒/难度 | 偏锋的数值与随机入口：MaxOffset 按个人 Boss 记录数分三档（0→48、1→24、≥2→0）并尊重 LegacyReleased；MaxOffsetAt 供 UI 阶段说明取同一组常量；NextOffset 用 Main.rand 生成圆形分布 radius=Max*(0.35+0.65*sqrt(u))、角度 0~2π，每把飞剑生成时调用一次 | SoulItem.EmitBlade、SoulBlade.CurseOffset、SoulCurseDescriptions.cs | 人工补写 |
+| `ZenithReborn/SoulDeviation.cs` | C# 静态类（偏锋诅咒） | 诅咒/难度 | 偏锋的数值与随机入口：MaxOffset 按个人 Boss 记录数分三档（0→48、1→24、≥2→0）并尊重 LegacyReleased，图鉴当前阶段说明取它的实战真值；MaxOffsetAt 仅供 Boss 解锁界面的未来阶段预览；NextOffset 用 Main.rand 生成圆形分布 radius=Max*(0.35+0.65*sqrt(u))、角度 0~2π，每把飞剑生成时调用一次 | SoulItem.EmitBlade、SoulBlade.CurseOffset、SoulCurseDescriptions.cs | 人工补写 |
 | `ZenithReborn/SoulDifficulty.cs` | ModSystem | 诅咒/难度 | 传奇难度开关：`GameMode==2 && getGoodWorld`，真实改写世界难度并持久化 | `SoulItem.LegendaryOn`、`SoulDomainUI` | 已验证 |
 | `ZenithReborn/SoulDomainUI.cs` | partial 分部 | 域界面 | `DomainMode`、`DomainWorkBounds`、`RingViewport`、`SelectSlot`、`LibraryItems`、`EquipFromInventory`、`ReturnSelected`、背景/页头/难度按钮 | `SoulArmoryLayout`、`SoulDifficulty`、`SoulInput` | 已验证 |
 | `ZenithReborn/SoulEchoDamage.cs` | 静态类 | 诅咒/难度 | 断锋诅咒 → 剑影伤害倍率（1 / 0.8^unit / 0.20） | `SoulBlade.ModifyHitNPC`、`SoulTrailUnits` | 已验证 |
@@ -295,7 +295,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `checks/ZenithPrototypeCheck/CombatFixture.cs` | ModSystem 实机夹具 | A 调度 | 只在 `ZENITH_COMBAT_GUI=1` 且 `SavePath` 含 `stage-one-playtest` 时启用；`PostUpdateWorld` 第 60 tick 造 5 把矿剑剑魂 + 20 万血木桩，摆好光照/时间，产出两个确定性视觉检查点（bloom → 穿透飞行），Esc 切换 | 依赖 `OreFamily.DefaultType`、`SoulProgress.All/Cores`；纯客户端 | 已验证 |
 | `checks/ZenithPrototypeCheck/CurseCheck.cs` | 静态断言套件 + GlobalItem | C 诅咒 | 文件内含 `CurseFixture : GlobalItem`（`NeutralDefaults` 开关，见 1.3）；六组诅咒全谱：新魂默认六诅咒且不看世界标志/兼容豁免（48 条）：阶段判定任意顺序、同一 Boss 不重复推进、单双子不算机械王、双双子算 1、外围 Boss 只记独立胜利不解咒、眼单独解绑且射程≥屏幕中点且不超已解射程、空封印仍算诅咒、切换只留第一个有效主剑、Brain 恢复全部特性不改独立伤害/不要求邪教徒、第一回归组 Boss 允许旧波继续、诅咒手势让旧主剑退役不删宿主、退役主剑视觉淡出无吸收、独行预算 2/3/常态4/祝福4、真实手势发射对应预算、祝福手势间隔可超 3 至 10、真实伤害路径限制 3/5/已解 重复命中、同刃可打不同敌人、每把新主剑独立命中字典、副剑命中不能绕过切换施加减益、第一切换组 Boss 恢复副剑减益、祝福下真实 ItemCheck 永不瞬时批量、祝福用唯一宿主并延续游标、原生手势 30 帧且稀疏宿主至 10、诅咒屏障挖约 2 格、弱化 4 格、扫掠地形不能穿墙、诅咒/弱化屏障挡住超 64 像素墙、已解恢复完整地形穿透、平台不静默挡剑、超额度立即截停、封印与显式遗留豁免持久不伪造击杀、全魂网络包保留诅咒记录且终点精确、克隆进度独立、旧魂可玩且不给 Brain/Eater 二义位、空旧残魂仍以新诅咒起步、哥布林重铸保封印与兼容态、真实前缀重建经 HERO 钩子恢复进度、真实遭遇区分 Brain/Eater、可选 Boss 进真实封印组、第二丛林 Boss 在 Golem 前完全移除屏障、第三丛林 Boss 记独立祝福阶段、外围胜利独立记录、剩余虫段阻止提前记账与重复交叉召唤、末段给待定个人封印并放行交叉召唤 | `SoulProgress`、`SoulCurse`、`CrossSummonDrops`、HERO 钩子 | 已验证 |
 | `checks/ZenithPrototypeCheck/DamageBalanceCheck.cs` | 静态断言套件 | B 核心 | 伤害分配：初始阶段保 65% 宿主伤害、进度不能替代十材质觉醒、觉醒铜剑无共享天顶伤害地板、加强宿主不摊薄弱宿主、宿主伤害只加自己那把、面板/前缀不能替代宿主伤害、发射剑用自己伤害且不按槽数均分、暴击逐剑（含前缀）、击退逐剑、原生飞行时钟替代宿主速度且每帧跑两次、模型放大 60% 但碰撞尺度保持、玩家攻速不重缩放 AI、重生态与命中间隔过网络、非重生 8 帧间隔、引擎强制同刃间隔、他刃独立命中、弱刃冷却后可再命中、附魔剑与星怒同帧触发、特殊弹幕伤害各自取源、各自冷却 45 帧 | `SoulBlade`、`SoulPlayer.Flow` | 已验证 |
-| `checks/ZenithPrototypeCheck/DeviationCheck.cs` | C# 夹具（偏锋） | 验证体系 / 偏锋 | 隔离夹具：三档上限与旧档兼容、256 次采样的半径环与四象限覆盖、每剑独立性、CurseOffset 的 SendExtraAI/ReceiveExtraAI 往返、TraitEnabled 恒 true 后全部主剑特性生效、AI 前后运动参数不变 | SoulDeviation.cs、SoulBlade.cs、checks/ZenithPrototypeCheck/Check.cs | 人工补写 |
+| `checks/ZenithPrototypeCheck/DeviationCheck.cs` | C# 夹具（偏锋） | 验证体系 / 偏锋 | 隔离夹具：三档上限与旧档兼容、256 次采样的半径环与四象限覆盖、每剑独立性、CurseOffset 的 SendExtraAI/ReceiveExtraAI 往返、TraitEnabled 恒 true 后全部主剑特性生效、AI 前后运动参数不变；2026-11-07 追加当前阶段说明与实战同源、旧档位不误显 24 像素、未来阶段预览不被剑魂状态污染、缚身保底文案护栏 | SoulDeviation.cs、SoulBlade.cs、checks/ZenithPrototypeCheck/Check.cs | 人工补写 |
 | `checks/ZenithPrototypeCheck/DomainCheck.cs` | 静态断言套件 | I UI | 全屏配阵/领域（29 条）：剑库只读真实合格背包武器（排除弓/工具/递归剑魂）、独立场景覆盖完整 UI 视口、配阵主页宽屏三区分开窄屏同区切换全在视口内、世界难度与退出控件可达、碎片导航不撞背包或难度控件、全屏场景移除隐藏背景悬停产生者但保留原生鼠标文本、真实原版光标层在全屏场景之上保原像素比例、手持光标物品在原生光标之上可见但不恢复隐藏背包、直接存入转移精确带前缀物品不克隆、替换把出向剑原子回原背包位、锁定主槽拒收剑库存入且不动源、剑库不能重开退役扩展槽、重复宿主校验也作用于快速装备、手持光标物品不能被剑库操作覆盖、空手星图点击只选择不抽进隐藏背包、起飞把精确剑还给真实背包、满包拒绝起飞不掉不删、遗留回收仍走新背包路径还给物品、剑库选择并存入真实第 6 个已得共享支援、切页保持活跃新支援选择而不与退役存储混淆、满领域能把暂停新支援带前缀还给真实背包、既有原生传奇世界不被误降级、难度按钮改真实原版 master/FTW 世界标志、存档保还原出处、二次点击还原精确原始难度与 FTW、旅程世界保其原生世界类型、客户端不能静默改多人世界、既有 Boss 战不能中途换属性基线、待定月总事件也阻切换 | `SoulUI.DomainMode`、`WorldGen` 标志位 | 已验证 |
 | `checks/ZenithPrototypeCheck/EchoDamageCheck.cs` | 静态断言套件 | B 核心 | 三剑影伤害资格：本体停伤后剑影仍可攻、专用服务端能查到相同 3 个攻击姿态、单元比例、切剑影不绕冷却、剑影间空隙无整片拖尾伤害、本体+3 剑影各自消耗矿石首击、3 剑影共用锋钝每目标上限、熄灯后消散材质无伤、提前归鞘立即全关 | `SoulBlade` echo 段、`OreStack` 首击资格 | 已验证 |
 | `checks/ZenithPrototypeCheck/EchoPhaseProbe.cs` | 探针（只测不判） | C 诅咒 | 实测"剑影亮灭时间窗"与"真实历史年龄"的偏差，用于确认与原版 933 一致。按 `SoulTrailUnits.Spacing=15` 采样、可见度按 `phase - index*Spacing`；每次更新推进 0.7~2 而非 1，故恒有偏差。文件头（`EchoPhaseProbe.cs:6-13`）明确写"这是原版行为不是缺陷，不要修" | 引用 `docs/原版天顶飞剑源码.md:111-113,400-405`；`AI_182_FinalFractal` | 已验证 |
@@ -541,7 +541,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `docs/0.3.128-族归属显示与数量分阶.md` | 版本记录 | 种族/UI | tooltip+界面三处族名；飞刃族 1/2/4/6/8/10 分阶 | WeaponFamilies.Name, WeaponFamilyTags.cs, FlyingBladeFamily.cs | 已验证 |
 | `docs/0.3.129-木质族V2与复合羁绊.md` | 版本记录 | 种族/木质 | 名册 12→8，森林之力重构，四复合羁绊，圣林归冠 | WoodTypes.cs, WoodBond*.cs, WoodCrown.cs | 已验证 |
 | `docs/0.3.130-木质族V2重做与口径统一.md` | 版本记录 | 种族/木质 | 删残留木剑类、补属性面板、统一有效寄宿口径、三羁绊服务端重校验 | WoodTypes.cs, BondSnapshot.cs, SoulUIWoodPanel.cs | 已验证 |
-| `docs/0.3.131-偏锋诅咒.md` | Markdown 版本记录 | 版本记录 / 偏锋 | 0.3.131 实装记录：设计定义、替换范围、保留枚举整数/按 Boss 记录数三档/独立 CurseOffset 字段/多人同步四项实现决策、验证结果与待实战调参说明 | ZenithReborn/SoulDeviation.cs、ZenithReborn/SoulCurses.cs、docs/CHANGELOG.md | 人工补写 |
+| `docs/0.3.131-偏锋诅咒.md` | Markdown 版本记录 | 版本记录 / 偏锋 | 0.3.131 实装记录：设计定义、替换范围、保留枚举整数/按 Boss 记录数三档/独立 CurseOffset 字段/多人同步四项实现决策、验证结果与待实战调参说明；§7 追加 2026-11-07 当前说明口径修正与 README 缚身保底文案同批修复 | ZenithReborn/SoulDeviation.cs、ZenithReborn/SoulCurses.cs、docs/CHANGELOG.md | 人工补写 |
 | `docs/0.3.132-薄刃诅咒.md` | Markdown 版本记录 | 版本记录 / 薄刃 | 0.3.132 实装记录：设计定义、替换阻隔的范围、枚举改名但整数位置不变、四阶段全可达、CanHitNPC 统一命中资格拦截、残缺语义字段、多人同步、地形惩罚移除与穿界祝福解耦、验证结果与待实战调参说明 | ZenithReborn/SoulThinblade.cs、ZenithReborn/SoulBlade.cs、docs/CHANGELOG.md | 人工补写 |
 | `docs/0.3.93-纯代码特效隔离与贴图独立验证.md` | 版本记录 | 特效/材质 | 建立 PureCodeOnly 统一输入限制策略 | VfxIsolation.cs, SwordFlowMaterial.cs | 已验证 |
 | `docs/0.3.94-P18宽高光扇形格纹隔离.md` | 版本记录 | 特效/材质 | 关 P18 做扇形格纹消融，结论被 95 纠正 | VfxIsolation Parts, 0.3.95 | 已验证 |

@@ -10,8 +10,8 @@ public static class SoulDeviation
     // 三档偏移的唯一数值来源：实战计算与 UI 阶段说明都从这里取，禁止再各写一份。
     private const float Full = 48f, Half = 24f;
 
-    // UI 的阶段预览按 CurseStage 取偏移。本组只有两位 Boss，StageForCount(total=2) 的
-    // count=1 直接判 Released、Weakened 永不可达，所以 Released 与 Weakened 都对应中间档。
+    // 仅供 Boss 解锁界面的未来阶段预览；当前阶段说明走 `MaxOffset(soul)`。
+    // 本组只有两位 Boss，StageForCount(total=2) 的 count=1 直接判 Released、Weakened 永不可达，所以 Released 与 Weakened 都对应中间档。
     public static float MaxOffsetAt(CurseStage stage) =>
         stage == CurseStage.Cursed ? Full : stage == CurseStage.Blessed ? 0f : Half;
 
@@ -19,7 +19,7 @@ public static class SoulDeviation
     // 本组只有两位 Boss：StageForCount 在 total=2 时 count=1 先命中 Released，Weakened 永不可达；
     // 若按 CurseStage 分档，24 像素的中间档永远取不到。故按个人 Boss 记录数独立分三档：
     // 未击败任何一位 48 → 击败克苏鲁之脑 24 → 再击败拜月教邪教徒 0。
-    // 不改 StageForCount（其他五道诅咒不受影响）；UI 阶段显示仍走原 6 诅咒规则，
+    // 不改 StageForCount（其他五道诅咒不受影响）；UI 阶段标签仍走原 6 诅咒规则；当前阶段说明取本函数的实战真值，
     // 偏锋强度按 Boss 记录数单独分档，两者口径不同是有意为之。
     public static float MaxOffset(SoulItem soul)
     {
