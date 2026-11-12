@@ -4,9 +4,9 @@
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-07 14:19:09
+生成时间 : 2026-11-12 18:50:32
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
-索引条目 : 774 条（去重合并 4 次重复出现；报告未覆盖的人工补写 61 条）
+索引条目 : 713 条（去重合并 4 次重复出现；报告未覆盖的人工补写 61 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
 排除目录 : artifacts/  bin/  obj/  */__pycache__/  *.pyc  *-profile/  *-playtest/  .git/  编辑器配置目录
 整体记录 : VfxLibrary/（11756 个原版素材，按第六节单独核对）
@@ -33,7 +33,7 @@ E-checks-scripts.md     1       93      0         0         0         0
 F-checks-fixtures.md    2       113     0         0         0         0
 G-docs-current.md       1       64      0         0         0         0
 H-docs-archive.md       7       116     0         0         0         0
-I-tools-vfx.md          10      163     1         40        0         0
+I-tools-vfx.md          10      163     1         40        44        0
 ```
 
 ---
@@ -737,71 +737,10 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `tools/ZenithMaterialLab/README.md` | md |  | 完整使用说明：打开方式、操作、素材约定表、导出、区域图工具 |  |  |
 | `tools/ZenithMaterialLab/ZenithMaterialLab.cs` | cs |  | **Mod 入口**（5 行，`class ZenithMaterialLab : Mod`） |  |  |
 | `tools/ZenithMaterialLab/ZenithMaterialLab.csproj` | csproj |  | net8.0，`Reference ZenithReborn.dll`，`Import tMLMod.targets` |  |  |
-| `tools/ZenithMaterialLab/bin/Release/net8.0/ZenithMaterialLab.deps.json` | json |  | 依赖图 |  |  |
-| `tools/ZenithMaterialLab/bin/Release/net8.0/ZenithMaterialLab.dll` | dll |  | 编译产物 |  |  |
-| `tools/ZenithMaterialLab/bin/Release/net8.0/ZenithMaterialLab.pdb` | pdb |  | 符号 |  |  |
 | `tools/ZenithMaterialLab/build.txt` | txt |  | 模组元数据：v0.1.3，`modReferences = ZenithReborn@0.3.80`，`includeSource = true` |  |  |
 | `tools/ZenithMaterialLab/description.txt` | txt |  | 模组描述（开发者独立工作台，不装进正式组合） |  |  |
-| `tools/ZenithMaterialLab/obj/` | json/xml | 分组 | NuGet 还原 |  |  |
-| `tools/ZenithMaterialLab/obj/Debug/net8.0/` | 混合 | 分组 | Debug 中间产物 |  |  |
-| `tools/ZenithMaterialLab/obj/Release/net8.0/` | 混合 | 分组 | Release 中间产物 |  |  |
-| `tools/ZenithMaterialLab/obj/project.assets.json` | json |  | 依赖资产 |  |  |
 | `tools/build_vanilla_vfx_catalog.py` | py | tools 根 | 重建 Vanilla 图鉴 | 读 `decomp/ProjectileID` + `artifacts/vanilla-*ID.reference.cs` | 已验证 |
-| `tools/decomp/Terraria.Graphics.FinalFractalHelper.decompiled.cs` | cs | decomp | 天顶剑最终分形绘制（204 行） | 多剑齐射视觉 | 第三方-未深入 |
-| `tools/decomp/Terraria.Graphics.Light.LightingMode.decompiled.cs` | cs | decomp | **0 字节，空文件** | 未确认原因 | 第三方-未深入 |
-| `tools/decomp/Terraria.Graphics.VertexStrip.decompiled.cs` | cs | decomp | 顶点带网格构造器（264 行） | 拖尾几何 | 第三方-未深入 |
-| `tools/decomp/Terraria.ID.ProjectileID.decompiled.cs` | cs | decomp | 弹幕 ID 常量表（2864 行） | **被 `build_vanilla_vfx_catalog.py:11` 读取** | 第三方-未深入 |
-| `tools/decomp/Terraria.LightMode.decompiled.cs` | cs | decomp | **0 字节，空文件** | 未确认原因 | 第三方-未深入 |
-| `tools/decomp/Terraria.Main.decompiled.cs` | cs | decomp | 原版 `Terraria.Main` 反编译（87341 行 / 3.9 MB） | 光照与绘制顺序查证 | 第三方-未深入 |
-| `tools/decomp/Terraria.Projectile.decompiled.cs` | cs | decomp | 原版 `Terraria.Projectile`（94255 行 / 3.9 MB） | 飞剑/拖尾行为对齐 | 第三方-未深入 |
-| `tools/decomp/tModLoader.list.txt` | txt | decomp | 类型/枚举名清单（160 行） | 查类型存在性 | 第三方-未深入 |
 | `tools/desktop_control.ps1` | ps1 | tools 根 | 窗口聚焦/鼠标键盘自动化 | `user32.dll` | 已验证 |
-| `tools/ilspy/ilspycmd.zip` | zip |  | NuGet 包原件（4.18 MB） |  |  |
-| `tools/ilspy/index.json` | json |  | 上游版本索引清单 |  |  |
-| `tools/ilspy/pkg/.signature.p7s` | p7s |  | NuGet 包签名 |  |  |
-| `tools/ilspy/pkg/ILSpyCmdNuGetPackageIcon.png` | png |  | 包图标 |  |  |
-| `tools/ilspy/pkg/README.md` | md |  | 包说明 |  |  |
-| `tools/ilspy/pkg/[Content_Types].xml` | xml |  | OPC 内容类型 |  |  |
-| `tools/ilspy/pkg/_rels/.rels` | rels |  | OPC 根关系 |  |  |
-| `tools/ilspy/pkg/ilspycmd.nuspec` | nuspec |  | **版本 9.1.0.7988 的唯一证据** |  |  |
-| `tools/ilspy/pkg/package/services/metadata/core-properties/b41afabca47440d49a71e4d9b3a71796.psmdcp` | psmdcp |  | NuGet 核心属性 |  |  |
-| `tools/xnbcli-binary/lz4.node` | node |  | 原生 LZ4 绑定 |  |  |
-| `tools/xnbcli-binary/pack.bat` | bat |  | 打包入口 |  |  |
-| `tools/xnbcli-binary/packed/PACKED.md` | md |  | 投放说明 |  |  |
-| `tools/xnbcli-binary/unpack.bat` | bat |  | 解包入口 |  |  |
-| `tools/xnbcli-binary/unpacked/UNPACKED.md` | md |  | 投放说明 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/HEAD` | git |  | 上游 clone 的 HEAD 指针 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/config` | git |  | 远端地址（固定上游 commit） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/description` | git |  | 仓库描述 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/applypatch-msg.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/commit-msg.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/fsmonitor-watchman.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/post-update.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/pre-applypatch.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/pre-commit.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/pre-merge-commit.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/pre-push.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/pre-rebase.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/pre-receive.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/prepare-commit-msg.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/push-to-checkout.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/sendemail-validate.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/hooks/update.sample` | git |  | 上游 hook 样例（`applypatch-msg`、`commit-msg`、`fsmonitor-watchman`、`post-update`、`pre-applypatch`、`pre-commit`、`pre-merge-commit`、`pre-push`、`pre-rebase`、`pre-receive`、`prepare-commit-msg`、`push-to-checkout`、`sendemail-validate`、`update`） |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/index` | git |  | 暂存区索引 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/info/exclude` | git |  | 忽略规则 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/logs/HEAD` | git |  | reflog |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/logs/refs/heads/master` | git |  | 分支 reflog |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/logs/refs/remotes/origin/HEAD` | git |  | 远端 reflog |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/objects/pack/pack-b6c07b17749e803d99e73649f07a11aafb2ce51d.idx` | git |  | 对象包索引 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/objects/pack/pack-b6c07b17749e803d99e73649f07a11aafb2ce51d.pack` | git |  | 对象包 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/objects/pack/pack-b6c07b17749e803d99e73649f07a11aafb2ce51d.rev` | git |  | 反向索引 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/packed-refs` | git |  | 打包引用 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/refs/heads/master` | git |  | 分支引用 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/refs/remotes/origin/HEAD` | git |  | 远端引用 |  |  |
-| `tools/xnbcli-binary/xnbcli-upstream-git/shallow` | git |  | **shallow clone 标记** |  |  |
-| `tools/xnbcli-binary/xnbcli.exe` | exe |  | **编译好的 xnbcli 可执行** |  |  |
-| `tools/xnbcli-binary/xxhash.node` | node |  | 原生 xxHash 绑定 |  |  |
-| `tools/xnbcli-windows-x64.zip` | zip | tools 根 | xnbcli 发行包下载件（12.2 MB） | 与 `xnbcli-binary/` 同源 | 第三方-未深入 |
 | `tools/xnbcli/.gitignore` | 配置 |  | 上游自身忽略规则 |  |  |
 | `tools/xnbcli/.travis.yml` | 配置 |  | 上游 CI |  |  |
 | `tools/xnbcli/LICENSE.LESSER` | 文本 |  | LGPL v3 正文（7.8 KB） |  |  |
@@ -859,7 +798,7 @@ I-tools-vfx.md          10      163     1         40        0         0
 | `tools/xnbcli/xnbcli.js` | js |  | CLI 入口（7.7 KB） |  |  |
 | `tools/打开材质实验室.cmd` | bat | tools 根 | 启动材质实验室 | `checks/run_material_lab.ps1` | 已验证 |
 | `tools/打开能量薄刃A1.cmd` | bat | tools 根 | 启动能量薄刃 A1 预览 | `checks/run_energy_blade_preview.ps1` | 已验证 |
-| (合计) | 136 条 |  |  |  |  |
+| (合计) | 75 条 |  |  |  |  |
 
 ---
 
