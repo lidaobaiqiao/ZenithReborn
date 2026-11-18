@@ -3,6 +3,7 @@ import hashlib
 import json
 from pathlib import Path
 from tmod_archive import read_archive, contents
+from effect_hash import source_sha256
 
 root=Path(__file__).resolve().parent.parent
 
@@ -17,11 +18,14 @@ def verify(package):
         assert effect['origin']=='project-authored' and not effect['thirdPartySourceIncludes']
         for field,hash_field in [('source','sourceSha256'),('compiled','compiledSha256')]:
             path='Assets/Effects/'+effect[field]
-            assert hashlib.sha256(packed[path]).hexdigest()==effect[hash_field],path
+            # 文本源码按 LF 归一化取哈希，编译产物 .fxc 是二进制、按原始字节取哈希。
+            data=packed[path]
+            expected=source_sha256(data) if field=='source' else hashlib.sha256(data).hexdigest()
+            assert expected==effect[hash_field],path
             declared.add(path)
         for dependency in effect.get('projectSourceIncludes',[]):
             path='Assets/Effects/'+dependency['source']
-            assert hashlib.sha256(packed[path]).hexdigest()==dependency['sourceSha256'],path
+            assert source_sha256(packed[path])==dependency['sourceSha256'],path
             declared.add(path)
     actual={path for path in packed if path.endswith(('.fx','.fxc','.fxh'))}
     assert actual==declared, (actual,declared)

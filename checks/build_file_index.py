@@ -252,6 +252,13 @@ SURVEY_ARCHIVE_ROWS = [
 # 报告没有覆盖、由人工核对补写的条目（每一条都按源码/正文核过，不是占位符）。
 # 补写条目在状态列标 `人工补写`，方便与报告来源的条目区分。
 SUPPLEMENT_ROWS = [
+    # --- 验证体系：着色器源码哈希口径（2026-11-18 新增）---
+    ("checks/effect_hash.py", "Python 共享模块（只读）",
+     "验证体系", "定义 .fx/.fxh 文本源码按 LF 归一化的哈希口径；生成器、打包校验与包内校验共用，避免检出换行差异让清单漂移",
+     "checks/compile_effects.py、checks/check_effect_manifest.py、ZenithReborn/Assets/Effects/build-manifest.json", "人工补写"),
+    ("checks/check_effect_manifest.py", "Python 只读检查脚本",
+     "验证体系", "只读校验 build-manifest.json 的记录集合、文本源码哈希口径与 .fxc 编译产物哈希；不写盘、不编译",
+     "checks/effect_hash.py、checks/compile_effects.py、checks/package_install.py", "人工补写"),
     # --- 仓库根 ---
     ("AGENTS.md", "Markdown 硬规则 + 版本状态流水",
      "仓库根", "不可让渡的硬规则与逐版本状态：每条记录安装版本、验证证据等级、未验证面；新版本往顶部追加，旧内容降级为历史",

@@ -18,7 +18,7 @@
 | 着色器 | 3 个 `.fx`（`ZRSwordFlow` / `ZRGlassScreen` / `ZRMaterialSurface`）+ 3 个同名 `.fxc` 对照产物 | `ZenithReborn/Assets/Effects/` |
 | 资产 | 52 张 PNG（矿石剑身图集 21 / 材质贴图 12 / Boss 立绘 19）+ `SwordSpark.png` + `ZoneMask.zrdata` | 见 §15 |
 | 本地化 | `zh-Hans.hjson` / `en-US.hjson`，各 133 行，仅覆盖 `Items/Buffs/NPCs/Projectiles/Keybinds` | `ZenithReborn/Localization/` |
-| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（102 个 `.cs`）+ `checks/*.py` 58 个 + `checks/*.ps1` 40 个 | §17 |
+| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（102 个 `.cs`）+ `checks/*.py` 60 个 + `checks/*.ps1` 40 个 | §17 |
 | 打包排除 | `docs` / `checks` / `VfxLibrary` / `tools` 四目录不进成品包 | `checks/package_install.py:70` |
 
 ### 验证等级约定（全文通用）
@@ -625,7 +625,8 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 | 总回归入口 | `ZENITH_WOOD`（`Check.cs:125` 区块）串联 29 个套件 |
 | 断言原语 | `Check.cs:15` `Assert(bool,string)` —— 失败即抛异常，**快速失败**；`PASS: N` 是成功数不是总数 |
 | 第二调度体系 | 49 个文件不经过 `Check.cs`，各自在 `ModSystem` 钩子里读 `ZENITH_*_RENDER/GPU/GUI`，由 `checks/run_*.ps1` 启动 |
-| 脚本 | `checks/*.py` 58 个（生成/校验/采集）、`checks/*.ps1` 40 个（构建/启动/上手配置） |
+| 脚本 | `checks/*.py` 60 个（生成/校验/采集）、`checks/*.ps1` 40 个（构建/启动/上手配置） |
+| 着色器哈希口径 | `checks/effect_hash.py` 单一来源：`.fx`/`.fxh` 文本按 LF 归一化取 sha256，`.fxc` 二进制按原始字节；`checks/check_effect_manifest.py` 只读守护 `build-manifest.json` | `checks/compile_effects.py`、`checks/package_install.py`、`checks/check_vfx_ownership.py` |
 | 打包安装 | `checks/package_install.py:70` 排除 `docs/checks/VfxLibrary/tools`；`:73` `tools` 下额外排除 dll/exe/pdb/zip/tmod |
 
 **⚠ 夹具体系的 6 个陷阱（写新夹具或排查假阴性必读）**

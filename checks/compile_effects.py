@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from effect_hash import source_sha256
 
 root=Path(__file__).resolve().parent.parent
 folder=root/'ZenithReborn/Assets/Effects'
@@ -36,7 +37,7 @@ for source in sorted(folder.glob('*.fx')):
             raise RuntimeError(f'{source.name}: 未登记的着色器模块 {name}')
         part=(folder/name).read_bytes()
         if b'#include' in part:raise RuntimeError(f'{name}: 不允许间接包含')
-        inputs.append({'source':name,'sourceSha256':hashlib.sha256(part).hexdigest()})
+        inputs.append({'source':name,'sourceSha256':source_sha256(part)})
         return part
     expanded=re.sub(rb'^[ \t]*#include\s+"([^"]+)"[ \t]*\r?$',include,data,flags=re.MULTILINE)
     if b'#include' in expanded:raise RuntimeError(f'{source.name}: 无效包含指令')
@@ -53,7 +54,7 @@ for source in sorted(folder.glob('*.fx')):
     # UI 构建仍验证着色器编译结果，但不反复覆盖完全相同的生产二进制。
     if not target.exists() or target.read_bytes()!=compiled:
         target.write_bytes(compiled)
-    records.append({'source':source.name,'sourceSha256':hashlib.sha256(data).hexdigest(),
+    records.append({'source':source.name,'sourceSha256':source_sha256(data),
         'compiled':target.name,'compiledSha256':hashlib.sha256(compiled).hexdigest(),
         'origin':'project-authored','compiler':'Microsoft D3DCompile / d3dcompiler_43 / fx_2_0',
         'thirdPartySourceIncludes':[],'projectSourceIncludes':inputs})
