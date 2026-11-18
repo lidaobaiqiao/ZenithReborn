@@ -4,9 +4,9 @@
 
 ```text
 生成命令 : python checks/build_file_index.py      （配套审计：python checks/map_audit.py）
-生成时间 : 2026-11-12 18:50:32
+生成时间 : 2026-11-18 21:30:11
 数据来源 : docs/archive/codebase-map-survey-2026-11-03/ 下 9 份分组调查报告（A~I）的六列索引表
-索引条目 : 713 条（去重合并 4 次重复出现；报告未覆盖的人工补写 61 条）
+索引条目 : 716 条（去重合并 4 次重复出现；报告未覆盖的人工补写 64 条）
 覆盖口径 : 仓库内全部自有文件，与 checks/map_audit.py 的分母一致
 排除目录 : artifacts/  bin/  obj/  */__pycache__/  *.pyc  *-profile/  *-playtest/  .git/  编辑器配置目录
 整体记录 : VfxLibrary/（11756 个原版素材，按第六节单独核对）
@@ -409,6 +409,7 @@ I-tools-vfx.md          10      163     1         40        44        0
 | `checks/check_color_glass_restoration.py` | py | C 交付核对 | 0.3.83 保留选色同时恢复玻璃 | 硬编码 0.3.83 | 部分待核实 |
 | `checks/check_day_night_delivery.py` | py | C 交付核对 | 0.3.89 昼夜纹理修订 + 原始 80 保留 | 硬编码 0.3.89 | 部分待核实 |
 | `checks/check_echo_damage_delivery.py` | py | C 交付核对 | 剑影伤害包的实机证据 + 素材保持 | build-profile | 部分待核实 |
+| `checks/check_effect_manifest.py` | Python 只读检查脚本 | 验证体系 | 只读校验 build-manifest.json 的记录集合、文本源码哈希口径与 .fxc 编译产物哈希；不写盘、不编译 | checks/effect_hash.py、checks/compile_effects.py、checks/package_install.py | 人工补写 |
 | `checks/check_ending_preservation.py` | py | C 交付核对 | 结束修订前后 GPU 图与随包美术比对 | build-profile、numpy/PIL | 部分待核实 |
 | `checks/check_glass_r3_delivery.py` | py | C 交付核对 | 0.3.80 R3 交付证据 | 硬编码 0.3.80 | 部分待核实 |
 | `checks/check_glass_reference_restore.py` | py | C 交付核对 | 0.3.84 用归档旧版 GPU 像素核对恢复 | 硬编码 0.3.84 | 部分待核实 |
@@ -416,6 +417,7 @@ I-tools-vfx.md          10      163     1         40        44        0
 | `checks/check_hybrid_preservation.py` | py | C 交付核对 | 0.3.86 融合版只改材质光效 | 硬编码 0.3.86、79/80 哈希常量 | 部分待核实 |
 | `checks/check_liquid_glass_analytic.py` | py | C 数值复核 | 解析梯度标量差分 | K=0.012 | 部分待核实 |
 | `checks/check_liquid_glass_geometry.py` | py | C 数值复核 | 截面与合并函数边界性质 | numerical-check.json | 部分待核实 |
+| `checks/check_localization_keys.py` | Python 只读检查脚本 | 验证体系 | 只读校验 zh-Hans/en-US 两份 hjson 的键集合一致、中文侧无注释占位、DisplayName 含汉字；未定名条目须在 PENDING_DISPLAY_NAMES 显式登记 | ZenithReborn/Localization/zh-Hans.hjson、en-US.hjson、checks/run_wood_checks.ps1 | 人工补写 |
 | `checks/check_material_preparation.py` | py | C 静态检查 | 8 条离线语义自测（通道/sRGB/法线mip/图集） | prepare_material_maps.py | 已验证 |
 | `checks/check_mod_assets.py` | py | C 静态检查 | 被注册类型必须有同名 png 或 Texture override（纯标准库） | run_wood_checks:13、ZenithReborn/*.png | 已验证 |
 | `checks/check_sword_color_delivery.py` | py | C 交付核对 | 0.3.82 剑身取色/亮度/滤镜保留 | 硬编码 0.3.82 | 部分待核实 |
@@ -431,6 +433,7 @@ I-tools-vfx.md          10      163     1         40        44        0
 | `checks/compile_liquid_glass_sentinel.py` | py | E 着色器 | 编译固定色 Sentinel.fx | run_liquid_glass | 部分待核实 |
 | `checks/compile_liquid_glass_trail.py` | py | E 着色器 | 编译 LiquidGlassTrail.fx | run_liquid_glass_trail/perf | 部分待核实 |
 | `checks/dev_setup.ps1` | PowerShell 脚本（上手配置） | 协作与上手 | 新克隆仓库的一键配置：按 -LoaderRoot > ZENITH_TML_ROOT > local.props > 默认值确定 tModLoader 路径，写 local.props、装 git 钩子、准备 Luminance、编译；幂等可重跑，配合 docs/协作开发指南.md | local.props、checks/install_git_hooks.ps1、checks/prepare_luminance.py、docs/协作开发指南.md | 人工补写 |
+| `checks/effect_hash.py` | Python 共享模块（只读） | 验证体系 | 定义 .fx/.fxh 文本源码按 LF 归一化的哈希口径；生成器、打包校验与包内校验共用，避免检出换行差异让清单漂移 | checks/compile_effects.py、checks/check_effect_manifest.py、ZenithReborn/Assets/Effects/build-manifest.json | 人工补写 |
 | `checks/emit_glass_preset.py` | py | E 生成器 | preset.json → GlassMaterialPreset.cs（13 参数带上下界断言） | VfxLibrary/Materials/SwordTrail/Glass/preset.json | 已验证 |
 | `checks/emit_vfx_mask_data.py` | py | E 生成器 | H4 蒙版 → ZenithReborn/Assets/Vfx/SwordBody + 几何/底色表 | 生产资产 | 部分待核实 |
 | `checks/encode_swordbody_preview.ps1` | ps1 | G 报告 | ffmpeg 把 5 个片段帧序列编 mp4 | artifacts/preview-tools/imageio_ffmpeg | 已验证 |
@@ -501,7 +504,7 @@ I-tools-vfx.md          10      163     1         40        44        0
 | `checks/verify_own_effect.py` | py | C 静态检查 | 无第三方素材包与原包 GPU 图逐像素一致 | 产出 soul-trail-gpu-<ver>/independence.json（package_install:156 消费） | 部分待核实 |
 | `checks/vfx_library.py` | py | C 编目校验 | validate：id/类别/目录层级/引用环/清单齐全；search 检索 | VfxLibrary/library.json、run_swordbody_batch 收尾 | 已验证 |
 | (分组) checks/archived-oneoff/（20 个 .py） | 历史归档脚本 | 归档·一次性 | 20 个扁平存放的一次性取证/生成脚本：14 个 `make_*_evidence.py`/`make_*_preview.py`（截图与取证图）、3 个 `make_*`（mask/colorfields/gif 工具）、1 个 `extract_`（从 Calamity 抄剑弧）、1 个 `localize_`（批量改注释语言）。**无一条断言**，只产 png/json 供人看；无 csproj、无执行入口，`run_*.ps1`/`*.py` 全文检索零命中 | 成员清单 `artifacts/codebase-map/archived-oneoff-manifest.txt`；目录成因见 `artifacts/codebase-map/F-checks-fixtures.md` 5.1~5.2 | 已扫描（分组索引） |
-| (合计) | 236 条 |  |  |  |  |
+| (合计) | 239 条 |  |  |  |  |
 
 ---
 

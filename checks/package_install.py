@@ -9,6 +9,7 @@ from pathlib import Path
 from tmod_archive import read_archive, contents
 from prepare_luminance import prepare as prepare_luminance
 from check_vfx_ownership import verify as verify_vfx_ownership
+from effect_hash import source_sha256
 
 root = Path(__file__).resolve().parent.parent
 source = root / 'ZenithReborn'
@@ -62,12 +63,14 @@ for entry in own_effects:
     for field,hash_field in [('source','sourceSha256'),('compiled','compiledSha256')]:
         relative='Assets/Effects/'+entry[field]
         data=(source/relative).read_bytes()
-        assert packed[relative]==data and hashlib.sha256(data).hexdigest()==entry[hash_field],relative
+        # 文本源码按 LF 归一化取哈希，编译产物 .fxc 是二进制、按原始字节取哈希。
+        expected=source_sha256(data) if field=='source' else hashlib.sha256(data).hexdigest()
+        assert packed[relative]==data and expected==entry[hash_field],relative
     assert entry['origin']=='project-authored' and not entry['thirdPartySourceIncludes']
     for dependency in entry.get('projectSourceIncludes',[]):
         relative='Assets/Effects/'+dependency['source']
         assert packed[relative]==(source/relative).read_bytes()
-        assert hashlib.sha256(packed[relative]).hexdigest()==dependency['sourceSha256']
+        assert source_sha256(packed[relative])==dependency['sourceSha256']
 sourcefiles = [p for p in source.rglob('*') if p.is_file() and not any(s in ('bin', 'obj') for s in p.relative_to(source).parts)]
 for manifest_path in (source / 'Assets/ThirdParty').glob('*/provenance.json'):
     manifest = json.loads(manifest_path.read_text(encoding='utf-8'))

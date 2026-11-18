@@ -4,21 +4,69 @@
 # 失败会阻断提交；确需绕过用 git commit --no-verify，并在提交说明里写原因。
 root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
 
-# 优先用项目约定的运行时 python，读不到再退回 PATH 上的 python。
-py="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe"
-if [ ! -x "$py" ]; then
-  py=$(command -v python 2>/dev/null || command -v python3 2>/dev/null)
-fi
-if [ -z "$py" ] || [ ! -x "$py" ]; then
-  echo "[pre-commit] 找不到 python，跳过地图校验"
+script="$root/checks/map_freshness.py"
+if [ ! -f "$script" ]; then
+  echo "[pre-commit] 找不到 $script，跳过地图校验"
   exit 0
 fi
 
-if ! "$py" "$root/checks/map_freshness.py"; then
+# 解释器必须真跑一次再认定可用，不能只看 command -v 或 -x：
+# Windows 商店别名 python.EXE 存在且可执行，运行却返回 9009。旧版钩子把这种
+# 「解释器跑不起来」误报成「地图与源码不同步」，换台机器就会重现。
+# 候选里没有硬编码本机绝对路径：项目约定运行时、WorkBuddy 托管运行时、
+# 安装时锁定的 .git/hooks/python-path，都按约定位置查找，由环境变量 ZR_PYTHON 覆盖。
+pick_python() {
+  for candidate in "$@"; do
+    [ -n "$candidate" ] || continue
+    if "$candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+    echo "[pre-commit] 跳过不可用解释器：$candidate" >&2
+  done
+  return 1
+}
+
+# 安装脚本探测成功后会把可用解释器写进这里；路径用正斜杠，Git for Windows 的 sh 能直接执行。
+pinned=""
+hookdir=$(git rev-parse --git-path hooks 2>/dev/null)
+if [ -n "$hookdir" ] && [ -f "$hookdir/python-path" ]; then
+  # 用 sh 内建 read 读，不用 cat：精简 PATH 下 coreutils 可能不在，外部命令会报 command not found。
+  IFS= read -r pinned < "$hookdir/python-path" || pinned=""
+fi
+
+set -- "$ZR_PYTHON" "$pinned" \
+  "$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe"
+for wbpy in "$HOME"/.workbuddy/binaries/python/versions/*/python.exe; do
+  [ -f "$wbpy" ] && set -- "$@" "$wbpy"
+done
+set -- "$@" "$(command -v python 2>/dev/null)" "$(command -v python3 2>/dev/null)"
+
+py=$(pick_python "$@")
+if [ -z "$py" ]; then
   echo ""
-  echo "[pre-commit] 地图与源码不同步，提交已阻止。"
-  echo "  重生成索引：python checks/build_file_index.py"
-  echo "  仅本次绕过：git commit --no-verify"
+  echo "[pre-commit] 找不到可运行的 Python（>=3.8），地图校验未执行，提交已阻止。"
+  echo "  这不是地图过期，是本机解释器不可用。请任选其一："
+  echo "  1) 设置 ZR_PYTHON 指向可用的 python.exe，重新提交；"
+  echo "  2) 重跑 pwsh -File checks/install_git_hooks.ps1 -PythonPath <python.exe>；"
+  echo "  3) 把可用的 Python 3.8+ 放到 PATH 前面，重新提交；"
+  echo "  4) 确需绕过：git commit --no-verify，并在提交说明里写明原因。"
   exit 1
 fi
-exit 0
+
+"$py" "$script"
+rc=$?
+if [ "$rc" -eq 0 ]; then
+  exit 0
+fi
+
+echo ""
+if [ "$rc" -eq 1 ]; then
+  echo "[pre-commit] 地图与源码不同步，提交已阻止。"
+else
+  echo "[pre-commit] 地图校验脚本未能正常完成（退出码 $rc），提交已阻止。"
+  echo "  先看上面的输出：若是 Python 堆栈或「仓库根不对」，属运行环境问题，不是地图过期。"
+fi
+echo "  重生成索引：python checks/build_file_index.py"
+echo "  仅本次绕过：git commit --no-verify（并在提交说明里写原因）"
+exit 1

@@ -2,7 +2,7 @@
   "effects": [
     {
       "source": "ZRGlassScreen.fx",
-      "sourceSha256": "9d527b828cf7ad855bd7006d8c0a3878f61b65200d1729df4c13bfa66b35a02d",
+      "sourceSha256": "7e376051c58947468d3837e6b30d59c6e55433a2e17dd605054583c69697e408",
       "compiled": "ZRGlassScreen.fxc",
       "compiledSha256": "880984043a6073c3245957f834cf5682a212a09abfa8099789a3c8e78dba8063",
       "origin": "project-authored",
@@ -22,7 +22,7 @@
     },
     {
       "source": "ZRSwordFlow.fx",
-      "sourceSha256": "4c26a0705900193996e7681021db921d555e7930d05449589317321798c3cb93",
+      "sourceSha256": "2e433f4a9e761b8726da63f8c42c89bbcd6ee848fbba7b4a979048f9cbbc09b4",
       "compiled": "ZRSwordFlow.fxc",
       "compiledSha256": "b9fd614821ff7d4b196f53b61f49006733ec98d4dee828ad724c51dc5459f1b2",
       "origin": "project-authored",

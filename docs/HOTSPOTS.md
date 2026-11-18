@@ -110,8 +110,8 @@
 | 功能 | 精确路径:行号 | 关键符号 | 常见修改场景 | 相关依赖 |
 |---|---|---|---|---|
 | 总闸 | `ZenithReborn/VfxIsolation.cs:12` | `PureCodeOnly => false`（**表达式不是字段**） | 一键关掉外部输入/贴图/滤镜 | 一改影响全部非纯几何特效，不可运行时切换 |
-| 真生效开关 Branches | `ZenithReborn/VfxIsolation.cs:63-76` | `Branches`（B1–B10） | 关拖尾/剑影/星芒/玻璃滤镜 | 面板与 `ResetAll` 读同一元数据；B7 `GlassFilter` 是最大性能开关 |
-| 空开关 Parts | `ZenithReborn/VfxIsolation.cs:107-134` | `Parts`（P01–P26） | 按 F9 只改面板文字，**画面零变化** | `PartValue`@`:141` 全库零调用；`.fx` 内 `uPart` 出现 0 次（重要入口，非高频） |
+| 真生效开关 Branches | `ZenithReborn/VfxIsolation.cs:62` 区块（`:62-75`） | `Branches`（B1–B10） | 关拖尾/剑影/星芒/玻璃滤镜 | 面板与 `ResetAll` 读同一元数据；B7 `GlassFilter` 是最大性能开关 |
+| 空开关 Parts | `ZenithReborn/VfxIsolation.cs:109` 区块（`:109-137`） | `Parts` / `PartValues`（P01–P26） | 按 F9 只改面板文字，**画面零变化** | 字段 `PartValues`@`:140` 是唯一状态；取值函数 `PartValue(string)` 已于 0.3.130 移除，`.fx` 内 `uPart` 出现 0 次（重要入口，非高频） |
 | 绘制状态保存 | `ZenithReborn/VfxRenderState.cs:9` | `DrawWithRestoredState` | 混合/深度/裁剪态泄漏 | 只保存 **0~2 号**纹理槽，而 `SurfaceMaterialRenderer` 用 16 槽（重要入口，非高频） |
 | 世界层拖尾 | `ZenithReborn/SoulVisuals.cs:54` | `PostDrawTiles` | 拖尾不出/重影 | `CompositingReady` 时提前 return |
 | 逐项调试 | `ZenithReborn/VfxPartDebug.cs:23` | `PostUpdateEverything`（F7/F8/F9/F10） | 现场试开关 | 61 项标签硬编码中文，不参与本地化 |
@@ -121,9 +121,9 @@
 
 | 功能 | 精确路径:行号 | 关键符号 | 常见修改场景 | 相关依赖 |
 |---|---|---|---|---|
-| 中文条目 | `ZenithReborn/Localization/zh-Hans.hjson`（`Items` 段起 `:2`，`Projectiles`@`:114`） | `Mods.ZenithReborn.Items.*` | 改物品名/说明 | 两文件各 133 行，必须同键同步 |
-| 英文条目 | `ZenithReborn/Localization/en-US.hjson:114` | 同上 | 同上 | 中文 `Projectiles` 缺 6 条（飞刃/星/冲击波/剑灵/环境机制） |
-| 唯一本地化断言 | `checks/ZenithPrototypeCheck/Check.cs:172` | `Assert(...DawnCore.DisplayName == "初光魂芯")` | 验证本地化加载 | 全局只有这 1 条（重要入口，非高频） |
+| 中文条目 | `ZenithReborn/Localization/zh-Hans.hjson`（`Items` 段起 `:3`，`Projectiles`@`:109`） | `Mods.ZenithReborn.Items.*` | 改物品名/说明 | 两文件必须同键同步，由 `checks/check_localization_keys.py` 守护 |
+| 英文条目 | `ZenithReborn/Localization/en-US.hjson:109` | 同上 | 同上 | 中文 `Projectiles` 6 条已于 2026-11-18 补齐，两份 hjson 同键同步 |
+| 唯一运行时本地化断言 | `checks/ZenithPrototypeCheck/Check.cs:172` | `Assert(...DawnCore.DisplayName == "初光魂芯")` | 验证本地化加载 | 静态守护另有 `checks/check_localization_keys.py`（键集合、中文名、注释占位） |
 | 改这类东西必看 | — | — | **界面文字全部硬编码在 `.cs`**（`SoulUIPages.Name`、"武器寄宿"等）：改界面文案改代码，改物品名改 hjson；原 `SlashZenithTest` 中文侧两键被注释会退回类型名，该遗留测试剑及本地化键已随 T5 删除，此例已失效（已删除，保留历史记录） | `SoulTraits`、`EnvironmentTooltips` 的文案表 |
 
 ## 11. 测试与回归
@@ -144,7 +144,7 @@
 | 唯一完整回归 | `checks/run_wood_checks.ps1` | `:13` 资产检查 → `:17` 着色器编译 → `:31` `ZENITH_WOOD=1` → `:35` `wood-check.txt` → `:44` `native-build-check.json` | 改完主模组走一遍 | 必须 `pwsh` 7（5.1 会按 GBK 解码中文注释直接报错） |
 | 打包安装与三重校验 | `checks/package_install.py` | `:70` 排除 `docs/checks/VfxLibrary/tools`；`:20` 读回归通过数；`:222` 写 `install-result.json` | 出成品包/装机 | 断言"被测包 = 安装包"：`wood-check.txt` 时间戳晚于 DLL、包哈希三方一致 |
 | 着色器编译 | `checks/compile_effects.py`（由上述 `:17` 调用） | `.fx` → `.fxc` + `build-manifest.json` | 改 `.fx` | 失败即中断回归；包内 shader 集合必须**恰好等于**清单（重要入口，非高频） |
-| 构建排除 | `ZenithReborn/build.txt:5` | `buildIgnore = bin/*, obj/*, *.csproj, Assets/Effects/*.fxh` | 调整打包内容 | `.fxh` 被排除故成孤儿；`docs/checks` 另由 `package_install.py:70` 排除 |
+| 构建排除 | `ZenithReborn/build.txt:5` | `buildIgnore = bin/*, obj/*, *.csproj, Assets/Effects/*.fxh` | 调整打包内容 | `.fxh` 被排除故成孤儿；成品包只收 `ZenithReborn/` 下文件（`checks/package_install.py:74` + `:82` 逐文件断言），四目录只进源码 zip |
 | 改这类东西必看 | — | — | 先跑飞刃夹具≠能装：两者抢 `build-profile`；`install-result.json` 的 `graphics_*_tested` 目前全 `false`，报告字段有 `tested_package_sha256` / `testedPackageSha256` 两种拼写，写错静默变 False | `checks/prepare_luminance.py`、`artifacts/backups/` |
 
 ## 13. 版本号与文档

@@ -19,7 +19,7 @@
 | 2 | 物品显示名走 hjson，不走 `.cs` | `ZenithReborn/Localization/zh-Hans.hjson`（Items 仅 10 条）；原 `SlashZenithTest` 中文侧两键被注释会回落类型名，该遗留测试剑及本地化键已随 T5 删除，此坑已失效（保留历史记录） | `checks/check_mod_assets.py` |
 | 3 | 族名/特性名硬编码在代码里 | `ZenithReborn/WoodTypes.cs:36`（`Effects`）、`:60`（`Description`）；`ZenithReborn/OreFamily.cs:21-41`（`Names/Tints`） | `checks/ZenithPrototypeCheck/FamilyAudit*` |
 | 4 | 界面文案全部硬编码 | `ZenithReborn/SoulUIPages.cs:8`（"武器寄宿/剑魂特性/成长记忆/环境之力"）。**改界面文案改 `.cs`，改物品名改 hjson** | — |
-| 5 | 弹幕中文名缺口 | `ZenithReborn/Localization/zh-Hans.hjson` 的 `Projectiles` 缺 6 条（`FlyingBladeShot`/`HolyHeavenStar`/`HolyHeavenImpact`/`LivingArmament`/`EnvironmentEffect`/`EnvironmentDomain`），这 6 个都有绘制代码 | — |
+| 5 | **（已修复）弹幕中文名缺口** | 中文 `Projectiles` 原缺 6 条（`FlyingBladeShot`/`HolyHeavenStar`/`HolyHeavenImpact`/`LivingArmament`/`EnvironmentEffect`/`EnvironmentDomain`），2026-11-18 已补齐 11/11；若再出现"显示成类型名或英文"，先查中文侧是否被注释 | `checks/check_localization_keys.py` |
 
 ### 现象：物品拿不到，或缺某个材料剑
 | 顺序 | 可能模块 | 优先检查 | 关联检查位置 |
@@ -111,12 +111,12 @@
 ### 现象：**特效开关按了没反应**（F9 切了，画面零变化）
 | 顺序 | 可能模块 | 优先检查 | 关联检查位置 |
 |---|---|---|---|
-| 1 | `Parts` 26 项是**空开关** | `ZenithReborn/VfxIsolation.cs:107-134`（P01–P26，`uPartShape`…`uPartRidges`）。`ZRSwordFlow.fx` 全文 `uPart` 出现 **0 次**，`.fxc` 中 `grep uPart` 计数也为 0 | `checks/run_vfx_stripe_ablation.ps1` |
-| 2 | `GlassParts` 7 项是**空开关** | `ZenithReborn/VfxIsolation.cs:226-235`（B7-1…B7-7，`uGlassPart*`）。`ZRGlassScreen.fx` 中 `uGlassPart` 出现 0 次 | `checks/run_liquid_glass.ps1` |
-| 3 | 取值函数**全库零调用** | `ZenithReborn/VfxIsolation.cs:141`（`PartValue(string)`）。唯一的读写方是调试面板 `ZenithReborn/VfxPartDebug.cs:80/85/106/111` → 按下只改面板文字与 `PartValues` 数组，从不进 shader | — |
-| 4 | `Branches` 才是真生效的那一类 | `ZenithReborn/VfxIsolation.cs:63-74`（B1–B10）。它们在各绘制入口前以 `if (VfxIsolation.Xxx)` 判断，**按下立刻有画面变化** —— 用它来对照即可确认"面板没坏，是 P/B7 项没接线" | `checks/run_slash_render.ps1` |
+| 1 | `Parts` 26 项是**空开关** | `ZenithReborn/VfxIsolation.cs:109` 区块（`:109-137`，P01–P26，`uPartShape`…`uPartRidges`）。`ZRSwordFlow.fx` 全文 `uPart` 出现 **0 次**，`.fxc` 中 `grep uPart` 计数也为 0 | `checks/run_vfx_stripe_ablation.ps1` |
+| 2 | `GlassParts` 7 项是**空开关** | `ZenithReborn/VfxIsolation.cs:222` 区块（`:222-231`，B7-1…B7-7，`uGlassPart*`）。`ZRGlassScreen.fx` 中 `uGlassPart` 出现 0 次 | `checks/run_liquid_glass.ps1` |
+| 3 | 取值函数已于 0.3.130 移除 | `ZenithReborn/VfxIsolation.cs:140` 现为字段 `PartValues`（另有 `SetAllParts`@`:142` / `ResetParts`@`:148`）。唯一的读写方是调试面板 `ZenithReborn/VfxPartDebug.cs:80/85/106/111` → 按下只改面板文字与数组，从不进 shader | — |
+| 4 | `Branches` 才是真生效的那一类 | `ZenithReborn/VfxIsolation.cs:62` 区块（`:62-75`，B1–B10）。它们在各绘制入口前以 `if (VfxIsolation.Xxx)` 判断，**按下立刻有画面变化** —— 用它来对照即可确认"面板没坏，是 P/B7 项没接线" | `checks/run_slash_render.ps1` |
 | 5 | 个别项不在 61 项清单里 | `ZenithReborn/VfxIsolation.cs:36`（`ViscousSlash` 默认 false，绕过总闸，只能改字段关） | `checks/run_liquid_glass_perf.ps1` |
-| 6 | 注释里的顺序约束已失效 | `ZenithReborn/VfxIsolation.cs:101` 声称"顺序必须与 `ZRSwordFlow.fx` 声明顺序一致"，但 shader 已重写（36 参数，无 `uPart*`）→ 调参时下标对不上 | — |
+| 6 | 顺序约束已随 shader 重写改写 | `ZenithReborn/VfxIsolation.cs:100` 现在如实写明「当前 .fx 里没有对应 uniform，将来重连时再对齐两边顺序」；旧版“顺序必须与 `ZRSwordFlow.fx` 声明顺序一致”的说法已删除，调参时不再有可对照的 shader 参数表 | — |
 
 **合计 33 项空开关 = P01–P26（26）+ B7-1…B7-7（7）。** 这不是"开关坏了"，是**从来没接线**：shader 没有对应 uniform，C# 侧也没有把 `PartValues` 传给任何 effect 参数。
 
@@ -145,10 +145,10 @@
 |---|---|---|---|
 | 1 | **（历史）跑的是小套件，报告却照样放行** | 旧行为：`checks/ZenithPrototypeCheck/Check.cs` 分支顺序 `GLASS:69 → INFORMATION_UI:75 → ECHO_ORE:83 → WOOD:125`（各自 `Environment.Exit(0)`）；设了 `ZENITH_GLASS` 就只跑玻璃套件，而 `checks/package_install.py:19` 当时只校验 `startswith('PASS: ')` → 静默收窄，曾是最危险的假绿。**该风险已由 `checks/package_install.py` 新增的 `FULL_SUITE_MARKER`（`SUITE=ZENITH_WOOD`）与 `MIN_FULL_SUITE_CHECKS` 防假绿标记修复**：缺全量套件标记或项数不足即拒绝安装；当前 `artifacts/wood-check.txt` 含 `SUITE=ZENITH_WOOD` 且为 8509 项。此行保留为历史记录 | `checks/run_wood_checks.ps1 -EchoOre` |
 | 2 | 时序断言：报告必须比包新 | `checks/package_install.py:25`（`report.stat().st_mtime > built.stat().st_mtime`）；包被任何脚本重建都会失败 —— 见上条现象第 6 行 | `checks/package_install.py` |
-| 3 | 哈希退化路径 | `checks/package_install.py:31-36`：哈希不匹配时**不直接失败**，退化成"包内 DLL == `bin/Release/net8.0/ZenithReborn.dll"` 弱断言 | `artifacts/native-build-check.json` |
+| 3 | **（历史）哈希退化路径已封堵** | 旧行为见 `checks/package_install.py:48` 注释：哈希不符时退化成“包内 DLL == bin/Release DLL”弱断言，曾让漏跑回归也能安装。当前 `:51` 起一律硬失败，并要求 `artifacts/native-build-check.json` 的 `passed=true` 与包哈希逐字节绑定 | `artifacts/native-build-check.json` |
 | 4 | 着色器编译失败即中断 | `checks/run_wood_checks.ps1:17` 调 `checks/compile_effects.py`；`.fx` 改了没同步 `.fxc` 会在这里炸 | `checks/ZenithReborn/Assets/Effects/build-manifest.json` |
 | 5 | hjson 语法错误 / C# 编译失败 | 构建闸门在 `-server -build` 阶段；`checks/ZenithPrototypeCheck` 的 `.csproj` 还硬编码 `E:/SteamLibrary/.../tMLMod.targets` → **换机器直接不可构建** | — |
-| 6 | 打包排除清单 | `checks/package_install.py:70`（排除 `docs`/`checks`/`VfxLibrary`/`tools`）；漏了会把 11756 个素材文件打进包 | — |
+| 6 | 打包排除清单 | `checks/package_install.py:74` 的 `sourcefiles` 只收 `ZenithReborn/`（排 bin/obj），`:82` 起逐文件断言成品包内容；四目录另由 `:95` 收进源码 zip。漏了会把 11756 个素材文件打进包 | — |
 
 ### 现象：存档损坏 / 多人不同步
 | 顺序 | 可能模块 | 优先检查 | 关联检查位置 |
@@ -202,9 +202,9 @@
 | B7-6 | `uGlassPartBloom` | 泛光扩散 | 1f | 无 |
 | B7-7 | `uGlassPartSpaceWarp` | 刀光周围空间扭曲 | 1f | 无（`ZRSwordSpaceWarp.fxh` 未被 include） |
 
-对照证据：`ZRSwordFlow.fx` 声明 36 个参数、`uPart` 命中 0；`ZRGlassScreen.fx` 中 `uGlassPart` 命中 0；`ZenithReborn/VfxIsolation.cs:141` 的 `PartValue(string)` 全库零调用。
+对照证据：`ZRSwordFlow.fx` 声明 36 个参数、`uPart` 命中 0；`ZRGlassScreen.fx` 中 `uGlassPart` 命中 0；`ZenithReborn/VfxIsolation.cs:140` 只有字段 `PartValues`（`PartValue(string)` 已删除），没有任何把值下发给 effect 的代码。
 
-**要真接线，需要三处同时改**：`.fx` 声明 uniform 并在计算里用上 → C# 侧把 `PartValues[i]` 写进 effect 参数 → 保留 `VfxIsolation.cs:101` 那条"顺序必须一致"的约束（目前该约束已失效）。
+**要真接线，需要两处同时改**：`.fx` 声明 uniform 并在计算里用上 → C# 侧把 `PartValues[i]` 写进 effect 参数。顺序对齐要求见 `VfxIsolation.cs:100` 的注释（「将来重连着色器时再对齐两边顺序」），当前尚无可对照的 shader 参数表。
 
 ## 附：Boss 位映射三套对照（对应现象 7）
 

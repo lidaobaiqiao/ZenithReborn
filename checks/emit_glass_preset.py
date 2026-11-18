@@ -18,5 +18,7 @@ for key,(low,high) in bounds.items():
     assert math.isfinite(value) and low<=value<=high,(key,value)
     lines.append(f'    public const float {key}={value:g}f;')
 lines.append('}')
-(root/'ZenithReborn/GlassMaterialPreset.cs').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+# 显式按 LF 写字节：.gitattributes 规定 *.cs eol=lf，用 write_text 会在 Windows 上转成 CRLF，
+# 生成物与检出不一致，导致每次跑完回归工作树都多出一个只有换行差异的改动。
+(root/'ZenithReborn/GlassMaterialPreset.cs').write_bytes(('\n'.join(lines)+'\n').encode('utf-8'))
 print('制作端玻璃预设已生成；没有玩家配置项。')

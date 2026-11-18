@@ -218,8 +218,8 @@ flowchart TD
 | 1 | 改 `SoulItem.Active` 组成（`SoulItem.cs:82`） | M03/M04/M07/M08/M09/M10/M11/M13/M14/M15 | 伤害均值与射程、六套族计数、`BondSnapshot.Wood`、`SoulTraits` 判定、`EnvironmentRules` 收集位全部同时变；必须跑 `ZENITH_WOOD` 全回归（29 套件） |
 | 2 | 改族判定（`WeaponFamilies.Of` / `WoodTypes.Types`） | M05/M08/M13/M14 | `WeaponFamilies.cs:18` 的木质/矿石**先短路**再看表，顺序一改手感剧变；`WeaponFamilyTags.Of`（`:10`）固定五段顺序；`EnvironmentAttributes.RegisterBuiltins`（`:87`）是另一张独立表，不会自动跟随 |
 | 3 | 加新族武器 | M08 或 M09 + M13 + M14 + M17 | 名册表（`WoodTypes.Types` / `OreFamily.MaterialSwords`）→ `WeaponFamilyTags.Of` → 环境绑定表 → 本地化 `Items` → 若有新贴图还要过资产闸门；矿石另需同步 `DefaultType/Names/Tints`、`AllMaterials` 位宽、`OreCollectionMask` 存档语义 |
-| 4 | 加新特效分支 | M16 + M17 + M18 | `VfxIsolation.Branches`（`:63`，**只有这 10 项真生效**）→ 消费点绘制函数 → `VfxPartDebug` 的 F9 清单（若加 Parts 只会得到空开关）→ 若新增 .fx 必须进 `build-manifest.json`，否则包审计 `check_vfx_ownership.py` 的"集合恰好相等"会失败 |
-| 5 | 改本地化 / 界面文案 | M18 或 M15 | **物品名/提示改 hjson；界面文字改 `.cs`**（`SoulUIPages.Name` 等全硬编码）。中文 Projectiles 仍缺 `FlyingBladeShot`/`HolyHeavenStar`/`HolyHeavenImpact`/`LivingArmament`/`EnvironmentEffect`/`EnvironmentDomain` 6 条 |
+| 4 | 加新特效分支 | M16 + M17 + M18 | `VfxIsolation.Branches`（`:62`，**只有这 10 项真生效**）→ 消费点绘制函数 → `VfxPartDebug` 的 F9 清单（若加 Parts 只会得到空开关）→ 若新增 .fx 必须进 `build-manifest.json`，否则包审计 `check_vfx_ownership.py` 的"集合恰好相等"会失败 |
+| 5 | 改本地化 / 界面文案 | M18 或 M15 | **物品名/提示改 hjson；界面文字改 `.cs`**（`SoulUIPages.Name` 等全硬编码）。中文 Projectiles 原缺 6 条已于 2026-11-18 补齐；两份 hjson 的键集合与中文名由 `checks/check_localization_keys.py` 静态守护，改完必须过这道检查 |
 | 6 | 改槽号（34 / 35-36 / 17-24） | M02/M07/M15 + 存档 | `ItemAt`、`SlotItems`、`VisibleSlotIds`、`SoulArmoryLayout.Slot`、`SlotBounds`、`SoulUIEffects` 六处同改；17-24 是存档兼容段，**不可回收** |
 
 ---
