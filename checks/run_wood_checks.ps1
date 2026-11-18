@@ -33,9 +33,25 @@ if(-not(Test-Path $python)){$python=(Get-Command python -ErrorAction Stop).Sourc
 # 地图新鲜度：只提示不阻断（提交时由 pre-commit 钩子强制），避免改代码期间反复卡回归。
 & $python "$taskRoot/checks/map_freshness.py" *> "$taskRoot/artifacts/map-freshness.log"
 if($LASTEXITCODE -ne 0){Write-Warning '代码地图落后于源码：细节见 artifacts/map-freshness.log，提交前必须修（pre-commit 会拦）'}
+# 生成物不漂移的基线：必须在下面所有生成器运行之前拍快照。
+# 用文件哈希而不是 git status：本机 git 不一定在 PATH，且这条断言判的是
+# 「回归自己有没有改写源码树」，与用户手上尚未提交的改动无关。
+function Get-ZenithSourceSnapshot {
+    $snapshot = @{}
+    foreach ($f in Get-ChildItem -LiteralPath "$taskRoot/ZenithReborn" -Recurse -File) {
+        $rel = $f.FullName.Substring($taskRoot.Length + 1)
+        if ($rel -match '(^|[\\/])(bin|obj)([\\/]|$)') { continue }
+        $snapshot[$rel] = (Get-FileHash -LiteralPath $f.FullName -Algorithm SHA256).Hash
+    }
+    return $snapshot
+}
+$sourceSnapshotBefore = Get-ZenithSourceSnapshot
 # 资产完整性先跑：服务端夹具不加载图形资产，新增 Mod 类型缺同名 png 或缺 Texture override 只会在客户端崩溃。
 & $python "$taskRoot/checks/check_mod_assets.py"
 if($LASTEXITCODE -ne 0){throw '资产完整性检查失败：新增 Mod 类型必须有同名 png 或显式 Texture override'}
+# 本地化键集合：中文侧漏键或残留英文占位不会让编译失败，只有进游戏才看得见。
+& $python "$taskRoot/checks/check_localization_keys.py"
+if($LASTEXITCODE -ne 0){throw '本地化键集合不一致或中文侧仍有英文占位：见上方明细'}
 & $python "$taskRoot/checks/emit_glass_preset.py" *> "$taskRoot/artifacts/glass-preset-build.log"
 if($LASTEXITCODE -ne 0){Get-Content "$taskRoot/artifacts/glass-preset-build.log";throw '制作端玻璃预设生成失败'}
 & $python "$taskRoot/checks/compile_effects.py" *> "$taskRoot/artifacts/own-effect-build.log"
@@ -78,7 +94,22 @@ if ($result -eq 0 -and $fullSuite) {
 }
 # 打印最终报告：全量跑法这里能看到 [suite=full ZENITH_WOOD] 与 SUITE=ZENITH_WOOD 两处标记。
 if (Test-Path -LiteralPath $reportPath) { Get-Content -LiteralPath $reportPath } else { Write-Output "本轮未产出报告：$reportPath" }
+# 生成物不漂移断言：把回归前后的源码树哈希逐文件对照。
+# 生成器写出与仓库不一致的字节（历史上是 CRLF / 着色器哈希口径漂移）会让工作树变脏，
+# 过去只能靠人跑 git status 发现，这里改成硬失败。
+$sourceSnapshotAfter = Get-ZenithSourceSnapshot
+$drifted = @()
+foreach ($key in (@($sourceSnapshotBefore.Keys) + @($sourceSnapshotAfter.Keys) | Sort-Object -Unique)) {
+    if ($sourceSnapshotBefore[$key] -ne $sourceSnapshotAfter[$key]) { $drifted += $key }
+}
+if ($drifted.Count -gt 0) {
+    Write-Warning '生成物漂移：本轮回归改写了源码树，明细：'
+    $drifted | ForEach-Object { Write-Warning "  $_" }
+}
 # 回归结果绑定实际加载的包；失败时也要落盘 passed=false，不能让上一轮的成功记录冒充本次通过。
-@{compiler='tModLoader native';packages=$nativePackages;passed=($result -eq 0)} | ConvertTo-Json -Depth 5 |
+# passed 同时要求夹具通过与源码树稳定，避免漂移被上一轮结果或安装脚本当成绿灯。
+@{compiler='tModLoader native';packages=$nativePackages;generatedArtifactsStable=($drifted.Count -eq 0);
+  passed=($result -eq 0 -and $drifted.Count -eq 0)} | ConvertTo-Json -Depth 5 |
     Set-Content -Encoding utf8 "$taskRoot/artifacts/native-build-check.json"
 if ($result -ne 0) { throw 'Isolated wood checks failed; see artifacts/wood-load.log' }
+if ($drifted.Count -gt 0) { throw '生成物漂移：回归改写了源码树，请检查生成器写盘口径（见上方明细）' }

@@ -259,6 +259,10 @@ SUPPLEMENT_ROWS = [
     ("checks/check_effect_manifest.py", "Python 只读检查脚本",
      "验证体系", "只读校验 build-manifest.json 的记录集合、文本源码哈希口径与 .fxc 编译产物哈希；不写盘、不编译",
      "checks/effect_hash.py、checks/compile_effects.py、checks/package_install.py", "人工补写"),
+    # --- 验证体系：本地化键集合（2026-11-18 新增）---
+    ("checks/check_localization_keys.py", "Python 只读检查脚本",
+     "验证体系", "只读校验 zh-Hans/en-US 两份 hjson 的键集合一致、中文侧无注释占位、DisplayName 含汉字；未定名条目须在 PENDING_DISPLAY_NAMES 显式登记",
+     "ZenithReborn/Localization/zh-Hans.hjson、en-US.hjson、checks/run_wood_checks.ps1", "人工补写"),
     # --- 仓库根 ---
     ("AGENTS.md", "Markdown 硬规则 + 版本状态流水",
      "仓库根", "不可让渡的硬规则与逐版本状态：每条记录安装版本、验证证据等级、未验证面；新版本往顶部追加，旧内容降级为历史",
@@ -890,7 +894,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(text, encoding="utf-8")
+    # 显式按 LF 写字节：.gitattributes 规定 *.md eol=lf，write_text 在 Windows 上会转 CRLF，
+    # 生成物与检出不一致会反复触发 "CRLF will be replaced by LF" 警告。
+    target.write_bytes(text.replace("\r\n", "\n").encode("utf-8"))
 
     print("[索引生成] 写出 %s" % target)
     print("  条目合计 : %d（去重合并 %d 次重复，报告未覆盖的人工补写 %d 条）" % (info["rows"], info["dup"], info["added"]))

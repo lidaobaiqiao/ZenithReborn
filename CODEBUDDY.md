@@ -85,7 +85,6 @@ python checks/check_mod_assets.py
 - 客户端画面、自然操作、多人联机、性能、美术观感**从未被自动验证**（`artifacts/install-result.json` 里对应三项长期为 `false`）。
 - 飞刃族「印记」为用户认定的核心设计，留白未实现（设计草案，未实现：`ZenithReborn/` 下无 `FlyingBladeMark.cs`，机制描述见 `docs/飞刃族F1-掷刃与印记.md`）。
 - 肉前八矿 M1 的独有机制仍是草案。
-- `FlyingBladeShot` / `HolyHeavenStar` / `HolyHeavenImpact` / `LivingArmament` 四个弹幕的中文显示名未定。
 
 ## 指针
 

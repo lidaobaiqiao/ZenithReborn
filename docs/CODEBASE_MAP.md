@@ -17,9 +17,9 @@
 | 代码规模 | `ZenithReborn/*.cs` = **123** 个，平铺在根目录（无子命名空间分层） | `ls ZenithReborn/*.cs \| wc -l` |
 | 着色器 | 3 个 `.fx`（`ZRSwordFlow` / `ZRGlassScreen` / `ZRMaterialSurface`）+ 3 个同名 `.fxc` 对照产物 | `ZenithReborn/Assets/Effects/` |
 | 资产 | 52 张 PNG（矿石剑身图集 21 / 材质贴图 12 / Boss 立绘 19）+ `SwordSpark.png` + `ZoneMask.zrdata` | 见 §15 |
-| 本地化 | `zh-Hans.hjson` / `en-US.hjson`，各 133 行，仅覆盖 `Items/Buffs/NPCs/Projectiles/Keybinds` | `ZenithReborn/Localization/` |
-| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（102 个 `.cs`）+ `checks/*.py` 60 个 + `checks/*.ps1` 40 个 | §17 |
-| 打包排除 | `docs` / `checks` / `VfxLibrary` / `tools` 四目录不进成品包 | `checks/package_install.py:70` |
+| 本地化 | `zh-Hans.hjson` / `en-US.hjson`，键集合一致（由 `checks/check_localization_keys.py` 守护），仅覆盖 `Items/Buffs/NPCs/Projectiles/Keybinds` | `ZenithReborn/Localization/` |
+| 验证体系 | 独立附属模组 `checks/ZenithPrototypeCheck`（102 个 `.cs`）+ `checks/*.py` 61 个 + `checks/*.ps1` 40 个 | §17 |
+| 打包排除 | 成品 `.tmod` 只收 `ZenithReborn/` 下的源码与资产；`docs` / `checks` / `VfxLibrary` / `tools` 四目录只进源码 zip | `checks/package_install.py:74`（`sourcefiles` 定义）、`:82`（逐文件断言）、`:95`（源码 zip 另收四目录） |
 
 ### 验证等级约定（全文通用）
 
@@ -538,9 +538,9 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 |---|---|---|
 | `VfxIsolation.PureCodeOnly => false` | `VfxIsolation.cs:12` | **是表达式不是字段**，不可运行时切换；置 true 会一次关掉 12 个外部输入分支 + 全部贴图加载 + 滤镜 |
 | `SwordTrail` 等 `Branches` | `VfxIsolation.cs:63` 区块 | 10 项（B1–B10） |
-| `Parts[26]` / `PartValues` | `VfxIsolation.cs:107` / `:138` | |
-| `PartValue(string)` | `VfxIsolation.cs:141` | **全代码库零调用** |
-| `GlassParts[7]` | `VfxIsolation.cs:226` 区块 | |
+| `Parts[26]` / `PartValues` | `VfxIsolation.cs:109` / `:140` | 字段而非取值函数；`PartValue(string)` 已于 0.3.130 移除 |
+| `SetAllParts` / `ResetParts` | `VfxIsolation.cs:142` / `:148` | 直接读写 `PartValues`，调试面板是唯一消费方 |
+| `GlassParts[7]` / `GlassPartValues` | `VfxIsolation.cs:222` / `:233` | 同样没有 shader 消费者 |
 | `ViscousSlash` 开关 | `VfxIsolation.cs:36` | 默认 false，**不在 61 项清单内** |
 | `VfxPartDebug.PostUpdateEverything` | `VfxPartDebug.cs:23` | F7/F8 移动、F9 切换、F10 全关 |
 | `VfxRenderState.DrawWithRestoredState` | `VfxRenderState.cs:9` | 保存/还原 Blend/Depth/Raster/Scissor + **0~2 号**纹理槽，进入置 Additive |
@@ -561,7 +561,7 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 
 | # | 事实 | 证据 |
 |---|---|---|
-| 1 | **P01~P26 与 GlassParts 共 33 项是空开关**：按 F9 只改面板文字，画面零变化 | `VfxIsolation.PartValue`（`:141`）零调用；`ZRSwordFlow.fx` 中 `uPart` 出现 0 次；`ZRGlassScreen.fx` 中 `uGlassPart` 出现 0 次；唯一消费方是 `VfxPartDebug.cs:80/85/106/111` 的读写 |
+| 1 | **P01~P26 与 GlassParts 共 33 项是空开关**：按 F9 只改面板文字，画面零变化 | 当前只有字段 `VfxIsolation.PartValues`（`VfxIsolation.cs:140`）与 `GlassPartValues`（`:233`），没有取值函数把值下发给 effect；`ZRSwordFlow.fx` 中 `uPart` 出现 0 次；`ZRGlassScreen.fx` 中 `uGlassPart` 出现 0 次；唯一消费方是 `VfxPartDebug.cs:80/85/106/111` 的读写 |
 | 2 | `Parts` 数组顺序与 shader 声明顺序一致的注释约束**已失效**（shader 已重写） | `VfxIsolation.cs:101` 注释 vs 实际 uniform 表 |
 | 3 | `ViscousSlash` 绕过总闸，**不在 61 项清单里**，只能改字段关 | `VfxIsolation.cs:33-36` 注释记录历史 |
 | 4 | `SurfaceMaterial` 管线整体休眠：`bindings.json` 的 `weapons` 为 `{}` | `SwordFlowMaterial.Load`（`:52`）读空 → `surfaceMaterials` 为空 → 永远走常量路径 |
@@ -601,13 +601,14 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 | Items | 10 条（`SoulItem`、`GuardianGel`、4 个召唤物、6 个魂芯） | 原缺口为 `SlashZenithTest` 中文侧两键被注释 → 走类型名；该遗留测试剑及本地化键已随 T5 删除，缺口已消失（已删除，保留历史记录） |
 | Buffs | 10 条全覆 | — |
 | NPCs | `GuardianSlimeKing.DisplayName` | — |
-| Projectiles | 英文 11 / 中文 5 | **中文缺 `FlyingBladeShot`、`HolyHeavenStar`、`HolyHeavenImpact`、`LivingArmament`、`EnvironmentEffect`、`EnvironmentDomain`** —— 这 6 个都有绘制代码 |
+| Projectiles | 英文 11 / 中文 11 | 6 条中文名已于 2026-11-18 补齐（回旋飞刃 / 天堂落星 / 天堂星震 / 寄魂剑灵 / 灵域结界 / 环境余韵）；由 `checks/check_localization_keys.py` 守护键集合与中文名 |
 | Keybinds | `OpenSoul`、`ActivateYujian` | — |
 
 **重要事实**：
 - **界面文字全部硬编码在 `.cs`**（如 `SoulUIPages.Name` 的"武器寄宿/剑魂特性/成长记忆/环境之力"）。**改界面文案改 `.cs`，改物品名/提示改 hjson。**
 - `VfxPartDebug` 的 61 项标签与 `VfxIsolation.Label` 全是硬编码中文，**不参与本地化**，英文客户端也会看到中文调试文本。
-- 全局只有 1 条本地化断言（`Check.cs` 校验 `DawnCore.DisplayName == "初光魂芯"`）。
+- 全局只有 1 条**运行时**本地化断言（`Check.cs` 校验 `DawnCore.DisplayName == "初光魂芯"`）；静态守卫是 `checks/check_localization_keys.py`（只读，回归入口调用）。
+- 界面文案与物品/弹幕名分属两处：改界面文字改 `.cs`，改显示名改 hjson；中文侧曾把 6 条弹幕 `DisplayName` 注释占位，2026-11-18 已补齐，静态守卫会拦住复发。
 
 ---
 
@@ -625,9 +626,11 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 | 总回归入口 | `ZENITH_WOOD`（`Check.cs:125` 区块）串联 29 个套件 |
 | 断言原语 | `Check.cs:15` `Assert(bool,string)` —— 失败即抛异常，**快速失败**；`PASS: N` 是成功数不是总数 |
 | 第二调度体系 | 49 个文件不经过 `Check.cs`，各自在 `ModSystem` 钩子里读 `ZENITH_*_RENDER/GPU/GUI`，由 `checks/run_*.ps1` 启动 |
-| 脚本 | `checks/*.py` 60 个（生成/校验/采集）、`checks/*.ps1` 40 个（构建/启动/上手配置） |
+| 脚本 | `checks/*.py` 61 个（生成/校验/采集）、`checks/*.ps1` 40 个（构建/启动/上手配置） |
 | 着色器哈希口径 | `checks/effect_hash.py` 单一来源：`.fx`/`.fxh` 文本按 LF 归一化取 sha256，`.fxc` 二进制按原始字节；`checks/check_effect_manifest.py` 只读守护 `build-manifest.json` | `checks/compile_effects.py`、`checks/package_install.py`、`checks/check_vfx_ownership.py` |
-| 打包安装 | `checks/package_install.py:70` 排除 `docs/checks/VfxLibrary/tools`；`:73` `tools` 下额外排除 dll/exe/pdb/zip/tmod |
+| 生成物不漂移 | `checks/run_wood_checks.ps1` 在生成器前拍源码树 SHA256 快照、末尾逐文件对照；任一生成物字节变化即硬失败，并把 `generatedArtifactsStable` 写进 `native-build-check.json` | `checks/emit_glass_preset.py`、`checks/compile_effects.py` |
+| 本地化键守护 | `checks/check_localization_keys.py` 只读校验两份 hjson 键集合、中文侧注释占位与 DisplayName 汉字；回归入口调用 | `ZenithReborn/Localization/` |
+| 打包安装 | `checks/package_install.py:74` 定义 `sourcefiles`（只含 `ZenithReborn/`，排 bin/obj）→ 成品包不含四目录；`:95` 起把 `docs`/`checks`/`VfxLibrary`/`tools` 收进源码 zip，其中 `tools` 在 `:98` 额外排除 decomp/ilspy 与 dll/exe/pdb/zip/tmod |
 
 **⚠ 夹具体系的 6 个陷阱（写新夹具或排查假阴性必读）**
 
@@ -671,3 +674,5 @@ SoulItem.CanUseItem → SoulSwingPlayer.Begin
 | `artifacts/codebase-map/A~I-*.md` | 本次并行调查原始产出（9 份，含逐文件索引表与逐条断言清单） |
 
 **关于 `E-checks-scripts.md`**：本次并行调查的 `.md` 产出实际只有 **8 份**（A/B/C/D/F/G/H/I），`checks/*.py`、`checks/*.ps1` 的系统性建图稿缺失。本文第 18 节中涉及脚本的行号（`package_install.py:70`、`run_wood_checks.ps1:17`、`emit_vfx_mask_data.py:11`）为撰写时**直接读源码补充核实**，非引自该缺失报告。
+
+> **行号口径（2026-11-18 校正）**：上面括号里的 `package_install.py:70` 等是撰写时的**时点记录**，源码后来有增删，现行有效行号以第 18 节表格为准。`docs/archive/` 下的调查报告同理，都是时点快照，不作为现行结论；里面仍写着 `PartValue(string)`、`package_install.py:70`，属历史记录，不跟随修改。
